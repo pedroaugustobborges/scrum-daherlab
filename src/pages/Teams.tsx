@@ -11,10 +11,13 @@ import {
   AvatarGroup,
   CircularProgress,
   Fab,
+  IconButton,
+  Tooltip,
 } from '@mui/material'
-import { Add, People, Groups } from '@mui/icons-material'
+import { Add, People, Groups, PersonAdd, Delete, Edit } from '@mui/icons-material'
 import Navbar from '@/components/Navbar'
 import CreateTeamModal from '@/components/CreateTeamModal'
+import AddTeamMembersModal from '@/components/AddTeamMembersModal'
 import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
 
@@ -23,12 +26,15 @@ interface Team {
   name: string
   description: string
   created_at: string
+  team_members?: { count: number }[]
 }
 
 export default function Teams() {
   const [teams, setTeams] = useState<Team[]>([])
   const [loading, setLoading] = useState(true)
   const [createModalOpen, setCreateModalOpen] = useState(false)
+  const [membersModalOpen, setMembersModalOpen] = useState(false)
+  const [selectedTeam, setSelectedTeam] = useState<{ id: string; name: string } | null>(null)
 
   useEffect(() => {
     fetchTeams()
@@ -39,7 +45,7 @@ export default function Teams() {
     try {
       const { data, error } = await supabase
         .from('teams')
-        .select('*')
+        .select('*, team_members(count)')
         .order('created_at', { ascending: false })
 
       if (error) throw error
@@ -50,6 +56,40 @@ export default function Teams() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleOpenMembersModal = (team: Team) => {
+    setSelectedTeam({ id: team.id, name: team.name })
+    setMembersModalOpen(true)
+  }
+
+  const handleCloseMembersModal = () => {
+    setMembersModalOpen(false)
+    setSelectedTeam(null)
+  }
+
+  const handleDeleteTeam = async (team: Team) => {
+    const confirmed = window.confirm(
+      `Tem certeza que deseja excluir o time "${team.name}"?\n\nTodos os membros e sprints associados serão afetados. Esta ação não pode ser desfeita.`
+    )
+
+    if (!confirmed) return
+
+    try {
+      const { error } = await supabase.from('teams').delete().eq('id', team.id)
+
+      if (error) throw error
+
+      toast.success('Time excluído com sucesso!')
+      await fetchTeams()
+    } catch (error) {
+      console.error('Error deleting team:', error)
+      toast.error('Erro ao excluir time')
+    }
+  }
+
+  const getMemberCount = (team: Team) => {
+    return team.team_members?.[0]?.count || 0
   }
 
   const formatDate = (date: string) => {
@@ -151,11 +191,34 @@ export default function Teams() {
                       >
                         <People sx={{ color: 'white', fontSize: 24 }} />
                       </Box>
-                      <AvatarGroup max={3} sx={{ '& .MuiAvatar-root': { width: 32, height: 32, fontSize: '0.875rem' } }}>
-                        <Avatar sx={{ bgcolor: '#10b981' }}>A</Avatar>
-                        <Avatar sx={{ bgcolor: '#f59e0b' }}>B</Avatar>
-                        <Avatar sx={{ bgcolor: '#ef4444' }}>C</Avatar>
-                      </AvatarGroup>
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <Tooltip title="Gerenciar Membros">
+                          <IconButton
+                            onClick={() => handleOpenMembersModal(team)}
+                            sx={{
+                              bgcolor: 'rgba(99, 102, 241, 0.1)',
+                              '&:hover': {
+                                bgcolor: 'rgba(99, 102, 241, 0.2)',
+                              },
+                            }}
+                          >
+                            <PersonAdd sx={{ color: '#6366f1' }} />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Excluir Time">
+                          <IconButton
+                            onClick={() => handleDeleteTeam(team)}
+                            sx={{
+                              bgcolor: 'rgba(239, 68, 68, 0.1)',
+                              '&:hover': {
+                                bgcolor: 'rgba(239, 68, 68, 0.2)',
+                              },
+                            }}
+                          >
+                            <Delete sx={{ color: '#ef4444' }} />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
                     </Box>
 
                     <Typography variant="h5" fontWeight={700} gutterBottom sx={{ mb: 1 }}>
@@ -191,7 +254,7 @@ export default function Teams() {
                           Membros
                         </Typography>
                         <Typography variant="h6" fontWeight={700} sx={{ color: '#6366f1' }}>
-                          0
+                          {getMemberCount(team)}
                         </Typography>
                       </Box>
 
@@ -233,6 +296,16 @@ export default function Teams() {
         onClose={() => setCreateModalOpen(false)}
         onSuccess={fetchTeams}
       />
+
+      {selectedTeam && (
+        <AddTeamMembersModal
+          open={membersModalOpen}
+          onClose={handleCloseMembersModal}
+          onSuccess={fetchTeams}
+          teamId={selectedTeam.id}
+          teamName={selectedTeam.name}
+        />
+      )}
     </Box>
   )
 }

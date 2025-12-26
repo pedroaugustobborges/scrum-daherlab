@@ -11,6 +11,7 @@ import {
   IconButton,
   CircularProgress,
   Fab,
+  Tooltip,
 } from '@mui/material'
 import {
   Add,
@@ -22,6 +23,7 @@ import {
 } from '@mui/icons-material'
 import Navbar from '@/components/Navbar'
 import CreateProjectModal from '@/components/CreateProjectModal'
+import EditProjectModal from '@/components/EditProjectModal'
 import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
 
@@ -46,6 +48,8 @@ export default function Projects() {
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
   const [createModalOpen, setCreateModalOpen] = useState(false)
+  const [editModalOpen, setEditModalOpen] = useState(false)
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
 
   useEffect(() => {
     fetchProjects()
@@ -72,6 +76,36 @@ export default function Projects() {
   const formatDate = (date: string) => {
     if (!date) return '-'
     return new Date(date).toLocaleDateString('pt-BR')
+  }
+
+  const handleOpenEditModal = (project: Project) => {
+    setSelectedProject(project)
+    setEditModalOpen(true)
+  }
+
+  const handleCloseEditModal = () => {
+    setEditModalOpen(false)
+    setSelectedProject(null)
+  }
+
+  const handleDeleteProject = async (project: Project) => {
+    const confirmed = window.confirm(
+      `Tem certeza que deseja excluir o projeto "${project.name}"?\n\nEsta ação não pode ser desfeita.`
+    )
+
+    if (!confirmed) return
+
+    try {
+      const { error } = await supabase.from('projects').delete().eq('id', project.id)
+
+      if (error) throw error
+
+      toast.success('Projeto excluído com sucesso!')
+      await fetchProjects()
+    } catch (error) {
+      console.error('Error deleting project:', error)
+      toast.error('Erro ao excluir projeto')
+    }
   }
 
   return (
@@ -168,12 +202,40 @@ export default function Projects() {
                       >
                         <Assignment sx={{ color: 'white', fontSize: 24 }} />
                       </Box>
-                      <Chip
-                        label={statusConfig[project.status]?.label || project.status}
-                        color={statusConfig[project.status]?.color || 'default'}
-                        size="small"
-                        sx={{ fontWeight: 600 }}
-                      />
+                      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                        <Chip
+                          label={statusConfig[project.status]?.label || project.status}
+                          color={statusConfig[project.status]?.color || 'default'}
+                          size="small"
+                          sx={{ fontWeight: 600 }}
+                        />
+                        <Tooltip title="Editar Projeto">
+                          <IconButton
+                            onClick={() => handleOpenEditModal(project)}
+                            sx={{
+                              bgcolor: 'rgba(99, 102, 241, 0.1)',
+                              '&:hover': {
+                                bgcolor: 'rgba(99, 102, 241, 0.2)',
+                              },
+                            }}
+                          >
+                            <Edit sx={{ color: '#6366f1' }} />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Excluir Projeto">
+                          <IconButton
+                            onClick={() => handleDeleteProject(project)}
+                            sx={{
+                              bgcolor: 'rgba(239, 68, 68, 0.1)',
+                              '&:hover': {
+                                bgcolor: 'rgba(239, 68, 68, 0.2)',
+                              },
+                            }}
+                          >
+                            <Delete sx={{ color: '#ef4444' }} />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
                     </Box>
 
                     <Typography variant="h5" fontWeight={700} gutterBottom sx={{ mb: 1 }}>
@@ -257,6 +319,15 @@ export default function Projects() {
         onClose={() => setCreateModalOpen(false)}
         onSuccess={fetchProjects}
       />
+
+      {selectedProject && (
+        <EditProjectModal
+          open={editModalOpen}
+          onClose={handleCloseEditModal}
+          onSuccess={fetchProjects}
+          project={selectedProject}
+        />
+      )}
     </Box>
   )
 }

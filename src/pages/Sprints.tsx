@@ -11,10 +11,13 @@ import {
   LinearProgress,
   CircularProgress,
   Fab,
+  IconButton,
+  Tooltip,
 } from '@mui/material'
-import { Add, SpaceDashboard, CalendarToday, Flag, Speed, Timeline } from '@mui/icons-material'
+import { Add, SpaceDashboard, CalendarToday, Flag, Speed, Timeline, Edit, Delete } from '@mui/icons-material'
 import Navbar from '@/components/Navbar'
 import CreateSprintModal from '@/components/CreateSprintModal'
+import EditSprintModal from '@/components/EditSprintModal'
 import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
 
@@ -26,6 +29,8 @@ interface Sprint {
   end_date: string
   status: string
   velocity: number
+  team_id: string
+  project_id: string
   created_at: string
   teams?: { name: string }
   projects?: { name: string }
@@ -42,6 +47,8 @@ export default function Sprints() {
   const [sprints, setSprints] = useState<Sprint[]>([])
   const [loading, setLoading] = useState(true)
   const [createModalOpen, setCreateModalOpen] = useState(false)
+  const [editModalOpen, setEditModalOpen] = useState(false)
+  const [selectedSprint, setSelectedSprint] = useState<Sprint | null>(null)
 
   useEffect(() => {
     fetchSprints()
@@ -89,6 +96,36 @@ export default function Sprints() {
     const diff = end - now
     const days = Math.ceil(diff / (1000 * 60 * 60 * 24))
     return days > 0 ? days : 0
+  }
+
+  const handleOpenEditModal = (sprint: Sprint) => {
+    setSelectedSprint(sprint)
+    setEditModalOpen(true)
+  }
+
+  const handleCloseEditModal = () => {
+    setEditModalOpen(false)
+    setSelectedSprint(null)
+  }
+
+  const handleDeleteSprint = async (sprint: Sprint) => {
+    const confirmed = window.confirm(
+      `Tem certeza que deseja excluir o sprint "${sprint.name}"?\n\nEsta ação não pode ser desfeita.`
+    )
+
+    if (!confirmed) return
+
+    try {
+      const { error } = await supabase.from('sprints').delete().eq('id', sprint.id)
+
+      if (error) throw error
+
+      toast.success('Sprint excluído com sucesso!')
+      await fetchSprints()
+    } catch (error) {
+      console.error('Error deleting sprint:', error)
+      toast.error('Erro ao excluir sprint')
+    }
   }
 
   return (
@@ -185,12 +222,40 @@ export default function Sprints() {
                       >
                         <SpaceDashboard sx={{ color: 'white', fontSize: 24 }} />
                       </Box>
-                      <Chip
-                        label={statusConfig[sprint.status]?.label || sprint.status}
-                        color={statusConfig[sprint.status]?.color || 'default'}
-                        size="small"
-                        sx={{ fontWeight: 600 }}
-                      />
+                      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                        <Chip
+                          label={statusConfig[sprint.status]?.label || sprint.status}
+                          color={statusConfig[sprint.status]?.color || 'default'}
+                          size="small"
+                          sx={{ fontWeight: 600 }}
+                        />
+                        <Tooltip title="Editar Sprint">
+                          <IconButton
+                            onClick={() => handleOpenEditModal(sprint)}
+                            sx={{
+                              bgcolor: 'rgba(99, 102, 241, 0.1)',
+                              '&:hover': {
+                                bgcolor: 'rgba(99, 102, 241, 0.2)',
+                              },
+                            }}
+                          >
+                            <Edit sx={{ color: '#6366f1' }} />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Excluir Sprint">
+                          <IconButton
+                            onClick={() => handleDeleteSprint(sprint)}
+                            sx={{
+                              bgcolor: 'rgba(239, 68, 68, 0.1)',
+                              '&:hover': {
+                                bgcolor: 'rgba(239, 68, 68, 0.2)',
+                              },
+                            }}
+                          >
+                            <Delete sx={{ color: '#ef4444' }} />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
                     </Box>
 
                     <Typography variant="h5" fontWeight={700} gutterBottom sx={{ mb: 1 }}>
@@ -333,6 +398,15 @@ export default function Sprints() {
         onClose={() => setCreateModalOpen(false)}
         onSuccess={fetchSprints}
       />
+
+      {selectedSprint && (
+        <EditSprintModal
+          open={editModalOpen}
+          onClose={handleCloseEditModal}
+          onSuccess={fetchSprints}
+          sprint={selectedSprint}
+        />
+      )}
     </Box>
   )
 }

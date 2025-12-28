@@ -14,10 +14,11 @@ import {
   IconButton,
   Tooltip,
 } from '@mui/material'
-import { Add, SpaceDashboard, CalendarToday, Flag, Speed, Timeline, Edit, Delete } from '@mui/icons-material'
+import { Add, SpaceDashboard, CalendarToday, Flag, Speed, Timeline, Edit, Delete, ListAlt } from '@mui/icons-material'
 import Navbar from '@/components/Navbar'
 import CreateSprintModal from '@/components/CreateSprintModal'
 import EditSprintModal from '@/components/EditSprintModal'
+import SprintDetailsModal from '@/components/SprintDetailsModal'
 import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
 
@@ -48,6 +49,7 @@ export default function Sprints() {
   const [loading, setLoading] = useState(true)
   const [createModalOpen, setCreateModalOpen] = useState(false)
   const [editModalOpen, setEditModalOpen] = useState(false)
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false)
   const [selectedSprint, setSelectedSprint] = useState<Sprint | null>(null)
 
   useEffect(() => {
@@ -126,6 +128,16 @@ export default function Sprints() {
       console.error('Error deleting sprint:', error)
       toast.error('Erro ao excluir sprint')
     }
+  }
+
+  const handleOpenDetailsModal = (sprint: Sprint) => {
+    setSelectedSprint(sprint)
+    setDetailsModalOpen(true)
+  }
+
+  const handleCloseDetailsModal = () => {
+    setDetailsModalOpen(false)
+    setSelectedSprint(null)
   }
 
   return (
@@ -369,6 +381,29 @@ export default function Sprints() {
                         </Typography>
                       </Box>
                     )}
+
+                    <Button
+                      fullWidth
+                      variant="outlined"
+                      startIcon={<ListAlt />}
+                      onClick={() => handleOpenDetailsModal(sprint)}
+                      sx={{
+                        mt: 3,
+                        py: 1.5,
+                        borderRadius: 2,
+                        borderWidth: 2,
+                        borderColor: 'rgba(99, 102, 241, 0.3)',
+                        color: '#6366f1',
+                        fontWeight: 600,
+                        '&:hover': {
+                          borderWidth: 2,
+                          borderColor: '#6366f1',
+                          backgroundColor: 'rgba(99, 102, 241, 0.05)',
+                        },
+                      }}
+                    >
+                      Gerenciar Histórias
+                    </Button>
                   </CardContent>
                 </Card>
               </Grid>
@@ -405,6 +440,21 @@ export default function Sprints() {
           onClose={handleCloseEditModal}
           onSuccess={fetchSprints}
           sprint={selectedSprint}
+        />
+      )}
+
+      {selectedSprint && (
+        <SprintDetailsModal
+          open={detailsModalOpen}
+          onClose={handleCloseDetailsModal}
+          sprint={{
+            id: selectedSprint.id,
+            name: selectedSprint.name,
+            project_id: selectedSprint.project_id,
+            team_id: selectedSprint.team_id,
+            start_date: selectedSprint.start_date,
+            end_date: selectedSprint.end_date,
+          }}
         />
       )}
     </Box>

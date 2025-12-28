@@ -22,6 +22,7 @@ import {
   AccountCircle,
   SpaceDashboard,
   MenuBook,
+  Inventory,
 } from '@mui/icons-material'
 import { useAuth } from '@/contexts/AuthContext'
 
@@ -53,6 +54,7 @@ export default function Navbar() {
     { label: 'Painel', path: '/dashboard', icon: <Dashboard /> },
     { label: 'Projetos', path: '/projects', icon: <Assignment /> },
     { label: 'Sprints', path: '/sprints', icon: <SpaceDashboard /> },
+    { label: 'Backlog', path: '/backlog', icon: <Inventory /> },
     { label: 'Times', path: '/teams', icon: <People /> },
     { label: 'Guia SCRUM', path: '/scrum-guide', icon: <MenuBook /> },
   ]

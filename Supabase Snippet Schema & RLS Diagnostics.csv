@@ -1,0 +1,8 @@
+trigger_name,event_manipulation,event_object_table
+update_retrospective_items_updated_at,UPDATE,retrospective_items
+update_retrospectives_updated_at,UPDATE,sprint_retrospectives
+update_reviews_updated_at,UPDATE,sprint_reviews
+update_subtasks_updated_at,UPDATE,subtasks
+trigger_assign_order_index,INSERT,tasks
+trigger_update_task_completed_at,UPDATE,tasks
+update_tasks_updated_at,UPDATE,tasks

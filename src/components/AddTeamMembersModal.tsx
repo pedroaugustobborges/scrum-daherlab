@@ -39,7 +39,7 @@ interface TeamMember {
   id: string
   user_id: string
   role: string
-  profiles: Profile
+  user_profile: Profile
 }
 
 const roleOptions = [
@@ -73,10 +73,10 @@ export default function AddTeamMembersModal({
     setLoadingMembers(true)
     try {
       const [profilesResponse, membersResponse] = await Promise.all([
-        supabase.from('profiles').select('id, full_name, email').order('full_name'),
+        supabase.from('profiles').select('id, full_name').order('full_name'),
         supabase
           .from('team_members')
-          .select('id, user_id, role, profiles(id, full_name, email)')
+          .select('id, user_id, role, user_profile:profiles!user_id(id, full_name)')
           .eq('team_id', teamId),
       ])
 
@@ -202,12 +202,12 @@ export default function AddTeamMembersModal({
                           height: 40,
                         }}
                       >
-                        {member.profiles.full_name?.charAt(0) || 'U'}
+                        {member.user_profile.full_name?.charAt(0) || 'U'}
                       </Avatar>
                       <ListItemText
                         primary={
                           <Typography variant="body1" fontWeight={600}>
-                            {member.profiles.full_name || 'Sem nome'}
+                            {member.user_profile.full_name || 'Sem nome'}
                           </Typography>
                         }
                         secondary={
@@ -268,7 +268,7 @@ export default function AddTeamMembersModal({
               ) : (
                 profiles.map((profile) => (
                   <MenuItem key={profile.id} value={profile.id}>
-                    {profile.full_name || profile.email || 'Sem nome'}
+                    {profile.full_name || 'Sem nome'}
                   </MenuItem>
                 ))
               )}

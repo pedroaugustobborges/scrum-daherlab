@@ -6,6 +6,7 @@ import Login from '@/pages/Login'
 import Dashboard from '@/pages/Dashboard'
 import Projects from '@/pages/Projects'
 import Sprints from '@/pages/Sprints'
+import ProductBacklog from '@/pages/ProductBacklog'
 import Teams from '@/pages/Teams'
 import Settings from '@/pages/Settings'
 import ScrumGuide from '@/pages/ScrumGuide'
@@ -70,6 +71,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Sprints />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/backlog"
+          element={
+            <ProtectedRoute>
+              <ProductBacklog />
             </ProtectedRoute>
           }
         />

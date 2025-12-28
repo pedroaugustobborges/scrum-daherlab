@@ -74,6 +74,7 @@ interface TeamMember {
   id: string
   full_name: string
   avatar_url?: string
+  role: string
 }
 
 const statusConfig: Record<string, { label: string; color: string }> = {
@@ -96,6 +97,13 @@ const sprintStatusConfig: Record<string, { label: string; color: string }> = {
   active: { label: 'Ativo', color: '#10b981' },
   completed: { label: 'Concluído', color: '#6366f1' },
   cancelled: { label: 'Cancelado', color: '#ef4444' },
+}
+
+const roleConfig: Record<string, { label: string; color: string }> = {
+  product_owner: { label: 'Product Owner', color: '#6366f1' },
+  scrum_master: { label: 'Scrum Master', color: '#8b5cf6' },
+  developer: { label: 'Developer', color: '#10b981' },
+  member: { label: 'Membro', color: '#6b7280' },
 }
 
 export default function ProjectDetailsModal({ open, onClose, project }: ProjectDetailsModalProps) {
@@ -162,11 +170,14 @@ export default function ProjectDetailsModal({ open, onClose, project }: ProjectD
       if (uniqueTeamIds.length > 0) {
         const { data: teamsData } = await supabase
           .from('team_members')
-          .select('user_profile:profiles!user_id(id, full_name, avatar_url)')
+          .select('role, user_profile:profiles!user_id(id, full_name, avatar_url)')
           .in('team_id', uniqueTeamIds)
 
         const uniqueMembers = teamsData
-          ?.map((tm: any) => tm.user_profile)
+          ?.map((tm: any) => ({
+            ...tm.user_profile,
+            role: tm.role,
+          }))
           .filter((m: any) => m)
           .reduce((acc: TeamMember[], curr: TeamMember) => {
             if (!acc.find((m) => m.id === curr.id)) {
@@ -291,25 +302,75 @@ export default function ProjectDetailsModal({ open, onClose, project }: ProjectD
 
                 {teamMembers.length > 0 && (
                   <Box>
-                    <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block' }}>
-                      Membros do Time
+                    <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1.5, display: 'block' }}>
+                      Membros do Time ({teamMembers.length})
                     </Typography>
-                    <AvatarGroup max={5}>
-                      {teamMembers.map((member) => (
-                        <Tooltip key={member.id} title={member.full_name}>
-                          <Avatar
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
+                      {teamMembers.map((member) => {
+                        const memberRole = roleConfig[member.role] || roleConfig.member
+                        return (
+                          <Card
+                            key={member.id}
+                            elevation={0}
                             sx={{
-                              width: 32,
-                              height: 32,
-                              bgcolor: '#6366f1',
-                              fontSize: '0.875rem',
+                              border: `2px solid ${memberRole.color}20`,
+                              borderRadius: 2,
+                              transition: 'all 0.2s',
+                              cursor: 'pointer',
+                              bgcolor: `${memberRole.color}08`,
+                              '&:hover': {
+                                border: `2px solid ${memberRole.color}`,
+                                boxShadow: `0 4px 12px ${memberRole.color}30`,
+                                transform: 'translateY(-2px)',
+                              },
                             }}
                           >
-                            {member.full_name?.charAt(0) || 'U'}
-                          </Avatar>
-                        </Tooltip>
-                      ))}
-                    </AvatarGroup>
+                            <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                <Avatar
+                                  sx={{
+                                    width: 36,
+                                    height: 36,
+                                    bgcolor: memberRole.color,
+                                    fontSize: '0.9rem',
+                                    fontWeight: 700,
+                                  }}
+                                >
+                                  {member.full_name?.charAt(0) || 'U'}
+                                </Avatar>
+                                <Box sx={{ minWidth: 0 }}>
+                                  <Typography
+                                    variant="body2"
+                                    fontWeight={700}
+                                    sx={{
+                                      color: 'text.primary',
+                                      lineHeight: 1.2,
+                                      mb: 0.3,
+                                    }}
+                                  >
+                                    {member.full_name}
+                                  </Typography>
+                                  <Chip
+                                    label={memberRole.label}
+                                    size="small"
+                                    sx={{
+                                      height: 18,
+                                      fontSize: '0.65rem',
+                                      fontWeight: 700,
+                                      bgcolor: `${memberRole.color}`,
+                                      color: 'white',
+                                      '& .MuiChip-label': {
+                                        px: 1,
+                                      },
+                                    }}
+                                  />
+                                </Box>
+                              </Box>
+                            </CardContent>
+                          </Card>
+                        )
+                      })}
+                    </Box>
                   </Box>
                 )}
               </Grid>

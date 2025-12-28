@@ -20,12 +20,14 @@ import {
   Delete,
   Edit,
   Folder,
+  Download,
 } from '@mui/icons-material'
 import Navbar from '@/components/Navbar'
 import CreateProjectModal from '@/components/CreateProjectModal'
 import EditProjectModal from '@/components/EditProjectModal'
 import ProjectDetailsModal from '@/components/ProjectDetailsModal'
 import { supabase } from '@/lib/supabase'
+import { exportProjectsToPDF } from '@/utils/exportProjectsToPDF'
 import toast from 'react-hot-toast'
 
 interface Project {
@@ -48,6 +50,7 @@ const statusConfig: Record<string, { label: string; color: any }> = {
 export default function Projects() {
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
+  const [exportLoading, setExportLoading] = useState(false)
   const [createModalOpen, setCreateModalOpen] = useState(false)
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [detailsModalOpen, setDetailsModalOpen] = useState(false)
@@ -120,6 +123,19 @@ export default function Projects() {
     }
   }
 
+  const handleExportToPDF = async () => {
+    setExportLoading(true)
+    try {
+      await exportProjectsToPDF()
+      toast.success('PDF gerado com sucesso!')
+    } catch (error: any) {
+      console.error('Error exporting to PDF:', error)
+      toast.error(error.message || 'Erro ao gerar PDF')
+    } finally {
+      setExportLoading(false)
+    }
+  }
+
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       <Navbar />
@@ -133,19 +149,44 @@ export default function Projects() {
               Gerencie todos os seus projetos em um só lugar
             </Typography>
           </Box>
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={() => setCreateModalOpen(true)}
-            sx={{
-              px: 4,
-              py: 1.5,
-              fontSize: '1rem',
-              display: { xs: 'none', sm: 'flex' },
-            }}
-          >
-            Novo Projeto
-          </Button>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button
+              variant="outlined"
+              startIcon={exportLoading ? <CircularProgress size={20} /> : <Download />}
+              onClick={handleExportToPDF}
+              disabled={exportLoading || projects.length === 0}
+              sx={{
+                px: 4,
+                py: 1.5,
+                fontSize: '1rem',
+                display: { xs: 'none', sm: 'flex' },
+                borderWidth: 2,
+                borderColor: 'rgba(99, 102, 241, 0.3)',
+                color: '#6366f1',
+                fontWeight: 600,
+                '&:hover': {
+                  borderWidth: 2,
+                  borderColor: '#6366f1',
+                  backgroundColor: 'rgba(99, 102, 241, 0.05)',
+                },
+              }}
+            >
+              {exportLoading ? 'Gerando PDF...' : 'Exportar PDF'}
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={() => setCreateModalOpen(true)}
+              sx={{
+                px: 4,
+                py: 1.5,
+                fontSize: '1rem',
+                display: { xs: 'none', sm: 'flex' },
+              }}
+            >
+              Novo Projeto
+            </Button>
+          </Box>
         </Box>
 
         {loading ? (

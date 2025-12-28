@@ -31,6 +31,8 @@ import {
   Functions,
 } from '@mui/icons-material'
 import Modal from './Modal'
+import SprintDetailsModal from './SprintDetailsModal'
+import CreateBacklogItemModal from './CreateBacklogItemModal'
 import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
 
@@ -60,9 +62,11 @@ interface Sprint {
 interface BacklogItem {
   id: string
   title: string
+  description: string
   status: string
   priority: string
   story_points: number
+  assigned_to: string
   assigned_to_profile?: { full_name: string }
 }
 
@@ -97,6 +101,10 @@ const sprintStatusConfig: Record<string, { label: string; color: string }> = {
 export default function ProjectDetailsModal({ open, onClose, project }: ProjectDetailsModalProps) {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState(0)
+  const [sprintDetailsOpen, setSprintDetailsOpen] = useState(false)
+  const [selectedSprint, setSelectedSprint] = useState<Sprint | null>(null)
+  const [backlogItemModalOpen, setBacklogItemModalOpen] = useState(false)
+  const [selectedBacklogItem, setSelectedBacklogItem] = useState<BacklogItem | null>(null)
   const [sprints, setSprints] = useState<Sprint[]>([])
   const [backlogItems, setBacklogItems] = useState<BacklogItem[]>([])
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
@@ -130,7 +138,7 @@ export default function ProjectDetailsModal({ open, onClose, project }: ProjectD
         // Fetch backlog items (tasks not in a sprint)
         supabase
           .from('tasks')
-          .select('id, title, status, priority, story_points, assigned_to_profile:profiles!assigned_to(full_name)')
+          .select('id, title, description, status, priority, story_points, assigned_to, assigned_to_profile:profiles!assigned_to(full_name)')
           .eq('project_id', project.id)
           .is('sprint_id', null)
           .order('created_at', { ascending: false }),
@@ -203,6 +211,26 @@ export default function ProjectDetailsModal({ open, onClose, project }: ProjectD
   const calculateProgress = () => {
     if (statistics.totalStoryPoints === 0) return 0
     return Math.round((statistics.completedStoryPoints / statistics.totalStoryPoints) * 100)
+  }
+
+  const handleOpenSprintDetails = (sprint: Sprint) => {
+    setSelectedSprint(sprint)
+    setSprintDetailsOpen(true)
+  }
+
+  const handleCloseSprintDetails = () => {
+    setSprintDetailsOpen(false)
+    setSelectedSprint(null)
+  }
+
+  const handleOpenBacklogItem = (item: BacklogItem) => {
+    setSelectedBacklogItem(item)
+    setBacklogItemModalOpen(true)
+  }
+
+  const handleCloseBacklogItem = () => {
+    setBacklogItemModalOpen(false)
+    setSelectedBacklogItem(null)
   }
 
   if (loading) {
@@ -399,10 +427,12 @@ export default function ProjectDetailsModal({ open, onClose, project }: ProjectD
                   <Card
                     key={sprint.id}
                     elevation={0}
+                    onClick={() => handleOpenSprintDetails(sprint)}
                     sx={{
                       border: '2px solid rgba(99, 102, 241, 0.1)',
                       borderRadius: 3,
                       transition: 'all 0.2s',
+                      cursor: 'pointer',
                       '&:hover': {
                         border: '2px solid rgba(99, 102, 241, 0.3)',
                         boxShadow: '0 4px 12px rgba(99, 102, 241, 0.15)',
@@ -480,10 +510,12 @@ export default function ProjectDetailsModal({ open, onClose, project }: ProjectD
                   <Card
                     key={item.id}
                     elevation={0}
+                    onClick={() => handleOpenBacklogItem(item)}
                     sx={{
                       border: '2px solid rgba(99, 102, 241, 0.1)',
                       borderRadius: 3,
                       transition: 'all 0.2s',
+                      cursor: 'pointer',
                       '&:hover': {
                         border: '2px solid rgba(99, 102, 241, 0.3)',
                         boxShadow: '0 4px 12px rgba(99, 102, 241, 0.15)',
@@ -559,6 +591,42 @@ export default function ProjectDetailsModal({ open, onClose, project }: ProjectD
           </Box>
         )}
       </Box>
+
+      {selectedSprint && (
+        <SprintDetailsModal
+          open={sprintDetailsOpen}
+          onClose={handleCloseSprintDetails}
+          sprint={{
+            id: selectedSprint.id,
+            name: selectedSprint.name,
+            project_id: project.id,
+            team_id: selectedSprint.team_id,
+            start_date: selectedSprint.start_date,
+            end_date: selectedSprint.end_date,
+          }}
+        />
+      )}
+
+      {selectedBacklogItem && (
+        <CreateBacklogItemModal
+          open={backlogItemModalOpen}
+          onClose={handleCloseBacklogItem}
+          onSuccess={() => {
+            handleCloseBacklogItem()
+            fetchProjectDetails()
+          }}
+          item={{
+            id: selectedBacklogItem.id,
+            title: selectedBacklogItem.title,
+            description: selectedBacklogItem.description,
+            status: selectedBacklogItem.status,
+            priority: selectedBacklogItem.priority,
+            story_points: selectedBacklogItem.story_points,
+            project_id: project.id,
+            assigned_to: selectedBacklogItem.assigned_to,
+          }}
+        />
+      )}
     </Modal>
   )
 }

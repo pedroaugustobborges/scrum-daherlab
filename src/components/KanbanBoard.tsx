@@ -14,6 +14,7 @@ import {
 } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import KanbanCard from './KanbanCard'
+import StoryDetailsModal from './StoryDetailsModal'
 import toast from 'react-hot-toast'
 import { supabase } from '@/lib/supabase'
 
@@ -70,6 +71,8 @@ function DroppableColumn({ id, children }: { id: string; children: React.ReactNo
 export default function KanbanBoard({ stories, onRefresh, onStoryClick, onDeleteStory }: KanbanBoardProps) {
   const [activeId, setActiveId] = useState<string | null>(null)
   const [storiesByStatus, setStoriesByStatus] = useState<Record<string, UserStory[]>>({})
+  const [storyDetailsOpen, setStoryDetailsOpen] = useState(false)
+  const [selectedStoryId, setSelectedStoryId] = useState<string>('')
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -101,27 +104,51 @@ export default function KanbanBoard({ stories, onRefresh, onStoryClick, onDelete
     const activeId = active.id as string
     const overId = over.id as string
 
-    // Find the active story
-    const activeStory = stories.find((s) => s.id === activeId)
+    // Find the active story from the current grouped state
+    let activeStory: UserStory | undefined
+    let currentStatus = ''
+
+    for (const [status, storyList] of Object.entries(storiesByStatus)) {
+      const found = storyList.find((s) => s.id === activeId)
+      if (found) {
+        activeStory = found
+        currentStatus = status
+        break
+      }
+    }
+
     if (!activeStory) return
 
     // Check if we're over a column (not a card)
     const isOverColumn = columns.some((col) => col.id === overId)
 
-    if (isOverColumn && activeStory.status !== overId) {
-      // Optimistically update local state for smooth UX
-      const updatedStories = { ...storiesByStatus }
-
-      // Remove from old column
-      updatedStories[activeStory.status] = updatedStories[activeStory.status].filter((s) => s.id !== activeId)
-
-      // Add to new column
-      if (!updatedStories[overId]) {
-        updatedStories[overId] = []
+    // If we're over a card, find which column it belongs to
+    let targetColumn = overId
+    if (!isOverColumn) {
+      for (const [status, storyList] of Object.entries(storiesByStatus)) {
+        if (storyList.some((s) => s.id === overId)) {
+          targetColumn = status
+          break
+        }
       }
-      updatedStories[overId] = [...updatedStories[overId], { ...activeStory, status: overId }]
+    }
 
-      setStoriesByStatus(updatedStories)
+    // Only update if actually moving to a different column
+    if (currentStatus !== targetColumn && columns.some((col) => col.id === targetColumn)) {
+      setStoriesByStatus((prev) => {
+        const newState = { ...prev }
+
+        // Remove from current column
+        newState[currentStatus] = newState[currentStatus].filter((s) => s.id !== activeId)
+
+        // Add to target column
+        if (!newState[targetColumn]) {
+          newState[targetColumn] = []
+        }
+        newState[targetColumn] = [...newState[targetColumn], { ...activeStory!, status: targetColumn }]
+
+        return newState
+      })
     }
   }
 
@@ -140,12 +167,34 @@ export default function KanbanBoard({ stories, onRefresh, onStoryClick, onDelete
     }
 
     const storyId = active.id as string
-    let newStatus = over.id as string
+    const overId = over.id as string
 
-    // If dropped over a card, find the column that card belongs to
-    const overStory = stories.find((s) => s.id === newStatus)
-    if (overStory) {
-      newStatus = overStory.status
+    // Find the original story from the stories prop
+    const story = stories.find((s) => s.id === storyId)
+    if (!story) {
+      // Reset if story not found
+      const grouped = columns.reduce((acc, col) => {
+        acc[col.id] = stories.filter((story) => story.status === col.id)
+        return acc
+      }, {} as Record<string, UserStory[]>)
+      setStoriesByStatus(grouped)
+      return
+    }
+
+    // Determine the target column
+    let newStatus = overId
+
+    // Check if we're over a column
+    const isOverColumn = columns.some((col) => col.id === overId)
+
+    // If dropped over a card, find which column it belongs to
+    if (!isOverColumn) {
+      for (const [status, storyList] of Object.entries(storiesByStatus)) {
+        if (storyList.some((s) => s.id === overId)) {
+          newStatus = status
+          break
+        }
+      }
     }
 
     // Check if it's a valid column
@@ -160,9 +209,8 @@ export default function KanbanBoard({ stories, onRefresh, onStoryClick, onDelete
       return
     }
 
-    // Find the story being moved
-    const story = stories.find((s) => s.id === storyId)
-    if (!story || story.status === newStatus) {
+    // Don't update if status hasn't changed
+    if (story.status === newStatus) {
       return
     }
 
@@ -290,7 +338,10 @@ export default function KanbanBoard({ stories, onRefresh, onStoryClick, onDelete
                         key={story.id}
                         story={story}
                         onDelete={onDeleteStory}
-                        onClick={onStoryClick}
+                        onClick={(storyId) => {
+                          setSelectedStoryId(storyId)
+                          setStoryDetailsOpen(true)
+                        }}
                       />
                     ))
                   )}
@@ -321,6 +372,19 @@ export default function KanbanBoard({ stories, onRefresh, onStoryClick, onDelete
           </Box>
         ) : null}
       </DragOverlay>
+
+      {/* Story Details Modal */}
+      {storyDetailsOpen && (
+        <StoryDetailsModal
+          open={storyDetailsOpen}
+          onClose={() => {
+            setStoryDetailsOpen(false)
+            setSelectedStoryId('')
+          }}
+          onSuccess={onRefresh}
+          storyId={selectedStoryId}
+        />
+      )}
     </DndContext>
   )
 }

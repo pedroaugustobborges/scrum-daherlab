@@ -24,6 +24,7 @@ import {
 import Navbar from '@/components/Navbar'
 import CreateProjectModal from '@/components/CreateProjectModal'
 import EditProjectModal from '@/components/EditProjectModal'
+import ProjectDetailsModal from '@/components/ProjectDetailsModal'
 import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
 
@@ -49,6 +50,7 @@ export default function Projects() {
   const [loading, setLoading] = useState(true)
   const [createModalOpen, setCreateModalOpen] = useState(false)
   const [editModalOpen, setEditModalOpen] = useState(false)
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false)
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
 
   useEffect(() => {
@@ -85,6 +87,16 @@ export default function Projects() {
 
   const handleCloseEditModal = () => {
     setEditModalOpen(false)
+    setSelectedProject(null)
+  }
+
+  const handleOpenDetailsModal = (project: Project) => {
+    setSelectedProject(project)
+    setDetailsModalOpen(true)
+  }
+
+  const handleCloseDetailsModal = () => {
+    setDetailsModalOpen(false)
     setSelectedProject(null)
   }
 
@@ -174,11 +186,13 @@ export default function Projects() {
               <Grid item xs={12} md={6} lg={4} key={project.id}>
                 <Card
                   elevation={0}
+                  onClick={() => handleOpenDetailsModal(project)}
                   sx={{
                     height: '100%',
                     background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
                     border: '2px solid rgba(99, 102, 241, 0.1)',
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    cursor: 'pointer',
                     '&:hover': {
                       transform: 'translateY(-8px)',
                       boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
@@ -211,7 +225,10 @@ export default function Projects() {
                         />
                         <Tooltip title="Editar Projeto">
                           <IconButton
-                            onClick={() => handleOpenEditModal(project)}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleOpenEditModal(project)
+                            }}
                             sx={{
                               bgcolor: 'rgba(99, 102, 241, 0.1)',
                               '&:hover': {
@@ -224,7 +241,10 @@ export default function Projects() {
                         </Tooltip>
                         <Tooltip title="Excluir Projeto">
                           <IconButton
-                            onClick={() => handleDeleteProject(project)}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleDeleteProject(project)
+                            }}
                             sx={{
                               bgcolor: 'rgba(239, 68, 68, 0.1)',
                               '&:hover': {
@@ -325,6 +345,14 @@ export default function Projects() {
           open={editModalOpen}
           onClose={handleCloseEditModal}
           onSuccess={fetchProjects}
+          project={selectedProject}
+        />
+      )}
+
+      {selectedProject && (
+        <ProjectDetailsModal
+          open={detailsModalOpen}
+          onClose={handleCloseDetailsModal}
           project={selectedProject}
         />
       )}

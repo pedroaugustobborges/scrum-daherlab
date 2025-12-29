@@ -17,6 +17,7 @@ import KanbanCard from './KanbanCard'
 import StoryDetailsModal from './StoryDetailsModal'
 import toast from 'react-hot-toast'
 import { supabase } from '@/lib/supabase'
+import confetti from 'canvas-confetti'
 
 interface UserStory {
   id: string
@@ -81,6 +82,41 @@ export default function KanbanBoard({ stories, onRefresh, onStoryClick, onDelete
       },
     })
   )
+
+  // Celebration confetti animation
+  const celebrateCompletion = () => {
+    const duration = 3000
+    const animationEnd = Date.now() + duration
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 }
+
+    const randomInRange = (min: number, max: number) => {
+      return Math.random() * (max - min) + min
+    }
+
+    const interval: any = setInterval(() => {
+      const timeLeft = animationEnd - Date.now()
+
+      if (timeLeft <= 0) {
+        return clearInterval(interval)
+      }
+
+      const particleCount = 50 * (timeLeft / duration)
+
+      // Launch confetti from random positions
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+        colors: ['#10b981', '#6366f1', '#8b5cf6', '#f59e0b', '#ef4444'],
+      })
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+        colors: ['#10b981', '#6366f1', '#8b5cf6', '#f59e0b', '#ef4444'],
+      })
+    }, 250)
+  }
 
   useEffect(() => {
     // Group stories by status
@@ -220,7 +256,22 @@ export default function KanbanBoard({ stories, onRefresh, onStoryClick, onDelete
 
       if (error) throw error
 
-      toast.success('Status atualizado com sucesso!')
+      // Celebrate if moved to 'done' column
+      if (newStatus === 'done') {
+        celebrateCompletion()
+        toast.success('🎉 Parabéns! Tarefa concluída!', {
+          duration: 4000,
+          icon: '✨',
+          style: {
+            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+            color: 'white',
+            fontWeight: 600,
+          },
+        })
+      } else {
+        toast.success('Status atualizado com sucesso!')
+      }
+
       onRefresh()
     } catch (error) {
       console.error('Error updating story status:', error)

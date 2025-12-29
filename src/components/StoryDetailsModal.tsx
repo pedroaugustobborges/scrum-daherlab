@@ -39,6 +39,7 @@ import toast from 'react-hot-toast'
 import Modal from './Modal'
 import CreateSubtaskModal from './CreateSubtaskModal'
 import { supabase } from '@/lib/supabase'
+import confetti from 'canvas-confetti'
 
 interface StoryDetailsModalProps {
   open: boolean
@@ -107,6 +108,17 @@ export default function StoryDetailsModal({ open, onClose, onSuccess, storyId }:
     story_points: 0,
     assigned_to: '',
   })
+
+  // Celebration confetti for subtask completion
+  const celebrateSubtaskCompletion = () => {
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#10b981', '#6366f1', '#8b5cf6', '#f59e0b'],
+      zIndex: 9999,
+    })
+  }
 
   useEffect(() => {
     if (open && storyId) {
@@ -212,6 +224,22 @@ export default function StoryDetailsModal({ open, onClose, onSuccess, storyId }:
       const { error } = await supabase.from('subtasks').update({ status: newStatus }).eq('id', subtask.id)
 
       if (error) throw error
+
+      // Celebrate if subtask is completed
+      if (newStatus === 'done') {
+        celebrateSubtaskCompletion()
+        toast.success('✨ Subtarefa concluída!', {
+          duration: 3000,
+          icon: '🎯',
+          style: {
+            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+            color: 'white',
+            fontWeight: 600,
+          },
+        })
+      } else {
+        toast.success('Status atualizado')
+      }
 
       await fetchStory()
       onSuccess()

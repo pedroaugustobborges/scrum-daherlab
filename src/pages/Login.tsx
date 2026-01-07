@@ -225,7 +225,7 @@ export default function Login() {
               letterSpacing: "-0.02em",
             }}
           >
-            SCRUM
+            Agir Ágil
           </Typography>
 
           <Typography
@@ -239,7 +239,7 @@ export default function Login() {
               letterSpacing: "0.02em",
             }}
           >
-            Agir é ágil
+            {/* Agir é ágil */}
           </Typography>
 
           <Box
@@ -382,9 +382,7 @@ export default function Login() {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <LockOutlined
-                        sx={{ color: "rgba(99, 102, 241, 0.5)" }}
-                      />
+                      <LockOutlined sx={{ color: "rgba(99, 102, 241, 0.5)" }} />
                     </InputAdornment>
                   ),
                   endAdornment: (
@@ -414,34 +412,34 @@ export default function Login() {
                   mb: 3,
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 3,
-                    backgroundColor: "rgba(255, 255, 255, 0.05)",
+                    backgroundColor: "rgba(255, 255, 255, 0.6)",
                     backdropFilter: "blur(12px)",
                     transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                     "& fieldset": {
-                      borderColor: "rgba(255, 255, 255, 0.12)",
+                      borderColor: "rgba(99, 102, 241, 0.2)",
                       borderWidth: "1.5px",
                       transition: "all 0.3s ease",
                     },
                     "&:hover fieldset": {
-                      borderColor: "rgba(96, 165, 250, 0.5)",
+                      borderColor: "rgba(99, 102, 241, 0.4)",
                     },
                     "&.Mui-focused fieldset": {
-                      borderColor: "#60a5fa",
+                      borderColor: "#6366f1",
                       borderWidth: "2px",
                     },
                     "&.Mui-focused": {
-                      backgroundColor: "rgba(255, 255, 255, 0.08)",
-                      boxShadow: "0 0 0 4px rgba(96, 165, 250, 0.1)",
+                      backgroundColor: "rgba(255, 255, 255, 0.8)",
+                      boxShadow: "0 0 0 4px rgba(99, 102, 241, 0.1)",
                     },
                   },
                   "& .MuiInputLabel-root": {
-                    color: "rgba(255, 255, 255, 0.6)",
+                    color: "rgba(71, 85, 105, 0.7)",
                     "&.Mui-focused": {
-                      color: "#60a5fa",
+                      color: "#6366f1",
                     },
                   },
                   "& .MuiInputBase-input": {
-                    color: "rgba(255, 255, 255, 0.95)",
+                    color: "rgba(15, 23, 42, 0.95)",
                     padding: "16px 14px",
                   },
                 }}
@@ -608,9 +606,7 @@ export default function Login() {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <LockOutlined
-                        sx={{ color: "rgba(99, 102, 241, 0.5)" }}
-                      />
+                      <LockOutlined sx={{ color: "rgba(99, 102, 241, 0.5)" }} />
                     </InputAdornment>
                   ),
                   endAdornment: (

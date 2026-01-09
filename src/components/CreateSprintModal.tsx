@@ -7,12 +7,10 @@ import {
   Stack,
   InputAdornment,
   CircularProgress,
-  Chip,
 } from '@mui/material'
 import {
   SpaceDashboard,
   CalendarToday,
-  Description,
   People,
   Assignment,
   Flag,

@@ -34,7 +34,6 @@ interface UserStory {
 interface KanbanBoardProps {
   stories: UserStory[]
   onRefresh: () => void
-  onStoryClick: (storyId: string) => void
   onDeleteStory: (storyId: string, title: string) => void
 }
 
@@ -69,7 +68,7 @@ function DroppableColumn({ id, children }: { id: string; children: React.ReactNo
   )
 }
 
-export default function KanbanBoard({ stories, onRefresh, onStoryClick, onDeleteStory }: KanbanBoardProps) {
+export default function KanbanBoard({ stories, onRefresh, onDeleteStory }: KanbanBoardProps) {
   const [activeId, setActiveId] = useState<string | null>(null)
   const [storiesByStatus, setStoriesByStatus] = useState<Record<string, UserStory[]>>({})
   const [storyDetailsOpen, setStoryDetailsOpen] = useState(false)

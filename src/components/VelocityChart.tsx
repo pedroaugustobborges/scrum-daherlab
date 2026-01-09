@@ -12,7 +12,7 @@ import {
   ReferenceLine,
   Cell,
 } from 'recharts'
-import { Speed, TrendingUp } from '@mui/icons-material'
+import { Speed } from '@mui/icons-material'
 import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
 

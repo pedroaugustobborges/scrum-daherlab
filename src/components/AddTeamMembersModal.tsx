@@ -87,7 +87,15 @@ export default function AddTeamMembersModal({
       }
 
       if (membersResponse.data) {
-        setCurrentMembers(membersResponse.data as TeamMember[])
+        const transformedMembers = membersResponse.data.map((member: any) => ({
+          id: member.id,
+          user_id: member.user_id,
+          role: member.role,
+          user_profile: Array.isArray(member.user_profile)
+            ? member.user_profile[0]
+            : member.user_profile,
+        })) as TeamMember[]
+        setCurrentMembers(transformedMembers)
       }
     } catch (error) {
       console.error('Error fetching data:', error)

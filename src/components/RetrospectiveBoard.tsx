@@ -7,7 +7,6 @@ import {
   Button,
   IconButton,
   Chip,
-  Rating,
   CircularProgress,
   Tooltip,
   Stack,
@@ -42,6 +41,8 @@ interface RetroItem {
   status: string
   assigned_to?: string
   profiles?: { full_name: string }
+  assigned_to_profile?: { full_name: string }
+  created_by_profile?: { full_name: string }
   created_by: string
 }
 
@@ -143,7 +144,18 @@ export default function RetrospectiveBoard({ sprintId, sprintName }: Retrospecti
         .order('created_at')
 
       if (itemsError) throw itemsError
-      setItems(itemsData || [])
+
+      // Transform items to handle profile arrays
+      const transformedItems = (itemsData || []).map((item: any) => ({
+        ...item,
+        assigned_to_profile: Array.isArray(item.assigned_to_profile)
+          ? item.assigned_to_profile[0]
+          : item.assigned_to_profile,
+        created_by_profile: Array.isArray(item.created_by_profile)
+          ? item.created_by_profile[0]
+          : item.created_by_profile,
+      }))
+      setItems(transformedItems)
     } catch (error) {
       console.error('Error fetching retrospective:', error)
       toast.error('Erro ao carregar retrospectiva')

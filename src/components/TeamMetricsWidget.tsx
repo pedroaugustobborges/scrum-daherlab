@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Box, Paper, Typography, CircularProgress, Avatar, AvatarGroup, Chip } from '@mui/material'
+import { Box, Paper, Typography, CircularProgress, Avatar, AvatarGroup } from '@mui/material'
 import { People, TrendingUp, Speed } from '@mui/icons-material'
 import { supabase } from '@/lib/supabase'
 

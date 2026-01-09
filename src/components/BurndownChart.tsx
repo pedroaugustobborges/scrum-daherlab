@@ -11,7 +11,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from 'recharts'
-import { TrendingDown, Timeline } from '@mui/icons-material'
+import { TrendingDown } from '@mui/icons-material'
 
 interface BurndownChartProps {
   sprint: {

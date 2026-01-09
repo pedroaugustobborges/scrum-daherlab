@@ -1,7 +1,7 @@
 import { Box, Typography, Chip, LinearProgress, Avatar, IconButton, Tooltip } from '@mui/material'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Flag, Functions, Person, Delete, DragIndicator, Assignment } from '@mui/icons-material'
+import { Flag, Functions, Delete, DragIndicator, Assignment } from '@mui/icons-material'
 
 interface KanbanCardProps {
   story: {

@@ -3,8 +3,6 @@ import {
   Box,
   Typography,
   Button,
-  Card,
-  CardContent,
   Chip,
   IconButton,
   Tooltip,
@@ -33,7 +31,6 @@ import {
   Delete,
   CheckCircle,
   Functions,
-  TrendingUp,
   Timer,
   ViewKanban,
   ViewList,
@@ -73,6 +70,7 @@ interface UserStory {
   story_points: number
   assigned_to: string
   profiles?: { full_name: string }
+  assigned_to_profile?: { full_name: string }
   subtasks?: Subtask[]
 }
 
@@ -84,6 +82,7 @@ interface Subtask {
   estimated_hours: number
   assigned_to: string
   profiles?: { full_name: string }
+  assigned_to_profile?: { full_name: string }
 }
 
 const statusConfig: Record<string, { label: string; color: string }> = {
@@ -127,9 +126,17 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
 
       if (storiesError) throw storiesError
 
+      // Transform stories to handle assigned_to_profile array
+      const transformedStories = (storiesData || []).map((story: any) => ({
+        ...story,
+        assigned_to_profile: Array.isArray(story.assigned_to_profile)
+          ? story.assigned_to_profile[0]
+          : story.assigned_to_profile,
+      }))
+
       // Fetch subtasks for each story
       const storiesWithSubtasks = await Promise.all(
-        (storiesData || []).map(async (story) => {
+        transformedStories.map(async (story) => {
           // Try to fetch subtasks, but don't fail if table doesn't exist
           try {
             const { data: subtasksData } = await supabase
@@ -138,9 +145,17 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
               .eq('task_id', story.id)
               .order('created_at', { ascending: true })
 
+            // Transform subtasks to handle assigned_to_profile array
+            const transformedSubtasks = (subtasksData || []).map((subtask: any) => ({
+              ...subtask,
+              assigned_to_profile: Array.isArray(subtask.assigned_to_profile)
+                ? subtask.assigned_to_profile[0]
+                : subtask.assigned_to_profile,
+            }))
+
             return {
               ...story,
-              subtasks: subtasksData || [],
+              subtasks: transformedSubtasks,
             }
           } catch (subtaskError) {
             console.warn('Subtasks table may not exist:', subtaskError)

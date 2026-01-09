@@ -14,7 +14,6 @@ import {
   Visibility,
   Save,
   Star,
-  People,
   Assignment,
   ThumbUp,
   ThumbDown,

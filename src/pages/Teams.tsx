@@ -7,14 +7,12 @@ import {
   Grid,
   Card,
   CardContent,
-  Avatar,
-  AvatarGroup,
   CircularProgress,
   Fab,
   IconButton,
   Tooltip,
 } from '@mui/material'
-import { Add, People, Groups, PersonAdd, Delete, Edit } from '@mui/icons-material'
+import { Add, People, Groups, PersonAdd, Delete } from '@mui/icons-material'
 import Navbar from '@/components/Navbar'
 import CreateTeamModal from '@/components/CreateTeamModal'
 import AddTeamMembersModal from '@/components/AddTeamMembersModal'

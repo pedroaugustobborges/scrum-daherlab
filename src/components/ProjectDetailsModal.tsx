@@ -11,21 +11,13 @@ import {
   LinearProgress,
   Stack,
   Avatar,
-  AvatarGroup,
   Grid,
-  Tooltip,
-  IconButton,
-  Button,
 } from '@mui/material'
 import {
   CalendarToday,
-  Assignment,
   TrendingUp,
-  CheckCircle,
   Inventory,
   SpaceDashboard,
-  Add,
-  Edit,
   Person,
   Flag,
   Functions,
@@ -163,7 +155,15 @@ export default function ProjectDetailsModal({ open, onClose, project }: ProjectD
       if (statsRes.error) throw statsRes.error
 
       setSprints(sprintsRes.data || [])
-      setBacklogItems(backlogRes.data || [])
+
+      // Transform backlog items to handle assigned_to_profile array
+      const transformedBacklog = (backlogRes.data || []).map((item: any) => ({
+        ...item,
+        assigned_to_profile: Array.isArray(item.assigned_to_profile)
+          ? item.assigned_to_profile[0]
+          : item.assigned_to_profile,
+      }))
+      setBacklogItems(transformedBacklog)
 
       // Get unique team members from sprints
       const uniqueTeamIds = [...new Set((sprintsRes.data || []).map((s) => s.team_id).filter(Boolean))]

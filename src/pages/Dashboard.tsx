@@ -11,7 +11,7 @@ import {
   LinearProgress,
   CircularProgress,
 } from '@mui/material'
-import { TrendingUp, Assignment } from '@mui/icons-material'
+import { Assignment } from '@mui/icons-material'
 import Navbar from '@/components/Navbar'
 import ActiveSprintsWidget from '@/components/ActiveSprintsWidget'
 import TeamMetricsWidget from '@/components/TeamMetricsWidget'

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Box, Paper, Typography, CircularProgress, Chip, Stack, Avatar } from '@mui/material'
-import { CheckCircle, Assignment, Person, TrendingUp } from '@mui/icons-material'
+import { Box, Paper, Typography, CircularProgress, Chip, Stack } from '@mui/material'
+import { CheckCircle, Person, TrendingUp } from '@mui/icons-material'
 import { supabase } from '@/lib/supabase'
 
 interface ActionItem {

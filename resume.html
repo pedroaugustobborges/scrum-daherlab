@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pedro Augusto Barbosa Borges - Analista de Dados</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: #f4f4f4;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: 20px auto;
+        background: white;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+        font-weight: 300;
+      }
+
+      .header .subtitle {
+        font-size: 1.3em;
+        margin-bottom: 20px;
+        opacity: 0.9;
+      }
+
+      .contact-info {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 20px;
+        font-size: 0.95em;
+      }
+
+      .contact-info span {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .content {
+        padding: 40px;
+      }
+
+      .section {
+        margin-bottom: 35px;
+      }
+
+      .section-title {
+        font-size: 1.5em;
+        color: #667eea;
+        border-bottom: 3px solid #667eea;
+        padding-bottom: 8px;
+        margin-bottom: 20px;
+        font-weight: 600;
+      }
+
+      .summary {
+        background: #f8f9ff;
+        padding: 20px;
+        border-left: 4px solid #667eea;
+        font-size: 1.05em;
+        line-height: 1.8;
+      }
+
+      .skills-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+      }
+
+      .skill-category {
+        background: #f8f9ff;
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 4px solid #764ba2;
+      }
+
+      .skill-category h4 {
+        color: #667eea;
+        margin-bottom: 10px;
+        font-size: 1.1em;
+      }
+
+      .skill-category ul {
+        list-style: none;
+        padding-left: 0;
+      }
+
+      .skill-category li {
+        padding: 4px 0;
+        padding-left: 20px;
+        position: relative;
+      }
+
+      .skill-category li:before {
+        content: "▹";
+        position: absolute;
+        left: 0;
+        color: #764ba2;
+        font-weight: bold;
+      }
+
+      .experience-item,
+      .education-item,
+      .project-item {
+        margin-bottom: 25px;
+        padding-left: 20px;
+        border-left: 2px solid #e0e0e0;
+      }
+
+      .experience-item:hover,
+      .education-item:hover,
+      .project-item:hover {
+        border-left-color: #667eea;
+      }
+
+      .item-header {
+        margin-bottom: 10px;
+      }
+
+      .item-title {
+        font-size: 1.2em;
+        font-weight: 600;
+        color: #333;
+      }
+
+      .item-company {
+        color: #667eea;
+        font-weight: 500;
+      }
+
+      .item-period {
+        color: #666;
+        font-size: 0.9em;
+        font-style: italic;
+      }
+
+      .item-description {
+        margin-top: 10px;
+      }
+
+      .item-description ul {
+        margin-left: 20px;
+        margin-top: 8px;
+      }
+
+      .item-description li {
+        margin-bottom: 6px;
+      }
+
+      .languages {
+        display: flex;
+        gap: 30px;
+        flex-wrap: wrap;
+      }
+
+      .language-item {
+        background: #f8f9ff;
+        padding: 12px 20px;
+        border-radius: 8px;
+        border-left: 4px solid #764ba2;
+      }
+
+      .language-item strong {
+        color: #667eea;
+      }
+
+      .highlight {
+        background: #fff3cd;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-weight: 500;
+      }
+
+      @media print {
+        body {
+          background: white;
+        }
+        .container {
+          box-shadow: none;
+          margin: 0;
+        }
+        .header {
+          background: #667eea;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .header h1 {
+          font-size: 2em;
+        }
+        .content {
+          padding: 20px;
+        }
+        .contact-info {
+          flex-direction: column;
+          gap: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Pedro Augusto Barbosa Borges</h1>
+        <div class="subtitle">
+          Analista de Dados | Cientista de Dados | Desenvolvedor
+        </div>
+        <div class="contact-info">
+          <span>📧 pedroaugustobborges@gmail.com</span>
+          <span>📱 (62) 99301-3303</span>
+          <span>📍 Goiânia, GO</span>
+          <span>🔗 https://www.linkedin.com/in/pedro-borges-729792341/</span>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="section">
+          <h2 class="section-title">Perfil Profissional</h2>
+          <div class="summary">
+            Analista de Dados com experiência em
+            <span class="highlight">programação Python</span>,
+            <span class="highlight">machine learning</span> e
+            <span class="highlight">visão computacional</span>. Especialista em
+            desenvolvimento de soluções de automação RPA e análise de dados com
+            foco em transformação digital. Mestrando em Saúde Pública com
+            projeto em saúde digital utilizando inteligência artificial.
+            Experiência comprovada em desenvolvimento full stack e implementação
+            de pipelines de dados para apoio à decisão estratégica.
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">Competências Técnicas</h2>
+          <div class="skills-grid">
+            <div class="skill-category">
+              <h4>Programação & Desenvolvimento</h4>
+              <ul>
+                <li>Python (avançado)</li>
+                <li>JavaScript/TypeScript/React</li>
+                <li>HTML/CSS</li>
+                <li>SQL</li>
+                <li>Git/GitHub</li>
+              </ul>
+            </div>
+            <div class="skill-category">
+              <h4>Data Science & IA</h4>
+              <ul>
+                <li>Machine Learning</li>
+                <li>Deep Learning</li>
+                <li>Visão Computacional</li>
+                <li>RAG</li>
+                <li>Análise Preditiva</li>
+              </ul>
+            </div>
+            <div class="skill-category">
+              <h4>Ferramentas & Frameworks</h4>
+              <ul>
+                <li>Pandas, NumPy, Scikit-learn</li>
+                <li>TensorFlow, PyTorch</li>
+                <li>Power BI, Tableau, Power BI</li>
+                <li>FastAPI, Django</li>
+                <li>Docker, APIs REST</li>
+              </ul>
+            </div>
+            <div class="skill-category">
+              <h4>Automação & Processos</h4>
+              <ul>
+                <li>RPA (Robot Process Automation)</li>
+                <li>ETL/ELT</li>
+                <li>Web Scraping</li>
+                <li>CI/CD</li>
+                <li>Otimização de Processos</li>
+              </ul>
+            </div>
+            <div class="skill-category">
+              <h4>Liderança & Gestão</h4>
+              <ul>
+                <li>Mapeamento de Processos</li>
+                <li>Metodologias Ágeis</li>
+                <li>Tomada de Decisão Baseada em Dados</li>
+                <li>Resolução de Problemas</li>
+                <li>Planejamento Estratégico</li>
+              </ul>
+            </div>
+            <div class="skill-category">
+              <h4>Comunicação & Colaboração</h4>
+              <ul>
+                <li>Comunicação Clara e Objetiva</li>
+                <li>Apresentações Técnicas</li>
+                <li>Trabalho em Equipe</li>
+                <li>Tradução Técnica para Negócios</li>
+                <li>Mentoria e Capacitação</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">Projetos em Destaque</h2>
+
+          <div class="project-item">
+            <div class="item-header">
+              <div class="item-title">
+                Sistema de Visão Computacional para Análise de Estoque
+              </div>
+              <div class="item-period">2024 - Atual</div>
+            </div>
+            <div class="item-description">
+              <ul>
+                <li>
+                  Desenvolvimento de modelo de deep learning para classificação
+                  e segmentação de imagens de estoque em almoxarifado hospitalar
+                </li>
+                <li>
+                  Implementação de pipeline de pré-processamento e aumento de
+                  dados
+                </li>
+                <li>Tecnologias: Python, TensorFlow, OpenCV, scikit-image</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="project-item">
+            <div class="item-header">
+              <div class="item-title">
+                Plataforma de Análise de Dados de Gestão em Saúde Digital
+              </div>
+              <div class="item-period">2024 - Atual | Projeto de Mestrado</div>
+            </div>
+            <div class="item-description">
+              <ul>
+                <li>
+                  Desenvolvimento de sistema full stack para análise de dados de
+                  escalas médicas
+                </li>
+                <li>
+                  Implementação de modelos de linguagem natural para insights
+                  sobre alocação de mão de obra médica
+                </li>
+                <li>
+                  Criação de dashboards interativos para visualização de dados
+                </li>
+                <li>Stack: Python, FastAPI, React, PostgreSQL</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="project-item">
+            <div class="item-header">
+              <div class="item-title">
+                Sistema RPA para Automação de Processos Empresariais
+              </div>
+              <div class="item-period">2023</div>
+            </div>
+            <div class="item-description">
+              <ul>
+                <li>
+                  Desenvolvimento de bots RPA para automação de tarefas
+                  repetitivas
+                </li>
+                <li>Redução de 70% no tempo de processamento de dados</li>
+                <li>Integração com sistemas legados e APIs</li>
+                <li>Tecnologias: Python, Selenium, BeautifulSoup, Pandas</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">Experiência Profissional</h2>
+
+          <div class="experience-item">
+            <div class="item-header">
+              <div class="item-company">
+                Analista em Infraestrutura e Logística
+              </div>
+              <div class="item-period">maio 2023 - Presente | Goiânia, GO</div>
+            </div>
+            <div class="item-description">
+              <ul>
+                <li>
+                  Desenvolvimento de
+                  <strong>dashboards automatizados em Power BI</strong> para
+                  análise de KPIs logísticos
+                </li>
+                <li>
+                  Implementação de <strong>scripts Python</strong> para
+                  automação de relatórios e processamento de dados
+                </li>
+                <li>
+                  Criação de <strong>modelos preditivos</strong> para otimização
+                  de rotas e redução de custos
+                </li>
+                <li>
+                  Análise de dados operacionais para identificação de
+                  oportunidades de melhoria
+                </li>
+                <li>
+                  Gestão de equipe e processos de supply chain com foco em
+                  eficiência
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="experience-item">
+            <div class="item-header">
+              <div class="item-company">
+                Analista em Infraestrutura e Logística
+              </div>
+              <div class="item-period">
+                Março 2022 - Janeiro 2023 | Goiânia, GO
+              </div>
+            </div>
+            <div class="item-description">
+              <ul>
+                <li>
+                  Desenvolvimento de
+                  <strong>ferramentas de análise de dados</strong> usando Python
+                  e Excel avançado
+                </li>
+                <li>
+                  Criação de <strong>automações RPA</strong> para coleta e
+                  processamento de dados
+                </li>
+                <li>Análise estatística de dados operacionais e financeiros</li>
+                <li>
+                  Elaboração de relatórios executivos com insights orientados
+                  por dados
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="experience-item">
+            <div class="item-header">
+              <div class="item-title">Analista de Dados</div>
+              <div class="item-company">Homeboy Electronic Recycling</div>
+              <div class="item-period">
+                Setembro 2022 - Abril 2023 | Los Angeles, California
+              </div>
+            </div>
+            <div class="item-description">
+              <ul>
+                <li>
+                  Análise de <strong>grandes volumes de dados</strong> para
+                  otimização de processos de logística reversa/reciclagem.
+                </li>
+                <li>
+                  Desenvolvimento de
+                  <strong>indicadores e métricas</strong> para monitoramento de
+                  performance
+                </li>
+                <li>Implementação de melhorias baseadas em análise de dados</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">Formação Acadêmica</h2>
+
+          <div class="education-item">
+            <div class="item-header">
+              <div class="item-title">Mestrado em Saúde Pública</div>
+              <div class="item-company">
+                Universidade Federal de Goiás (UFG)
+              </div>
+              <div class="item-period">2025 - Atual</div>
+            </div>
+            <div class="item-description">
+              <strong>Projeto:</strong> Saúde Digital com Inteligência
+              Artificial - Desenvolvimento de soluções de IA para análise de
+              dados epidemiológicos e predição de tendências em saúde pública
+            </div>
+          </div>
+
+          <div class="education-item">
+            <div class="item-header">
+              <div class="item-title">
+                Pós-Graduação em Engenharia de Software
+              </div>
+              <div class="item-company">
+                Pontifícia Universidade Católica do Rio de Janeiro (PUC-Rio)
+              </div>
+              <div class="item-period">2025 - Atual</div>
+            </div>
+            <div class="item-description">
+              Foco em arquitetura de software, desenvolvimento full stack,
+              design patterns, boas práticas de programação e gestão
+            </div>
+          </div>
+
+          <div class="education-item">
+            <div class="item-header">
+              <div class="item-title">Pós em Supply Chain & Logistics</div>
+              <div class="item-company">Escuela de Negocios de Barcelona</div>
+              <div class="item-period">2023 - 2024</div>
+            </div>
+          </div>
+
+          <div class="education-item">
+            <div class="item-header">
+              <div class="item-title">Graduação em Engenharia Civil</div>
+              <div class="item-company">Universidade Federal de Goiás</div>
+              <div class="item-period">2011 - 2017</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">Idiomas</h2>
+          <div class="languages">
+            <div class="language-item"><strong>Português:</strong> Nativo</div>
+            <div class="language-item"><strong>Inglês:</strong> Fluente</div>
+            <div class="language-item"><strong>Espanhol:</strong> Fluente</div>
+            <div class="language-item"><strong>Francês:</strong> Básico</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

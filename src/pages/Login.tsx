@@ -107,10 +107,11 @@ export default function Login() {
         alignItems: "center",
         justifyContent: "center",
         background:
-          "linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 30%, #dbeafe 60%, #ede9fe 100%)",
+          "linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #0d4d63 50%, #1e3a5f 75%, #1a1f3a 100%)",
         padding: 3,
         position: "relative",
         overflow: "hidden",
+        // Animated gradient orbs representing agile iterations
         "&::before": {
           content: '""',
           position: "absolute",
@@ -119,12 +120,14 @@ export default function Login() {
           right: 0,
           bottom: 0,
           background: `
-            radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
-            radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
-            radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.06) 0%, transparent 60%)
+            radial-gradient(circle at 15% 20%, rgba(6, 182, 212, 0.15) 0%, transparent 40%),
+            radial-gradient(circle at 85% 80%, rgba(99, 102, 241, 0.12) 0%, transparent 45%),
+            radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 70% 30%, rgba(139, 92, 246, 0.1) 0%, transparent 40%)
           `,
-          animation: "gradientShift 20s ease-in-out infinite",
+          animation: "orbPulse 15s ease-in-out infinite",
         },
+        // Grid pattern representing sprints and structure
         "&::after": {
           content: '""',
           position: "absolute",
@@ -132,62 +135,161 @@ export default function Login() {
           left: 0,
           right: 0,
           bottom: 0,
-          background: `
-            repeating-linear-gradient(
-              0deg,
-              rgba(99, 102, 241, 0.02) 0px,
-              transparent 1px,
-              transparent 40px,
-              rgba(99, 102, 241, 0.02) 41px
-            ),
-            repeating-linear-gradient(
-              90deg,
-              rgba(99, 102, 241, 0.02) 0px,
-              transparent 1px,
-              transparent 40px,
-              rgba(99, 102, 241, 0.02) 41px
-            )
+          backgroundImage: `
+            linear-gradient(rgba(6, 182, 212, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(6, 182, 212, 0.03) 1px, transparent 1px),
+            linear-gradient(rgba(99, 102, 241, 0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(99, 102, 241, 0.02) 1px, transparent 1px)
           `,
-          opacity: 0.5,
+          backgroundSize: "100px 100px, 100px 100px, 20px 20px, 20px 20px",
+          backgroundPosition: "-1px -1px, -1px -1px, -1px -1px, -1px -1px",
+          animation: "gridFlow 20s linear infinite",
         },
-        "@keyframes gradientShift": {
+        "@keyframes orbPulse": {
           "0%, 100%": {
-            transform: "scale(1) rotate(0deg)",
-            opacity: 0.6,
+            transform: "scale(1) translate(0, 0)",
+            opacity: 1,
+          },
+          "33%": {
+            transform: "scale(1.1) translate(-5%, 5%)",
+            opacity: 0.8,
+          },
+          "66%": {
+            transform: "scale(0.95) translate(5%, -5%)",
+            opacity: 0.9,
+          },
+        },
+        "@keyframes gridFlow": {
+          "0%": {
+            transform: "translate(0, 0)",
+          },
+          "100%": {
+            transform: "translate(20px, 20px)",
+          },
+        },
+        "@keyframes float": {
+          "0%, 100%": {
+            transform: "translateY(0) rotate(0deg)",
           },
           "50%": {
-            transform: "scale(1.05) rotate(1deg)",
-            opacity: 1,
+            transform: "translateY(-20px) rotate(5deg)",
+          },
+        },
+        "@keyframes pulse": {
+          "0%, 100%": {
+            opacity: 0.4,
+            transform: "scale(1)",
+          },
+          "50%": {
+            opacity: 0.8,
+            transform: "scale(1.05)",
           },
         },
       }}
     >
+      {/* Floating medical/agile themed elements */}
+      <Box
+        sx={{
+          position: "absolute",
+          top: "10%",
+          left: "8%",
+          width: "120px",
+          height: "120px",
+          border: "2px solid rgba(6, 182, 212, 0.2)",
+          borderRadius: "50%",
+          animation:
+            "float 8s ease-in-out infinite, pulse 4s ease-in-out infinite",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "60%",
+            height: "60%",
+            border: "2px solid rgba(6, 182, 212, 0.3)",
+            borderRadius: "50%",
+          },
+        }}
+      />
+      <Box
+        sx={{
+          position: "absolute",
+          bottom: "15%",
+          right: "10%",
+          width: "100px",
+          height: "100px",
+          border: "2px solid rgba(99, 102, 241, 0.2)",
+          borderRadius: "30% 70% 70% 30% / 30% 30% 70% 70%",
+          animation:
+            "float 10s ease-in-out infinite 2s, pulse 5s ease-in-out infinite 1s",
+        }}
+      />
+      <Box
+        sx={{
+          position: "absolute",
+          top: "60%",
+          left: "15%",
+          width: "80px",
+          height: "80px",
+          border: "2px solid rgba(16, 185, 129, 0.2)",
+          borderRadius: "50%",
+          animation:
+            "float 12s ease-in-out infinite 4s, pulse 6s ease-in-out infinite 2s",
+        }}
+      />
+      {/* Pulse lines representing health monitoring */}
+      <Box
+        sx={{
+          position: "absolute",
+          top: "30%",
+          right: "5%",
+          width: "200px",
+          height: "2px",
+          background:
+            "linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.5), transparent)",
+          animation: "pulse 3s ease-in-out infinite",
+        }}
+      />
+      <Box
+        sx={{
+          position: "absolute",
+          bottom: "40%",
+          left: "3%",
+          width: "180px",
+          height: "2px",
+          background:
+            "linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.5), transparent)",
+          animation: "pulse 4s ease-in-out infinite 1.5s",
+        }}
+      />
       <Card
         sx={{
           maxWidth: 520,
           width: "100%",
           borderRadius: 6,
           boxShadow:
-            "0 30px 60px -12px rgba(99, 102, 241, 0.15), 0 10px 30px -10px rgba(139, 92, 246, 0.1)",
-          backdropFilter: "blur(24px) saturate(180%)",
-          background: "rgba(255, 255, 255, 0.85)",
-          border: "1px solid rgba(255, 255, 255, 0.8)",
+            "0 40px 80px -12px rgba(6, 182, 212, 0.3), 0 20px 40px -10px rgba(99, 102, 241, 0.2), 0 0 0 1px rgba(6, 182, 212, 0.1)",
+          backdropFilter: "blur(40px) saturate(180%)",
+          background:
+            "linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%)",
+          border: "1px solid rgba(6, 182, 212, 0.2)",
           position: "relative",
           zIndex: 1,
           transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
           "&:hover": {
             boxShadow:
-              "0 40px 80px -12px rgba(99, 102, 241, 0.2), 0 15px 40px -10px rgba(139, 92, 246, 0.15)",
-            transform: "translateY(-4px)",
+              "0 50px 100px -12px rgba(6, 182, 212, 0.4), 0 25px 50px -10px rgba(99, 102, 241, 0.3), 0 0 0 1px rgba(6, 182, 212, 0.2)",
+            transform: "translateY(-6px)",
           },
           "&::before": {
             content: '""',
             position: "absolute",
             inset: 0,
             borderRadius: 6,
-            padding: "1px",
+            padding: "2px",
             background:
-              "linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.1))",
+              "linear-gradient(135deg, rgba(6, 182, 212, 0.4), rgba(99, 102, 241, 0.3), rgba(16, 185, 129, 0.2))",
             WebkitMask:
               "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
             WebkitMaskComposite: "xor",
@@ -217,15 +319,19 @@ export default function Login() {
             align="center"
             sx={{
               fontWeight: 800,
-              background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+              background:
+                "linear-gradient(135deg, #06b6d4 0%, #6366f1 50%, #10b981 100%)",
               backgroundClip: "text",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               mb: 2,
               letterSpacing: "-0.02em",
+              filter: "drop-shadow(0 2px 8px rgba(6, 182, 212, 0.3))",
+              lineHeight: 1.4, // Dá mais espaço vertical para a fonte
+              paddingBottom: "10px", // Garante que o corte do container não pegue a sombra/letra
             }}
           >
-            Agir Ágil
+            agir ágil
           </Typography>
 
           <Typography
@@ -244,7 +350,7 @@ export default function Login() {
 
           <Box
             sx={{
-              borderBottom: "1px solid rgba(99, 102, 241, 0.15)",
+              borderBottom: "1px solid rgba(6, 182, 212, 0.2)",
               mb: 4,
             }}
           >
@@ -261,11 +367,16 @@ export default function Login() {
                   textTransform: "uppercase",
                   transition: "all 0.3s ease",
                   "&.Mui-selected": {
-                    color: "#6366f1",
+                    background:
+                      "linear-gradient(135deg, #06b6d4 0%, #6366f1 100%)",
+                    backgroundClip: "text",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
                   },
                 },
                 "& .MuiTabs-indicator": {
-                  backgroundColor: "#6366f1",
+                  background:
+                    "linear-gradient(90deg, #06b6d4 0%, #6366f1 100%)",
                   height: 3,
                   borderRadius: "3px 3px 0 0",
                 },
@@ -328,9 +439,7 @@ export default function Login() {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <EmailOutlined
-                        sx={{ color: "rgba(99, 102, 241, 0.5)" }}
-                      />
+                      <EmailOutlined sx={{ color: "rgba(6, 182, 212, 0.6)" }} />
                     </InputAdornment>
                   ),
                 }}
@@ -338,30 +447,30 @@ export default function Login() {
                   mb: 3,
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 3,
-                    backgroundColor: "rgba(255, 255, 255, 0.6)",
+                    backgroundColor: "rgba(255, 255, 255, 0.7)",
                     backdropFilter: "blur(12px)",
                     transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                     "& fieldset": {
-                      borderColor: "rgba(99, 102, 241, 0.2)",
+                      borderColor: "rgba(6, 182, 212, 0.25)",
                       borderWidth: "1.5px",
                       transition: "all 0.3s ease",
                     },
                     "&:hover fieldset": {
-                      borderColor: "rgba(99, 102, 241, 0.4)",
+                      borderColor: "rgba(6, 182, 212, 0.5)",
                     },
                     "&.Mui-focused fieldset": {
-                      borderColor: "#6366f1",
+                      borderColor: "#06b6d4",
                       borderWidth: "2px",
                     },
                     "&.Mui-focused": {
-                      backgroundColor: "rgba(255, 255, 255, 0.8)",
-                      boxShadow: "0 0 0 4px rgba(99, 102, 241, 0.1)",
+                      backgroundColor: "rgba(255, 255, 255, 0.9)",
+                      boxShadow: "0 0 0 4px rgba(6, 182, 212, 0.15)",
                     },
                   },
                   "& .MuiInputLabel-root": {
                     color: "rgba(71, 85, 105, 0.7)",
                     "&.Mui-focused": {
-                      color: "#6366f1",
+                      color: "#06b6d4",
                     },
                   },
                   "& .MuiInputBase-input": {
@@ -382,7 +491,7 @@ export default function Login() {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <LockOutlined sx={{ color: "rgba(99, 102, 241, 0.5)" }} />
+                      <LockOutlined sx={{ color: "rgba(6, 182, 212, 0.6)" }} />
                     </InputAdornment>
                   ),
                   endAdornment: (
@@ -391,11 +500,11 @@ export default function Login() {
                         onClick={() => setShowPassword(!showPassword)}
                         edge="end"
                         sx={{
-                          color: "rgba(99, 102, 241, 0.6)",
+                          color: "rgba(6, 182, 212, 0.6)",
                           transition: "all 0.2s ease",
                           "&:hover": {
-                            color: "#6366f1",
-                            backgroundColor: "rgba(99, 102, 241, 0.1)",
+                            color: "#06b6d4",
+                            backgroundColor: "rgba(6, 182, 212, 0.1)",
                           },
                         }}
                       >
@@ -412,30 +521,30 @@ export default function Login() {
                   mb: 3,
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 3,
-                    backgroundColor: "rgba(255, 255, 255, 0.6)",
+                    backgroundColor: "rgba(255, 255, 255, 0.7)",
                     backdropFilter: "blur(12px)",
                     transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                     "& fieldset": {
-                      borderColor: "rgba(99, 102, 241, 0.2)",
+                      borderColor: "rgba(6, 182, 212, 0.25)",
                       borderWidth: "1.5px",
                       transition: "all 0.3s ease",
                     },
                     "&:hover fieldset": {
-                      borderColor: "rgba(99, 102, 241, 0.4)",
+                      borderColor: "rgba(6, 182, 212, 0.5)",
                     },
                     "&.Mui-focused fieldset": {
-                      borderColor: "#6366f1",
+                      borderColor: "#06b6d4",
                       borderWidth: "2px",
                     },
                     "&.Mui-focused": {
-                      backgroundColor: "rgba(255, 255, 255, 0.8)",
-                      boxShadow: "0 0 0 4px rgba(99, 102, 241, 0.1)",
+                      backgroundColor: "rgba(255, 255, 255, 0.9)",
+                      boxShadow: "0 0 0 4px rgba(6, 182, 212, 0.15)",
                     },
                   },
                   "& .MuiInputLabel-root": {
                     color: "rgba(71, 85, 105, 0.7)",
                     "&.Mui-focused": {
-                      color: "#6366f1",
+                      color: "#06b6d4",
                     },
                   },
                   "& .MuiInputBase-input": {
@@ -459,14 +568,16 @@ export default function Login() {
                   textTransform: "none",
                   letterSpacing: "0.5px",
                   background:
-                    "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
-                  boxShadow: "0 8px 24px rgba(99, 102, 241, 0.35)",
+                    "linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #6366f1 100%)",
+                  boxShadow:
+                    "0 8px 24px rgba(6, 182, 212, 0.4), 0 4px 12px rgba(99, 102, 241, 0.3)",
                   color: "#ffffff",
                   transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                   "&:hover": {
                     background:
-                      "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)",
-                    boxShadow: "0 12px 32px rgba(99, 102, 241, 0.45)",
+                      "linear-gradient(135deg, #0891b2 0%, #2563eb 50%, #4f46e5 100%)",
+                    boxShadow:
+                      "0 12px 32px rgba(6, 182, 212, 0.5), 0 6px 16px rgba(99, 102, 241, 0.4)",
                     transform: "translateY(-2px)",
                   },
                   "&:active": {
@@ -498,7 +609,7 @@ export default function Login() {
                   startAdornment: (
                     <InputAdornment position="start">
                       <PersonOutlined
-                        sx={{ color: "rgba(99, 102, 241, 0.5)" }}
+                        sx={{ color: "rgba(6, 182, 212, 0.6)" }}
                       />
                     </InputAdornment>
                   ),
@@ -507,34 +618,34 @@ export default function Login() {
                   mb: 3,
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 3,
-                    backgroundColor: "rgba(255, 255, 255, 0.05)",
+                    backgroundColor: "rgba(255, 255, 255, 0.7)",
                     backdropFilter: "blur(12px)",
                     transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                     "& fieldset": {
-                      borderColor: "rgba(255, 255, 255, 0.12)",
+                      borderColor: "rgba(6, 182, 212, 0.25)",
                       borderWidth: "1.5px",
                       transition: "all 0.3s ease",
                     },
                     "&:hover fieldset": {
-                      borderColor: "rgba(96, 165, 250, 0.5)",
+                      borderColor: "rgba(6, 182, 212, 0.5)",
                     },
                     "&.Mui-focused fieldset": {
-                      borderColor: "#60a5fa",
+                      borderColor: "#06b6d4",
                       borderWidth: "2px",
                     },
                     "&.Mui-focused": {
-                      backgroundColor: "rgba(255, 255, 255, 0.08)",
-                      boxShadow: "0 0 0 4px rgba(96, 165, 250, 0.1)",
+                      backgroundColor: "rgba(255, 255, 255, 0.9)",
+                      boxShadow: "0 0 0 4px rgba(6, 182, 212, 0.15)",
                     },
                   },
                   "& .MuiInputLabel-root": {
-                    color: "rgba(255, 255, 255, 0.6)",
+                    color: "rgba(71, 85, 105, 0.7)",
                     "&.Mui-focused": {
-                      color: "#60a5fa",
+                      color: "#06b6d4",
                     },
                   },
                   "& .MuiInputBase-input": {
-                    color: "rgba(255, 255, 255, 0.95)",
+                    color: "rgba(15, 23, 42, 0.95)",
                     padding: "16px 14px",
                   },
                 }}
@@ -551,9 +662,7 @@ export default function Login() {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <EmailOutlined
-                        sx={{ color: "rgba(99, 102, 241, 0.5)" }}
-                      />
+                      <EmailOutlined sx={{ color: "rgba(6, 182, 212, 0.6)" }} />
                     </InputAdornment>
                   ),
                 }}
@@ -561,30 +670,30 @@ export default function Login() {
                   mb: 3,
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 3,
-                    backgroundColor: "rgba(255, 255, 255, 0.6)",
+                    backgroundColor: "rgba(255, 255, 255, 0.7)",
                     backdropFilter: "blur(12px)",
                     transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                     "& fieldset": {
-                      borderColor: "rgba(99, 102, 241, 0.2)",
+                      borderColor: "rgba(6, 182, 212, 0.25)",
                       borderWidth: "1.5px",
                       transition: "all 0.3s ease",
                     },
                     "&:hover fieldset": {
-                      borderColor: "rgba(99, 102, 241, 0.4)",
+                      borderColor: "rgba(6, 182, 212, 0.5)",
                     },
                     "&.Mui-focused fieldset": {
-                      borderColor: "#6366f1",
+                      borderColor: "#06b6d4",
                       borderWidth: "2px",
                     },
                     "&.Mui-focused": {
-                      backgroundColor: "rgba(255, 255, 255, 0.8)",
-                      boxShadow: "0 0 0 4px rgba(99, 102, 241, 0.1)",
+                      backgroundColor: "rgba(255, 255, 255, 0.9)",
+                      boxShadow: "0 0 0 4px rgba(6, 182, 212, 0.15)",
                     },
                   },
                   "& .MuiInputLabel-root": {
                     color: "rgba(71, 85, 105, 0.7)",
                     "&.Mui-focused": {
-                      color: "#6366f1",
+                      color: "#06b6d4",
                     },
                   },
                   "& .MuiInputBase-input": {
@@ -606,7 +715,7 @@ export default function Login() {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <LockOutlined sx={{ color: "rgba(99, 102, 241, 0.5)" }} />
+                      <LockOutlined sx={{ color: "rgba(6, 182, 212, 0.6)" }} />
                     </InputAdornment>
                   ),
                   endAdornment: (
@@ -615,11 +724,11 @@ export default function Login() {
                         onClick={() => setShowPassword(!showPassword)}
                         edge="end"
                         sx={{
-                          color: "rgba(99, 102, 241, 0.6)",
+                          color: "rgba(6, 182, 212, 0.6)",
                           transition: "all 0.2s ease",
                           "&:hover": {
-                            color: "#6366f1",
-                            backgroundColor: "rgba(99, 102, 241, 0.1)",
+                            color: "#06b6d4",
+                            backgroundColor: "rgba(6, 182, 212, 0.1)",
                           },
                         }}
                       >
@@ -636,30 +745,30 @@ export default function Login() {
                   mb: 3,
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 3,
-                    backgroundColor: "rgba(255, 255, 255, 0.6)",
+                    backgroundColor: "rgba(255, 255, 255, 0.7)",
                     backdropFilter: "blur(12px)",
                     transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                     "& fieldset": {
-                      borderColor: "rgba(99, 102, 241, 0.2)",
+                      borderColor: "rgba(6, 182, 212, 0.25)",
                       borderWidth: "1.5px",
                       transition: "all 0.3s ease",
                     },
                     "&:hover fieldset": {
-                      borderColor: "rgba(99, 102, 241, 0.4)",
+                      borderColor: "rgba(6, 182, 212, 0.5)",
                     },
                     "&.Mui-focused fieldset": {
-                      borderColor: "#6366f1",
+                      borderColor: "#06b6d4",
                       borderWidth: "2px",
                     },
                     "&.Mui-focused": {
-                      backgroundColor: "rgba(255, 255, 255, 0.8)",
-                      boxShadow: "0 0 0 4px rgba(99, 102, 241, 0.1)",
+                      backgroundColor: "rgba(255, 255, 255, 0.9)",
+                      boxShadow: "0 0 0 4px rgba(6, 182, 212, 0.15)",
                     },
                   },
                   "& .MuiInputLabel-root": {
                     color: "rgba(71, 85, 105, 0.7)",
                     "&.Mui-focused": {
-                      color: "#6366f1",
+                      color: "#06b6d4",
                     },
                   },
                   "& .MuiInputBase-input": {
@@ -687,14 +796,16 @@ export default function Login() {
                   textTransform: "none",
                   letterSpacing: "0.5px",
                   background:
-                    "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
-                  boxShadow: "0 8px 24px rgba(99, 102, 241, 0.35)",
+                    "linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #6366f1 100%)",
+                  boxShadow:
+                    "0 8px 24px rgba(6, 182, 212, 0.4), 0 4px 12px rgba(99, 102, 241, 0.3)",
                   color: "#ffffff",
                   transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                   "&:hover": {
                     background:
-                      "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)",
-                    boxShadow: "0 12px 32px rgba(99, 102, 241, 0.45)",
+                      "linear-gradient(135deg, #0891b2 0%, #2563eb 50%, #4f46e5 100%)",
+                    boxShadow:
+                      "0 12px 32px rgba(6, 182, 212, 0.5), 0 6px 16px rgba(99, 102, 241, 0.4)",
                     transform: "translateY(-2px)",
                   },
                   "&:active": {

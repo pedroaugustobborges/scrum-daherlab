@@ -435,12 +435,6 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
             <KanbanBoard
               stories={stories}
               onRefresh={fetchUserStories}
-              onStoryClick={(storyId) => {
-                const story = stories.find((s) => s.id === storyId)
-                if (story) {
-                  handleOpenSubtaskModal(story.id)
-                }
-              }}
               onDeleteStory={handleDeleteStory}
             />
           ) : (

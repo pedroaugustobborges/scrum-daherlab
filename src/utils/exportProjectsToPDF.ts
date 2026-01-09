@@ -155,8 +155,10 @@ export async function exportProjectsToPDF() {
       // Check if we need to add "Prazo para as ações remanescentes"
       const projectEndDate = project.end_date ? new Date(project.end_date) : null
       let needsRemainingActions = false
-      if (projectEndDate && lastSprintEndDate) {
-        needsRemainingActions = projectEndDate.getTime() > lastSprintEndDate.getTime()
+      if (projectEndDate !== null && lastSprintEndDate !== null) {
+        const projectEndTime = projectEndDate.getTime()
+        const lastSprintEndTime = lastSprintEndDate.getTime()
+        needsRemainingActions = projectEndTime > lastSprintEndTime
       }
 
       // Calculate actual row count (including remaining actions row if needed)

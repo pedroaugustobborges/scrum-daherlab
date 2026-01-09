@@ -116,7 +116,7 @@ export default function ScrumGuide() {
               gutterBottom
               sx={{ letterSpacing: "-0.02em" }}
             >
-              SCRUM na Saúde
+              Ágil na Saúde
             </Typography>
             <Typography
               variant="h5"
@@ -200,7 +200,9 @@ export default function ScrumGuide() {
             >
               Na saúde, <strong>eficiência não é apenas produtividade</strong> —
               é uma questão de <strong>sustentabilidade do sistema</strong> e
-              cuidado com as gerações futuras.
+              cuidado com as gerações futuras. A saúde não é apenas um objetivo
+              da sociedade, mas também um meio da sociedade alcançar seus
+              objetivos.
             </Typography>
 
             <Typography
@@ -248,10 +250,10 @@ export default function ScrumGuide() {
                 fontWeight={700}
                 sx={{ mb: 1, color: "#10b981" }}
               >
-                O Papel do SCRUM
+                O Papel da Agilidade
               </Typography>
               <Typography variant="body1" sx={{ lineHeight: 1.8 }}>
-                O SCRUM nos permite{" "}
+                Metodologias Ágeis nos permitem{" "}
                 <strong>inovar com velocidade e qualidade</strong>, testando
                 soluções rapidamente, aprendendo com erros sem grandes
                 prejuízos, e entregando valor incremental. Em healthtech, isso
@@ -647,7 +649,7 @@ export default function ScrumGuide() {
             gutterBottom
             sx={{ color: "#10b981" }}
           >
-            SCRUM: Uma Ferramenta para Transformar a Saúde
+            Uma Ferramenta para Transformação Digital em Saúde
           </Typography>
           <Typography
             variant="h6"

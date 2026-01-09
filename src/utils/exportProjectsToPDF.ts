@@ -146,8 +146,11 @@ export async function exportProjectsToPDF() {
           const sprintEnd = new Date(sprint.end_date)
           if (lastSprintEndDate === null) {
             lastSprintEndDate = sprintEnd
-          } else if (sprintEnd.getTime() > lastSprintEndDate.getTime()) {
-            lastSprintEndDate = sprintEnd
+          } else {
+            const currentEndTime = (lastSprintEndDate as Date).getTime()
+            if (sprintEnd.getTime() > currentEndTime) {
+              lastSprintEndDate = sprintEnd
+            }
           }
         }
       })
@@ -157,7 +160,7 @@ export async function exportProjectsToPDF() {
       let needsRemainingActions = false
       if (projectEndDate !== null && lastSprintEndDate !== null) {
         const projectEndTime = projectEndDate.getTime()
-        const lastSprintEndTime = lastSprintEndDate.getTime()
+        const lastSprintEndTime = (lastSprintEndDate as Date).getTime()
         needsRemainingActions = projectEndTime > lastSprintEndTime
       }
 

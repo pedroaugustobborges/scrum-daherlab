@@ -144,7 +144,7 @@ export async function exportProjectsToPDF() {
         const sprint = sprints?.find((s: SprintData) => s.id === task.sprint_id)
         if (sprint && sprint.end_date) {
           const sprintEnd = new Date(sprint.end_date)
-          if (!lastSprintEndDate || sprintEnd > lastSprintEndDate) {
+          if (!lastSprintEndDate || sprintEnd.getTime() > lastSprintEndDate.getTime()) {
             lastSprintEndDate = sprintEnd
           }
         }

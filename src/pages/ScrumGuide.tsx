@@ -116,7 +116,7 @@ export default function ScrumGuide() {
               gutterBottom
               sx={{ letterSpacing: "-0.02em" }}
             >
-              Ágil na Saúde
+              DaherLab
             </Typography>
             <Typography
               variant="h5"

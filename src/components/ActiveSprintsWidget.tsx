@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Box, Paper, Typography, CircularProgress, Chip, LinearProgress } from '@mui/material'
-import { SpaceDashboard, CalendarToday } from '@mui/icons-material'
+import { Box, Paper, Typography, CircularProgress, Chip, LinearProgress, IconButton } from '@mui/material'
+import { SpaceDashboard, CalendarToday, KeyboardArrowUp, KeyboardArrowDown } from '@mui/icons-material'
 import { supabase } from '@/lib/supabase'
 
 interface ActiveSprint {
@@ -12,11 +12,18 @@ interface ActiveSprint {
   total_stories: number
 }
 
+const ITEMS_PER_PAGE = 2
+
 export default function ActiveSprintsWidget() {
   const [loading, setLoading] = useState(true)
   const [activeSprints, setActiveSprints] = useState<ActiveSprint[]>([])
   const [totalCount, setTotalCount] = useState(0)
   const [daysRemaining, setDaysRemaining] = useState(0)
+  const [currentPage, setCurrentPage] = useState(1)
+
+  const totalPages = Math.ceil(activeSprints.length / ITEMS_PER_PAGE)
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+  const paginatedSprints = activeSprints.slice(startIndex, startIndex + ITEMS_PER_PAGE)
 
   useEffect(() => {
     fetchActiveSprints()
@@ -172,8 +179,31 @@ export default function ActiveSprintsWidget() {
             </Typography>
           </Box>
 
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            {activeSprints.slice(0, 2).map((sprint) => (
+          <Box
+            sx={{
+              maxHeight: 180,
+              overflowY: 'auto',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 1.5,
+              pr: 0.5,
+              '&::-webkit-scrollbar': {
+                width: 6,
+              },
+              '&::-webkit-scrollbar-track': {
+                backgroundColor: 'rgba(8, 145, 178, 0.05)',
+                borderRadius: 3,
+              },
+              '&::-webkit-scrollbar-thumb': {
+                backgroundColor: 'rgba(8, 145, 178, 0.3)',
+                borderRadius: 3,
+                '&:hover': {
+                  backgroundColor: 'rgba(8, 145, 178, 0.5)',
+                },
+              },
+            }}
+          >
+            {paginatedSprints.map((sprint) => (
               <Box
                 key={sprint.id}
                 sx={{
@@ -181,6 +211,11 @@ export default function ActiveSprintsWidget() {
                   borderRadius: 2,
                   bgcolor: 'white',
                   border: '1px solid rgba(8, 145, 178, 0.15)',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    borderColor: 'rgba(8, 145, 178, 0.3)',
+                    boxShadow: '0 2px 8px rgba(8, 145, 178, 0.1)',
+                  },
                 }}
               >
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
@@ -218,14 +253,46 @@ export default function ActiveSprintsWidget() {
             ))}
           </Box>
 
-          {activeSprints.length > 2 && (
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ display: 'block', mt: 1.5, textAlign: 'center', fontWeight: 600 }}
+          {totalPages > 1 && (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 1,
+                mt: 2,
+                pt: 1.5,
+                borderTop: '1px solid rgba(8, 145, 178, 0.1)',
+              }}
             >
-              +{activeSprints.length - 2} {activeSprints.length - 2 === 1 ? 'outro sprint' : 'outros sprints'}
-            </Typography>
+              <IconButton
+                size="small"
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                sx={{
+                  color: '#0891b2',
+                  '&:disabled': { color: 'rgba(8, 145, 178, 0.3)' },
+                  '&:hover': { bgcolor: 'rgba(8, 145, 178, 0.1)' },
+                }}
+              >
+                <KeyboardArrowUp fontSize="small" />
+              </IconButton>
+              <Typography variant="caption" fontWeight={600} sx={{ color: '#0891b2' }}>
+                {currentPage} / {totalPages}
+              </Typography>
+              <IconButton
+                size="small"
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                sx={{
+                  color: '#0891b2',
+                  '&:disabled': { color: 'rgba(8, 145, 178, 0.3)' },
+                  '&:hover': { bgcolor: 'rgba(8, 145, 178, 0.1)' },
+                }}
+              >
+                <KeyboardArrowDown fontSize="small" />
+              </IconButton>
+            </Box>
           )}
         </>
       ) : (

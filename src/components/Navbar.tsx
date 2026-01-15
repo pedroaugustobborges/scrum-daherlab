@@ -90,7 +90,7 @@ export default function Navbar() {
             component="div"
             sx={{ fontWeight: 700, display: { xs: "none", sm: "block" } }}
           >
-            Dashboard
+            Dashboard,
           </Typography>
         </Box>
 

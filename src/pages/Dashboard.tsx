@@ -5,122 +5,19 @@ import {
   Grid,
   Paper,
   Typography,
-  Card,
-  CardContent,
   Chip,
   LinearProgress,
   CircularProgress,
+  IconButton,
 } from '@mui/material'
-import { Assignment } from '@mui/icons-material'
+import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material'
 import Navbar from '@/components/Navbar'
+import ActiveProjectsWidget from '@/components/ActiveProjectsWidget'
 import ActiveSprintsWidget from '@/components/ActiveSprintsWidget'
 import TeamMetricsWidget from '@/components/TeamMetricsWidget'
 import ActionItemsWidget from '@/components/ActionItemsWidget'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
-
-interface StatCardProps {
-  title: string
-  value: string | number
-  icon: React.ReactNode
-  color: string
-  subtitle?: string
-  progress?: number
-}
-
-function StatCard({ title, value, icon, color, subtitle, progress }: StatCardProps) {
-  return (
-    <Card
-      elevation={0}
-      sx={{
-        height: '100%',
-        background: `linear-gradient(135deg, ${color}08 0%, ${color}03 100%)`,
-        border: `2px solid ${color}20`,
-        position: 'relative',
-        overflow: 'visible',
-      }}
-    >
-      <CardContent sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-          <Box sx={{ flex: 1 }}>
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              fontWeight={600}
-              gutterBottom
-              sx={{ textTransform: 'uppercase', letterSpacing: '0.5px', fontSize: '0.75rem' }}
-            >
-              {title}
-            </Typography>
-            <Typography
-              variant="h3"
-              fontWeight={800}
-              sx={{
-                mb: 0.5,
-                background: `linear-gradient(135deg, ${color} 0%, ${color}cc 100%)`,
-                backgroundClip: 'text',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-              }}
-            >
-              {value}
-            </Typography>
-            {subtitle && (
-              <Typography variant="body2" color="text.secondary" fontWeight={500}>
-                {subtitle}
-              </Typography>
-            )}
-          </Box>
-          <Box
-            sx={{
-              width: 64,
-              height: 64,
-              borderRadius: 3,
-              background: `linear-gradient(135deg, ${color} 0%, ${color}dd 100%)`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white',
-              boxShadow: `0 8px 16px ${color}40`,
-              transform: 'rotate(-5deg)',
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              '&:hover': {
-                transform: 'rotate(0deg) scale(1.05)',
-              },
-            }}
-          >
-            {icon}
-          </Box>
-        </Box>
-        {progress !== undefined && (
-          <Box sx={{ mt: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-              <Typography variant="caption" color="text.secondary" fontWeight={600}>
-                Progresso
-              </Typography>
-              <Typography variant="caption" fontWeight={700} sx={{ color: color }}>
-                {progress}%
-              </Typography>
-            </Box>
-            <LinearProgress
-              variant="determinate"
-              value={progress}
-              sx={{
-                height: 8,
-                borderRadius: 10,
-                backgroundColor: `${color}15`,
-                '& .MuiLinearProgress-bar': {
-                  background: `linear-gradient(90deg, ${color} 0%, ${color}cc 100%)`,
-                  borderRadius: 10,
-                },
-              }}
-            />
-          </Box>
-        )}
-      </CardContent>
-    </Card>
-  )
-}
 
 interface CurrentSprint {
   id: string
@@ -145,13 +42,18 @@ interface Activity {
   created_at: string
 }
 
+const ACTIVITIES_PER_PAGE = 4
+
 export default function Dashboard() {
   const { user } = useAuth()
   const [loading, setLoading] = useState(true)
-  const [projectsCount, setProjectsCount] = useState(0)
-  const [onTimeProjects, setOnTimeProjects] = useState(0)
   const [currentSprint, setCurrentSprint] = useState<CurrentSprint | null>(null)
   const [recentActivities, setRecentActivities] = useState<Activity[]>([])
+  const [activitiesPage, setActivitiesPage] = useState(1)
+
+  const totalActivitiesPages = Math.ceil(recentActivities.length / ACTIVITIES_PER_PAGE)
+  const activitiesStartIndex = (activitiesPage - 1) * ACTIVITIES_PER_PAGE
+  const paginatedActivities = recentActivities.slice(activitiesStartIndex, activitiesStartIndex + ACTIVITIES_PER_PAGE)
 
   useEffect(() => {
     fetchDashboardData()
@@ -160,20 +62,6 @@ export default function Dashboard() {
   const fetchDashboardData = async () => {
     try {
       setLoading(true)
-
-      // Fetch active projects count
-      const { data: projects, error: projectsError } = await supabase
-        .from('projects')
-        .select('id, end_date')
-        .eq('status', 'active')
-
-      if (projectsError) throw projectsError
-
-      setProjectsCount(projects?.length || 0)
-
-      // Count on-time projects (end_date >= today)
-      const onTime = projects?.filter((p) => new Date(p.end_date) >= new Date()).length || 0
-      setOnTimeProjects(onTime)
 
       // Fetch current active sprint
       const { data: sprints, error: sprintsError } = await supabase
@@ -273,9 +161,9 @@ export default function Dashboard() {
         })
       })
 
-      // Sort by created_at and take top 4
+      // Sort by created_at and take top 20 for pagination
       activities.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-      setRecentActivities(activities.slice(0, 4))
+      setRecentActivities(activities.slice(0, 20))
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
     } finally {
@@ -345,29 +233,7 @@ export default function Dashboard() {
 
         <Grid container spacing={3} sx={{ mb: 4 }}>
           <Grid item xs={12} sm={6} md={3}>
-            {loading ? (
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 3,
-                  height: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  minHeight: 200,
-                }}
-              >
-                <CircularProgress />
-              </Paper>
-            ) : (
-              <StatCard
-                title="Projetos Ativos"
-                value={projectsCount}
-                icon={<Assignment sx={{ fontSize: 28 }} />}
-                color="#1e40af"
-                subtitle={`${onTimeProjects} no prazo`}
-              />
-            )}
+            <ActiveProjectsWidget />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <ActiveSprintsWidget />
@@ -492,29 +358,101 @@ export default function Dashboard() {
                   <CircularProgress />
                 </Box>
               ) : recentActivities.length > 0 ? (
-                <Box sx={{ mt: 3 }}>
-                  {recentActivities.map((item, index) => (
+                <>
+                  <Box
+                    sx={{
+                      mt: 3,
+                      maxHeight: 280,
+                      overflowY: 'auto',
+                      pr: 1,
+                      '&::-webkit-scrollbar': {
+                        width: 6,
+                      },
+                      '&::-webkit-scrollbar-track': {
+                        backgroundColor: 'rgba(99, 102, 241, 0.05)',
+                        borderRadius: 3,
+                      },
+                      '&::-webkit-scrollbar-thumb': {
+                        backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                        borderRadius: 3,
+                        '&:hover': {
+                          backgroundColor: 'rgba(99, 102, 241, 0.4)',
+                        },
+                      },
+                    }}
+                  >
+                    {paginatedActivities.map((item, index) => (
+                      <Box
+                        key={item.id}
+                        sx={{
+                          pb: 2,
+                          mb: 2,
+                          borderBottom: index < paginatedActivities.length - 1 ? '1px solid' : 'none',
+                          borderColor: 'divider',
+                          transition: 'all 0.2s ease',
+                          borderRadius: 1,
+                          p: 1.5,
+                          mx: -1.5,
+                          '&:hover': {
+                            bgcolor: 'rgba(99, 102, 241, 0.04)',
+                          },
+                        }}
+                      >
+                        <Typography variant="body2" fontWeight={600}>
+                          {item.action}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {item.task}
+                        </Typography>
+                        <Typography variant="caption" display="block" color="text.secondary" sx={{ mt: 0.5 }}>
+                          {item.time}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                  {totalActivitiesPages > 1 && (
                     <Box
-                      key={item.id}
                       sx={{
-                        pb: 2,
-                        mb: 2,
-                        borderBottom: index < recentActivities.length - 1 ? '1px solid' : 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 1.5,
+                        mt: 2,
+                        pt: 2,
+                        borderTop: '1px solid',
                         borderColor: 'divider',
                       }}
                     >
-                      <Typography variant="body2" fontWeight={600}>
-                        {item.action}
+                      <IconButton
+                        size="small"
+                        onClick={() => setActivitiesPage((prev) => Math.max(prev - 1, 1))}
+                        disabled={activitiesPage === 1}
+                        sx={{
+                          color: '#6366f1',
+                          '&:disabled': { color: 'rgba(99, 102, 241, 0.3)' },
+                          '&:hover': { bgcolor: 'rgba(99, 102, 241, 0.1)' },
+                        }}
+                      >
+                        <KeyboardArrowLeft fontSize="small" />
+                      </IconButton>
+                      <Typography variant="caption" fontWeight={600} color="text.secondary">
+                        {activitiesPage} / {totalActivitiesPages}
                       </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {item.task}
-                      </Typography>
-                      <Typography variant="caption" display="block" color="text.secondary" sx={{ mt: 0.5 }}>
-                        {item.time}
-                      </Typography>
+                      <IconButton
+                        size="small"
+                        onClick={() => setActivitiesPage((prev) => Math.min(prev + 1, totalActivitiesPages))}
+                        disabled={activitiesPage === totalActivitiesPages}
+                        sx={{
+                          color: '#6366f1',
+                          '&:disabled': { color: 'rgba(99, 102, 241, 0.3)' },
+                          '&:hover': { bgcolor: 'rgba(99, 102, 241, 0.1)' },
+                        }}
+                      >
+                        <KeyboardArrowRight fontSize="small" />
+                      </IconButton>
                     </Box>
-                  ))}
-                </Box>
+                  )}
+                </>
               ) : (
                 <Box sx={{ textAlign: 'center', py: 4 }}>
                   <Typography variant="body2" color="text.secondary">

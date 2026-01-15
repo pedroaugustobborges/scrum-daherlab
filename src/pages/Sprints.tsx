@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   Box,
   Container,
@@ -13,8 +13,34 @@ import {
   Fab,
   IconButton,
   Tooltip,
+  TextField,
+  InputAdornment,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  OutlinedInput,
+  Collapse,
+  Paper,
 } from '@mui/material'
-import { Add, SpaceDashboard, CalendarToday, Flag, Speed, Timeline, Edit, Delete, ListAlt } from '@mui/icons-material'
+import {
+  Add,
+  SpaceDashboard,
+  CalendarToday,
+  Flag,
+  Speed,
+  Timeline,
+  Edit,
+  Delete,
+  ListAlt,
+  Search,
+  FilterList,
+  Clear,
+  ExpandMore,
+  ExpandLess,
+  Groups,
+  Assignment,
+} from '@mui/icons-material'
 import Navbar from '@/components/Navbar'
 import CreateSprintModal from '@/components/CreateSprintModal'
 import EditSprintModal from '@/components/EditSprintModal'
@@ -37,6 +63,27 @@ interface Sprint {
   projects?: { name: string }
 }
 
+interface Team {
+  id: string
+  name: string
+}
+
+interface Project {
+  id: string
+  name: string
+}
+
+interface Filters {
+  search: string
+  status: string[]
+  startDateFrom: string
+  startDateTo: string
+  endDateFrom: string
+  endDateTo: string
+  teams: string[]
+  projects: string[]
+}
+
 const statusConfig: Record<string, { label: string; color: any }> = {
   planning: { label: 'Planejamento', color: 'warning' },
   active: { label: 'Ativo', color: 'success' },
@@ -44,39 +91,142 @@ const statusConfig: Record<string, { label: string; color: any }> = {
   cancelled: { label: 'Cancelado', color: 'error' },
 }
 
+const initialFilters: Filters = {
+  search: '',
+  status: [],
+  startDateFrom: '',
+  startDateTo: '',
+  endDateFrom: '',
+  endDateTo: '',
+  teams: [],
+  projects: [],
+}
+
 export default function Sprints() {
   const [sprints, setSprints] = useState<Sprint[]>([])
+  const [teams, setTeams] = useState<Team[]>([])
+  const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
   const [createModalOpen, setCreateModalOpen] = useState(false)
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [detailsModalOpen, setDetailsModalOpen] = useState(false)
   const [selectedSprint, setSelectedSprint] = useState<Sprint | null>(null)
+  const [filters, setFilters] = useState<Filters>(initialFilters)
+  const [filtersExpanded, setFiltersExpanded] = useState(false)
 
   useEffect(() => {
-    fetchSprints()
+    fetchData()
   }, [])
 
-  const fetchSprints = async () => {
+  const fetchData = async () => {
     setLoading(true)
     try {
-      const { data, error } = await supabase
-        .from('sprints')
-        .select('*, teams(name), projects(name)')
-        .order('created_at', { ascending: false })
+      const [sprintsRes, teamsRes, projectsRes] = await Promise.all([
+        supabase
+          .from('sprints')
+          .select('*, teams(name), projects(name)')
+          .order('created_at', { ascending: false }),
+        supabase.from('teams').select('id, name').order('name'),
+        supabase.from('projects').select('id, name').order('name'),
+      ])
 
-      if (error) throw error
-      setSprints(data || [])
+      if (sprintsRes.error) throw sprintsRes.error
+      if (teamsRes.error) throw teamsRes.error
+      if (projectsRes.error) throw projectsRes.error
+
+      setSprints(sprintsRes.data || [])
+      setTeams(teamsRes.data || [])
+      setProjects(projectsRes.data || [])
     } catch (error) {
-      console.error('Error fetching sprints:', error)
+      console.error('Error fetching data:', error)
       toast.error('Erro ao carregar sprints')
     } finally {
       setLoading(false)
     }
   }
 
+  const fetchSprints = async () => {
+    await fetchData()
+  }
+
   const formatDate = (date: string) => {
     if (!date) return '-'
     return new Date(date).toLocaleDateString('pt-BR')
+  }
+
+  // Filter logic
+  const filteredSprints = useMemo(() => {
+    return sprints.filter((sprint) => {
+      // Search filter (name)
+      if (filters.search) {
+        const searchLower = filters.search.toLowerCase()
+        if (!sprint.name.toLowerCase().includes(searchLower)) {
+          return false
+        }
+      }
+
+      // Status filter
+      if (filters.status.length > 0 && !filters.status.includes(sprint.status)) {
+        return false
+      }
+
+      // Start date range filter
+      if (filters.startDateFrom && sprint.start_date) {
+        if (new Date(sprint.start_date) < new Date(filters.startDateFrom)) {
+          return false
+        }
+      }
+      if (filters.startDateTo && sprint.start_date) {
+        if (new Date(sprint.start_date) > new Date(filters.startDateTo)) {
+          return false
+        }
+      }
+
+      // End date range filter
+      if (filters.endDateFrom && sprint.end_date) {
+        if (new Date(sprint.end_date) < new Date(filters.endDateFrom)) {
+          return false
+        }
+      }
+      if (filters.endDateTo && sprint.end_date) {
+        if (new Date(sprint.end_date) > new Date(filters.endDateTo)) {
+          return false
+        }
+      }
+
+      // Teams filter
+      if (filters.teams.length > 0 && !filters.teams.includes(sprint.team_id)) {
+        return false
+      }
+
+      // Projects filter
+      if (filters.projects.length > 0 && !filters.projects.includes(sprint.project_id)) {
+        return false
+      }
+
+      return true
+    })
+  }, [sprints, filters])
+
+  const hasActiveFilters = useMemo(() => {
+    return (
+      filters.search !== '' ||
+      filters.status.length > 0 ||
+      filters.startDateFrom !== '' ||
+      filters.startDateTo !== '' ||
+      filters.endDateFrom !== '' ||
+      filters.endDateTo !== '' ||
+      filters.teams.length > 0 ||
+      filters.projects.length > 0
+    )
+  }, [filters])
+
+  const clearFilters = () => {
+    setFilters(initialFilters)
+  }
+
+  const handleFilterChange = (field: keyof Filters, value: any) => {
+    setFilters((prev) => ({ ...prev, [field]: value }))
   }
 
   const calculateProgress = (startDate: string, endDate: string) => {
@@ -168,11 +318,371 @@ export default function Sprints() {
           </Button>
         </Box>
 
+        {/* Filter Section */}
+        <Paper
+          elevation={0}
+          sx={{
+            mb: 4,
+            border: '2px solid',
+            borderColor: hasActiveFilters ? 'rgba(99, 102, 241, 0.3)' : 'rgba(99, 102, 241, 0.1)',
+            borderRadius: 3,
+            overflow: 'hidden',
+            transition: 'all 0.3s ease',
+          }}
+        >
+          {/* Filter Header */}
+          <Box
+            onClick={() => setFiltersExpanded(!filtersExpanded)}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              p: 2,
+              cursor: 'pointer',
+              bgcolor: hasActiveFilters ? 'rgba(99, 102, 241, 0.05)' : 'transparent',
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                bgcolor: 'rgba(99, 102, 241, 0.08)',
+              },
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <FilterList sx={{ color: '#6366f1' }} />
+              <Typography variant="subtitle1" fontWeight={600}>
+                Filtros
+              </Typography>
+              {hasActiveFilters && (
+                <Chip
+                  label={`${filteredSprints.length} de ${sprints.length}`}
+                  size="small"
+                  sx={{
+                    bgcolor: 'rgba(99, 102, 241, 0.1)',
+                    color: '#6366f1',
+                    fontWeight: 600,
+                  }}
+                />
+              )}
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              {hasActiveFilters && (
+                <Button
+                  size="small"
+                  startIcon={<Clear />}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    clearFilters()
+                  }}
+                  sx={{
+                    color: '#ef4444',
+                    fontWeight: 600,
+                    '&:hover': {
+                      bgcolor: 'rgba(239, 68, 68, 0.1)',
+                    },
+                  }}
+                >
+                  Limpar
+                </Button>
+              )}
+              {filtersExpanded ? (
+                <ExpandLess sx={{ color: 'text.secondary' }} />
+              ) : (
+                <ExpandMore sx={{ color: 'text.secondary' }} />
+              )}
+            </Box>
+          </Box>
+
+          {/* Filter Content */}
+          <Collapse in={filtersExpanded}>
+            <Box
+              sx={{
+                p: 3,
+                pt: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 3,
+              }}
+            >
+              {/* Row 1: Search and Status */}
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    placeholder="Buscar por nome do sprint..."
+                    value={filters.search}
+                    onChange={(e) => handleFilterChange('search', e.target.value)}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Search sx={{ color: 'text.secondary' }} />
+                        </InputAdornment>
+                      ),
+                      endAdornment: filters.search && (
+                        <InputAdornment position="end">
+                          <IconButton size="small" onClick={() => handleFilterChange('search', '')}>
+                            <Clear fontSize="small" />
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 2,
+                        '&:hover fieldset': {
+                          borderColor: '#6366f1',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#6366f1',
+                        },
+                      },
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth>
+                    <InputLabel id="status-filter-label">Status</InputLabel>
+                    <Select
+                      labelId="status-filter-label"
+                      multiple
+                      value={filters.status}
+                      onChange={(e) => handleFilterChange('status', e.target.value)}
+                      input={<OutlinedInput label="Status" />}
+                      renderValue={(selected) => (
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                          {selected.map((value) => (
+                            <Chip
+                              key={value}
+                              label={statusConfig[value]?.label || value}
+                              size="small"
+                              color={statusConfig[value]?.color || 'default'}
+                              sx={{ fontWeight: 600 }}
+                            />
+                          ))}
+                        </Box>
+                      )}
+                      sx={{
+                        borderRadius: 2,
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#6366f1',
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#6366f1',
+                        },
+                      }}
+                    >
+                      {Object.entries(statusConfig).map(([key, config]) => (
+                        <MenuItem key={key} value={key}>
+                          <Chip
+                            label={config.label}
+                            size="small"
+                            color={config.color}
+                            sx={{ fontWeight: 600 }}
+                          />
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </Grid>
+
+              {/* Row 2: Projects and Teams */}
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth>
+                    <InputLabel id="projects-filter-label">Projetos</InputLabel>
+                    <Select
+                      labelId="projects-filter-label"
+                      multiple
+                      value={filters.projects}
+                      onChange={(e) => handleFilterChange('projects', e.target.value)}
+                      input={<OutlinedInput label="Projetos" />}
+                      renderValue={(selected) => (
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                          {selected.map((value) => {
+                            const project = projects.find((p) => p.id === value)
+                            return (
+                              <Chip
+                                key={value}
+                                label={project?.name || value}
+                                size="small"
+                                icon={<Assignment sx={{ fontSize: 16 }} />}
+                                sx={{
+                                  fontWeight: 600,
+                                  bgcolor: 'rgba(99, 102, 241, 0.1)',
+                                  color: '#6366f1',
+                                  '& .MuiChip-icon': { color: '#6366f1' },
+                                }}
+                              />
+                            )
+                          })}
+                        </Box>
+                      )}
+                      sx={{
+                        borderRadius: 2,
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#6366f1',
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#6366f1',
+                        },
+                      }}
+                    >
+                      {projects.map((project) => (
+                        <MenuItem key={project.id} value={project.id}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Assignment sx={{ fontSize: 20, color: '#6366f1' }} />
+                            <Typography>{project.name}</Typography>
+                          </Box>
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth>
+                    <InputLabel id="teams-filter-label">Times</InputLabel>
+                    <Select
+                      labelId="teams-filter-label"
+                      multiple
+                      value={filters.teams}
+                      onChange={(e) => handleFilterChange('teams', e.target.value)}
+                      input={<OutlinedInput label="Times" />}
+                      renderValue={(selected) => (
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                          {selected.map((value) => {
+                            const team = teams.find((t) => t.id === value)
+                            return (
+                              <Chip
+                                key={value}
+                                label={team?.name || value}
+                                size="small"
+                                icon={<Groups sx={{ fontSize: 16 }} />}
+                                sx={{
+                                  fontWeight: 600,
+                                  bgcolor: 'rgba(124, 58, 237, 0.1)',
+                                  color: '#7c3aed',
+                                  '& .MuiChip-icon': { color: '#7c3aed' },
+                                }}
+                              />
+                            )
+                          })}
+                        </Box>
+                      )}
+                      sx={{
+                        borderRadius: 2,
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#6366f1',
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#6366f1',
+                        },
+                      }}
+                    >
+                      {teams.map((team) => (
+                        <MenuItem key={team.id} value={team.id}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Groups sx={{ fontSize: 20, color: '#7c3aed' }} />
+                            <Typography>{team.name}</Typography>
+                          </Box>
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </Grid>
+
+              {/* Row 3: Date Filters */}
+              <Box>
+                <Typography variant="body2" fontWeight={600} color="text.secondary" sx={{ mb: 1.5 }}>
+                  Data de Início
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      type="date"
+                      label="De"
+                      value={filters.startDateFrom}
+                      onChange={(e) => handleFilterChange('startDateFrom', e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          '&:hover fieldset': { borderColor: '#6366f1' },
+                          '&.Mui-focused fieldset': { borderColor: '#6366f1' },
+                        },
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      type="date"
+                      label="Até"
+                      value={filters.startDateTo}
+                      onChange={(e) => handleFilterChange('startDateTo', e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          '&:hover fieldset': { borderColor: '#6366f1' },
+                          '&.Mui-focused fieldset': { borderColor: '#6366f1' },
+                        },
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+              </Box>
+
+              <Box>
+                <Typography variant="body2" fontWeight={600} color="text.secondary" sx={{ mb: 1.5 }}>
+                  Data de Término
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      type="date"
+                      label="De"
+                      value={filters.endDateFrom}
+                      onChange={(e) => handleFilterChange('endDateFrom', e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          '&:hover fieldset': { borderColor: '#6366f1' },
+                          '&.Mui-focused fieldset': { borderColor: '#6366f1' },
+                        },
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      type="date"
+                      label="Até"
+                      value={filters.endDateTo}
+                      onChange={(e) => handleFilterChange('endDateTo', e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          '&:hover fieldset': { borderColor: '#6366f1' },
+                          '&.Mui-focused fieldset': { borderColor: '#6366f1' },
+                        },
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+              </Box>
+            </Box>
+          </Collapse>
+        </Paper>
+
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
             <CircularProgress size={60} />
           </Box>
-        ) : sprints.length === 0 ? (
+        ) : filteredSprints.length === 0 && !hasActiveFilters ? (
           <Box
             sx={{
               textAlign: 'center',
@@ -200,9 +710,47 @@ export default function Sprints() {
               Criar Primeiro Sprint
             </Button>
           </Box>
+        ) : filteredSprints.length === 0 && hasActiveFilters ? (
+          <Box
+            sx={{
+              textAlign: 'center',
+              py: 8,
+              px: 4,
+              borderRadius: 4,
+              background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, rgba(139, 92, 246, 0.03) 100%)',
+              border: '2px dashed rgba(99, 102, 241, 0.2)',
+            }}
+          >
+            <Search sx={{ fontSize: 80, color: '#6366f1', opacity: 0.3, mb: 2 }} />
+            <Typography variant="h5" fontWeight={700} gutterBottom>
+              Nenhum sprint encontrado
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 500, mx: 'auto' }}>
+              Não encontramos sprints que correspondam aos filtros selecionados
+            </Typography>
+            <Button
+              variant="outlined"
+              startIcon={<Clear />}
+              onClick={clearFilters}
+              sx={{
+                px: 4,
+                py: 1.5,
+                borderWidth: 2,
+                borderColor: '#6366f1',
+                color: '#6366f1',
+                fontWeight: 600,
+                '&:hover': {
+                  borderWidth: 2,
+                  bgcolor: 'rgba(99, 102, 241, 0.05)',
+                },
+              }}
+            >
+              Limpar Filtros
+            </Button>
+          </Box>
         ) : (
           <Grid container spacing={3}>
-            {sprints.map((sprint) => (
+            {filteredSprints.map((sprint) => (
               <Grid item xs={12} md={6} lg={4} key={sprint.id}>
                 <Card
                   elevation={0}

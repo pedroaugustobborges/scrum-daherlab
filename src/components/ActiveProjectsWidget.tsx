@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Box, Paper, Typography, CircularProgress, Chip, LinearProgress, IconButton } from '@mui/material'
 import { Assignment, CalendarToday, KeyboardArrowUp, KeyboardArrowDown } from '@mui/icons-material'
 import { supabase } from '@/lib/supabase'
+import ProjectDetailsModal from './ProjectDetailsModal'
 
 interface ActiveProject {
   id: string
@@ -22,6 +23,8 @@ export default function ActiveProjectsWidget() {
   const [totalCount, setTotalCount] = useState(0)
   const [onTimeCount, setOnTimeCount] = useState(0)
   const [currentPage, setCurrentPage] = useState(1)
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false)
+  const [selectedProject, setSelectedProject] = useState<ActiveProject | null>(null)
 
   const totalPages = Math.ceil(activeProjects.length / ITEMS_PER_PAGE)
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
@@ -112,6 +115,16 @@ export default function ActiveProjectsWidget() {
     if (days < 0) return '#dc2626' // Overdue - red
     if (days <= 7) return '#f59e0b' // Soon - amber
     return '#1e40af' // On track - blue
+  }
+
+  const handleOpenDetails = (project: ActiveProject) => {
+    setSelectedProject(project)
+    setDetailsModalOpen(true)
+  }
+
+  const handleCloseDetails = () => {
+    setDetailsModalOpen(false)
+    setSelectedProject(null)
   }
 
   if (loading) {
@@ -226,15 +239,18 @@ export default function ActiveProjectsWidget() {
               return (
                 <Box
                   key={project.id}
+                  onClick={() => handleOpenDetails(project)}
                   sx={{
                     p: 2,
                     borderRadius: 2,
                     bgcolor: 'white',
                     border: '1px solid rgba(30, 64, 175, 0.15)',
                     transition: 'all 0.2s ease',
+                    cursor: 'pointer',
                     '&:hover': {
                       borderColor: 'rgba(30, 64, 175, 0.3)',
-                      boxShadow: '0 2px 8px rgba(30, 64, 175, 0.1)',
+                      boxShadow: '0 4px 12px rgba(30, 64, 175, 0.15)',
+                      transform: 'translateX(4px)',
                     },
                   }}
                 >
@@ -341,6 +357,21 @@ export default function ActiveProjectsWidget() {
         <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
           Nenhum projeto ativo no momento
         </Typography>
+      )}
+
+      {selectedProject && (
+        <ProjectDetailsModal
+          open={detailsModalOpen}
+          onClose={handleCloseDetails}
+          project={{
+            id: selectedProject.id,
+            name: selectedProject.name,
+            description: selectedProject.description,
+            status: selectedProject.status,
+            start_date: selectedProject.start_date,
+            end_date: selectedProject.end_date,
+          }}
+        />
       )}
     </Paper>
   )

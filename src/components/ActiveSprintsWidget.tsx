@@ -2,12 +2,15 @@ import { useState, useEffect } from 'react'
 import { Box, Paper, Typography, CircularProgress, Chip, LinearProgress, IconButton } from '@mui/material'
 import { SpaceDashboard, CalendarToday, KeyboardArrowUp, KeyboardArrowDown } from '@mui/icons-material'
 import { supabase } from '@/lib/supabase'
+import SprintDetailsModal from './SprintDetailsModal'
 
 interface ActiveSprint {
   id: string
   name: string
   start_date: string
   end_date: string
+  project_id: string
+  team_id: string
   completed_stories: number
   total_stories: number
 }
@@ -20,6 +23,8 @@ export default function ActiveSprintsWidget() {
   const [totalCount, setTotalCount] = useState(0)
   const [daysRemaining, setDaysRemaining] = useState(0)
   const [currentPage, setCurrentPage] = useState(1)
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false)
+  const [selectedSprint, setSelectedSprint] = useState<ActiveSprint | null>(null)
 
   const totalPages = Math.ceil(activeSprints.length / ITEMS_PER_PAGE)
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
@@ -36,7 +41,7 @@ export default function ActiveSprintsWidget() {
       // Fetch active sprints
       const { data: sprints, error: sprintsError } = await supabase
         .from('sprints')
-        .select('id, name, start_date, end_date')
+        .select('id, name, start_date, end_date, project_id, team_id')
         .eq('status', 'active')
         .order('end_date', { ascending: true })
 
@@ -77,6 +82,8 @@ export default function ActiveSprintsWidget() {
             name: sprint.name,
             start_date: sprint.start_date,
             end_date: sprint.end_date,
+            project_id: sprint.project_id,
+            team_id: sprint.team_id,
             completed_stories: completed,
             total_stories: total,
           }
@@ -96,6 +103,16 @@ export default function ActiveSprintsWidget() {
   const calculateProgress = (sprint: ActiveSprint) => {
     if (sprint.total_stories === 0) return 0
     return Math.round((sprint.completed_stories / sprint.total_stories) * 100)
+  }
+
+  const handleOpenDetails = (sprint: ActiveSprint) => {
+    setSelectedSprint(sprint)
+    setDetailsModalOpen(true)
+  }
+
+  const handleCloseDetails = () => {
+    setDetailsModalOpen(false)
+    setSelectedSprint(null)
   }
 
   if (loading) {
@@ -206,15 +223,18 @@ export default function ActiveSprintsWidget() {
             {paginatedSprints.map((sprint) => (
               <Box
                 key={sprint.id}
+                onClick={() => handleOpenDetails(sprint)}
                 sx={{
                   p: 2,
                   borderRadius: 2,
                   bgcolor: 'white',
                   border: '1px solid rgba(8, 145, 178, 0.15)',
                   transition: 'all 0.2s ease',
+                  cursor: 'pointer',
                   '&:hover': {
                     borderColor: 'rgba(8, 145, 178, 0.3)',
-                    boxShadow: '0 2px 8px rgba(8, 145, 178, 0.1)',
+                    boxShadow: '0 4px 12px rgba(8, 145, 178, 0.15)',
+                    transform: 'translateX(4px)',
                   },
                 }}
               >
@@ -299,6 +319,21 @@ export default function ActiveSprintsWidget() {
         <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
           Nenhum sprint ativo no momento
         </Typography>
+      )}
+
+      {selectedSprint && (
+        <SprintDetailsModal
+          open={detailsModalOpen}
+          onClose={handleCloseDetails}
+          sprint={{
+            id: selectedSprint.id,
+            name: selectedSprint.name,
+            project_id: selectedSprint.project_id,
+            team_id: selectedSprint.team_id,
+            start_date: selectedSprint.start_date,
+            end_date: selectedSprint.end_date,
+          }}
+        />
       )}
     </Paper>
   )

@@ -37,6 +37,7 @@ import {
 import Navbar from '@/components/Navbar'
 import CreateTeamModal from '@/components/CreateTeamModal'
 import AddTeamMembersModal from '@/components/AddTeamMembersModal'
+import TeamProjectsModal from '@/components/TeamProjectsModal'
 import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
 
@@ -79,6 +80,7 @@ export default function Teams() {
   const [loading, setLoading] = useState(true)
   const [createModalOpen, setCreateModalOpen] = useState(false)
   const [membersModalOpen, setMembersModalOpen] = useState(false)
+  const [projectsModalOpen, setProjectsModalOpen] = useState(false)
   const [selectedTeam, setSelectedTeam] = useState<{ id: string; name: string } | null>(null)
   const [filters, setFilters] = useState<Filters>(initialFilters)
   const [filtersExpanded, setFiltersExpanded] = useState(false)
@@ -177,6 +179,16 @@ export default function Teams() {
 
   const handleCloseMembersModal = () => {
     setMembersModalOpen(false)
+    setSelectedTeam(null)
+  }
+
+  const handleOpenProjectsModal = (team: Team) => {
+    setSelectedTeam({ id: team.id, name: team.name })
+    setProjectsModalOpen(true)
+  }
+
+  const handleCloseProjectsModal = () => {
+    setProjectsModalOpen(false)
     setSelectedTeam(null)
   }
 
@@ -641,11 +653,13 @@ export default function Teams() {
               <Grid item xs={12} md={6} lg={4} key={team.id}>
                 <Card
                   elevation={0}
+                  onClick={() => handleOpenProjectsModal(team)}
                   sx={{
                     height: '100%',
                     background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
                     border: '2px solid rgba(99, 102, 241, 0.1)',
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    cursor: 'pointer',
                     '&:hover': {
                       transform: 'translateY(-8px)',
                       boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
@@ -672,7 +686,10 @@ export default function Teams() {
                       <Box sx={{ display: 'flex', gap: 1 }}>
                         <Tooltip title="Gerenciar Membros">
                           <IconButton
-                            onClick={() => handleOpenMembersModal(team)}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleOpenMembersModal(team)
+                            }}
                             sx={{
                               bgcolor: 'rgba(99, 102, 241, 0.1)',
                               '&:hover': {
@@ -685,7 +702,10 @@ export default function Teams() {
                         </Tooltip>
                         <Tooltip title="Excluir Time">
                           <IconButton
-                            onClick={() => handleDeleteTeam(team)}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleDeleteTeam(team)
+                            }}
                             sx={{
                               bgcolor: 'rgba(239, 68, 68, 0.1)',
                               '&:hover': {
@@ -782,6 +802,14 @@ export default function Teams() {
           onSuccess={fetchTeams}
           teamId={selectedTeam.id}
           teamName={selectedTeam.name}
+        />
+      )}
+
+      {selectedTeam && (
+        <TeamProjectsModal
+          open={projectsModalOpen}
+          onClose={handleCloseProjectsModal}
+          team={selectedTeam}
         />
       )}
     </Box>

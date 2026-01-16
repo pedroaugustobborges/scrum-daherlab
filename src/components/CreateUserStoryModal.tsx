@@ -115,6 +115,16 @@ export default function CreateUserStoryModal({
       return
     }
 
+    if (!projectId) {
+      toast.error('Este sprint não está associado a um projeto. Por favor, edite o sprint e selecione um projeto.')
+      return
+    }
+
+    if (!sprintId) {
+      toast.error('Sprint não identificado')
+      return
+    }
+
     setLoading(true)
 
     try {

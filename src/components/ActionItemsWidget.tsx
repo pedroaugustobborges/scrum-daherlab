@@ -35,8 +35,10 @@ export default function ActionItemsWidget() {
           content,
           status,
           votes,
-          sprint_retrospectives!inner(sprint_id),
-          sprints!sprint_retrospectives_sprint_id_fkey(name),
+          sprint_retrospectives!retrospective_id(
+            sprint_id,
+            sprints(name)
+          ),
           assigned_to_profile:profiles!assigned_to(full_name)
         `
         )
@@ -47,14 +49,23 @@ export default function ActionItemsWidget() {
       if (itemsError) throw itemsError
 
       // Transform data
-      const transformedItems = (items || []).map((item: any) => ({
-        id: item.id,
-        content: item.content,
-        status: item.status,
-        sprint_name: item.sprints?.name || 'Sprint desconhecido',
-        assigned_to_name: item.assigned_to_profile?.full_name,
-        votes: item.votes || 0,
-      }))
+      const transformedItems = (items || []).map((item: any) => {
+        const retroData = item.sprint_retrospectives
+        const sprintRetro = Array.isArray(retroData) ? retroData[0] : retroData
+        const sprintsData = sprintRetro?.sprints
+        const sprint = Array.isArray(sprintsData) ? sprintsData[0] : sprintsData
+        const profileData = item.assigned_to_profile
+        const profile = Array.isArray(profileData) ? profileData[0] : profileData
+
+        return {
+          id: item.id,
+          content: item.content,
+          status: item.status,
+          sprint_name: sprint?.name || 'Sprint desconhecido',
+          assigned_to_name: profile?.full_name,
+          votes: item.votes || 0,
+        }
+      })
 
       // Filter pending items
       const pendingItems = transformedItems.filter((item) => item.status === 'pending' || item.status === 'in_progress')

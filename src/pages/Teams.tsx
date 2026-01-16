@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   Box,
   Container,
@@ -11,8 +11,29 @@ import {
   Fab,
   IconButton,
   Tooltip,
+  TextField,
+  InputAdornment,
+  Collapse,
+  Paper,
+  Chip,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  OutlinedInput,
 } from '@mui/material'
-import { Add, People, Groups, PersonAdd, Delete } from '@mui/icons-material'
+import {
+  Add,
+  People,
+  Groups,
+  PersonAdd,
+  Delete,
+  Search,
+  FilterList,
+  Clear,
+  ExpandMore,
+  ExpandLess,
+} from '@mui/icons-material'
 import Navbar from '@/components/Navbar'
 import CreateTeamModal from '@/components/CreateTeamModal'
 import AddTeamMembersModal from '@/components/AddTeamMembersModal'
@@ -27,12 +48,44 @@ interface Team {
   team_members?: { count: number }[]
 }
 
+interface Member {
+  id: string
+  name: string
+}
+
+interface Project {
+  id: string
+  name: string
+}
+
+interface Filters {
+  search: string
+  members: string[]
+  projects: string[]
+  createdDateFrom: string
+  createdDateTo: string
+}
+
+const initialFilters: Filters = {
+  search: '',
+  members: [],
+  projects: [],
+  createdDateFrom: '',
+  createdDateTo: '',
+}
+
 export default function Teams() {
   const [teams, setTeams] = useState<Team[]>([])
   const [loading, setLoading] = useState(true)
   const [createModalOpen, setCreateModalOpen] = useState(false)
   const [membersModalOpen, setMembersModalOpen] = useState(false)
   const [selectedTeam, setSelectedTeam] = useState<{ id: string; name: string } | null>(null)
+  const [filters, setFilters] = useState<Filters>(initialFilters)
+  const [filtersExpanded, setFiltersExpanded] = useState(false)
+  const [allMembers, setAllMembers] = useState<Member[]>([])
+  const [allProjects, setAllProjects] = useState<Project[]>([])
+  const [teamMembersMap, setTeamMembersMap] = useState<Record<string, string[]>>({})
+  const [teamProjectsMap, setTeamProjectsMap] = useState<Record<string, string[]>>({})
 
   useEffect(() => {
     fetchTeams()
@@ -41,6 +94,7 @@ export default function Teams() {
   const fetchTeams = async () => {
     setLoading(true)
     try {
+      // Fetch teams
       const { data, error } = await supabase
         .from('teams')
         .select('*, team_members(count)')
@@ -48,6 +102,66 @@ export default function Teams() {
 
       if (error) throw error
       setTeams(data || [])
+
+      // Fetch all team members with their profiles for the filter
+      const { data: teamMembersData, error: teamMembersError } = await supabase
+        .from('team_members')
+        .select('team_id, user_id, user_profile:profiles!user_id(id, full_name)')
+
+      if (teamMembersError) throw teamMembersError
+
+      // Build unique members list and team-members mapping
+      const membersSet = new Map<string, string>()
+      const membersMapping: Record<string, string[]> = {}
+
+      teamMembersData?.forEach((tm) => {
+        // Supabase returns the joined relation - handle both array and object cases
+        const profileData = tm.user_profile
+        const profile = Array.isArray(profileData) ? profileData[0] : profileData
+        if (profile) {
+          membersSet.set(profile.id, profile.full_name || 'Sem nome')
+          if (!membersMapping[tm.team_id]) {
+            membersMapping[tm.team_id] = []
+          }
+          membersMapping[tm.team_id].push(profile.id)
+        }
+      })
+
+      const membersList: Member[] = Array.from(membersSet.entries()).map(([id, name]) => ({ id, name }))
+      membersList.sort((a, b) => a.name.localeCompare(b.name))
+      setAllMembers(membersList)
+      setTeamMembersMap(membersMapping)
+
+      // Fetch all sprints to get team-project relationships
+      const { data: sprintsData, error: sprintsError } = await supabase
+        .from('sprints')
+        .select('team_id, project_id, projects(id, name)')
+
+      if (sprintsError) throw sprintsError
+
+      // Build unique projects list and team-projects mapping
+      const projectsSet = new Map<string, string>()
+      const projectsMapping: Record<string, string[]> = {}
+
+      sprintsData?.forEach((sprint) => {
+        // Supabase returns the joined relation - handle both array and object cases
+        const projectData = sprint.projects
+        const project = Array.isArray(projectData) ? projectData[0] : projectData
+        if (project && sprint.team_id) {
+          projectsSet.set(project.id, project.name)
+          if (!projectsMapping[sprint.team_id]) {
+            projectsMapping[sprint.team_id] = []
+          }
+          if (!projectsMapping[sprint.team_id].includes(project.id)) {
+            projectsMapping[sprint.team_id].push(project.id)
+          }
+        }
+      })
+
+      const projectsList: Project[] = Array.from(projectsSet.entries()).map(([id, name]) => ({ id, name }))
+      projectsList.sort((a, b) => a.name.localeCompare(b.name))
+      setAllProjects(projectsList)
+      setTeamProjectsMap(projectsMapping)
     } catch (error) {
       console.error('Error fetching teams:', error)
       toast.error('Erro ao carregar times')
@@ -95,6 +209,69 @@ export default function Teams() {
     return new Date(date).toLocaleDateString('pt-BR')
   }
 
+  // Filter logic
+  const filteredTeams = useMemo(() => {
+    return teams.filter((team) => {
+      // Search filter (name)
+      if (filters.search) {
+        const searchLower = filters.search.toLowerCase()
+        if (!team.name.toLowerCase().includes(searchLower)) {
+          return false
+        }
+      }
+
+      // Members filter - team must have at least one of the selected members
+      if (filters.members.length > 0) {
+        const teamMembers = teamMembersMap[team.id] || []
+        const hasMatchingMember = filters.members.some((memberId) => teamMembers.includes(memberId))
+        if (!hasMatchingMember) {
+          return false
+        }
+      }
+
+      // Projects filter - team must be linked to at least one of the selected projects
+      if (filters.projects.length > 0) {
+        const teamProjects = teamProjectsMap[team.id] || []
+        const hasMatchingProject = filters.projects.some((projectId) => teamProjects.includes(projectId))
+        if (!hasMatchingProject) {
+          return false
+        }
+      }
+
+      // Created date range filter
+      if (filters.createdDateFrom && team.created_at) {
+        if (new Date(team.created_at) < new Date(filters.createdDateFrom)) {
+          return false
+        }
+      }
+      if (filters.createdDateTo && team.created_at) {
+        if (new Date(team.created_at) > new Date(filters.createdDateTo)) {
+          return false
+        }
+      }
+
+      return true
+    })
+  }, [teams, filters, teamMembersMap, teamProjectsMap])
+
+  const hasActiveFilters = useMemo(() => {
+    return (
+      filters.search !== '' ||
+      filters.members.length > 0 ||
+      filters.projects.length > 0 ||
+      filters.createdDateFrom !== '' ||
+      filters.createdDateTo !== ''
+    )
+  }, [filters])
+
+  const clearFilters = () => {
+    setFilters(initialFilters)
+  }
+
+  const handleFilterChange = (field: keyof Filters, value: string | string[]) => {
+    setFilters((prev) => ({ ...prev, [field]: value }))
+  }
+
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       <Navbar />
@@ -123,11 +300,276 @@ export default function Teams() {
           </Button>
         </Box>
 
+        {/* Filter Section */}
+        <Paper
+          elevation={0}
+          sx={{
+            mb: 4,
+            border: '2px solid',
+            borderColor: hasActiveFilters ? 'rgba(99, 102, 241, 0.3)' : 'rgba(99, 102, 241, 0.1)',
+            borderRadius: 3,
+            overflow: 'hidden',
+            transition: 'all 0.3s ease',
+          }}
+        >
+          {/* Filter Header */}
+          <Box
+            onClick={() => setFiltersExpanded(!filtersExpanded)}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              p: 2,
+              cursor: 'pointer',
+              bgcolor: hasActiveFilters ? 'rgba(99, 102, 241, 0.05)' : 'transparent',
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                bgcolor: 'rgba(99, 102, 241, 0.08)',
+              },
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <FilterList sx={{ color: '#6366f1' }} />
+              <Typography variant="subtitle1" fontWeight={600}>
+                Filtros
+              </Typography>
+              {hasActiveFilters && (
+                <Chip
+                  label={`${filteredTeams.length} de ${teams.length}`}
+                  size="small"
+                  sx={{
+                    bgcolor: 'rgba(99, 102, 241, 0.1)',
+                    color: '#6366f1',
+                    fontWeight: 600,
+                  }}
+                />
+              )}
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              {hasActiveFilters && (
+                <Button
+                  size="small"
+                  startIcon={<Clear />}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    clearFilters()
+                  }}
+                  sx={{
+                    color: '#ef4444',
+                    fontWeight: 600,
+                    '&:hover': {
+                      bgcolor: 'rgba(239, 68, 68, 0.1)',
+                    },
+                  }}
+                >
+                  Limpar
+                </Button>
+              )}
+              {filtersExpanded ? (
+                <ExpandLess sx={{ color: 'text.secondary' }} />
+              ) : (
+                <ExpandMore sx={{ color: 'text.secondary' }} />
+              )}
+            </Box>
+          </Box>
+
+          {/* Filter Content */}
+          <Collapse in={filtersExpanded}>
+            <Box
+              sx={{
+                p: 3,
+                pt: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 3,
+              }}
+            >
+              {/* Row 1: Search */}
+              <TextField
+                fullWidth
+                placeholder="Buscar por nome do time..."
+                value={filters.search}
+                onChange={(e) => handleFilterChange('search', e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Search sx={{ color: 'text.secondary' }} />
+                    </InputAdornment>
+                  ),
+                  endAdornment: filters.search && (
+                    <InputAdornment position="end">
+                      <IconButton size="small" onClick={() => handleFilterChange('search', '')}>
+                        <Clear fontSize="small" />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                    '&:hover fieldset': {
+                      borderColor: '#6366f1',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#6366f1',
+                    },
+                  },
+                }}
+              />
+
+              {/* Row 2: Members and Projects Filters */}
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth>
+                    <InputLabel
+                      id="members-filter-label"
+                      sx={{
+                        '&.Mui-focused': { color: '#6366f1' },
+                      }}
+                    >
+                      Membros
+                    </InputLabel>
+                    <Select
+                      labelId="members-filter-label"
+                      multiple
+                      value={filters.members}
+                      onChange={(e) => handleFilterChange('members', e.target.value as string[])}
+                      input={<OutlinedInput label="Membros" />}
+                      renderValue={(selected) => (
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                          {(selected as string[]).map((value) => {
+                            const member = allMembers.find((m) => m.id === value)
+                            return (
+                              <Chip
+                                key={value}
+                                label={member?.name || value}
+                                size="small"
+                                sx={{
+                                  bgcolor: 'rgba(99, 102, 241, 0.1)',
+                                  color: '#6366f1',
+                                  fontWeight: 600,
+                                }}
+                              />
+                            )
+                          })}
+                        </Box>
+                      )}
+                      sx={{
+                        borderRadius: 2,
+                        '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#6366f1' },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#6366f1' },
+                      }}
+                    >
+                      {allMembers.map((member) => (
+                        <MenuItem key={member.id} value={member.id}>
+                          {member.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth>
+                    <InputLabel
+                      id="projects-filter-label"
+                      sx={{
+                        '&.Mui-focused': { color: '#6366f1' },
+                      }}
+                    >
+                      Projetos
+                    </InputLabel>
+                    <Select
+                      labelId="projects-filter-label"
+                      multiple
+                      value={filters.projects}
+                      onChange={(e) => handleFilterChange('projects', e.target.value as string[])}
+                      input={<OutlinedInput label="Projetos" />}
+                      renderValue={(selected) => (
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                          {(selected as string[]).map((value) => {
+                            const project = allProjects.find((p) => p.id === value)
+                            return (
+                              <Chip
+                                key={value}
+                                label={project?.name || value}
+                                size="small"
+                                sx={{
+                                  bgcolor: 'rgba(124, 58, 237, 0.1)',
+                                  color: '#7c3aed',
+                                  fontWeight: 600,
+                                }}
+                              />
+                            )
+                          })}
+                        </Box>
+                      )}
+                      sx={{
+                        borderRadius: 2,
+                        '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#6366f1' },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#6366f1' },
+                      }}
+                    >
+                      {allProjects.map((project) => (
+                        <MenuItem key={project.id} value={project.id}>
+                          {project.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </Grid>
+
+              {/* Row 3: Creation Date Filter */}
+              <Box>
+                <Typography variant="body2" fontWeight={600} color="text.secondary" sx={{ mb: 1.5 }}>
+                  Data de Criação
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      type="date"
+                      label="De"
+                      value={filters.createdDateFrom}
+                      onChange={(e) => handleFilterChange('createdDateFrom', e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          '&:hover fieldset': { borderColor: '#6366f1' },
+                          '&.Mui-focused fieldset': { borderColor: '#6366f1' },
+                        },
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      type="date"
+                      label="Até"
+                      value={filters.createdDateTo}
+                      onChange={(e) => handleFilterChange('createdDateTo', e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          '&:hover fieldset': { borderColor: '#6366f1' },
+                          '&.Mui-focused fieldset': { borderColor: '#6366f1' },
+                        },
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+              </Box>
+            </Box>
+          </Collapse>
+        </Paper>
+
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
             <CircularProgress size={60} />
           </Box>
-        ) : teams.length === 0 ? (
+        ) : filteredTeams.length === 0 && !hasActiveFilters ? (
           <Box
             sx={{
               textAlign: 'center',
@@ -155,9 +597,47 @@ export default function Teams() {
               Criar Primeiro Time
             </Button>
           </Box>
+        ) : filteredTeams.length === 0 && hasActiveFilters ? (
+          <Box
+            sx={{
+              textAlign: 'center',
+              py: 8,
+              px: 4,
+              borderRadius: 4,
+              background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, rgba(139, 92, 246, 0.03) 100%)',
+              border: '2px dashed rgba(99, 102, 241, 0.2)',
+            }}
+          >
+            <Search sx={{ fontSize: 80, color: '#6366f1', opacity: 0.3, mb: 2 }} />
+            <Typography variant="h5" fontWeight={700} gutterBottom>
+              Nenhum time encontrado
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 500, mx: 'auto' }}>
+              Não encontramos times que correspondam aos filtros selecionados
+            </Typography>
+            <Button
+              variant="outlined"
+              startIcon={<Clear />}
+              onClick={clearFilters}
+              sx={{
+                px: 4,
+                py: 1.5,
+                borderWidth: 2,
+                borderColor: '#6366f1',
+                color: '#6366f1',
+                fontWeight: 600,
+                '&:hover': {
+                  borderWidth: 2,
+                  bgcolor: 'rgba(99, 102, 241, 0.05)',
+                },
+              }}
+            >
+              Limpar Filtros
+            </Button>
+          </Box>
         ) : (
           <Grid container spacing={3}>
-            {teams.map((team) => (
+            {filteredTeams.map((team) => (
               <Grid item xs={12} md={6} lg={4} key={team.id}>
                 <Card
                   elevation={0}

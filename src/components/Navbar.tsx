@@ -88,9 +88,9 @@ export default function Navbar() {
           <Typography
             variant="h6"
             component="div"
-            sx={{ fontWeight: 700, display: { xs: "none", sm: "block" } }}
+            sx={{ fontWeight: 750, display: { xs: "none", sm: "block" } }}
           >
-            Agir é ágil
+            agir ágil
           </Typography>
         </Box>
 

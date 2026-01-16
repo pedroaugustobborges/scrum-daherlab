@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -12,7 +12,8 @@ import {
   Stack,
   Avatar,
   Grid,
-} from '@mui/material'
+  Button,
+} from "@mui/material";
 import {
   CalendarToday,
   TrendingUp,
@@ -21,93 +22,102 @@ import {
   Person,
   Flag,
   Functions,
-} from '@mui/icons-material'
-import Modal from './Modal'
-import SprintDetailsModal from './SprintDetailsModal'
-import CreateBacklogItemModal from './CreateBacklogItemModal'
-import { supabase } from '@/lib/supabase'
-import toast from 'react-hot-toast'
+  Add,
+} from "@mui/icons-material";
+import Modal from "./Modal";
+import SprintDetailsModal from "./SprintDetailsModal";
+import CreateBacklogItemModal from "./CreateBacklogItemModal";
+import CreateSprintModal from "./CreateSprintModal";
+import { supabase } from "@/lib/supabase";
+import toast from "react-hot-toast";
 
 interface ProjectDetailsModalProps {
-  open: boolean
-  onClose: () => void
+  open: boolean;
+  onClose: () => void;
   project: {
-    id: string
-    name: string
-    description: string
-    status: string
-    start_date: string
-    end_date: string
-  }
+    id: string;
+    name: string;
+    description: string;
+    status: string;
+    start_date: string;
+    end_date: string;
+  };
 }
 
 interface Sprint {
-  id: string
-  name: string
-  status: string
-  start_date: string
-  end_date: string
-  velocity: number
-  team_id: string
+  id: string;
+  name: string;
+  status: string;
+  start_date: string;
+  end_date: string;
+  velocity: number;
+  team_id: string;
 }
 
 interface BacklogItem {
-  id: string
-  title: string
-  description: string
-  status: string
-  priority: string
-  story_points: number
-  assigned_to: string
-  assigned_to_profile?: { full_name: string }
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  priority: string;
+  story_points: number;
+  assigned_to: string;
+  assigned_to_profile?: { full_name: string };
 }
 
 interface TeamMember {
-  id: string
-  full_name: string
-  avatar_url?: string
-  role: string
+  id: string;
+  full_name: string;
+  avatar_url?: string;
+  role: string;
 }
 
 const statusConfig: Record<string, { label: string; color: string }> = {
-  todo: { label: 'A Fazer', color: '#6b7280' },
-  'in-progress': { label: 'Em Progresso', color: '#f59e0b' },
-  review: { label: 'Em Revisão', color: '#8b5cf6' },
-  done: { label: 'Concluído', color: '#10b981' },
-  blocked: { label: 'Bloqueado', color: '#ef4444' },
-}
+  todo: { label: "A Fazer", color: "#6b7280" },
+  "in-progress": { label: "Em Progresso", color: "#f59e0b" },
+  review: { label: "Em Revisão", color: "#8b5cf6" },
+  done: { label: "Concluído", color: "#10b981" },
+  blocked: { label: "Bloqueado", color: "#ef4444" },
+};
 
 const priorityConfig: Record<string, { label: string; color: string }> = {
-  low: { label: 'Baixa', color: '#6b7280' },
-  medium: { label: 'Média', color: '#f59e0b' },
-  high: { label: 'Alta', color: '#ef4444' },
-  urgent: { label: 'Urgente', color: '#dc2626' },
-}
+  low: { label: "Baixa", color: "#6b7280" },
+  medium: { label: "Média", color: "#f59e0b" },
+  high: { label: "Alta", color: "#ef4444" },
+  urgent: { label: "Urgente", color: "#dc2626" },
+};
 
 const sprintStatusConfig: Record<string, { label: string; color: string }> = {
-  planning: { label: 'Planejamento', color: '#6b7280' },
-  active: { label: 'Ativo', color: '#10b981' },
-  completed: { label: 'Concluído', color: '#6366f1' },
-  cancelled: { label: 'Cancelado', color: '#ef4444' },
-}
+  planning: { label: "Planejamento", color: "#6b7280" },
+  active: { label: "Ativo", color: "#10b981" },
+  completed: { label: "Concluído", color: "#6366f1" },
+  cancelled: { label: "Cancelado", color: "#ef4444" },
+};
 
 const roleConfig: Record<string, { label: string; color: string }> = {
-  product_owner: { label: 'Product Owner', color: '#6366f1' },
-  scrum_master: { label: 'Scrum Master', color: '#8b5cf6' },
-  developer: { label: 'Developer', color: '#10b981' },
-  member: { label: 'Membro', color: '#6b7280' },
-}
+  product_owner: { label: "Product Owner", color: "#6366f1" },
+  scrum_master: { label: "Scrum Master", color: "#8b5cf6" },
+  developer: { label: "Developer", color: "#10b981" },
+  member: { label: "Membro", color: "#6b7280" },
+};
 
-export default function ProjectDetailsModal({ open, onClose, project }: ProjectDetailsModalProps) {
-  const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState(0)
-  const [sprintDetailsOpen, setSprintDetailsOpen] = useState(false)
-  const [selectedSprint, setSelectedSprint] = useState<Sprint | null>(null)
-  const [backlogItemModalOpen, setBacklogItemModalOpen] = useState(false)
-  const [selectedBacklogItem, setSelectedBacklogItem] = useState<BacklogItem | null>(null)
-  const [sprints, setSprints] = useState<Sprint[]>([])
-  const [backlogItems, setBacklogItems] = useState<BacklogItem[]>([])
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
+export default function ProjectDetailsModal({
+  open,
+  onClose,
+  project,
+}: ProjectDetailsModalProps) {
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState(0);
+  const [sprintDetailsOpen, setSprintDetailsOpen] = useState(false);
+  const [selectedSprint, setSelectedSprint] = useState<Sprint | null>(null);
+  const [backlogItemModalOpen, setBacklogItemModalOpen] = useState(false);
+  const [selectedBacklogItem, setSelectedBacklogItem] =
+    useState<BacklogItem | null>(null);
+  const [createSprintModalOpen, setCreateSprintModalOpen] = useState(false);
+  const [createBacklogModalOpen, setCreateBacklogModalOpen] = useState(false);
+  const [sprints, setSprints] = useState<Sprint[]>([]);
+  const [backlogItems, setBacklogItems] = useState<BacklogItem[]>([]);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [statistics, setStatistics] = useState({
     totalBacklogItems: 0,
     totalSprints: 0,
@@ -115,46 +125,48 @@ export default function ProjectDetailsModal({ open, onClose, project }: ProjectD
     completedSprints: 0,
     totalStoryPoints: 0,
     completedStoryPoints: 0,
-  })
+  });
 
   useEffect(() => {
     if (open) {
-      fetchProjectDetails()
+      fetchProjectDetails();
     }
-  }, [open, project.id])
+  }, [open, project.id]);
 
   const fetchProjectDetails = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       // Fetch all data in parallel
       const [sprintsRes, backlogRes, statsRes] = await Promise.all([
         // Fetch sprints
         supabase
-          .from('sprints')
-          .select('id, name, status, start_date, end_date, velocity, team_id')
-          .eq('project_id', project.id)
-          .order('start_date', { ascending: false }),
+          .from("sprints")
+          .select("id, name, status, start_date, end_date, velocity, team_id")
+          .eq("project_id", project.id)
+          .order("start_date", { ascending: false }),
 
         // Fetch backlog items (tasks not in a sprint)
         supabase
-          .from('tasks')
-          .select('id, title, description, status, priority, story_points, assigned_to, assigned_to_profile:profiles!assigned_to(full_name)')
-          .eq('project_id', project.id)
-          .is('sprint_id', null)
-          .order('created_at', { ascending: false }),
+          .from("tasks")
+          .select(
+            "id, title, description, status, priority, story_points, assigned_to, assigned_to_profile:profiles!assigned_to(full_name)"
+          )
+          .eq("project_id", project.id)
+          .is("sprint_id", null)
+          .order("created_at", { ascending: false }),
 
         // Fetch all tasks for statistics
         supabase
-          .from('tasks')
-          .select('id, status, story_points')
-          .eq('project_id', project.id),
-      ])
+          .from("tasks")
+          .select("id, status, story_points")
+          .eq("project_id", project.id),
+      ]);
 
-      if (sprintsRes.error) throw sprintsRes.error
-      if (backlogRes.error) throw backlogRes.error
-      if (statsRes.error) throw statsRes.error
+      if (sprintsRes.error) throw sprintsRes.error;
+      if (backlogRes.error) throw backlogRes.error;
+      if (statsRes.error) throw statsRes.error;
 
-      setSprints(sprintsRes.data || [])
+      setSprints(sprintsRes.data || []);
 
       // Transform backlog items to handle assigned_to_profile array
       const transformedBacklog = (backlogRes.data || []).map((item: any) => ({
@@ -162,16 +174,22 @@ export default function ProjectDetailsModal({ open, onClose, project }: ProjectD
         assigned_to_profile: Array.isArray(item.assigned_to_profile)
           ? item.assigned_to_profile[0]
           : item.assigned_to_profile,
-      }))
-      setBacklogItems(transformedBacklog)
+      }));
+      setBacklogItems(transformedBacklog);
 
       // Get unique team members from sprints
-      const uniqueTeamIds = [...new Set((sprintsRes.data || []).map((s) => s.team_id).filter(Boolean))]
+      const uniqueTeamIds = [
+        ...new Set(
+          (sprintsRes.data || []).map((s) => s.team_id).filter(Boolean)
+        ),
+      ];
       if (uniqueTeamIds.length > 0) {
         const { data: teamsData } = await supabase
-          .from('team_members')
-          .select('role, user_profile:profiles!user_id(id, full_name, avatar_url)')
-          .in('team_id', uniqueTeamIds)
+          .from("team_members")
+          .select(
+            "role, user_profile:profiles!user_id(id, full_name, avatar_url)"
+          )
+          .in("team_id", uniqueTeamIds);
 
         const uniqueMembers = teamsData
           ?.map((tm: any) => ({
@@ -181,22 +199,29 @@ export default function ProjectDetailsModal({ open, onClose, project }: ProjectD
           .filter((m: any) => m)
           .reduce((acc: TeamMember[], curr: TeamMember) => {
             if (!acc.find((m) => m.id === curr.id)) {
-              acc.push(curr)
+              acc.push(curr);
             }
-            return acc
-          }, [])
+            return acc;
+          }, []);
 
-        setTeamMembers(uniqueMembers || [])
+        setTeamMembers(uniqueMembers || []);
       }
 
       // Calculate statistics
-      const allTasks = statsRes.data || []
-      const activeSprints = (sprintsRes.data || []).filter((s) => s.status === 'active').length
-      const completedSprints = (sprintsRes.data || []).filter((s) => s.status === 'completed').length
-      const totalStoryPoints = allTasks.reduce((sum, task) => sum + (task.story_points || 0), 0)
+      const allTasks = statsRes.data || [];
+      const activeSprints = (sprintsRes.data || []).filter(
+        (s) => s.status === "active"
+      ).length;
+      const completedSprints = (sprintsRes.data || []).filter(
+        (s) => s.status === "completed"
+      ).length;
+      const totalStoryPoints = allTasks.reduce(
+        (sum, task) => sum + (task.story_points || 0),
+        0
+      );
       const completedStoryPoints = allTasks
-        .filter((task) => task.status === 'done')
-        .reduce((sum, task) => sum + (task.story_points || 0), 0)
+        .filter((task) => task.status === "done")
+        .reduce((sum, task) => sum + (task.story_points || 0), 0);
 
       setStatistics({
         totalBacklogItems: (backlogRes.data || []).length,
@@ -205,53 +230,62 @@ export default function ProjectDetailsModal({ open, onClose, project }: ProjectD
         completedSprints,
         totalStoryPoints,
         completedStoryPoints,
-      })
+      });
     } catch (error) {
-      console.error('Error fetching project details:', error)
-      toast.error('Erro ao carregar detalhes do projeto')
+      console.error("Error fetching project details:", error);
+      toast.error("Erro ao carregar detalhes do projeto");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const formatDate = (date: string) => {
-    if (!date) return '-'
-    return new Date(date).toLocaleDateString('pt-BR')
-  }
+    if (!date) return "-";
+    return new Date(date).toLocaleDateString("pt-BR");
+  };
 
   const calculateProgress = () => {
-    if (statistics.totalStoryPoints === 0) return 0
-    return Math.round((statistics.completedStoryPoints / statistics.totalStoryPoints) * 100)
-  }
+    if (statistics.totalStoryPoints === 0) return 0;
+    return Math.round(
+      (statistics.completedStoryPoints / statistics.totalStoryPoints) * 100
+    );
+  };
 
   const handleOpenSprintDetails = (sprint: Sprint) => {
-    setSelectedSprint(sprint)
-    setSprintDetailsOpen(true)
-  }
+    setSelectedSprint(sprint);
+    setSprintDetailsOpen(true);
+  };
 
   const handleCloseSprintDetails = () => {
-    setSprintDetailsOpen(false)
-    setSelectedSprint(null)
-  }
+    setSprintDetailsOpen(false);
+    setSelectedSprint(null);
+  };
 
   const handleOpenBacklogItem = (item: BacklogItem) => {
-    setSelectedBacklogItem(item)
-    setBacklogItemModalOpen(true)
-  }
+    setSelectedBacklogItem(item);
+    setBacklogItemModalOpen(true);
+  };
 
   const handleCloseBacklogItem = () => {
-    setBacklogItemModalOpen(false)
-    setSelectedBacklogItem(null)
-  }
+    setBacklogItemModalOpen(false);
+    setSelectedBacklogItem(null);
+  };
 
   if (loading) {
     return (
       <Modal open={open} onClose={onClose} title={project.name} maxWidth="lg">
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            py: 8,
+          }}
+        >
           <CircularProgress size={60} />
         </Box>
       </Modal>
-    )
+    );
   }
 
   return (
@@ -262,25 +296,36 @@ export default function ProjectDetailsModal({ open, onClose, project }: ProjectD
           elevation={0}
           sx={{
             mb: 3,
-            background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)',
-            border: '2px solid rgba(99, 102, 241, 0.1)',
+            background:
+              "linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)",
+            border: "2px solid rgba(99, 102, 241, 0.1)",
             borderRadius: 3,
           }}
         >
           <CardContent sx={{ p: 3 }}>
             <Grid container spacing={3}>
               <Grid item xs={12} md={8}>
-                <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-                  {project.description || 'Sem descrição'}
+                <Typography
+                  variant="body1"
+                  color="text.secondary"
+                  sx={{ mb: 2 }}
+                >
+                  {project.description || "Sem descrição"}
                 </Typography>
 
-                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 2 }}>
+                <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 2 }}>
                   <Box>
-                    <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      fontWeight={600}
+                    >
                       Início
                     </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <CalendarToday sx={{ fontSize: 14, color: '#6366f1' }} />
+                    <Box
+                      sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+                    >
+                      <CalendarToday sx={{ fontSize: 14, color: "#6366f1" }} />
                       <Typography variant="body2" fontWeight={600}>
                         {formatDate(project.start_date)}
                       </Typography>
@@ -288,11 +333,17 @@ export default function ProjectDetailsModal({ open, onClose, project }: ProjectD
                   </Box>
 
                   <Box>
-                    <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      fontWeight={600}
+                    >
                       Término
                     </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <CalendarToday sx={{ fontSize: 14, color: '#6366f1' }} />
+                    <Box
+                      sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+                    >
+                      <CalendarToday sx={{ fontSize: 14, color: "#6366f1" }} />
                       <Typography variant="body2" fontWeight={600}>
                         {formatDate(project.end_date)}
                       </Typography>
@@ -302,12 +353,18 @@ export default function ProjectDetailsModal({ open, onClose, project }: ProjectD
 
                 {teamMembers.length > 0 && (
                   <Box>
-                    <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1.5, display: 'block' }}>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      fontWeight={600}
+                      sx={{ mb: 1.5, display: "block" }}
+                    >
                       Membros do Time ({teamMembers.length})
                     </Typography>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5 }}>
                       {teamMembers.map((member) => {
-                        const memberRole = roleConfig[member.role] || roleConfig.member
+                        const memberRole =
+                          roleConfig[member.role] || roleConfig.member;
                         return (
                           <Card
                             key={member.id}
@@ -315,35 +372,43 @@ export default function ProjectDetailsModal({ open, onClose, project }: ProjectD
                             sx={{
                               border: `2px solid ${memberRole.color}20`,
                               borderRadius: 2,
-                              transition: 'all 0.2s',
-                              cursor: 'pointer',
+                              transition: "all 0.2s",
+                              cursor: "pointer",
                               bgcolor: `${memberRole.color}08`,
-                              '&:hover': {
+                              "&:hover": {
                                 border: `2px solid ${memberRole.color}`,
                                 boxShadow: `0 4px 12px ${memberRole.color}30`,
-                                transform: 'translateY(-2px)',
+                                transform: "translateY(-2px)",
                               },
                             }}
                           >
-                            <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                            <CardContent
+                              sx={{ p: 1.5, "&:last-child": { pb: 1.5 } }}
+                            >
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 1.5,
+                                }}
+                              >
                                 <Avatar
                                   sx={{
                                     width: 36,
                                     height: 36,
                                     bgcolor: memberRole.color,
-                                    fontSize: '0.9rem',
+                                    fontSize: "0.9rem",
                                     fontWeight: 700,
                                   }}
                                 >
-                                  {member.full_name?.charAt(0) || 'U'}
+                                  {member.full_name?.charAt(0) || "U"}
                                 </Avatar>
                                 <Box sx={{ minWidth: 0 }}>
                                   <Typography
                                     variant="body2"
                                     fontWeight={700}
                                     sx={{
-                                      color: 'text.primary',
+                                      color: "text.primary",
                                       lineHeight: 1.2,
                                       mb: 0.3,
                                     }}
@@ -355,11 +420,11 @@ export default function ProjectDetailsModal({ open, onClose, project }: ProjectD
                                     size="small"
                                     sx={{
                                       height: 18,
-                                      fontSize: '0.65rem',
+                                      fontSize: "0.65rem",
                                       fontWeight: 700,
                                       bgcolor: `${memberRole.color}`,
-                                      color: 'white',
-                                      '& .MuiChip-label': {
+                                      color: "white",
+                                      "& .MuiChip-label": {
                                         px: 1,
                                       },
                                     }}
@@ -368,7 +433,7 @@ export default function ProjectDetailsModal({ open, onClose, project }: ProjectD
                               </Box>
                             </CardContent>
                           </Card>
-                        )
+                        );
                       })}
                     </Box>
                   </Box>
@@ -381,17 +446,28 @@ export default function ProjectDetailsModal({ open, onClose, project }: ProjectD
                     sx={{
                       p: 2,
                       borderRadius: 2,
-                      bgcolor: 'white',
-                      border: '1px solid rgba(99, 102, 241, 0.2)',
+                      bgcolor: "white",
+                      border: "1px solid rgba(99, 102, 241, 0.2)",
                     }}
                   >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                      <TrendingUp sx={{ fontSize: 20, color: '#6366f1' }} />
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        mb: 1,
+                      }}
+                    >
+                      <TrendingUp sx={{ fontSize: 20, color: "#6366f1" }} />
                       <Typography variant="body2" fontWeight={600}>
                         Progresso Geral
                       </Typography>
                     </Box>
-                    <Typography variant="h4" fontWeight={800} sx={{ color: '#6366f1', mb: 1 }}>
+                    <Typography
+                      variant="h4"
+                      fontWeight={800}
+                      sx={{ color: "#6366f1", mb: 1 }}
+                    >
                       {calculateProgress()}%
                     </Typography>
                     <LinearProgress
@@ -400,31 +476,44 @@ export default function ProjectDetailsModal({ open, onClose, project }: ProjectD
                       sx={{
                         height: 8,
                         borderRadius: 1,
-                        bgcolor: 'rgba(99, 102, 241, 0.1)',
-                        '& .MuiLinearProgress-bar': {
-                          bgcolor: '#6366f1',
+                        bgcolor: "rgba(99, 102, 241, 0.1)",
+                        "& .MuiLinearProgress-bar": {
+                          bgcolor: "#6366f1",
                         },
                       }}
                     />
-                    <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-                      {statistics.completedStoryPoints} / {statistics.totalStoryPoints} story points
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ mt: 0.5, display: "block" }}
+                    >
+                      {statistics.completedStoryPoints} /{" "}
+                      {statistics.totalStoryPoints} story points
                     </Typography>
                   </Box>
 
-                  <Box sx={{ display: 'flex', gap: 1 }}>
+                  <Box sx={{ display: "flex", gap: 1 }}>
                     <Box
                       sx={{
                         flex: 1,
                         p: 1.5,
                         borderRadius: 2,
-                        bgcolor: 'rgba(16, 185, 129, 0.1)',
-                        textAlign: 'center',
+                        bgcolor: "rgba(16, 185, 129, 0.1)",
+                        textAlign: "center",
                       }}
                     >
-                      <Typography variant="h6" fontWeight={700} sx={{ color: '#10b981' }}>
+                      <Typography
+                        variant="h6"
+                        fontWeight={700}
+                        sx={{ color: "#10b981" }}
+                      >
                         {statistics.activeSprints}
                       </Typography>
-                      <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        fontWeight={600}
+                      >
                         Sprints Ativos
                       </Typography>
                     </Box>
@@ -434,14 +523,22 @@ export default function ProjectDetailsModal({ open, onClose, project }: ProjectD
                         flex: 1,
                         p: 1.5,
                         borderRadius: 2,
-                        bgcolor: 'rgba(245, 158, 11, 0.1)',
-                        textAlign: 'center',
+                        bgcolor: "rgba(245, 158, 11, 0.1)",
+                        textAlign: "center",
                       }}
                     >
-                      <Typography variant="h6" fontWeight={700} sx={{ color: '#f59e0b' }}>
+                      <Typography
+                        variant="h6"
+                        fontWeight={700}
+                        sx={{ color: "#f59e0b" }}
+                      >
                         {statistics.totalBacklogItems}
                       </Typography>
-                      <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        fontWeight={600}
+                      >
                         No Backlog
                       </Typography>
                     </Box>
@@ -453,9 +550,16 @@ export default function ProjectDetailsModal({ open, onClose, project }: ProjectD
         </Card>
 
         {/* Tabs */}
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-          <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)}>
-            <Tab label="Sprints" icon={<SpaceDashboard />} iconPosition="start" />
+        <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
+          <Tabs
+            value={activeTab}
+            onChange={(_, newValue) => setActiveTab(newValue)}
+          >
+            <Tab
+              label="Sprints"
+              icon={<SpaceDashboard />}
+              iconPosition="start"
+            />
             <Tab label="Backlog" icon={<Inventory />} iconPosition="start" />
           </Tabs>
         </Box>
@@ -463,24 +567,85 @@ export default function ProjectDetailsModal({ open, onClose, project }: ProjectD
         {/* Tab Panels */}
         {activeTab === 0 && (
           <Box>
+            {/* Sprints Header with Create Button */}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 3,
+              }}
+            >
+              <Box>
+                <Typography variant="h6" fontWeight={700}>
+                  Sprints do Projeto
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {sprints.length} sprint{sprints.length !== 1 ? "s" : ""} encontrado{sprints.length !== 1 ? "s" : ""}
+                </Typography>
+              </Box>
+              <Button
+                variant="contained"
+                startIcon={<Add />}
+                onClick={() => setCreateSprintModalOpen(true)}
+                sx={{
+                  px: 3,
+                  py: 1,
+                  borderRadius: 2,
+                  fontWeight: 600,
+                  background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+                  boxShadow: "0 4px 12px rgba(99, 102, 241, 0.3)",
+                  "&:hover": {
+                    background: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)",
+                    boxShadow: "0 6px 16px rgba(99, 102, 241, 0.4)",
+                  },
+                }}
+              >
+                Novo Sprint
+              </Button>
+            </Box>
+
             {sprints.length === 0 ? (
               <Box
                 sx={{
-                  textAlign: 'center',
+                  textAlign: "center",
                   py: 6,
                   px: 3,
                   borderRadius: 3,
-                  bgcolor: 'rgba(99, 102, 241, 0.05)',
-                  border: '2px dashed rgba(99, 102, 241, 0.2)',
+                  bgcolor: "rgba(99, 102, 241, 0.05)",
+                  border: "2px dashed rgba(99, 102, 241, 0.2)",
                 }}
               >
-                <SpaceDashboard sx={{ fontSize: 60, color: '#6366f1', opacity: 0.3, mb: 2 }} />
+                <SpaceDashboard
+                  sx={{ fontSize: 60, color: "#6366f1", opacity: 0.3, mb: 2 }}
+                />
                 <Typography variant="h6" fontWeight={700} gutterBottom>
                   Nenhum sprint criado ainda
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Este projeto ainda não possui sprints
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                  Crie o primeiro sprint para este projeto
                 </Typography>
+                <Button
+                  variant="outlined"
+                  startIcon={<Add />}
+                  onClick={() => setCreateSprintModalOpen(true)}
+                  sx={{
+                    px: 4,
+                    py: 1.5,
+                    borderRadius: 2,
+                    borderWidth: 2,
+                    borderColor: "#6366f1",
+                    color: "#6366f1",
+                    fontWeight: 600,
+                    "&:hover": {
+                      borderWidth: 2,
+                      borderColor: "#6366f1",
+                      bgcolor: "rgba(99, 102, 241, 0.05)",
+                    },
+                  }}
+                >
+                  Criar Primeiro Sprint
+                </Button>
               </Box>
             ) : (
               <Stack spacing={2}>
@@ -490,45 +655,86 @@ export default function ProjectDetailsModal({ open, onClose, project }: ProjectD
                     elevation={0}
                     onClick={() => handleOpenSprintDetails(sprint)}
                     sx={{
-                      border: '2px solid rgba(99, 102, 241, 0.1)',
+                      border: "2px solid rgba(99, 102, 241, 0.1)",
                       borderRadius: 3,
-                      transition: 'all 0.2s',
-                      cursor: 'pointer',
-                      '&:hover': {
-                        border: '2px solid rgba(99, 102, 241, 0.3)',
-                        boxShadow: '0 4px 12px rgba(99, 102, 241, 0.15)',
+                      transition: "all 0.2s",
+                      cursor: "pointer",
+                      "&:hover": {
+                        border: "2px solid rgba(99, 102, 241, 0.3)",
+                        boxShadow: "0 4px 12px rgba(99, 102, 241, 0.15)",
                       },
                     }}
                   >
                     <CardContent sx={{ p: 2.5 }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
                         <Box sx={{ flex: 1 }}>
-                          <Typography variant="h6" fontWeight={700} gutterBottom>
+                          <Typography
+                            variant="h6"
+                            fontWeight={700}
+                            gutterBottom
+                          >
                             {sprint.name}
                           </Typography>
 
-                          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                          <Box
+                            sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}
+                          >
                             <Chip
-                              label={sprintStatusConfig[sprint.status]?.label || sprint.status}
+                              label={
+                                sprintStatusConfig[sprint.status]?.label ||
+                                sprint.status
+                              }
                               size="small"
                               sx={{
-                                bgcolor: `${sprintStatusConfig[sprint.status]?.color}20`,
+                                bgcolor: `${
+                                  sprintStatusConfig[sprint.status]?.color
+                                }20`,
                                 color: sprintStatusConfig[sprint.status]?.color,
                                 fontWeight: 600,
                               }}
                             />
 
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                              <CalendarToday sx={{ fontSize: 14, color: 'text.secondary' }} />
-                              <Typography variant="caption" color="text.secondary">
-                                {formatDate(sprint.start_date)} - {formatDate(sprint.end_date)}
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 0.5,
+                              }}
+                            >
+                              <CalendarToday
+                                sx={{ fontSize: 14, color: "text.secondary" }}
+                              />
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
+                                {formatDate(sprint.start_date)} -{" "}
+                                {formatDate(sprint.end_date)}
                               </Typography>
                             </Box>
 
                             {sprint.velocity > 0 && (
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                <TrendingUp sx={{ fontSize: 14, color: '#6366f1' }} />
-                                <Typography variant="caption" fontWeight={600} sx={{ color: '#6366f1' }}>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 0.5,
+                                }}
+                              >
+                                <TrendingUp
+                                  sx={{ fontSize: 14, color: "#6366f1" }}
+                                />
+                                <Typography
+                                  variant="caption"
+                                  fontWeight={600}
+                                  sx={{ color: "#6366f1" }}
+                                >
                                   Velocity: {sprint.velocity}
                                 </Typography>
                               </Box>
@@ -546,24 +752,85 @@ export default function ProjectDetailsModal({ open, onClose, project }: ProjectD
 
         {activeTab === 1 && (
           <Box>
+            {/* Backlog Header with Create Button */}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 3,
+              }}
+            >
+              <Box>
+                <Typography variant="h6" fontWeight={700}>
+                  Product Backlog
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {backlogItems.length} ite{backlogItems.length !== 1 ? "ns" : "m"} no backlog
+                </Typography>
+              </Box>
+              <Button
+                variant="contained"
+                startIcon={<Add />}
+                onClick={() => setCreateBacklogModalOpen(true)}
+                sx={{
+                  px: 3,
+                  py: 1,
+                  borderRadius: 2,
+                  fontWeight: 600,
+                  background: "linear-gradient(135deg, #f59e0b 0%, #f97316 100%)",
+                  boxShadow: "0 4px 12px rgba(245, 158, 11, 0.3)",
+                  "&:hover": {
+                    background: "linear-gradient(135deg, #d97706 0%, #ea580c 100%)",
+                    boxShadow: "0 6px 16px rgba(245, 158, 11, 0.4)",
+                  },
+                }}
+              >
+                Novo Item
+              </Button>
+            </Box>
+
             {backlogItems.length === 0 ? (
               <Box
                 sx={{
-                  textAlign: 'center',
+                  textAlign: "center",
                   py: 6,
                   px: 3,
                   borderRadius: 3,
-                  bgcolor: 'rgba(245, 158, 11, 0.05)',
-                  border: '2px dashed rgba(245, 158, 11, 0.2)',
+                  bgcolor: "rgba(245, 158, 11, 0.05)",
+                  border: "2px dashed rgba(245, 158, 11, 0.2)",
                 }}
               >
-                <Inventory sx={{ fontSize: 60, color: '#f59e0b', opacity: 0.3, mb: 2 }} />
+                <Inventory
+                  sx={{ fontSize: 60, color: "#f59e0b", opacity: 0.3, mb: 2 }}
+                />
                 <Typography variant="h6" fontWeight={700} gutterBottom>
                   Backlog vazio
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Não há itens no backlog para este projeto
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                  Adicione itens ao backlog deste projeto
                 </Typography>
+                <Button
+                  variant="outlined"
+                  startIcon={<Add />}
+                  onClick={() => setCreateBacklogModalOpen(true)}
+                  sx={{
+                    px: 4,
+                    py: 1.5,
+                    borderRadius: 2,
+                    borderWidth: 2,
+                    borderColor: "#f59e0b",
+                    color: "#f59e0b",
+                    fontWeight: 600,
+                    "&:hover": {
+                      borderWidth: 2,
+                      borderColor: "#f59e0b",
+                      bgcolor: "rgba(245, 158, 11, 0.05)",
+                    },
+                  }}
+                >
+                  Criar Primeiro Item
+                </Button>
               </Box>
             ) : (
               <Stack spacing={2}>
@@ -573,44 +840,65 @@ export default function ProjectDetailsModal({ open, onClose, project }: ProjectD
                     elevation={0}
                     onClick={() => handleOpenBacklogItem(item)}
                     sx={{
-                      border: '2px solid rgba(99, 102, 241, 0.1)',
+                      border: "2px solid rgba(99, 102, 241, 0.1)",
                       borderRadius: 3,
-                      transition: 'all 0.2s',
-                      cursor: 'pointer',
-                      '&:hover': {
-                        border: '2px solid rgba(99, 102, 241, 0.3)',
-                        boxShadow: '0 4px 12px rgba(99, 102, 241, 0.15)',
+                      transition: "all 0.2s",
+                      cursor: "pointer",
+                      "&:hover": {
+                        border: "2px solid rgba(99, 102, 241, 0.3)",
+                        boxShadow: "0 4px 12px rgba(99, 102, 241, 0.15)",
                       },
                     }}
                   >
                     <CardContent sx={{ p: 2.5 }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
                         <Box sx={{ flex: 1 }}>
-                          <Typography variant="body1" fontWeight={600} gutterBottom>
+                          <Typography
+                            variant="body1"
+                            fontWeight={600}
+                            gutterBottom
+                          >
                             {item.title}
                           </Typography>
 
-                          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                          <Box
+                            sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}
+                          >
                             <Chip
-                              label={statusConfig[item.status]?.label || item.status}
+                              label={
+                                statusConfig[item.status]?.label || item.status
+                              }
                               size="small"
                               sx={{
-                                bgcolor: `${statusConfig[item.status]?.color}20`,
+                                bgcolor: `${
+                                  statusConfig[item.status]?.color
+                                }20`,
                                 color: statusConfig[item.status]?.color,
                                 fontWeight: 600,
-                                fontSize: '0.7rem',
+                                fontSize: "0.7rem",
                               }}
                             />
 
                             <Chip
-                              label={priorityConfig[item.priority]?.label || item.priority}
+                              label={
+                                priorityConfig[item.priority]?.label ||
+                                item.priority
+                              }
                               size="small"
                               icon={<Flag sx={{ fontSize: 14 }} />}
                               sx={{
-                                bgcolor: `${priorityConfig[item.priority]?.color}20`,
+                                bgcolor: `${
+                                  priorityConfig[item.priority]?.color
+                                }20`,
                                 color: priorityConfig[item.priority]?.color,
                                 fontWeight: 600,
-                                fontSize: '0.7rem',
+                                fontSize: "0.7rem",
                               }}
                             />
 
@@ -620,10 +908,10 @@ export default function ProjectDetailsModal({ open, onClose, project }: ProjectD
                                 size="small"
                                 icon={<Functions sx={{ fontSize: 14 }} />}
                                 sx={{
-                                  bgcolor: 'rgba(99, 102, 241, 0.1)',
-                                  color: '#6366f1',
+                                  bgcolor: "rgba(99, 102, 241, 0.1)",
+                                  color: "#6366f1",
                                   fontWeight: 600,
-                                  fontSize: '0.7rem',
+                                  fontSize: "0.7rem",
                                 }}
                               />
                             )}
@@ -634,10 +922,10 @@ export default function ProjectDetailsModal({ open, onClose, project }: ProjectD
                                 size="small"
                                 icon={<Person sx={{ fontSize: 14 }} />}
                                 sx={{
-                                  bgcolor: 'rgba(16, 185, 129, 0.1)',
-                                  color: '#10b981',
+                                  bgcolor: "rgba(16, 185, 129, 0.1)",
+                                  color: "#10b981",
                                   fontWeight: 600,
-                                  fontSize: '0.7rem',
+                                  fontSize: "0.7rem",
                                 }}
                               />
                             )}
@@ -673,8 +961,8 @@ export default function ProjectDetailsModal({ open, onClose, project }: ProjectD
           open={backlogItemModalOpen}
           onClose={handleCloseBacklogItem}
           onSuccess={() => {
-            handleCloseBacklogItem()
-            fetchProjectDetails()
+            handleCloseBacklogItem();
+            fetchProjectDetails();
           }}
           item={{
             id: selectedBacklogItem.id,
@@ -688,6 +976,37 @@ export default function ProjectDetailsModal({ open, onClose, project }: ProjectD
           }}
         />
       )}
+
+      {/* Create Sprint Modal */}
+      <CreateSprintModal
+        open={createSprintModalOpen}
+        onClose={() => setCreateSprintModalOpen(false)}
+        onSuccess={() => {
+          setCreateSprintModalOpen(false);
+          fetchProjectDetails();
+        }}
+        defaultProjectId={project.id}
+      />
+
+      {/* Create Backlog Item Modal */}
+      <CreateBacklogItemModal
+        open={createBacklogModalOpen}
+        onClose={() => setCreateBacklogModalOpen(false)}
+        onSuccess={() => {
+          setCreateBacklogModalOpen(false);
+          fetchProjectDetails();
+        }}
+        item={{
+          id: "",
+          title: "",
+          description: "",
+          status: "todo",
+          priority: "medium",
+          story_points: 0,
+          project_id: project.id,
+          assigned_to: "",
+        }}
+      />
     </Modal>
-  )
+  );
 }

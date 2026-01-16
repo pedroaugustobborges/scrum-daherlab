@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from "react";
 import {
   TextField,
   Button,
@@ -7,7 +7,7 @@ import {
   Stack,
   InputAdornment,
   CircularProgress,
-} from '@mui/material'
+} from "@mui/material";
 import {
   SpaceDashboard,
   CalendarToday,
@@ -15,117 +15,123 @@ import {
   Assignment,
   Flag,
   Speed,
-} from '@mui/icons-material'
-import toast from 'react-hot-toast'
-import Modal from './Modal'
-import { supabase } from '@/lib/supabase'
-import { useAuth } from '@/contexts/AuthContext'
+} from "@mui/icons-material";
+import toast from "react-hot-toast";
+import Modal from "./Modal";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface CreateSprintModalProps {
-  open: boolean
-  onClose: () => void
-  onSuccess: () => void
+  open: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+  defaultProjectId?: string;
 }
 
 interface Team {
-  id: string
-  name: string
+  id: string;
+  name: string;
 }
 
 interface Project {
-  id: string
-  name: string
+  id: string;
+  name: string;
 }
 
 const statusOptions = [
-  { value: 'planning', label: 'Planejamento', color: '#f59e0b' },
-  { value: 'active', label: 'Ativo', color: '#10b981' },
-  { value: 'completed', label: 'Concluído', color: '#6366f1' },
-  { value: 'cancelled', label: 'Cancelado', color: '#ef4444' },
-]
+  { value: "planning", label: "Planejamento", color: "#f59e0b" },
+  { value: "active", label: "Ativo", color: "#10b981" },
+  { value: "completed", label: "Concluído", color: "#6366f1" },
+  { value: "cancelled", label: "Cancelado", color: "#ef4444" },
+];
 
 export default function CreateSprintModal({
   open,
   onClose,
   onSuccess,
+  defaultProjectId,
 }: CreateSprintModalProps) {
-  const { user } = useAuth()
-  const [loading, setLoading] = useState(false)
-  const [teams, setTeams] = useState<Team[]>([])
-  const [projects, setProjects] = useState<Project[]>([])
-  const [loadingData, setLoadingData] = useState(true)
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loadingData, setLoadingData] = useState(true);
   const [formData, setFormData] = useState({
-    name: '',
-    goal: '',
-    start_date: '',
-    end_date: '',
-    status: 'planning',
-    team_id: '',
-    project_id: '',
+    name: "",
+    goal: "",
+    start_date: "",
+    end_date: "",
+    status: "planning",
+    team_id: "",
+    project_id: "",
     velocity: 0,
-  })
+  });
 
   useEffect(() => {
     if (open) {
-      fetchTeamsAndProjects()
+      fetchTeamsAndProjects();
+      // Set default project if provided
+      if (defaultProjectId) {
+        setFormData((prev) => ({ ...prev, project_id: defaultProjectId }));
+      }
     }
-  }, [open])
+  }, [open, defaultProjectId]);
 
   const fetchTeamsAndProjects = async () => {
-    setLoadingData(true)
+    setLoadingData(true);
     try {
       const [teamsResponse, projectsResponse] = await Promise.all([
-        supabase.from('teams').select('id, name').order('name'),
-        supabase.from('projects').select('id, name').order('name'),
-      ])
+        supabase.from("teams").select("id, name").order("name"),
+        supabase.from("projects").select("id, name").order("name"),
+      ]);
 
-      if (teamsResponse.data) setTeams(teamsResponse.data)
-      if (projectsResponse.data) setProjects(projectsResponse.data)
+      if (teamsResponse.data) setTeams(teamsResponse.data);
+      if (projectsResponse.data) setProjects(projectsResponse.data);
     } catch (error) {
-      console.error('Error fetching data:', error)
-      toast.error('Erro ao carregar dados')
+      console.error("Error fetching data:", error);
+      toast.error("Erro ao carregar dados");
     } finally {
-      setLoadingData(false)
+      setLoadingData(false);
     }
-  }
+  };
 
   const handleChange = (field: string, value: string | number) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-  }
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
   const calculateSprintDuration = () => {
     if (formData.start_date && formData.end_date) {
-      const start = new Date(formData.start_date)
-      const end = new Date(formData.end_date)
-      const diffTime = Math.abs(end.getTime() - start.getTime())
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-      return diffDays
+      const start = new Date(formData.start_date);
+      const end = new Date(formData.end_date);
+      const diffTime = Math.abs(end.getTime() - start.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays;
     }
-    return 0
-  }
+    return 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!formData.name.trim()) {
-      toast.error('Por favor, informe o nome do sprint')
-      return
+      toast.error("Por favor, informe o nome do sprint");
+      return;
     }
 
     if (!formData.team_id) {
-      toast.error('Por favor, selecione um time')
-      return
+      toast.error("Por favor, selecione um time");
+      return;
     }
 
     if (!formData.start_date || !formData.end_date) {
-      toast.error('Por favor, informe as datas de início e término')
-      return
+      toast.error("Por favor, informe as datas de início e término");
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
 
     try {
-      const { error } = await supabase.from('sprints').insert([
+      const { error } = await supabase.from("sprints").insert([
         {
           name: formData.name,
           goal: formData.goal,
@@ -137,37 +143,42 @@ export default function CreateSprintModal({
           velocity: formData.velocity,
           created_by: user?.id,
         },
-      ])
+      ]);
 
-      if (error) throw error
+      if (error) throw error;
 
-      toast.success('Sprint criado com sucesso!')
+      toast.success("Sprint criado com sucesso!");
       setFormData({
-        name: '',
-        goal: '',
-        start_date: '',
-        end_date: '',
-        status: 'planning',
-        team_id: '',
-        project_id: '',
+        name: "",
+        goal: "",
+        start_date: "",
+        end_date: "",
+        status: "planning",
+        team_id: "",
+        project_id: defaultProjectId || "",
         velocity: 0,
-      })
-      onSuccess()
-      onClose()
+      });
+      onSuccess();
+      onClose();
     } catch (error) {
-      console.error('Error creating sprint:', error)
-      toast.error('Erro ao criar sprint')
+      console.error("Error creating sprint:", error);
+      toast.error("Erro ao criar sprint");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <Modal open={open} onClose={onClose} title="Criar Novo Sprint" maxWidth="md">
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="Criar Novo Sprint"
+      maxWidth="md"
+    >
       <form onSubmit={handleSubmit}>
-        <Stack spacing={3}>
+        <Stack spacing={3} sx={{ pt: 2 }}>
           {loadingData ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+            <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
               <CircularProgress />
             </Box>
           ) : (
@@ -176,19 +187,19 @@ export default function CreateSprintModal({
                 fullWidth
                 label="Nome do Sprint"
                 value={formData.name}
-                onChange={(e) => handleChange('name', e.target.value)}
+                onChange={(e) => handleChange("name", e.target.value)}
                 required
                 placeholder="Ex: Sprint 24 - Q1 2025"
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <SpaceDashboard sx={{ color: '#6366f1' }} />
+                      <SpaceDashboard sx={{ color: "#6366f1" }} />
                     </InputAdornment>
                   ),
                 }}
                 sx={{
-                  '& .MuiOutlinedInput-root': {
-                    fontSize: '1.1rem',
+                  "& .MuiOutlinedInput-root": {
+                    fontSize: "1.1rem",
                     fontWeight: 500,
                   },
                 }}
@@ -198,14 +209,17 @@ export default function CreateSprintModal({
                 fullWidth
                 label="Objetivo do Sprint"
                 value={formData.goal}
-                onChange={(e) => handleChange('goal', e.target.value)}
+                onChange={(e) => handleChange("goal", e.target.value)}
                 multiline
                 rows={3}
                 placeholder="Qual é a meta principal deste sprint?"
                 InputProps={{
                   startAdornment: (
-                    <InputAdornment position="start" sx={{ alignSelf: 'flex-start', mt: 2 }}>
-                      <Flag sx={{ color: '#6366f1' }} />
+                    <InputAdornment
+                      position="start"
+                      sx={{ alignSelf: "flex-start", mt: 2 }}
+                    >
+                      <Flag sx={{ color: "#6366f1" }} />
                     </InputAdornment>
                   ),
                 }}
@@ -213,8 +227,8 @@ export default function CreateSprintModal({
 
               <Box
                 sx={{
-                  display: 'grid',
-                  gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+                  display: "grid",
+                  gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
                   gap: 2,
                 }}
               >
@@ -223,12 +237,12 @@ export default function CreateSprintModal({
                   select
                   label="Time"
                   value={formData.team_id}
-                  onChange={(e) => handleChange('team_id', e.target.value)}
+                  onChange={(e) => handleChange("team_id", e.target.value)}
                   required
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <People sx={{ color: '#6366f1' }} />
+                        <People sx={{ color: "#6366f1" }} />
                       </InputAdornment>
                     ),
                   }}
@@ -249,11 +263,11 @@ export default function CreateSprintModal({
                   select
                   label="Projeto (Opcional)"
                   value={formData.project_id}
-                  onChange={(e) => handleChange('project_id', e.target.value)}
+                  onChange={(e) => handleChange("project_id", e.target.value)}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <Assignment sx={{ color: '#6366f1' }} />
+                        <Assignment sx={{ color: "#6366f1" }} />
                       </InputAdornment>
                     ),
                   }}
@@ -269,8 +283,8 @@ export default function CreateSprintModal({
 
               <Box
                 sx={{
-                  display: 'grid',
-                  gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+                  display: "grid",
+                  gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
                   gap: 2,
                 }}
               >
@@ -279,13 +293,15 @@ export default function CreateSprintModal({
                   type="date"
                   label="Data de Início"
                   value={formData.start_date}
-                  onChange={(e) => handleChange('start_date', e.target.value)}
+                  onChange={(e) => handleChange("start_date", e.target.value)}
                   required
                   InputLabelProps={{ shrink: true }}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <CalendarToday sx={{ color: '#6366f1', fontSize: 20 }} />
+                        <CalendarToday
+                          sx={{ color: "#6366f1", fontSize: 20 }}
+                        />
                       </InputAdornment>
                     ),
                   }}
@@ -296,13 +312,15 @@ export default function CreateSprintModal({
                   type="date"
                   label="Data de Término"
                   value={formData.end_date}
-                  onChange={(e) => handleChange('end_date', e.target.value)}
+                  onChange={(e) => handleChange("end_date", e.target.value)}
                   required
                   InputLabelProps={{ shrink: true }}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <CalendarToday sx={{ color: '#6366f1', fontSize: 20 }} />
+                        <CalendarToday
+                          sx={{ color: "#6366f1", fontSize: 20 }}
+                        />
                       </InputAdornment>
                     ),
                   }}
@@ -317,15 +335,16 @@ export default function CreateSprintModal({
                   sx={{
                     p: 2,
                     borderRadius: 2,
-                    background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)',
-                    border: '2px solid rgba(99, 102, 241, 0.1)',
-                    display: 'flex',
-                    alignItems: 'center',
+                    background:
+                      "linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)",
+                    border: "2px solid rgba(99, 102, 241, 0.1)",
+                    display: "flex",
+                    alignItems: "center",
                     gap: 1,
                   }}
                 >
-                  <CalendarToday sx={{ color: '#6366f1', fontSize: 20 }} />
-                  <Box sx={{ fontWeight: 600, color: '#6366f1' }}>
+                  <CalendarToday sx={{ color: "#6366f1", fontSize: 20 }} />
+                  <Box sx={{ fontWeight: 600, color: "#6366f1" }}>
                     Duração: {calculateSprintDuration()} dias
                   </Box>
                 </Box>
@@ -333,8 +352,8 @@ export default function CreateSprintModal({
 
               <Box
                 sx={{
-                  display: 'grid',
-                  gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+                  display: "grid",
+                  gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
                   gap: 2,
                 }}
               >
@@ -343,23 +362,25 @@ export default function CreateSprintModal({
                   select
                   label="Status"
                   value={formData.status}
-                  onChange={(e) => handleChange('status', e.target.value)}
+                  onChange={(e) => handleChange("status", e.target.value)}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <SpaceDashboard sx={{ color: '#6366f1' }} />
+                        <SpaceDashboard sx={{ color: "#6366f1" }} />
                       </InputAdornment>
                     ),
                   }}
                 >
                   {statusOptions.map((option) => (
                     <MenuItem key={option.value} value={option.value}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
                         <Box
                           sx={{
                             width: 12,
                             height: 12,
-                            borderRadius: '50%',
+                            borderRadius: "50%",
                             backgroundColor: option.color,
                           }}
                         />
@@ -374,11 +395,13 @@ export default function CreateSprintModal({
                   type="number"
                   label="Velocity (Pontos)"
                   value={formData.velocity}
-                  onChange={(e) => handleChange('velocity', parseInt(e.target.value) || 0)}
+                  onChange={(e) =>
+                    handleChange("velocity", parseInt(e.target.value) || 0)
+                  }
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <Speed sx={{ color: '#6366f1' }} />
+                        <Speed sx={{ color: "#6366f1" }} />
                       </InputAdornment>
                     ),
                   }}
@@ -390,12 +413,12 @@ export default function CreateSprintModal({
 
               <Box
                 sx={{
-                  display: 'flex',
+                  display: "flex",
                   gap: 2,
-                  justifyContent: 'flex-end',
+                  justifyContent: "flex-end",
                   pt: 2,
-                  borderTop: '2px solid',
-                  borderColor: 'rgba(99, 102, 241, 0.1)',
+                  borderTop: "2px solid",
+                  borderColor: "rgba(99, 102, 241, 0.1)",
                 }}
               >
                 <Button
@@ -407,13 +430,13 @@ export default function CreateSprintModal({
                     py: 1.5,
                     borderRadius: 3,
                     borderWidth: 2,
-                    borderColor: 'rgba(99, 102, 241, 0.3)',
-                    color: '#6366f1',
+                    borderColor: "rgba(99, 102, 241, 0.3)",
+                    color: "#6366f1",
                     fontWeight: 600,
-                    '&:hover': {
+                    "&:hover": {
                       borderWidth: 2,
-                      borderColor: '#6366f1',
-                      backgroundColor: 'rgba(99, 102, 241, 0.05)',
+                      borderColor: "#6366f1",
+                      backgroundColor: "rgba(99, 102, 241, 0.05)",
                     },
                   }}
                 >
@@ -424,16 +447,20 @@ export default function CreateSprintModal({
                   variant="contained"
                   disabled={loading}
                   startIcon={
-                    loading ? <CircularProgress size={20} color="inherit" /> : <SpaceDashboard />
+                    loading ? (
+                      <CircularProgress size={20} color="inherit" />
+                    ) : (
+                      <SpaceDashboard />
+                    )
                   }
                   sx={{
                     px: 4,
                     py: 1.5,
                     borderRadius: 3,
-                    fontSize: '1rem',
+                    fontSize: "1rem",
                   }}
                 >
-                  {loading ? 'Criando...' : 'Criar Sprint'}
+                  {loading ? "Criando..." : "Criar Sprint"}
                 </Button>
               </Box>
             </>
@@ -441,5 +468,5 @@ export default function CreateSprintModal({
         </Stack>
       </form>
     </Modal>
-  )
+  );
 }

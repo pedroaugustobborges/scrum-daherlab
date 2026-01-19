@@ -82,11 +82,18 @@ export default function KanbanBoard({ stories, onRefresh, onDeleteStory }: Kanba
     })
   )
 
-  // Celebration confetti animation
+  // Celebration confetti animation with sound
   const celebrateCompletion = () => {
     const duration = 3000
     const animationEnd = Date.now() + duration
     const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 }
+
+    // Play celebration sound
+    const audio = new Audio('/brasil.mpeg')
+    audio.volume = 0.5
+    audio.play().catch((error) => {
+      console.log('Audio playback failed:', error)
+    })
 
     const randomInRange = (min: number, max: number) => {
       return Math.random() * (max - min) + min

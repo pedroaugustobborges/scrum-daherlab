@@ -9,7 +9,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-  closestCorners,
+  rectIntersection,
   useDroppable,
 } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
@@ -47,20 +47,21 @@ const columns = [
 
 // Droppable Column Component
 function DroppableColumn({ id, children }: { id: string; children: React.ReactNode }) {
-  const { setNodeRef, isOver } = useDroppable({ id })
+  const droppableId = `column-${id}`
+  const { setNodeRef, isOver } = useDroppable({ id: droppableId })
 
   return (
     <Box
       ref={setNodeRef}
       sx={{
         flex: 1,
+        minHeight: 300,
         overflowY: 'auto',
         pr: 0.5,
         transition: 'all 0.2s ease',
         borderRadius: 2,
-        ...(isOver && {
-          bgcolor: 'rgba(99, 102, 241, 0.05)',
-        }),
+        bgcolor: isOver ? 'rgba(99, 102, 241, 0.12)' : 'transparent',
+        border: isOver ? '2px dashed rgba(99, 102, 241, 0.5)' : '2px dashed transparent',
       }}
     >
       {children}
@@ -144,7 +145,12 @@ export default function KanbanBoard({ stories, onRefresh, onDeleteStory }: Kanba
     if (!over) return
 
     const activeId = active.id as string
-    const overId = over.id as string
+    let overId = over.id as string
+
+    // Check if we're over a column droppable (has 'column-' prefix)
+    if (overId.startsWith('column-')) {
+      overId = overId.replace('column-', '')
+    }
 
     // Find the active story from the current grouped state
     let activeStory: UserStory | undefined
@@ -209,7 +215,12 @@ export default function KanbanBoard({ stories, onRefresh, onDeleteStory }: Kanba
     }
 
     const storyId = active.id as string
-    const overId = over.id as string
+    let overId = over.id as string
+
+    // Check if we're over a column droppable (has 'column-' prefix)
+    if (overId.startsWith('column-')) {
+      overId = overId.replace('column-', '')
+    }
 
     // Find the original story from the stories prop
     const story = stories.find((s) => s.id === storyId)
@@ -305,7 +316,7 @@ export default function KanbanBoard({ stories, onRefresh, onDeleteStory }: Kanba
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCorners}
+      collisionDetection={rectIntersection}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
@@ -378,11 +389,15 @@ export default function KanbanBoard({ stories, onRefresh, onDeleteStory }: Kanba
                     <Box
                       sx={{
                         textAlign: 'center',
-                        py: 4,
+                        py: 6,
                         px: 2,
                         borderRadius: 2,
-                        border: `2px dashed ${column.color}30`,
-                        bgcolor: 'white',
+                        border: `2px dashed ${column.color}40`,
+                        bgcolor: 'rgba(255,255,255,0.5)',
+                        minHeight: 200,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                       }}
                     >
                       <Typography variant="caption" color="text.secondary">

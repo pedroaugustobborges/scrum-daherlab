@@ -1,7 +1,8 @@
-import { Box, Typography, Chip, LinearProgress, Avatar, IconButton, Tooltip } from '@mui/material'
+import { useState } from 'react'
+import { Box, Typography, Chip, LinearProgress, Avatar, IconButton, Tooltip, Menu, MenuItem, ListItemIcon, ListItemText, Divider } from '@mui/material'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Flag, Functions, Delete, DragIndicator, Assignment } from '@mui/icons-material'
+import { Flag, Functions, Delete, DragIndicator, Assignment, MoreVert, ContentCopy, Inventory } from '@mui/icons-material'
 
 interface KanbanCardProps {
   story: {
@@ -15,6 +16,8 @@ interface KanbanCardProps {
   }
   onDelete: (id: string, title: string) => void
   onClick: (id: string) => void
+  onReplicate?: (storyId: string) => void
+  onSendToBacklog?: (storyId: string, title: string) => void
 }
 
 const priorityConfig: Record<string, { label: string; color: string }> = {
@@ -24,10 +27,22 @@ const priorityConfig: Record<string, { label: string; color: string }> = {
   urgent: { label: 'Urgente', color: '#dc2626' },
 }
 
-export default function KanbanCard({ story, onDelete, onClick }: KanbanCardProps) {
+export default function KanbanCard({ story, onDelete, onClick, onReplicate, onSendToBacklog }: KanbanCardProps) {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const menuOpen = Boolean(anchorEl)
+
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: story.id,
   })
+
+  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation()
+    setAnchorEl(event.currentTarget)
+  }
+
+  const handleMenuClose = () => {
+    setAnchorEl(null)
+  }
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -82,25 +97,72 @@ export default function KanbanCard({ story, onDelete, onClick }: KanbanCardProps
           <Assignment sx={{ fontSize: 18, color: '#6366f1' }} />
         </Box>
 
-        <Tooltip title="Excluir História">
+        <Tooltip title="Ações">
           <IconButton
             size="small"
-            onClick={(e) => {
-              e.stopPropagation()
-              onDelete(story.id, story.title)
-            }}
+            onClick={handleMenuClick}
             sx={{
               width: 24,
               height: 24,
-              bgcolor: 'rgba(239, 68, 68, 0.1)',
+              bgcolor: 'rgba(99, 102, 241, 0.1)',
               '&:hover': {
-                bgcolor: 'rgba(239, 68, 68, 0.2)',
+                bgcolor: 'rgba(99, 102, 241, 0.2)',
               },
             }}
           >
-            <Delete sx={{ fontSize: 14, color: '#ef4444' }} />
+            <MoreVert sx={{ fontSize: 14, color: '#6366f1' }} />
           </IconButton>
         </Tooltip>
+
+        {/* Actions Menu */}
+        <Menu
+          anchorEl={anchorEl}
+          open={menuOpen}
+          onClose={handleMenuClose}
+          onClick={(e) => e.stopPropagation()}
+          transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+        >
+          {onReplicate && (
+            <MenuItem
+              onClick={() => {
+                onReplicate(story.id)
+                handleMenuClose()
+              }}
+            >
+              <ListItemIcon>
+                <ContentCopy fontSize="small" sx={{ color: '#6366f1' }} />
+              </ListItemIcon>
+              <ListItemText>Replicar para Sprint</ListItemText>
+            </MenuItem>
+          )}
+          {onSendToBacklog && (
+            <MenuItem
+              onClick={() => {
+                onSendToBacklog(story.id, story.title)
+                handleMenuClose()
+              }}
+            >
+              <ListItemIcon>
+                <Inventory fontSize="small" sx={{ color: '#f59e0b' }} />
+              </ListItemIcon>
+              <ListItemText>Enviar para Backlog</ListItemText>
+            </MenuItem>
+          )}
+          {(onReplicate || onSendToBacklog) && <Divider />}
+          <MenuItem
+            onClick={() => {
+              onDelete(story.id, story.title)
+              handleMenuClose()
+            }}
+            sx={{ color: 'error.main' }}
+          >
+            <ListItemIcon>
+              <Delete fontSize="small" color="error" />
+            </ListItemIcon>
+            <ListItemText>Excluir</ListItemText>
+          </MenuItem>
+        </Menu>
       </Box>
 
       {/* Card Content */}

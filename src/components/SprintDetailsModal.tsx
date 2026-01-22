@@ -436,6 +436,7 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
               stories={stories}
               onRefresh={fetchUserStories}
               onDeleteStory={handleDeleteStory}
+              currentSprintId={sprint.id}
             />
           ) : (
             <Stack spacing={2}>

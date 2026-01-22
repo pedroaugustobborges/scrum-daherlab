@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Box, Typography, Paper, Chip } from '@mui/material'
+import { Box, Typography, Paper, Chip, Dialog, DialogTitle, DialogContent, DialogActions, Button, List, ListItem, ListItemText, Divider } from '@mui/material'
 import {
   DndContext,
   DragEndEvent,
@@ -19,6 +19,12 @@ import toast from 'react-hot-toast'
 import { supabase } from '@/lib/supabase'
 import confetti from 'canvas-confetti'
 
+interface Sprint {
+  id: string
+  name: string
+  status: string
+}
+
 interface UserStory {
   id: string
   title: string
@@ -35,6 +41,7 @@ interface KanbanBoardProps {
   stories: UserStory[]
   onRefresh: () => void
   onDeleteStory: (storyId: string, title: string) => void
+  currentSprintId?: string
 }
 
 const columns = [
@@ -69,11 +76,14 @@ function DroppableColumn({ id, children }: { id: string; children: React.ReactNo
   )
 }
 
-export default function KanbanBoard({ stories, onRefresh, onDeleteStory }: KanbanBoardProps) {
+export default function KanbanBoard({ stories, onRefresh, onDeleteStory, currentSprintId }: KanbanBoardProps) {
   const [activeId, setActiveId] = useState<string | null>(null)
   const [storiesByStatus, setStoriesByStatus] = useState<Record<string, UserStory[]>>({})
   const [storyDetailsOpen, setStoryDetailsOpen] = useState(false)
   const [selectedStoryId, setSelectedStoryId] = useState<string>('')
+  const [sprintDialogOpen, setSprintDialogOpen] = useState(false)
+  const [sprints, setSprints] = useState<Sprint[]>([])
+  const [storyToReplicate, setStoryToReplicate] = useState<string | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -134,6 +144,92 @@ export default function KanbanBoard({ stories, onRefresh, onDeleteStory }: Kanba
 
     setStoriesByStatus(grouped)
   }, [stories])
+
+  // Fetch available sprints when dialog opens
+  useEffect(() => {
+    if (sprintDialogOpen) {
+      fetchAvailableSprints()
+    }
+  }, [sprintDialogOpen])
+
+  const fetchAvailableSprints = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('sprints')
+        .select('id, name, status')
+        .in('status', ['planning', 'active'])
+        .order('start_date', { ascending: false })
+
+      if (error) throw error
+      // Filter out the current sprint
+      const filteredSprints = (data || []).filter((s) => s.id !== currentSprintId)
+      setSprints(filteredSprints)
+    } catch (error) {
+      console.error('Error fetching sprints:', error)
+      toast.error('Erro ao carregar sprints')
+    }
+  }
+
+  const handleOpenReplicateDialog = (storyId: string) => {
+    setStoryToReplicate(storyId)
+    setSprintDialogOpen(true)
+  }
+
+  const handleReplicateToSprint = async (targetSprintId: string) => {
+    if (!storyToReplicate) return
+
+    try {
+      // Find the story to replicate
+      const storyToClone = stories.find((s) => s.id === storyToReplicate)
+      if (!storyToClone) {
+        toast.error('História não encontrada')
+        return
+      }
+
+      // Create a copy of the story in the target sprint
+      const { error } = await supabase.from('tasks').insert({
+        title: storyToClone.title,
+        description: storyToClone.description,
+        status: 'todo', // Reset status for the new sprint
+        priority: storyToClone.priority,
+        story_points: storyToClone.story_points,
+        assigned_to: storyToClone.assigned_to,
+        sprint_id: targetSprintId,
+      })
+
+      if (error) throw error
+
+      toast.success('História replicada com sucesso!')
+      setSprintDialogOpen(false)
+      setStoryToReplicate(null)
+    } catch (error) {
+      console.error('Error replicating story:', error)
+      toast.error('Erro ao replicar história')
+    }
+  }
+
+  const handleSendToBacklog = async (storyId: string, storyTitle: string) => {
+    const confirmed = window.confirm(
+      `Tem certeza que deseja enviar "${storyTitle}" para o Backlog?\n\nA história será removida deste sprint.`
+    )
+
+    if (!confirmed) return
+
+    try {
+      const { error } = await supabase
+        .from('tasks')
+        .update({ sprint_id: null, status: 'todo' })
+        .eq('id', storyId)
+
+      if (error) throw error
+
+      toast.success('História enviada para o Backlog!')
+      onRefresh()
+    } catch (error) {
+      console.error('Error sending to backlog:', error)
+      toast.error('Erro ao enviar para o Backlog')
+    }
+  }
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string)
@@ -414,6 +510,8 @@ export default function KanbanBoard({ stories, onRefresh, onDeleteStory }: Kanba
                           setSelectedStoryId(storyId)
                           setStoryDetailsOpen(true)
                         }}
+                        onReplicate={currentSprintId ? handleOpenReplicateDialog : undefined}
+                        onSendToBacklog={currentSprintId ? handleSendToBacklog : undefined}
                       />
                     ))
                   )}
@@ -457,6 +555,68 @@ export default function KanbanBoard({ stories, onRefresh, onDeleteStory }: Kanba
           storyId={selectedStoryId}
         />
       )}
+
+      {/* Sprint Selection Dialog for Replication */}
+      <Dialog
+        open={sprintDialogOpen}
+        onClose={() => {
+          setSprintDialogOpen(false)
+          setStoryToReplicate(null)
+        }}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Replicar História para Sprint</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Selecione o sprint para onde deseja replicar esta história
+          </Typography>
+          {sprints.length === 0 ? (
+            <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
+              Nenhum outro sprint disponível. Crie um novo sprint primeiro.
+            </Typography>
+          ) : (
+            <List>
+              {sprints.map((sprint, index) => (
+                <Box key={sprint.id}>
+                  <ListItem
+                    component="div"
+                    onClick={() => handleReplicateToSprint(sprint.id)}
+                    sx={{
+                      borderRadius: 2,
+                      cursor: 'pointer',
+                      '&:hover': {
+                        bgcolor: 'rgba(99, 102, 241, 0.05)',
+                      },
+                    }}
+                  >
+                    <ListItemText
+                      primary={sprint.name}
+                      secondary={sprint.status === 'active' ? 'Ativo' : 'Planejamento'}
+                    />
+                    <Chip
+                      label={sprint.status === 'active' ? 'Ativo' : 'Planejamento'}
+                      size="small"
+                      color={sprint.status === 'active' ? 'success' : 'warning'}
+                    />
+                  </ListItem>
+                  {index < sprints.length - 1 && <Divider />}
+                </Box>
+              ))}
+            </List>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setSprintDialogOpen(false)
+              setStoryToReplicate(null)
+            }}
+          >
+            Cancelar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </DndContext>
   )
 }

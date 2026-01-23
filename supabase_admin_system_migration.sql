@@ -395,16 +395,92 @@ END;
 $$;
 
 -- ================================================
--- 9. GRANT EXECUTE PERMISSIONS
+-- 9. CREATE RESET PASSWORD FUNCTION
+-- ================================================
+
+CREATE OR REPLACE FUNCTION public.admin_reset_user_password(
+    target_user_id UUID,
+    new_password TEXT
+)
+RETURNS JSON
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions
+AS $$
+DECLARE
+    calling_user_id UUID;
+    is_caller_admin BOOLEAN;
+    target_email TEXT;
+BEGIN
+    -- Get the calling user's ID
+    calling_user_id := auth.uid();
+
+    -- Check if the calling user is an admin
+    SELECT is_admin INTO is_caller_admin
+    FROM public.profiles
+    WHERE id = calling_user_id;
+
+    IF NOT COALESCE(is_caller_admin, FALSE) THEN
+        RETURN json_build_object(
+            'success', FALSE,
+            'error', 'Unauthorized: Only admins can reset passwords'
+        );
+    END IF;
+
+    -- Validate password length
+    IF LENGTH(new_password) < 6 THEN
+        RETURN json_build_object(
+            'success', FALSE,
+            'error', 'Password must be at least 6 characters'
+        );
+    END IF;
+
+    -- Get target user email for response
+    SELECT email INTO target_email
+    FROM auth.users
+    WHERE id = target_user_id;
+
+    IF target_email IS NULL THEN
+        RETURN json_build_object(
+            'success', FALSE,
+            'error', 'User not found'
+        );
+    END IF;
+
+    -- Update the password
+    UPDATE auth.users
+    SET
+        encrypted_password = extensions.crypt(new_password, extensions.gen_salt('bf')),
+        updated_at = NOW()
+    WHERE id = target_user_id;
+
+    RETURN json_build_object(
+        'success', TRUE,
+        'user_id', target_user_id,
+        'email', target_email,
+        'message', 'Password reset successfully'
+    );
+
+EXCEPTION WHEN OTHERS THEN
+    RETURN json_build_object(
+        'success', FALSE,
+        'error', SQLERRM
+    );
+END;
+$$;
+
+-- ================================================
+-- 10. GRANT EXECUTE PERMISSIONS
 -- ================================================
 
 GRANT EXECUTE ON FUNCTION public.admin_create_user TO authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_toggle_user_admin TO authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_delete_user TO authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_get_all_users TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_reset_user_password TO authenticated;
 
 -- ================================================
--- 10. COMMENTS
+-- 11. COMMENTS
 -- ================================================
 
 COMMENT ON COLUMN public.profiles.is_admin IS 'Indicates if the user has admin privileges';
@@ -412,6 +488,7 @@ COMMENT ON FUNCTION public.admin_create_user IS 'Allows admins to create new use
 COMMENT ON FUNCTION public.admin_toggle_user_admin IS 'Allows admins to toggle admin status of users';
 COMMENT ON FUNCTION public.admin_delete_user IS 'Allows admins to delete users';
 COMMENT ON FUNCTION public.admin_get_all_users IS 'Allows admins to get list of all users';
+COMMENT ON FUNCTION public.admin_reset_user_password IS 'Allows admins to reset user passwords';
 
 -- ================================================
 -- END OF MIGRATION

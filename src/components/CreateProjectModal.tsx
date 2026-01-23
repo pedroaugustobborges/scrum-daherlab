@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   TextField,
   Button,
@@ -7,17 +7,31 @@ import {
   Stack,
   InputAdornment,
   CircularProgress,
+  FormControl,
+  InputLabel,
+  Select,
+  OutlinedInput,
+  Chip,
+  Typography,
+  Checkbox,
+  ListItemText,
 } from "@mui/material";
 import {
   Assignment,
   CalendarToday,
   Description,
   TrendingUp,
+  Groups,
 } from "@mui/icons-material";
 import toast from "react-hot-toast";
 import Modal from "./Modal";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
+
+interface Team {
+  id: string;
+  name: string;
+}
 
 interface CreateProjectModalProps {
   open: boolean;
@@ -39,6 +53,9 @@ export default function CreateProjectModal({
 }: CreateProjectModalProps) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [teamsLoading, setTeamsLoading] = useState(false);
+  const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -46,6 +63,54 @@ export default function CreateProjectModal({
     start_date: "",
     end_date: "",
   });
+
+  // Fetch teams when modal opens
+  useEffect(() => {
+    if (open) {
+      fetchTeams();
+    }
+  }, [open]);
+
+  const fetchTeams = async () => {
+    setTeamsLoading(true);
+    try {
+      // Fetch teams where the current user is a member
+      const { data: userTeamMembers, error: memberError } = await supabase
+        .from("team_members")
+        .select("team_id")
+        .eq("user_id", user?.id);
+
+      if (memberError) throw memberError;
+
+      const userTeamIds = userTeamMembers?.map((tm) => tm.team_id) || [];
+
+      if (userTeamIds.length === 0) {
+        // If user is not a member of any team, show all teams
+        const { data: allTeams, error: teamsError } = await supabase
+          .from("teams")
+          .select("id, name")
+          .order("name");
+
+        if (teamsError) throw teamsError;
+        setTeams(allTeams || []);
+      } else {
+        // Show teams where user is a member
+        const { data: userTeams, error: teamsError } = await supabase
+          .from("teams")
+          .select("id, name")
+          .in("id", userTeamIds)
+          .order("name");
+
+        if (teamsError) throw teamsError;
+        setTeams(userTeams || []);
+      }
+    } catch (error) {
+      console.error("Error fetching teams:", error);
+      toast.error("Erro ao carregar times");
+    } finally {
+      setTeamsLoading(false);
+    }
+  };
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -62,18 +127,41 @@ export default function CreateProjectModal({
     setLoading(true);
 
     try {
-      const { error } = await supabase.from("projects").insert([
-        {
-          name: formData.name,
-          description: formData.description,
-          status: formData.status,
-          start_date: formData.start_date || null,
-          end_date: formData.end_date || null,
-          created_by: user?.id,
-        },
-      ]);
+      // Create the project
+      const { data: projectData, error: projectError } = await supabase
+        .from("projects")
+        .insert([
+          {
+            name: formData.name,
+            description: formData.description,
+            status: formData.status,
+            start_date: formData.start_date || null,
+            end_date: formData.end_date || null,
+            created_by: user?.id,
+          },
+        ])
+        .select("id")
+        .single();
 
-      if (error) throw error;
+      if (projectError) throw projectError;
+
+      // If teams are selected, create project_teams associations
+      if (selectedTeams.length > 0 && projectData?.id) {
+        const projectTeamsData = selectedTeams.map((teamId) => ({
+          project_id: projectData.id,
+          team_id: teamId,
+        }));
+
+        const { error: projectTeamsError } = await supabase
+          .from("project_teams")
+          .insert(projectTeamsData);
+
+        if (projectTeamsError) {
+          console.error("Error creating project teams:", projectTeamsError);
+          // Don't throw - project was created successfully
+          toast.error("Projeto criado, mas houve erro ao associar times");
+        }
+      }
 
       toast.success("Projeto criado com sucesso!");
       setFormData({
@@ -83,6 +171,7 @@ export default function CreateProjectModal({
         start_date: "",
         end_date: "",
       });
+      setSelectedTeams([]);
       onSuccess();
       onClose();
     } catch (error) {
@@ -175,6 +264,117 @@ export default function CreateProjectModal({
                 </MenuItem>
               ))}
             </TextField>
+          </Box>
+
+          {/* Team Selection */}
+          <Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+              <Groups sx={{ color: "#6366f1", fontSize: 20 }} />
+              <Typography variant="body2" fontWeight={600} color="text.secondary">
+                Times Responsáveis
+              </Typography>
+            </Box>
+            <FormControl fullWidth>
+              <InputLabel
+                id="teams-select-label"
+                sx={{
+                  "&.Mui-focused": { color: "#6366f1" },
+                }}
+              >
+                Selecione os times
+              </InputLabel>
+              <Select
+                labelId="teams-select-label"
+                multiple
+                value={selectedTeams}
+                onChange={(e) => setSelectedTeams(e.target.value as string[])}
+                input={<OutlinedInput label="Selecione os times" />}
+                disabled={teamsLoading}
+                renderValue={(selected) => (
+                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                    {(selected as string[]).map((value) => {
+                      const team = teams.find((t) => t.id === value);
+                      return (
+                        <Chip
+                          key={value}
+                          label={team?.name || value}
+                          size="small"
+                          onDelete={() => {
+                            setSelectedTeams((prev) =>
+                              prev.filter((id) => id !== value)
+                            );
+                          }}
+                          onMouseDown={(e) => e.stopPropagation()}
+                          sx={{
+                            bgcolor: "rgba(99, 102, 241, 0.1)",
+                            color: "#6366f1",
+                            fontWeight: 600,
+                            "& .MuiChip-deleteIcon": {
+                              color: "#6366f1",
+                              "&:hover": {
+                                color: "#4f46e5",
+                              },
+                            },
+                          }}
+                        />
+                      );
+                    })}
+                  </Box>
+                )}
+                MenuProps={{
+                  PaperProps: {
+                    sx: {
+                      maxHeight: 300,
+                    },
+                  },
+                }}
+                sx={{
+                  borderRadius: 2,
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#6366f1",
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#6366f1",
+                  },
+                }}
+              >
+                {teamsLoading ? (
+                  <MenuItem disabled>
+                    <CircularProgress size={20} sx={{ mr: 1 }} />
+                    Carregando times...
+                  </MenuItem>
+                ) : teams.length === 0 ? (
+                  <MenuItem disabled>
+                    <Typography variant="body2" color="text.secondary">
+                      Nenhum time disponível
+                    </Typography>
+                  </MenuItem>
+                ) : (
+                  teams.map((team) => (
+                    <MenuItem key={team.id} value={team.id}>
+                      <Checkbox
+                        checked={selectedTeams.indexOf(team.id) > -1}
+                        sx={{
+                          color: "#6366f1",
+                          "&.Mui-checked": {
+                            color: "#6366f1",
+                          },
+                        }}
+                      />
+                      <ListItemText primary={team.name} />
+                    </MenuItem>
+                  ))
+                )}
+              </Select>
+            </FormControl>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ display: "block", mt: 1 }}
+            >
+              Selecione os times que serão responsáveis por este projeto.
+              Somente membros destes times terão acesso ao projeto.
+            </Typography>
           </Box>
 
           <Box

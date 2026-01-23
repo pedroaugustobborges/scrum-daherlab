@@ -10,6 +10,7 @@ import ProductBacklog from '@/pages/ProductBacklog'
 import Teams from '@/pages/Teams'
 import Settings from '@/pages/Settings'
 import ScrumGuide from '@/pages/ScrumGuide'
+import AdminPanel from '@/pages/AdminPanel'
 
 function App() {
   return (
@@ -103,6 +104,14 @@ function App() {
           element={
             <ProtectedRoute>
               <ScrumGuide />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <AdminPanel />
             </ProtectedRoute>
           }
         />

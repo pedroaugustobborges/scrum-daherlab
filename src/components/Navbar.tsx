@@ -23,12 +23,13 @@ import {
   SpaceDashboard,
   MenuBook,
   Inventory,
+  AdminPanelSettings,
 } from "@mui/icons-material";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function Navbar() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -56,8 +57,17 @@ export default function Navbar() {
     { label: "Sprints", path: "/sprints", icon: <SpaceDashboard /> },
     { label: "Backlog", path: "/backlog", icon: <Inventory /> },
     { label: "Times", path: "/teams", icon: <People /> },
-    { label: "Guia Daher Lab", path: "/scrum-guide", icon: <MenuBook /> },
+    { label: "Daher Lab", path: "/scrum-guide", icon: <MenuBook /> },
   ];
+
+  // Add admin menu item if user is admin
+  if (isAdmin) {
+    menuItems.push({
+      label: "Admin",
+      path: "/admin",
+      icon: <AdminPanelSettings />,
+    });
+  }
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -159,14 +169,53 @@ export default function Navbar() {
             onClose={handleClose}
           >
             <Box sx={{ px: 2, py: 1 }}>
-              <Typography variant="subtitle1" fontWeight={600}>
-                {user?.user_metadata?.full_name || "Usuário"}
-              </Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Typography variant="subtitle1" fontWeight={600}>
+                  {user?.user_metadata?.full_name || "Usuário"}
+                </Typography>
+                {isAdmin && (
+                  <Box
+                    sx={{
+                      px: 1,
+                      py: 0.25,
+                      bgcolor: "rgba(220, 38, 38, 0.1)",
+                      borderRadius: 1,
+                      fontSize: "0.65rem",
+                      fontWeight: 700,
+                      color: "#dc2626",
+                    }}
+                  >
+                    ADMIN
+                  </Box>
+                )}
+              </Box>
               <Typography variant="body2" color="text.secondary">
                 {user?.email}
               </Typography>
             </Box>
             <Divider />
+            {isAdmin && (
+              <MenuItem
+                onClick={() => {
+                  navigate("/admin");
+                  handleClose();
+                }}
+                sx={{
+                  color: "#dc2626",
+                  "&:hover": {
+                    bgcolor: "rgba(220, 38, 38, 0.05)",
+                  },
+                }}
+              >
+                <ListItemIcon>
+                  <AdminPanelSettings
+                    fontSize="small"
+                    sx={{ color: "#dc2626" }}
+                  />
+                </ListItemIcon>
+                Painel Admin
+              </MenuItem>
+            )}
             <MenuItem
               onClick={() => {
                 navigate("/settings");

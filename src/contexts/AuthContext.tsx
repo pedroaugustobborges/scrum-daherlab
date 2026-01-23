@@ -16,11 +16,43 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  // Function to check admin status from profiles table
+  const checkAdminStatus = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', userId)
+        .single()
+
+      if (error) {
+        console.error('Error checking admin status:', error)
+        setIsAdmin(false)
+        return
+      }
+
+      setIsAdmin(data?.is_admin ?? false)
+    } catch (error) {
+      console.error('Error checking admin status:', error)
+      setIsAdmin(false)
+    }
+  }
+
+  const refreshAdminStatus = async () => {
+    if (user?.id) {
+      await checkAdminStatus(user.id)
+    }
+  }
 
   useEffect(() => {
     // Check active sessions and sets the user
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
+      if (session?.user?.id) {
+        checkAdminStatus(session.user.id)
+      }
       setLoading(false)
     })
 
@@ -29,6 +61,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
+      if (session?.user?.id) {
+        checkAdminStatus(session.user.id)
+      } else {
+        setIsAdmin(false)
+      }
       setLoading(false)
     })
 
@@ -64,9 +101,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const value = {
     user,
     loading,
+    isAdmin,
     signIn,
     signUp,
     signOut,
+    refreshAdminStatus,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

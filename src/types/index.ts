@@ -3,9 +3,11 @@ import { User } from '@supabase/supabase-js'
 export interface AuthContextType {
   user: User | null
   loading: boolean
+  isAdmin: boolean
   signIn: (email: string, password: string) => Promise<void>
   signUp: (email: string, password: string, fullName: string) => Promise<void>
   signOut: () => Promise<void>
+  refreshAdminStatus: () => Promise<void>
 }
 
 export interface Sprint {

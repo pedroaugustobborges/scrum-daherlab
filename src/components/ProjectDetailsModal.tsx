@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Box,
   Typography,
@@ -32,6 +32,8 @@ import {
   Close,
   OpenInFull,
   ZoomOut,
+  Edit as EditIcon,
+  CloudUpload,
 } from "@mui/icons-material";
 import Modal from "./Modal";
 import SprintDetailsModal from "./SprintDetailsModal";
@@ -329,6 +331,8 @@ export default function ProjectDetailsModal({
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [processMapUrl, setProcessMapUrl] = useState<string | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [statistics, setStatistics] = useState({
     totalBacklogItems: 0,
     totalSprints: 0,
@@ -491,6 +495,67 @@ export default function ProjectDetailsModal({
   const handleCloseBacklogItem = () => {
     setBacklogItemModalOpen(false);
     setSelectedBacklogItem(null);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      toast.error("Formato inválido. Use JPG, PNG, GIF ou WebP.");
+      return;
+    }
+
+    // Validate file size (2MB max)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Arquivo muito grande. Máximo 2MB.");
+      return;
+    }
+
+    setUploadingImage(true);
+
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${project.id}/process-map-${Date.now()}.${fileExt}`;
+
+      const { data, error } = await supabase.storage
+        .from("project-images")
+        .upload(fileName, file, {
+          cacheControl: "3600",
+          upsert: true,
+        });
+
+      if (error) throw error;
+
+      // Get public URL
+      const { data: publicUrlData } = supabase.storage
+        .from("project-images")
+        .getPublicUrl(data.path);
+
+      const newUrl = publicUrlData.publicUrl;
+
+      // Update project with new image URL
+      const { error: updateError } = await supabase
+        .from("projects")
+        .update({ mapping_process_url: newUrl })
+        .eq("id", project.id);
+
+      if (updateError) throw updateError;
+
+      setProcessMapUrl(newUrl);
+      toast.success(processMapUrl ? "Imagem atualizada com sucesso!" : "Imagem adicionada com sucesso!");
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      toast.error("Erro ao fazer upload da imagem");
+    } finally {
+      setUploadingImage(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
   };
 
   if (loading) {
@@ -770,126 +835,6 @@ export default function ProjectDetailsModal({
             </Grid>
           </CardContent>
         </Card>
-
-        {/* Process Map Section */}
-        {processMapUrl && (
-          <Card
-            elevation={0}
-            sx={{
-              mb: 3,
-              border: "2px solid rgba(99, 102, 241, 0.15)",
-              borderRadius: 3,
-              overflow: "hidden",
-            }}
-          >
-            <Box
-              sx={{
-                p: 2,
-                bgcolor: "rgba(99, 102, 241, 0.05)",
-                borderBottom: "1px solid rgba(99, 102, 241, 0.1)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <ImageIcon sx={{ color: "#6366f1", fontSize: 22 }} />
-                <Typography variant="subtitle1" fontWeight={700}>
-                  Mapa de Processos
-                </Typography>
-              </Box>
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={<ZoomIn />}
-                onClick={() => setLightboxOpen(true)}
-                sx={{
-                  borderColor: "#6366f1",
-                  color: "#6366f1",
-                  fontWeight: 600,
-                  "&:hover": {
-                    borderColor: "#4f46e5",
-                    bgcolor: "rgba(99, 102, 241, 0.05)",
-                  },
-                }}
-              >
-                Expandir
-              </Button>
-            </Box>
-            <Box
-              onClick={() => setLightboxOpen(true)}
-              sx={{
-                p: 2,
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                bgcolor: "rgba(248, 250, 252, 0.5)",
-                cursor: "pointer",
-                position: "relative",
-                overflow: "hidden",
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  bgcolor: "rgba(99, 102, 241, 0.03)",
-                },
-                "&:hover .zoom-overlay": {
-                  opacity: 1,
-                },
-              }}
-            >
-              {/* Hover overlay */}
-              <Box
-                className="zoom-overlay"
-                sx={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  bgcolor: "rgba(99, 102, 241, 0.1)",
-                  opacity: 0,
-                  transition: "opacity 0.3s ease",
-                  zIndex: 1,
-                }}
-              >
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    bgcolor: "rgba(99, 102, 241, 0.9)",
-                    color: "white",
-                    px: 3,
-                    py: 1.5,
-                    borderRadius: 3,
-                    boxShadow: "0 4px 20px rgba(99, 102, 241, 0.4)",
-                  }}
-                >
-                  <ZoomIn sx={{ fontSize: 20 }} />
-                  <Typography variant="body2" fontWeight={600}>
-                    Clique para ampliar
-                  </Typography>
-                </Box>
-              </Box>
-
-              {/* Process Map Image */}
-              <Box
-                component="img"
-                src={processMapUrl}
-                alt="Mapa de Processos do Projeto"
-                sx={{
-                  maxWidth: "100%",
-                  maxHeight: 300,
-                  objectFit: "contain",
-                  borderRadius: 2,
-                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
-                }}
-              />
-            </Box>
-          </Card>
-        )}
 
         {/* Tabs */}
         <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
@@ -1281,6 +1226,203 @@ export default function ProjectDetailsModal({
             )}
           </Box>
         )}
+
+        {/* Process Map Section - At the bottom */}
+        <Card
+          elevation={0}
+          sx={{
+            mt: 4,
+            border: "2px solid rgba(99, 102, 241, 0.15)",
+            borderRadius: 3,
+            overflow: "hidden",
+          }}
+        >
+          <Box
+            sx={{
+              p: 2,
+              bgcolor: "rgba(99, 102, 241, 0.05)",
+              borderBottom: processMapUrl ? "1px solid rgba(99, 102, 241, 0.1)" : "none",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <ImageIcon sx={{ color: "#6366f1", fontSize: 22 }} />
+              <Typography variant="subtitle1" fontWeight={700}>
+                Mapa de Processos
+              </Typography>
+            </Box>
+            <Box sx={{ display: "flex", gap: 1 }}>
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                onChange={handleImageUpload}
+                style={{ display: "none" }}
+              />
+              {processMapUrl && (
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<ZoomIn />}
+                  onClick={() => setLightboxOpen(true)}
+                  sx={{
+                    borderColor: "#6366f1",
+                    color: "#6366f1",
+                    fontWeight: 600,
+                    "&:hover": {
+                      borderColor: "#4f46e5",
+                      bgcolor: "rgba(99, 102, 241, 0.05)",
+                    },
+                  }}
+                >
+                  Expandir
+                </Button>
+              )}
+              <Button
+                variant="contained"
+                size="small"
+                startIcon={uploadingImage ? <CircularProgress size={16} color="inherit" /> : (processMapUrl ? <EditIcon /> : <CloudUpload />)}
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingImage}
+                sx={{
+                  fontWeight: 600,
+                  background: processMapUrl
+                    ? "linear-gradient(135deg, #f59e0b 0%, #f97316 100%)"
+                    : "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+                  boxShadow: processMapUrl
+                    ? "0 2px 8px rgba(245, 158, 11, 0.3)"
+                    : "0 2px 8px rgba(99, 102, 241, 0.3)",
+                  "&:hover": {
+                    background: processMapUrl
+                      ? "linear-gradient(135deg, #d97706 0%, #ea580c 100%)"
+                      : "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)",
+                  },
+                }}
+              >
+                {uploadingImage ? "Enviando..." : (processMapUrl ? "Alterar" : "Adicionar")}
+              </Button>
+            </Box>
+          </Box>
+
+          {processMapUrl ? (
+            <Box
+              onClick={() => setLightboxOpen(true)}
+              sx={{
+                p: 2,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                bgcolor: "rgba(248, 250, 252, 0.5)",
+                cursor: "pointer",
+                position: "relative",
+                overflow: "hidden",
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  bgcolor: "rgba(99, 102, 241, 0.03)",
+                },
+                "&:hover .zoom-overlay": {
+                  opacity: 1,
+                },
+              }}
+            >
+              {/* Hover overlay */}
+              <Box
+                className="zoom-overlay"
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  bgcolor: "rgba(99, 102, 241, 0.1)",
+                  opacity: 0,
+                  transition: "opacity 0.3s ease",
+                  zIndex: 1,
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    bgcolor: "rgba(99, 102, 241, 0.9)",
+                    color: "white",
+                    px: 3,
+                    py: 1.5,
+                    borderRadius: 3,
+                    boxShadow: "0 4px 20px rgba(99, 102, 241, 0.4)",
+                  }}
+                >
+                  <ZoomIn sx={{ fontSize: 20 }} />
+                  <Typography variant="body2" fontWeight={600}>
+                    Clique para ampliar
+                  </Typography>
+                </Box>
+              </Box>
+
+              {/* Process Map Image */}
+              <Box
+                component="img"
+                src={processMapUrl}
+                alt="Mapa de Processos do Projeto"
+                sx={{
+                  maxWidth: "100%",
+                  maxHeight: 300,
+                  objectFit: "contain",
+                  borderRadius: 2,
+                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
+                }}
+              />
+            </Box>
+          ) : (
+            <Box
+              onClick={() => fileInputRef.current?.click()}
+              sx={{
+                p: 4,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                bgcolor: "rgba(248, 250, 252, 0.5)",
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  bgcolor: "rgba(99, 102, 241, 0.05)",
+                },
+              }}
+            >
+              <Box
+                sx={{
+                  width: 60,
+                  height: 60,
+                  borderRadius: "50%",
+                  bgcolor: "rgba(99, 102, 241, 0.1)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  mb: 2,
+                }}
+              >
+                <CloudUpload sx={{ fontSize: 30, color: "#6366f1" }} />
+              </Box>
+              <Typography variant="body1" fontWeight={600} gutterBottom>
+                Nenhum mapa de processos
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Clique para adicionar uma imagem
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
+                JPG, PNG, GIF ou WebP (max. 2MB)
+              </Typography>
+            </Box>
+          )}
+        </Card>
       </Box>
 
       {selectedSprint && (

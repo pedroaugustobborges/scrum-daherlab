@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   TextField,
   Button,
@@ -15,6 +15,8 @@ import {
   Typography,
   Checkbox,
   ListItemText,
+  LinearProgress,
+  IconButton,
 } from "@mui/material";
 import {
   Assignment,
@@ -22,6 +24,11 @@ import {
   Description,
   TrendingUp,
   Groups,
+  CloudUpload,
+  CheckCircle,
+  Error as ErrorIcon,
+  Close,
+  Image as ImageIcon,
 } from "@mui/icons-material";
 import toast from "react-hot-toast";
 import Modal from "./Modal";
@@ -38,6 +45,8 @@ interface CreateProjectModalProps {
   onClose: () => void;
   onSuccess: () => void;
 }
+
+type UploadStatus = "idle" | "dragging" | "uploading" | "success" | "error";
 
 const statusOptions = [
   { value: "active", label: "Ativo", color: "#10b981" },
@@ -64,12 +73,29 @@ export default function CreateProjectModal({
     end_date: "",
   });
 
+  // Image upload state
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploadStatus, setUploadStatus] = useState<UploadStatus>("idle");
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   // Fetch teams when modal opens
   useEffect(() => {
     if (open) {
       fetchTeams();
     }
   }, [open]);
+
+  // Cleanup image preview URL on unmount
+  useEffect(() => {
+    return () => {
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, [imagePreview]);
 
   const fetchTeams = async () => {
     setTeamsLoading(true);
@@ -116,6 +142,120 @@ export default function CreateProjectModal({
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  // Image upload handlers
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setUploadStatus("dragging");
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setUploadStatus("idle");
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setUploadStatus("idle");
+
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      handleFileSelect(files[0]);
+    }
+  }, []);
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      handleFileSelect(files[0]);
+    }
+  };
+
+  const handleFileSelect = (file: File) => {
+    // Validate file type
+    const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      setUploadError("Formato inválido. Use JPG, PNG, GIF ou WebP.");
+      setUploadStatus("error");
+      return;
+    }
+
+    // Validate file size (2MB max)
+    if (file.size > 2 * 1024 * 1024) {
+      setUploadError("Arquivo muito grande. Máximo 2MB.");
+      setUploadStatus("error");
+      return;
+    }
+
+    // Clear previous preview
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+    }
+
+    // Create preview
+    const previewUrl = URL.createObjectURL(file);
+    setImageFile(file);
+    setImagePreview(previewUrl);
+    setUploadStatus("success");
+    setUploadError(null);
+  };
+
+  const handleRemoveImage = () => {
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+    }
+    setImageFile(null);
+    setImagePreview(null);
+    setUploadStatus("idle");
+    setUploadError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const uploadImageToStorage = async (projectId: string): Promise<string | null> => {
+    if (!imageFile) return null;
+
+    setUploadStatus("uploading");
+    setUploadProgress(0);
+
+    try {
+      const fileExt = imageFile.name.split(".").pop();
+      const fileName = `${projectId}/process-map-${Date.now()}.${fileExt}`;
+
+      // Simulate progress (since Supabase doesn't provide real-time progress)
+      const progressInterval = setInterval(() => {
+        setUploadProgress((prev) => Math.min(prev + 20, 90));
+      }, 200);
+
+      const { data, error } = await supabase.storage
+        .from("project-images")
+        .upload(fileName, imageFile, {
+          cacheControl: "3600",
+          upsert: true,
+        });
+
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+
+      if (error) throw error;
+
+      // Get public URL
+      const { data: publicUrlData } = supabase.storage
+        .from("project-images")
+        .getPublicUrl(data.path);
+
+      return publicUrlData.publicUrl;
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      setUploadStatus("error");
+      setUploadError("Erro ao fazer upload da imagem");
+      return null;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -127,7 +267,7 @@ export default function CreateProjectModal({
     setLoading(true);
 
     try {
-      // Create the project
+      // Create the project first
       const { data: projectData, error: projectError } = await supabase
         .from("projects")
         .insert([
@@ -144,6 +284,24 @@ export default function CreateProjectModal({
         .single();
 
       if (projectError) throw projectError;
+
+      // Upload image if selected
+      let mappingProcessUrl = null;
+      if (imageFile && projectData?.id) {
+        mappingProcessUrl = await uploadImageToStorage(projectData.id);
+
+        // Update project with image URL
+        if (mappingProcessUrl) {
+          const { error: updateError } = await supabase
+            .from("projects")
+            .update({ mapping_process_url: mappingProcessUrl })
+            .eq("id", projectData.id);
+
+          if (updateError) {
+            console.error("Error updating project with image URL:", updateError);
+          }
+        }
+      }
 
       // If teams are selected, create project_teams associations
       if (selectedTeams.length > 0 && projectData?.id) {
@@ -164,14 +322,7 @@ export default function CreateProjectModal({
       }
 
       toast.success("Projeto criado com sucesso!");
-      setFormData({
-        name: "",
-        description: "",
-        status: "active",
-        start_date: "",
-        end_date: "",
-      });
-      setSelectedTeams([]);
+      resetForm();
       onSuccess();
       onClose();
     } catch (error) {
@@ -179,6 +330,69 @@ export default function CreateProjectModal({
       toast.error("Erro ao criar projeto");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      description: "",
+      status: "active",
+      start_date: "",
+      end_date: "",
+    });
+    setSelectedTeams([]);
+    handleRemoveImage();
+  };
+
+  const getDropzoneStyles = () => {
+    const baseStyles = {
+      border: "2px dashed",
+      borderRadius: 3,
+      p: 3,
+      textAlign: "center" as const,
+      cursor: "pointer",
+      transition: "all 0.3s ease",
+      position: "relative" as const,
+      overflow: "hidden",
+    };
+
+    switch (uploadStatus) {
+      case "dragging":
+        return {
+          ...baseStyles,
+          borderColor: "#6366f1",
+          bgcolor: "rgba(99, 102, 241, 0.1)",
+          transform: "scale(1.02)",
+        };
+      case "success":
+        return {
+          ...baseStyles,
+          borderColor: "#10b981",
+          bgcolor: "rgba(16, 185, 129, 0.05)",
+        };
+      case "error":
+        return {
+          ...baseStyles,
+          borderColor: "#ef4444",
+          bgcolor: "rgba(239, 68, 68, 0.05)",
+        };
+      case "uploading":
+        return {
+          ...baseStyles,
+          borderColor: "#6366f1",
+          bgcolor: "rgba(99, 102, 241, 0.05)",
+        };
+      default:
+        return {
+          ...baseStyles,
+          borderColor: "rgba(99, 102, 241, 0.3)",
+          bgcolor: "rgba(99, 102, 241, 0.02)",
+          "&:hover": {
+            borderColor: "#6366f1",
+            bgcolor: "rgba(99, 102, 241, 0.05)",
+          },
+        };
     }
   };
 
@@ -232,6 +446,227 @@ export default function CreateProjectModal({
               ),
             }}
           />
+
+          {/* Process Map Upload Section */}
+          <Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
+              <ImageIcon sx={{ color: "#6366f1", fontSize: 20 }} />
+              <Typography variant="body2" fontWeight={600} color="text.secondary">
+                Mapa de Processos
+              </Typography>
+              <Chip
+                label="Opcional"
+                size="small"
+                sx={{
+                  height: 20,
+                  fontSize: "0.65rem",
+                  bgcolor: "rgba(107, 114, 128, 0.1)",
+                  color: "#6b7280",
+                }}
+              />
+            </Box>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              onChange={handleFileInputChange}
+              style={{ display: "none" }}
+            />
+
+            {!imagePreview ? (
+              <Box
+                onClick={() => fileInputRef.current?.click()}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                sx={getDropzoneStyles()}
+              >
+                {uploadStatus === "uploading" ? (
+                  <Box>
+                    <CircularProgress size={40} sx={{ color: "#6366f1", mb: 2 }} />
+                    <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>
+                      Fazendo upload...
+                    </Typography>
+                    <LinearProgress
+                      variant="determinate"
+                      value={uploadProgress}
+                      sx={{
+                        height: 6,
+                        borderRadius: 3,
+                        bgcolor: "rgba(99, 102, 241, 0.1)",
+                        "& .MuiLinearProgress-bar": {
+                          bgcolor: "#6366f1",
+                          borderRadius: 3,
+                        },
+                      }}
+                    />
+                  </Box>
+                ) : uploadStatus === "error" ? (
+                  <Box>
+                    <ErrorIcon sx={{ fontSize: 40, color: "#ef4444", mb: 1 }} />
+                    <Typography variant="body2" color="error" fontWeight={600}>
+                      {uploadError}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Clique para tentar novamente
+                    </Typography>
+                  </Box>
+                ) : (
+                  <Box>
+                    <Box
+                      sx={{
+                        width: 60,
+                        height: 60,
+                        borderRadius: "50%",
+                        bgcolor: "rgba(99, 102, 241, 0.1)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        mx: "auto",
+                        mb: 2,
+                        transition: "all 0.3s",
+                        ...(uploadStatus === "dragging" && {
+                          bgcolor: "rgba(99, 102, 241, 0.2)",
+                          transform: "scale(1.1)",
+                        }),
+                      }}
+                    >
+                      <CloudUpload
+                        sx={{
+                          fontSize: 30,
+                          color: "#6366f1",
+                          transition: "all 0.3s",
+                          ...(uploadStatus === "dragging" && {
+                            transform: "translateY(-3px)",
+                          }),
+                        }}
+                      />
+                    </Box>
+                    <Typography variant="body1" fontWeight={600} gutterBottom>
+                      {uploadStatus === "dragging"
+                        ? "Solte a imagem aqui"
+                        : "Arraste e solte uma imagem"}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      ou clique para selecionar
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ display: "block", mt: 1 }}
+                    >
+                      JPG, PNG, GIF ou WebP (máx. 2MB)
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+            ) : (
+              <Box
+                sx={{
+                  position: "relative",
+                  borderRadius: 3,
+                  overflow: "hidden",
+                  border: "2px solid rgba(16, 185, 129, 0.3)",
+                  bgcolor: "rgba(16, 185, 129, 0.02)",
+                }}
+              >
+                {/* Success indicator */}
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: 12,
+                    left: 12,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.5,
+                    bgcolor: "rgba(16, 185, 129, 0.9)",
+                    color: "white",
+                    px: 1.5,
+                    py: 0.5,
+                    borderRadius: 2,
+                    zIndex: 2,
+                  }}
+                >
+                  <CheckCircle sx={{ fontSize: 16 }} />
+                  <Typography variant="caption" fontWeight={600}>
+                    Imagem selecionada
+                  </Typography>
+                </Box>
+
+                {/* Remove button */}
+                <IconButton
+                  onClick={handleRemoveImage}
+                  sx={{
+                    position: "absolute",
+                    top: 8,
+                    right: 8,
+                    bgcolor: "rgba(0, 0, 0, 0.6)",
+                    color: "white",
+                    zIndex: 2,
+                    "&:hover": {
+                      bgcolor: "rgba(239, 68, 68, 0.9)",
+                    },
+                  }}
+                >
+                  <Close />
+                </IconButton>
+
+                {/* Image preview */}
+                <Box
+                  sx={{
+                    p: 2,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Box
+                    component="img"
+                    src={imagePreview}
+                    alt="Preview do mapa de processos"
+                    sx={{
+                      maxWidth: "100%",
+                      maxHeight: 250,
+                      objectFit: "contain",
+                      borderRadius: 2,
+                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                    }}
+                  />
+                </Box>
+
+                {/* File info */}
+                <Box
+                  sx={{
+                    p: 2,
+                    borderTop: "1px solid rgba(16, 185, 129, 0.2)",
+                    bgcolor: "rgba(16, 185, 129, 0.05)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <ImageIcon sx={{ fontSize: 18, color: "#10b981" }} />
+                    <Typography variant="body2" fontWeight={500}>
+                      {imageFile?.name}
+                    </Typography>
+                  </Box>
+                  <Typography variant="caption" color="text.secondary">
+                    {imageFile && (imageFile.size / 1024 / 1024).toFixed(2)} MB
+                  </Typography>
+                </Box>
+              </Box>
+            )}
+
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ display: "block", mt: 1 }}
+            >
+              Faça upload de um diagrama ou fluxograma do processo do projeto.
+            </Typography>
+          </Box>
 
           <Box>
             <TextField

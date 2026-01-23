@@ -13,6 +13,10 @@ import {
   Avatar,
   Grid,
   Button,
+  Modal as MuiModal,
+  IconButton,
+  Fade,
+  Backdrop,
 } from "@mui/material";
 import {
   CalendarToday,
@@ -23,6 +27,11 @@ import {
   Flag,
   Functions,
   Add,
+  Image as ImageIcon,
+  ZoomIn,
+  Close,
+  OpenInFull,
+  ZoomOut,
 } from "@mui/icons-material";
 import Modal from "./Modal";
 import SprintDetailsModal from "./SprintDetailsModal";
@@ -41,6 +50,7 @@ interface ProjectDetailsModalProps {
     status: string;
     start_date: string;
     end_date: string;
+    mapping_process_url?: string;
   };
 }
 
@@ -101,6 +111,205 @@ const roleConfig: Record<string, { label: string; color: string }> = {
   member: { label: "Membro", color: "#6b7280" },
 };
 
+// Lightbox component for full-screen image viewing
+function ImageLightbox({
+  open,
+  onClose,
+  imageUrl,
+  title,
+}: {
+  open: boolean;
+  onClose: () => void;
+  imageUrl: string;
+  title: string;
+}) {
+  const [zoom, setZoom] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+  const handleZoomIn = () => {
+    setZoom((prev) => Math.min(prev + 0.5, 4));
+  };
+
+  const handleZoomOut = () => {
+    setZoom((prev) => {
+      const newZoom = Math.max(prev - 0.5, 1);
+      if (newZoom === 1) setPosition({ x: 0, y: 0 });
+      return newZoom;
+    });
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (zoom > 1) {
+      setIsDragging(true);
+      setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging && zoom > 1) {
+      setPosition({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y,
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleReset = () => {
+    setZoom(1);
+    setPosition({ x: 0, y: 0 });
+  };
+
+  return (
+    <MuiModal
+      open={open}
+      onClose={onClose}
+      closeAfterTransition
+      slots={{ backdrop: Backdrop }}
+      slotProps={{
+        backdrop: {
+          timeout: 300,
+          sx: { bgcolor: "rgba(0, 0, 0, 0.95)" },
+        },
+      }}
+    >
+      <Fade in={open}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: "flex",
+            flexDirection: "column",
+            outline: "none",
+          }}
+        >
+          {/* Header */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              p: 2,
+              bgcolor: "rgba(0, 0, 0, 0.5)",
+            }}
+          >
+            <Typography variant="h6" color="white" fontWeight={600}>
+              {title}
+            </Typography>
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <IconButton
+                onClick={handleZoomOut}
+                disabled={zoom <= 1}
+                sx={{
+                  color: "white",
+                  bgcolor: "rgba(255, 255, 255, 0.1)",
+                  "&:hover": { bgcolor: "rgba(255, 255, 255, 0.2)" },
+                  "&.Mui-disabled": { color: "rgba(255, 255, 255, 0.3)" },
+                }}
+              >
+                <ZoomOut />
+              </IconButton>
+              <Chip
+                label={`${Math.round(zoom * 100)}%`}
+                sx={{
+                  bgcolor: "rgba(99, 102, 241, 0.8)",
+                  color: "white",
+                  fontWeight: 600,
+                }}
+              />
+              <IconButton
+                onClick={handleZoomIn}
+                disabled={zoom >= 4}
+                sx={{
+                  color: "white",
+                  bgcolor: "rgba(255, 255, 255, 0.1)",
+                  "&:hover": { bgcolor: "rgba(255, 255, 255, 0.2)" },
+                  "&.Mui-disabled": { color: "rgba(255, 255, 255, 0.3)" },
+                }}
+              >
+                <ZoomIn />
+              </IconButton>
+              <IconButton
+                onClick={handleReset}
+                sx={{
+                  color: "white",
+                  bgcolor: "rgba(255, 255, 255, 0.1)",
+                  "&:hover": { bgcolor: "rgba(255, 255, 255, 0.2)" },
+                }}
+              >
+                <OpenInFull />
+              </IconButton>
+              <IconButton
+                onClick={onClose}
+                sx={{
+                  color: "white",
+                  bgcolor: "rgba(239, 68, 68, 0.8)",
+                  "&:hover": { bgcolor: "rgba(239, 68, 68, 1)" },
+                }}
+              >
+                <Close />
+              </IconButton>
+            </Box>
+          </Box>
+
+          {/* Image Container */}
+          <Box
+            sx={{
+              flex: 1,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              overflow: "hidden",
+              cursor: zoom > 1 ? (isDragging ? "grabbing" : "grab") : "default",
+            }}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+          >
+            <Box
+              component="img"
+              src={imageUrl}
+              alt="Mapa de Processos"
+              sx={{
+                maxWidth: zoom === 1 ? "90%" : "none",
+                maxHeight: zoom === 1 ? "90%" : "none",
+                objectFit: "contain",
+                transform: `scale(${zoom}) translate(${position.x / zoom}px, ${position.y / zoom}px)`,
+                transition: isDragging ? "none" : "transform 0.2s ease-out",
+                userSelect: "none",
+                pointerEvents: "none",
+              }}
+              draggable={false}
+            />
+          </Box>
+
+          {/* Footer hint */}
+          <Box
+            sx={{
+              p: 2,
+              textAlign: "center",
+              bgcolor: "rgba(0, 0, 0, 0.5)",
+            }}
+          >
+            <Typography variant="caption" color="rgba(255, 255, 255, 0.7)">
+              Use os botoes de zoom para ampliar. {zoom > 1 && "Arraste para mover a imagem."}
+            </Typography>
+          </Box>
+        </Box>
+      </Fade>
+    </MuiModal>
+  );
+}
+
 export default function ProjectDetailsModal({
   open,
   onClose,
@@ -118,6 +327,8 @@ export default function ProjectDetailsModal({
   const [sprints, setSprints] = useState<Sprint[]>([]);
   const [backlogItems, setBacklogItems] = useState<BacklogItem[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [processMapUrl, setProcessMapUrl] = useState<string | null>(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const [statistics, setStatistics] = useState({
     totalBacklogItems: 0,
     totalSprints: 0,
@@ -136,6 +347,17 @@ export default function ProjectDetailsModal({
   const fetchProjectDetails = async () => {
     setLoading(true);
     try {
+      // Fetch project with mapping_process_url
+      const { data: projectData, error: projectError } = await supabase
+        .from("projects")
+        .select("mapping_process_url")
+        .eq("id", project.id)
+        .single();
+
+      if (!projectError && projectData) {
+        setProcessMapUrl(projectData.mapping_process_url || null);
+      }
+
       // Fetch all data in parallel
       const [sprintsRes, backlogRes, statsRes] = await Promise.all([
         // Fetch sprints
@@ -310,7 +532,7 @@ export default function ProjectDetailsModal({
                   color="text.secondary"
                   sx={{ mb: 2 }}
                 >
-                  {project.description || "Sem descrição"}
+                  {project.description || "Sem descricao"}
                 </Typography>
 
                 <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 2 }}>
@@ -320,7 +542,7 @@ export default function ProjectDetailsModal({
                       color="text.secondary"
                       fontWeight={600}
                     >
-                      Início
+                      Inicio
                     </Typography>
                     <Box
                       sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
@@ -338,7 +560,7 @@ export default function ProjectDetailsModal({
                       color="text.secondary"
                       fontWeight={600}
                     >
-                      Término
+                      Termino
                     </Typography>
                     <Box
                       sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
@@ -548,6 +770,126 @@ export default function ProjectDetailsModal({
             </Grid>
           </CardContent>
         </Card>
+
+        {/* Process Map Section */}
+        {processMapUrl && (
+          <Card
+            elevation={0}
+            sx={{
+              mb: 3,
+              border: "2px solid rgba(99, 102, 241, 0.15)",
+              borderRadius: 3,
+              overflow: "hidden",
+            }}
+          >
+            <Box
+              sx={{
+                p: 2,
+                bgcolor: "rgba(99, 102, 241, 0.05)",
+                borderBottom: "1px solid rgba(99, 102, 241, 0.1)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <ImageIcon sx={{ color: "#6366f1", fontSize: 22 }} />
+                <Typography variant="subtitle1" fontWeight={700}>
+                  Mapa de Processos
+                </Typography>
+              </Box>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<ZoomIn />}
+                onClick={() => setLightboxOpen(true)}
+                sx={{
+                  borderColor: "#6366f1",
+                  color: "#6366f1",
+                  fontWeight: 600,
+                  "&:hover": {
+                    borderColor: "#4f46e5",
+                    bgcolor: "rgba(99, 102, 241, 0.05)",
+                  },
+                }}
+              >
+                Expandir
+              </Button>
+            </Box>
+            <Box
+              onClick={() => setLightboxOpen(true)}
+              sx={{
+                p: 2,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                bgcolor: "rgba(248, 250, 252, 0.5)",
+                cursor: "pointer",
+                position: "relative",
+                overflow: "hidden",
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  bgcolor: "rgba(99, 102, 241, 0.03)",
+                },
+                "&:hover .zoom-overlay": {
+                  opacity: 1,
+                },
+              }}
+            >
+              {/* Hover overlay */}
+              <Box
+                className="zoom-overlay"
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  bgcolor: "rgba(99, 102, 241, 0.1)",
+                  opacity: 0,
+                  transition: "opacity 0.3s ease",
+                  zIndex: 1,
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    bgcolor: "rgba(99, 102, 241, 0.9)",
+                    color: "white",
+                    px: 3,
+                    py: 1.5,
+                    borderRadius: 3,
+                    boxShadow: "0 4px 20px rgba(99, 102, 241, 0.4)",
+                  }}
+                >
+                  <ZoomIn sx={{ fontSize: 20 }} />
+                  <Typography variant="body2" fontWeight={600}>
+                    Clique para ampliar
+                  </Typography>
+                </Box>
+              </Box>
+
+              {/* Process Map Image */}
+              <Box
+                component="img"
+                src={processMapUrl}
+                alt="Mapa de Processos do Projeto"
+                sx={{
+                  maxWidth: "100%",
+                  maxHeight: 300,
+                  objectFit: "contain",
+                  borderRadius: 2,
+                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
+                }}
+              />
+            </Box>
+          </Card>
+        )}
 
         {/* Tabs */}
         <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
@@ -1007,6 +1349,16 @@ export default function ProjectDetailsModal({
           assigned_to: "",
         }}
       />
+
+      {/* Image Lightbox */}
+      {processMapUrl && (
+        <ImageLightbox
+          open={lightboxOpen}
+          onClose={() => setLightboxOpen(false)}
+          imageUrl={processMapUrl}
+          title={`Mapa de Processos - ${project.name}`}
+        />
+      )}
     </Modal>
   );
 }

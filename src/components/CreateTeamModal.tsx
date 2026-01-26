@@ -58,52 +58,6 @@ const roleOptions = [
   { value: "member", label: "Membro", color: "#6b7280" },
 ];
 
-// AI Name Suggestion Prompt
-const AI_PROMPT = `# Role
-Você é um especialista em Naming criativo para equipes corporativas no Brasil. Sua função é receber o nome original de um time e a data atual, e transformar esse nome em uma versão divertida e temática, alinhada à festividade mais próxima.
-
-# Input
-1. Nome Original do Time
-2. Data Atual
-
-# Lógica de Sazonalidade (Prioridade Alta)
-Analise a "Data Atual" e aplique o tema correspondente:
-
-1. **Carnaval (Janeiro e Fevereiro)**
-   - Estilo: Escolas de Samba, Bloquinhos de Rua, Marchinhas.
-   - Padrões: ""Bloco do [Nome]", "Unidos do [Nome]", "Acadêmicos do [Nome]", "Turma do Abadá".
-   - Exemplo: "Contratos" -> "Bloco da Contratual 🎭"
-
-2. **Festa Junina (Maio e Junho)**
-   - Estilo: Caipira, Sertanejo, Arraiá.
-   - Padrões: "Arraiá do [Nome]", "Quadrilha do [Nome]", "Barraca do [Nome]".
-   - Exemplo: "Engenharia" -> "Arraiá da Engenharia 🤠"
-
-3. **Férias Escolares de Julho (Julho)**
-   - Estilo: Relaxamento, Praia, Pescaria.
-   - Padrões: "[Nome] de Férias", "Expedição [Nome]", "Viajantes do [Nome]".
-   - Exemplo: "Financeiro" -> "Financeiro no Araguaia 🎣"
-
-4. **Halloween (Outubro)**
-   - Estilo: Terror cômico, Fantasias.
-   - Padrões: "Maldição do [Nome]", "Coven do [Nome]", "[Nome] Assombrado".
-   - Exemplo: "RH" -> "RH do Além 👻"
-
-5. **Natal e Fim de Ano (Dezembro)**
-   - Estilo: Natalino, Ano Novo, Confraternização.
-   - Padrões: "Papai Noel do [Nome]", "Trenó do [Nome]", "Família [Nome]".
-   - Exemplo: "Logística" -> "Expresso Polar da Logística 🎅"
-
-6. **Outras Datas (Default)**
-   - Estilo: Cultura Pop, Trocadilhos de escritório, Futurismo.
-   - Padrões: "Liga da [Nome]", "Mestres do [Nome]", "[Nome] S.A.".
-
-# Regras de Output
-- Mantenha o humor leve e adequado ao ambiente de trabalho (safe for work).
-- Use sempre um emoji no final correspondente ao tema.
-- O nome deve ser curto e fácil de ler.
-- Retorne APENAS o nome sugerido, sem explicações.`;
-
 export default function CreateTeamModal({
   open,
   onClose,
@@ -149,7 +103,7 @@ export default function CreateTeamModal({
   const [suggestionSelected, setSuggestionSelected] = useState(false);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Function to call DeepSeek API
+  // Function to call Supabase Edge Function for AI suggestion
   const fetchAISuggestion = useCallback(async (teamName: string) => {
     if (!teamName.trim() || teamName.length < 3) {
       setAiSuggestion("");
@@ -160,42 +114,18 @@ export default function CreateTeamModal({
     setSuggestionSelected(false);
 
     try {
-      const currentDate = new Date().toLocaleDateString("pt-BR", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      });
-
-      const response = await fetch(
-        "https://api.deepseek.com/chat/completions",
+      const { data, error } = await supabase.functions.invoke(
+        "generate-team-name",
         {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_DEEPSEEK_API_KEY}`,
-          },
-          body: JSON.stringify({
-            model: "deepseek-chat",
-            messages: [
-              { role: "system", content: AI_PROMPT },
-              {
-                role: "user",
-                content: `Nome Original do Time: ${teamName}\nData Atual: ${currentDate}`,
-              },
-            ],
-            max_tokens: 100,
-            temperature: 0.8,
-          }),
-        },
+          body: { teamName },
+        }
       );
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch AI suggestion");
+      if (error) {
+        throw error;
       }
 
-      const data = await response.json();
-      const suggestion = data.choices?.[0]?.message?.content?.trim() || "";
-      setAiSuggestion(suggestion);
+      setAiSuggestion(data?.suggestion || "");
     } catch (error) {
       console.error("Error fetching AI suggestion:", error);
       setAiSuggestion("");

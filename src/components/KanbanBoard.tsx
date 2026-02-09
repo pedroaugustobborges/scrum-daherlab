@@ -179,8 +179,15 @@ export default function KanbanBoard({ stories, onRefresh, onDeleteStory, current
     if (!storyToReplicate) return
 
     try {
-      // Find the story to replicate
-      const storyToClone = stories.find((s) => s.id === storyToReplicate)
+      // Fetch the complete story data including project_id
+      const { data: storyToClone, error: fetchError } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('id', storyToReplicate)
+        .single()
+
+      if (fetchError) throw fetchError
+
       if (!storyToClone) {
         toast.error('História não encontrada')
         return
@@ -195,6 +202,7 @@ export default function KanbanBoard({ stories, onRefresh, onDeleteStory, current
         story_points: storyToClone.story_points,
         assigned_to: storyToClone.assigned_to,
         sprint_id: targetSprintId,
+        project_id: storyToClone.project_id,
       })
 
       if (error) throw error

@@ -7,6 +7,14 @@ import {
   Stack,
   InputAdornment,
   CircularProgress,
+  FormControl,
+  InputLabel,
+  Select,
+  OutlinedInput,
+  Chip,
+  Typography,
+  Checkbox,
+  ListItemText,
 } from '@mui/material'
 import {
   Assignment,
@@ -14,10 +22,16 @@ import {
   Description,
   TrendingUp,
   Save,
+  Groups,
 } from '@mui/icons-material'
 import toast from 'react-hot-toast'
 import Modal from './Modal'
 import { supabase } from '@/lib/supabase'
+
+interface Team {
+  id: string
+  name: string
+}
 
 interface EditProjectModalProps {
   open: boolean
@@ -47,6 +61,10 @@ export default function EditProjectModal({
   project,
 }: EditProjectModalProps) {
   const [loading, setLoading] = useState(false)
+  const [teams, setTeams] = useState<Team[]>([])
+  const [teamsLoading, setTeamsLoading] = useState(false)
+  const [selectedTeams, setSelectedTeams] = useState<string[]>([])
+  const [initialTeams, setInitialTeams] = useState<string[]>([])
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -64,8 +82,45 @@ export default function EditProjectModal({
         start_date: project.start_date || '',
         end_date: project.end_date || '',
       })
+      fetchTeams()
+      fetchProjectTeams()
     }
   }, [open, project])
+
+  const fetchTeams = async () => {
+    setTeamsLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('teams')
+        .select('id, name')
+        .order('name')
+
+      if (error) throw error
+      setTeams(data || [])
+    } catch (error) {
+      console.error('Error fetching teams:', error)
+      toast.error('Erro ao carregar times')
+    } finally {
+      setTeamsLoading(false)
+    }
+  }
+
+  const fetchProjectTeams = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('project_teams')
+        .select('team_id')
+        .eq('project_id', project.id)
+
+      if (error) throw error
+
+      const teamIds = (data || []).map((pt) => pt.team_id)
+      setSelectedTeams(teamIds)
+      setInitialTeams(teamIds)
+    } catch (error) {
+      console.error('Error fetching project teams:', error)
+    }
+  }
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -94,6 +149,39 @@ export default function EditProjectModal({
         .eq('id', project.id)
 
       if (error) throw error
+
+      // Handle team changes
+      const teamsToAdd = selectedTeams.filter((id) => !initialTeams.includes(id))
+      const teamsToRemove = initialTeams.filter((id) => !selectedTeams.includes(id))
+
+      // Remove teams that were deselected
+      if (teamsToRemove.length > 0) {
+        const { error: removeError } = await supabase
+          .from('project_teams')
+          .delete()
+          .eq('project_id', project.id)
+          .in('team_id', teamsToRemove)
+
+        if (removeError) {
+          console.error('Error removing teams:', removeError)
+        }
+      }
+
+      // Add newly selected teams
+      if (teamsToAdd.length > 0) {
+        const projectTeamsData = teamsToAdd.map((teamId) => ({
+          project_id: project.id,
+          team_id: teamId,
+        }))
+
+        const { error: addError } = await supabase
+          .from('project_teams')
+          .insert(projectTeamsData)
+
+        if (addError) {
+          console.error('Error adding teams:', addError)
+        }
+      }
 
       toast.success('Projeto atualizado com sucesso!')
       onSuccess()
@@ -180,6 +268,114 @@ export default function EditProjectModal({
                 </MenuItem>
               ))}
             </TextField>
+          </Box>
+
+          {/* Team Selection */}
+          <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+              <Groups sx={{ color: '#6366f1', fontSize: 20 }} />
+              <Typography variant="body2" fontWeight={600} color="text.secondary">
+                Times Responsáveis
+              </Typography>
+            </Box>
+            <FormControl fullWidth>
+              <InputLabel
+                id="teams-select-label"
+                sx={{
+                  '&.Mui-focused': { color: '#6366f1' },
+                }}
+              >
+                Selecione os times
+              </InputLabel>
+              <Select
+                labelId="teams-select-label"
+                multiple
+                value={selectedTeams}
+                onChange={(e) => setSelectedTeams(e.target.value as string[])}
+                input={<OutlinedInput label="Selecione os times" />}
+                disabled={teamsLoading}
+                renderValue={(selected) => (
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                    {(selected as string[]).map((value) => {
+                      const team = teams.find((t) => t.id === value)
+                      return (
+                        <Chip
+                          key={value}
+                          label={team?.name || value}
+                          size="small"
+                          onDelete={() => {
+                            setSelectedTeams((prev) => prev.filter((id) => id !== value))
+                          }}
+                          onMouseDown={(e) => e.stopPropagation()}
+                          sx={{
+                            bgcolor: 'rgba(99, 102, 241, 0.1)',
+                            color: '#6366f1',
+                            fontWeight: 600,
+                            '& .MuiChip-deleteIcon': {
+                              color: '#6366f1',
+                              '&:hover': {
+                                color: '#4f46e5',
+                              },
+                            },
+                          }}
+                        />
+                      )
+                    })}
+                  </Box>
+                )}
+                MenuProps={{
+                  PaperProps: {
+                    sx: {
+                      maxHeight: 300,
+                    },
+                  },
+                }}
+                sx={{
+                  borderRadius: 2,
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#6366f1',
+                  },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#6366f1',
+                  },
+                }}
+              >
+                {teamsLoading ? (
+                  <MenuItem disabled>
+                    <CircularProgress size={20} sx={{ mr: 1 }} />
+                    Carregando times...
+                  </MenuItem>
+                ) : teams.length === 0 ? (
+                  <MenuItem disabled>
+                    <Typography variant="body2" color="text.secondary">
+                      Nenhum time disponível
+                    </Typography>
+                  </MenuItem>
+                ) : (
+                  teams.map((team) => (
+                    <MenuItem key={team.id} value={team.id}>
+                      <Checkbox
+                        checked={selectedTeams.indexOf(team.id) > -1}
+                        sx={{
+                          color: '#6366f1',
+                          '&.Mui-checked': {
+                            color: '#6366f1',
+                          },
+                        }}
+                      />
+                      <ListItemText primary={team.name} />
+                    </MenuItem>
+                  ))
+                )}
+              </Select>
+            </FormControl>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ display: 'block', mt: 1 }}
+            >
+              Selecione os times que serão responsáveis por este projeto.
+            </Typography>
           </Box>
 
           <Box

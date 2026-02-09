@@ -20,11 +20,21 @@ import toast from 'react-hot-toast'
 import Modal from './Modal'
 import { supabase } from '@/lib/supabase'
 
+interface Subtask {
+  id: string
+  title: string
+  description: string
+  status: string
+  estimated_hours: number
+  assigned_to: string
+}
+
 interface CreateSubtaskModalProps {
   open: boolean
   onClose: () => void
   onSuccess: () => void
   taskId: string
+  subtask?: Subtask | null
 }
 
 interface Profile {
@@ -44,6 +54,7 @@ export default function CreateSubtaskModal({
   onClose,
   onSuccess,
   taskId,
+  subtask,
 }: CreateSubtaskModalProps) {
   const [loading, setLoading] = useState(false)
   const [loadingProfiles, setLoadingProfiles] = useState(false)
@@ -56,18 +67,30 @@ export default function CreateSubtaskModal({
     estimated_hours: '',
   })
 
+  const isEditMode = !!subtask
+
   useEffect(() => {
     if (open) {
       fetchProfiles()
-      setFormData({
-        title: '',
-        description: '',
-        status: 'todo',
-        assigned_to: '',
-        estimated_hours: '',
-      })
+      if (subtask) {
+        setFormData({
+          title: subtask.title || '',
+          description: subtask.description || '',
+          status: subtask.status || 'todo',
+          assigned_to: subtask.assigned_to || '',
+          estimated_hours: subtask.estimated_hours ? String(subtask.estimated_hours) : '',
+        })
+      } else {
+        setFormData({
+          title: '',
+          description: '',
+          status: 'todo',
+          assigned_to: '',
+          estimated_hours: '',
+        })
+      }
     }
-  }, [open])
+  }, [open, subtask])
 
   const fetchProfiles = async () => {
     setLoadingProfiles(true)
@@ -102,35 +125,53 @@ export default function CreateSubtaskModal({
     setLoading(true)
 
     try {
-      const { data: user } = await supabase.auth.getUser()
+      if (isEditMode && subtask) {
+        const { error } = await supabase
+          .from('subtasks')
+          .update({
+            title: formData.title,
+            description: formData.description,
+            status: formData.status,
+            assigned_to: formData.assigned_to || null,
+            estimated_hours: formData.estimated_hours ? parseFloat(formData.estimated_hours) : null,
+          })
+          .eq('id', subtask.id)
 
-      const { error } = await supabase.from('subtasks').insert([
-        {
-          task_id: taskId,
-          title: formData.title,
-          description: formData.description,
-          status: formData.status,
-          assigned_to: formData.assigned_to || null,
-          estimated_hours: formData.estimated_hours ? parseFloat(formData.estimated_hours) : null,
-          created_by: user.user?.id,
-        },
-      ])
+        if (error) throw error
 
-      if (error) throw error
+        toast.success('Subtarefa atualizada com sucesso!')
+      } else {
+        const { data: user } = await supabase.auth.getUser()
 
-      toast.success('Subtarefa criada com sucesso!')
+        const { error } = await supabase.from('subtasks').insert([
+          {
+            task_id: taskId,
+            title: formData.title,
+            description: formData.description,
+            status: formData.status,
+            assigned_to: formData.assigned_to || null,
+            estimated_hours: formData.estimated_hours ? parseFloat(formData.estimated_hours) : null,
+            created_by: user.user?.id,
+          },
+        ])
+
+        if (error) throw error
+
+        toast.success('Subtarefa criada com sucesso!')
+      }
+
       onSuccess()
       onClose()
     } catch (error) {
-      console.error('Error creating subtask:', error)
-      toast.error('Erro ao criar subtarefa')
+      console.error('Error saving subtask:', error)
+      toast.error(isEditMode ? 'Erro ao atualizar subtarefa' : 'Erro ao criar subtarefa')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Nova Subtarefa" maxWidth="sm">
+    <Modal open={open} onClose={onClose} title={isEditMode ? 'Editar Subtarefa' : 'Nova Subtarefa'} maxWidth="sm">
       <form onSubmit={handleSubmit}>
         <Stack spacing={3}>
           <TextField
@@ -294,7 +335,7 @@ export default function CreateSubtaskModal({
                 fontSize: '1rem',
               }}
             >
-              {loading ? 'Criando...' : 'Criar Subtarefa'}
+              {loading ? (isEditMode ? 'Salvando...' : 'Criando...') : (isEditMode ? 'Salvar Alterações' : 'Criar Subtarefa')}
             </Button>
           </Box>
         </Stack>

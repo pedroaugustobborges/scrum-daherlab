@@ -100,6 +100,7 @@ export default function StoryDetailsModal({ open, onClose, onSuccess, storyId }:
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [story, setStory] = useState<Story | null>(null)
   const [createSubtaskOpen, setCreateSubtaskOpen] = useState(false)
+  const [editingSubtask, setEditingSubtask] = useState<Subtask | null>(null)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -693,6 +694,20 @@ export default function StoryDetailsModal({ open, onClose, onSuccess, storyId }:
                           }
                         />
                         <ListItemSecondaryAction>
+                          <Tooltip title="Editar subtarefa">
+                            <IconButton
+                              onClick={() => setEditingSubtask(subtask)}
+                              sx={{
+                                color: '#6366f1',
+                                mr: 1,
+                                '&:hover': {
+                                  bgcolor: 'rgba(99, 102, 241, 0.1)',
+                                },
+                              }}
+                            >
+                              <EditIcon />
+                            </IconButton>
+                          </Tooltip>
                           <IconButton
                             edge="end"
                             onClick={() => handleDeleteSubtask(subtask.id)}
@@ -745,14 +760,19 @@ export default function StoryDetailsModal({ open, onClose, onSuccess, storyId }:
       </Modal>
 
       <CreateSubtaskModal
-        open={createSubtaskOpen}
-        onClose={() => setCreateSubtaskOpen(false)}
+        open={createSubtaskOpen || !!editingSubtask}
+        onClose={() => {
+          setCreateSubtaskOpen(false)
+          setEditingSubtask(null)
+        }}
         onSuccess={async () => {
           setCreateSubtaskOpen(false)
+          setEditingSubtask(null)
           await fetchStory()
           onSuccess()
         }}
         taskId={storyId}
+        subtask={editingSubtask}
       />
     </>
   )

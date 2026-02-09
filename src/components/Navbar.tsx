@@ -12,6 +12,11 @@ import {
   Box,
   Divider,
   ListItemIcon,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
 } from "@mui/material";
 import {
   Dashboard,
@@ -24,14 +29,21 @@ import {
   MenuBook,
   Inventory,
   AdminPanelSettings,
+  Menu as MenuIcon,
+  Close,
 } from "@mui/icons-material";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function Navbar() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const { user, signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -83,6 +95,17 @@ export default function Navbar() {
       }}
     >
       <Toolbar sx={{ justifyContent: "space-between", py: 1 }}>
+        {/* Mobile menu button */}
+        <IconButton
+          color="inherit"
+          aria-label="open drawer"
+          edge="start"
+          onClick={handleDrawerToggle}
+          sx={{ display: { md: "none" }, mr: 1 }}
+        >
+          <MenuIcon />
+        </IconButton>
+
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <img
             src="/logo_branca_sem_slogan.png"
@@ -93,7 +116,7 @@ export default function Navbar() {
           <Divider
             orientation="vertical"
             flexItem
-            sx={{ bgcolor: "rgba(255,255,255,0.3)" }}
+            sx={{ bgcolor: "rgba(255,255,255,0.3)", display: { xs: "none", sm: "block" } }}
           />
           <Typography
             variant="h6"
@@ -236,6 +259,78 @@ export default function Navbar() {
           </Menu>
         </Box>
       </Toolbar>
+
+      {/* Mobile Navigation Drawer */}
+      <Drawer
+        variant="temporary"
+        anchor="left"
+        open={mobileOpen}
+        onClose={handleDrawerToggle}
+        ModalProps={{
+          keepMounted: true,
+        }}
+        sx={{
+          display: { xs: "block", md: "none" },
+          "& .MuiDrawer-paper": {
+            boxSizing: "border-box",
+            width: 280,
+            background: "linear-gradient(180deg, #6366f1 0%, #8b5cf6 100%)",
+          },
+        }}
+      >
+        <Box sx={{ p: 2 }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+            <img
+              src="/logo_branca_sem_slogan.png"
+              alt="Daher Lab"
+              style={{ height: "36px" }}
+            />
+            <IconButton color="inherit" onClick={handleDrawerToggle} sx={{ color: "white" }}>
+              <Close />
+            </IconButton>
+          </Box>
+          <Divider sx={{ bgcolor: "rgba(255,255,255,0.2)", mb: 2 }} />
+          <List>
+            {menuItems.map((item) => (
+              <ListItem key={item.path} disablePadding sx={{ mb: 1 }}>
+                <ListItemButton
+                  onClick={() => {
+                    navigate(item.path);
+                    handleDrawerToggle();
+                  }}
+                  sx={{
+                    borderRadius: 2,
+                    color: "white",
+                    backgroundColor: isActive(item.path)
+                      ? "rgba(255,255,255,0.25)"
+                      : "transparent",
+                    "&:hover": {
+                      backgroundColor: "rgba(255,255,255,0.15)",
+                    },
+                  }}
+                >
+                  <ListItemIcon sx={{ color: "white", minWidth: 40 }}>
+                    {item.icon}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={item.label}
+                    primaryTypographyProps={{ fontWeight: isActive(item.path) ? 700 : 500 }}
+                  />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+          <Divider sx={{ bgcolor: "rgba(255,255,255,0.2)", my: 2 }} />
+          <Box sx={{ px: 2, py: 1 }}>
+            <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.7)" }}>
+              Conectado como
+            </Typography>
+            <Typography variant="subtitle2" sx={{ color: "white", fontWeight: 600 }}>
+              {user?.user_metadata?.full_name || user?.email}
+            </Typography>
+          </Box>
+        </Box>
+      </Drawer>
     </AppBar>
   );
 }

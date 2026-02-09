@@ -26,7 +26,7 @@ import {
   Add,
   People,
   Groups,
-  PersonAdd,
+  Edit,
   Delete,
   Search,
   FilterList,
@@ -36,7 +36,7 @@ import {
 } from '@mui/icons-material'
 import Navbar from '@/components/Navbar'
 import CreateTeamModal from '@/components/CreateTeamModal'
-import AddTeamMembersModal from '@/components/AddTeamMembersModal'
+import EditTeamModal from '@/components/EditTeamModal'
 import TeamProjectsModal from '@/components/TeamProjectsModal'
 import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
@@ -79,7 +79,7 @@ export default function Teams() {
   const [teams, setTeams] = useState<Team[]>([])
   const [loading, setLoading] = useState(true)
   const [createModalOpen, setCreateModalOpen] = useState(false)
-  const [membersModalOpen, setMembersModalOpen] = useState(false)
+  const [editModalOpen, setEditModalOpen] = useState(false)
   const [projectsModalOpen, setProjectsModalOpen] = useState(false)
   const [selectedTeam, setSelectedTeam] = useState<{ id: string; name: string } | null>(null)
   const [filters, setFilters] = useState<Filters>(initialFilters)
@@ -172,13 +172,13 @@ export default function Teams() {
     }
   }
 
-  const handleOpenMembersModal = (team: Team) => {
+  const handleOpenEditModal = (team: Team) => {
     setSelectedTeam({ id: team.id, name: team.name })
-    setMembersModalOpen(true)
+    setEditModalOpen(true)
   }
 
-  const handleCloseMembersModal = () => {
-    setMembersModalOpen(false)
+  const handleCloseEditModal = () => {
+    setEditModalOpen(false)
     setSelectedTeam(null)
   }
 
@@ -684,11 +684,11 @@ export default function Teams() {
                         <People sx={{ color: 'white', fontSize: 24 }} />
                       </Box>
                       <Box sx={{ display: 'flex', gap: 1 }}>
-                        <Tooltip title="Gerenciar Membros">
+                        <Tooltip title="Editar Time">
                           <IconButton
                             onClick={(e) => {
                               e.stopPropagation()
-                              handleOpenMembersModal(team)
+                              handleOpenEditModal(team)
                             }}
                             sx={{
                               bgcolor: 'rgba(99, 102, 241, 0.1)',
@@ -697,7 +697,7 @@ export default function Teams() {
                               },
                             }}
                           >
-                            <PersonAdd sx={{ color: '#6366f1' }} />
+                            <Edit sx={{ color: '#6366f1' }} />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="Excluir Time">
@@ -796,9 +796,9 @@ export default function Teams() {
       />
 
       {selectedTeam && (
-        <AddTeamMembersModal
-          open={membersModalOpen}
-          onClose={handleCloseMembersModal}
+        <EditTeamModal
+          open={editModalOpen}
+          onClose={handleCloseEditModal}
           onSuccess={fetchTeams}
           teamId={selectedTeam.id}
           teamName={selectedTeam.name}

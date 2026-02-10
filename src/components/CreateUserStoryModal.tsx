@@ -25,7 +25,7 @@ interface CreateUserStoryModalProps {
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  sprintId: string;
+  sprintId?: string;
   projectId: string;
 }
 
@@ -117,13 +117,8 @@ export default function CreateUserStoryModal({
 
     if (!projectId) {
       toast.error(
-        "Este sprint não está associado a um projeto. Por favor, edite o sprint e selecione um projeto."
+        "Projeto não identificado. Por favor, selecione um projeto."
       );
-      return;
-    }
-
-    if (!sprintId) {
-      toast.error("Sprint não identificado");
       return;
     }
 
@@ -139,7 +134,7 @@ export default function CreateUserStoryModal({
           status: formData.status,
           priority: formData.priority,
           story_points: formData.story_points,
-          sprint_id: sprintId,
+          sprint_id: sprintId || null,
           project_id: projectId,
           assigned_to: formData.assigned_to || null,
           created_by: user.user?.id,
@@ -148,7 +143,7 @@ export default function CreateUserStoryModal({
 
       if (error) throw error;
 
-      toast.success("História de usuário criada com sucesso!");
+      toast.success(sprintId ? "História de usuário criada com sucesso!" : "Item adicionado ao backlog!");
       onSuccess();
       onClose();
     } catch (error) {

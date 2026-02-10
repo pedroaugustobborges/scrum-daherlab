@@ -1,5 +1,8 @@
 import { User } from '@supabase/supabase-js'
 
+// Re-export all hybrid types
+export * from './hybrid'
+
 export interface AuthContextType {
   user: User | null
   loading: boolean

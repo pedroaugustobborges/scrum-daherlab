@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Container,
@@ -38,9 +39,8 @@ import {
   Groups,
 } from "@mui/icons-material";
 import Navbar from "@/components/Navbar";
-import CreateProjectModal from "@/components/CreateProjectModal";
+import { ProjectCreationWizard } from "@/components/project";
 import EditProjectModal from "@/components/EditProjectModal";
-import ProjectDetailsModal from "@/components/ProjectDetailsModal";
 import { supabase } from "@/lib/supabase";
 import { exportProjectsToPDF } from "@/utils/exportProjectsToPDF";
 import toast from "react-hot-toast";
@@ -89,6 +89,7 @@ const initialFilters: Filters = {
 };
 
 export default function Projects() {
+  const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [projectTeams, setProjectTeams] = useState<Record<string, string[]>>(
@@ -96,9 +97,8 @@ export default function Projects() {
   );
   const [loading, setLoading] = useState(true);
   const [exportLoading, setExportLoading] = useState(false);
-  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [createWizardOpen, setCreateWizardOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
-  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [filters, setFilters] = useState<Filters>(initialFilters);
   const [filtersExpanded, setFiltersExpanded] = useState(false);
@@ -245,14 +245,8 @@ export default function Projects() {
     setSelectedProject(null);
   };
 
-  const handleOpenDetailsModal = (project: Project) => {
-    setSelectedProject(project);
-    setDetailsModalOpen(true);
-  };
-
-  const handleCloseDetailsModal = () => {
-    setDetailsModalOpen(false);
-    setSelectedProject(null);
+  const handleOpenProject = (project: Project) => {
+    navigate(`/projects/${project.id}`);
   };
 
   const handleDeleteProject = async (project: Project) => {
@@ -344,7 +338,7 @@ export default function Projects() {
             <Button
               variant="contained"
               startIcon={<Add />}
-              onClick={() => setCreateModalOpen(true)}
+              onClick={() => setCreateWizardOpen(true)}
               sx={{
                 px: 4,
                 py: 1.5,
@@ -729,7 +723,7 @@ export default function Projects() {
               variant="contained"
               size="large"
               startIcon={<Add />}
-              onClick={() => setCreateModalOpen(true)}
+              onClick={() => setCreateWizardOpen(true)}
               sx={{ px: 6, py: 1.5, fontSize: "1.1rem" }}
             >
               Criar Primeiro Projeto
@@ -786,7 +780,7 @@ export default function Projects() {
               <Grid item xs={12} md={6} lg={4} key={project.id}>
                 <Card
                   elevation={0}
-                  onClick={() => handleOpenDetailsModal(project)}
+                  onClick={() => handleOpenProject(project)}
                   sx={{
                     height: "100%",
                     background:
@@ -967,7 +961,7 @@ export default function Projects() {
 
         <Fab
           color="primary"
-          onClick={() => setCreateModalOpen(true)}
+          onClick={() => setCreateWizardOpen(true)}
           sx={{
             position: "fixed",
             bottom: 32,
@@ -982,10 +976,12 @@ export default function Projects() {
         </Fab>
       </Container>
 
-      <CreateProjectModal
-        open={createModalOpen}
-        onClose={() => setCreateModalOpen(false)}
-        onSuccess={fetchProjects}
+      <ProjectCreationWizard
+        open={createWizardOpen}
+        onClose={() => setCreateWizardOpen(false)}
+        onSuccess={() => {
+          fetchProjects();
+        }}
       />
 
       {selectedProject && (
@@ -993,14 +989,6 @@ export default function Projects() {
           open={editModalOpen}
           onClose={handleCloseEditModal}
           onSuccess={fetchProjects}
-          project={selectedProject}
-        />
-      )}
-
-      {selectedProject && (
-        <ProjectDetailsModal
-          open={detailsModalOpen}
-          onClose={handleCloseDetailsModal}
           project={selectedProject}
         />
       )}

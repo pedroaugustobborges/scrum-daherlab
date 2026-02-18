@@ -54,6 +54,9 @@ interface UserStory {
   story_points: number
   assigned_to: string
   sprint_id: string | null
+  due_date?: string | null
+  start_date?: string | null
+  end_date?: string | null
   profiles?: { full_name: string }
   assigned_to_profile?: { full_name: string }
   subtasks?: Subtask[]

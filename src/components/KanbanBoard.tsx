@@ -34,6 +34,8 @@ interface UserStory {
   story_points: number
   assigned_to: string
   due_date?: string | null
+  start_date?: string | null
+  end_date?: string | null
   profiles?: { full_name: string }
   subtasks?: Array<{ status: string }>
 }

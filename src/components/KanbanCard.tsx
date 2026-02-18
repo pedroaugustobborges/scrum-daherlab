@@ -12,6 +12,8 @@ interface KanbanCardProps {
     story_points: number
     assigned_to?: string
     due_date?: string | null
+    start_date?: string | null
+    end_date?: string | null
     profiles?: { full_name: string }
     subtasks?: Array<{ status: string }>
   }
@@ -33,8 +35,19 @@ export default function KanbanCard({ story, onDelete, onClick, onReplicate, onSe
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const menuOpen = Boolean(anchorEl)
 
-  // Check if due date has passed
-  const isDueDatePassed = story.due_date && new Date(story.due_date) < new Date()
+  // Use end_date as fallback when due_date is not set
+  const effectiveDeadline = story.due_date || story.end_date
+
+  // Check if deadline has passed (handle timezone properly)
+  const isDeadlinePassed = (() => {
+    if (!effectiveDeadline) return false
+    const [y, m, d] = effectiveDeadline.split('T')[0].split('-').map(Number)
+    const deadlineDate = new Date(y, m - 1, d)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    return deadlineDate < today
+  })()
+
   const hasPendingPredecessors = predecessorInfo && predecessorInfo.incomplete > 0
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -227,17 +240,23 @@ export default function KanbanCard({ story, onDelete, onClick, onReplicate, onSe
             />
           )}
 
-          {story.due_date && (
-            <Tooltip title={`Data de conclusão: ${new Date(story.due_date).toLocaleDateString('pt-BR')}`}>
+          {effectiveDeadline && (
+            <Tooltip title={`${story.due_date ? 'Prazo' : 'Término'}: ${(() => {
+              const [y, m, d] = effectiveDeadline.split('T')[0].split('-').map(Number)
+              return new Date(y, m - 1, d).toLocaleDateString('pt-BR')
+            })()}`}>
               <Chip
-                label={new Date(story.due_date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+                label={(() => {
+                  const [y, m, d] = effectiveDeadline.split('T')[0].split('-').map(Number)
+                  return new Date(y, m - 1, d).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
+                })()}
                 size="small"
                 icon={<CalendarMonth sx={{ fontSize: 12 }} />}
                 sx={{
                   height: 20,
                   fontSize: '0.65rem',
-                  bgcolor: isDueDatePassed ? 'rgba(239, 68, 68, 0.1)' : 'rgba(245, 158, 11, 0.1)',
-                  color: isDueDatePassed ? '#ef4444' : '#f59e0b',
+                  bgcolor: isDeadlinePassed ? 'rgba(239, 68, 68, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+                  color: isDeadlinePassed ? '#ef4444' : '#f59e0b',
                   fontWeight: 600,
                   '& .MuiChip-icon': {
                     fontSize: 12,

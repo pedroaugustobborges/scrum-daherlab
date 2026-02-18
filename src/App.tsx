@@ -20,6 +20,8 @@ import Teams from '@/pages/Teams'
 import Settings from '@/pages/Settings'
 import ScrumGuide from '@/pages/ScrumGuide'
 import AdminPanel from '@/pages/AdminPanel'
+import Planner from '@/pages/Planner'
+import Calendar from '@/pages/Calendar'
 
 // Placeholder component for views not yet implemented
 function PlaceholderView({ title }: { title: string }) {
@@ -156,6 +158,22 @@ function App() {
           element={
             <ProtectedRoute>
               <ProductBacklog />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/planner"
+          element={
+            <ProtectedRoute>
+              <Planner />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/calendar"
+          element={
+            <ProtectedRoute>
+              <Calendar />
             </ProtectedRoute>
           }
         />

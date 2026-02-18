@@ -17,6 +17,8 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
+  Collapse,
+  alpha,
 } from "@mui/material";
 import {
   Dashboard,
@@ -31,12 +33,19 @@ import {
   AdminPanelSettings,
   Menu as MenuIcon,
   Close,
+  KeyboardArrowDown,
+  ViewList,
+  CalendarMonth,
+  ExpandLess,
+  ExpandMore,
 } from "@mui/icons-material";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function Navbar() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [projectsAnchorEl, setProjectsAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileProjectsOpen, setMobileProjectsOpen] = useState(false);
   const { user, signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -53,6 +62,14 @@ export default function Navbar() {
     setAnchorEl(null);
   };
 
+  const handleProjectsMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setProjectsAnchorEl(event.currentTarget);
+  };
+
+  const handleProjectsMenuClose = () => {
+    setProjectsAnchorEl(null);
+  };
+
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -63,11 +80,18 @@ export default function Navbar() {
     handleClose();
   };
 
-  const menuItems = [
-    { label: "Painel", path: "/dashboard", icon: <Dashboard /> },
-    { label: "Projetos", path: "/projects", icon: <Assignment /> },
+  // Projects dropdown items
+  const projectsMenuItems = [
+    { label: "Ver Todos", path: "/projects", icon: <ViewList /> },
     { label: "Sprints", path: "/sprints", icon: <SpaceDashboard /> },
     { label: "Backlog", path: "/backlog", icon: <Inventory /> },
+  ];
+
+  // Main navigation items
+  const menuItems = [
+    { label: "Painel", path: "/dashboard", icon: <Dashboard /> },
+    { label: "Planner", path: "/planner", icon: <SpaceDashboard /> },
+    { label: "Calendário", path: "/calendar", icon: <CalendarMonth /> },
     { label: "Times", path: "/teams", icon: <People /> },
     { label: "Daher Lab", path: "/scrum-guide", icon: <MenuBook /> },
   ];
@@ -82,6 +106,7 @@ export default function Navbar() {
   }
 
   const isActive = (path: string) => location.pathname === path;
+  const isProjectsActive = projectsMenuItems.some(item => location.pathname === item.path);
 
   return (
     <AppBar
@@ -127,8 +152,141 @@ export default function Navbar() {
           </Typography>
         </Box>
 
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          {menuItems.map((item) => (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          {/* Painel */}
+          <Button
+            color="inherit"
+            startIcon={<Dashboard />}
+            onClick={() => navigate("/dashboard")}
+            sx={{
+              display: { xs: "none", md: "flex" },
+              fontWeight: 600,
+              px: 2.5,
+              py: 1,
+              borderRadius: 3,
+              backgroundColor: isActive("/dashboard")
+                ? "rgba(255,255,255,0.25)"
+                : "transparent",
+              backdropFilter: isActive("/dashboard") ? "blur(10px)" : "none",
+              border: isActive("/dashboard")
+                ? "1px solid rgba(255,255,255,0.3)"
+                : "1px solid transparent",
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              "&:hover": {
+                backgroundColor: "rgba(255,255,255,0.2)",
+                backdropFilter: "blur(10px)",
+                border: "1px solid rgba(255,255,255,0.2)",
+                transform: "translateY(-2px)",
+              },
+            }}
+          >
+            Painel
+          </Button>
+
+          {/* Projetos Dropdown */}
+          <Button
+            color="inherit"
+            startIcon={<Assignment />}
+            endIcon={<KeyboardArrowDown sx={{
+              transform: Boolean(projectsAnchorEl) ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s'
+            }} />}
+            onClick={handleProjectsMenuOpen}
+            sx={{
+              display: { xs: "none", md: "flex" },
+              fontWeight: 600,
+              px: 2.5,
+              py: 1,
+              borderRadius: 3,
+              backgroundColor: isProjectsActive
+                ? "rgba(255,255,255,0.25)"
+                : "transparent",
+              backdropFilter: isProjectsActive ? "blur(10px)" : "none",
+              border: isProjectsActive
+                ? "1px solid rgba(255,255,255,0.3)"
+                : "1px solid transparent",
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              "&:hover": {
+                backgroundColor: "rgba(255,255,255,0.2)",
+                backdropFilter: "blur(10px)",
+                border: "1px solid rgba(255,255,255,0.2)",
+                transform: "translateY(-2px)",
+              },
+            }}
+          >
+            Projetos
+          </Button>
+
+          {/* Projects Dropdown Menu */}
+          <Menu
+            anchorEl={projectsAnchorEl}
+            open={Boolean(projectsAnchorEl)}
+            onClose={handleProjectsMenuClose}
+            PaperProps={{
+              sx: {
+                mt: 1.5,
+                borderRadius: 3,
+                minWidth: 200,
+                boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
+                border: '1px solid rgba(99, 102, 241, 0.1)',
+                overflow: 'visible',
+                '&:before': {
+                  content: '""',
+                  display: 'block',
+                  position: 'absolute',
+                  top: 0,
+                  left: 24,
+                  width: 12,
+                  height: 12,
+                  bgcolor: 'background.paper',
+                  transform: 'translateY(-50%) rotate(45deg)',
+                  borderLeft: '1px solid rgba(99, 102, 241, 0.1)',
+                  borderTop: '1px solid rgba(99, 102, 241, 0.1)',
+                },
+              },
+            }}
+            transformOrigin={{ horizontal: 'left', vertical: 'top' }}
+            anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
+          >
+            {projectsMenuItems.map((item, index) => (
+              <MenuItem
+                key={item.path}
+                onClick={() => {
+                  navigate(item.path);
+                  handleProjectsMenuClose();
+                }}
+                sx={{
+                  py: 1.5,
+                  px: 2,
+                  borderRadius: 2,
+                  mx: 1,
+                  my: index === 0 ? 1 : 0.5,
+                  mb: index === projectsMenuItems.length - 1 ? 1 : 0.5,
+                  backgroundColor: isActive(item.path)
+                    ? alpha('#6366f1', 0.1)
+                    : 'transparent',
+                  color: isActive(item.path) ? '#6366f1' : 'inherit',
+                  fontWeight: isActive(item.path) ? 600 : 500,
+                  transition: 'all 0.2s',
+                  '&:hover': {
+                    backgroundColor: alpha('#6366f1', 0.08),
+                    transform: 'translateX(4px)',
+                  },
+                }}
+              >
+                <ListItemIcon sx={{
+                  color: isActive(item.path) ? '#6366f1' : 'inherit',
+                  minWidth: 36
+                }}>
+                  {item.icon}
+                </ListItemIcon>
+                {item.label}
+              </MenuItem>
+            ))}
+          </Menu>
+
+          {/* Other menu items */}
+          {menuItems.slice(1).map((item) => (
             <Button
               key={item.path}
               color="inherit"
@@ -137,7 +295,7 @@ export default function Navbar() {
               sx={{
                 display: { xs: "none", md: "flex" },
                 fontWeight: 600,
-                px: 3,
+                px: 2.5,
                 py: 1,
                 borderRadius: 3,
                 backgroundColor: isActive(item.path)
@@ -164,7 +322,7 @@ export default function Navbar() {
             size="large"
             onClick={handleMenu}
             color="inherit"
-            sx={{ ml: 2 }}
+            sx={{ ml: 1 }}
           >
             {user?.user_metadata?.avatar_url ? (
               <Avatar
@@ -291,7 +449,97 @@ export default function Navbar() {
           </Box>
           <Divider sx={{ bgcolor: "rgba(255,255,255,0.2)", mb: 2 }} />
           <List>
-            {menuItems.map((item) => (
+            {/* Painel */}
+            <ListItem disablePadding sx={{ mb: 1 }}>
+              <ListItemButton
+                onClick={() => {
+                  navigate("/dashboard");
+                  handleDrawerToggle();
+                }}
+                sx={{
+                  borderRadius: 2,
+                  color: "white",
+                  backgroundColor: isActive("/dashboard")
+                    ? "rgba(255,255,255,0.25)"
+                    : "transparent",
+                  "&:hover": {
+                    backgroundColor: "rgba(255,255,255,0.15)",
+                  },
+                }}
+              >
+                <ListItemIcon sx={{ color: "white", minWidth: 40 }}>
+                  <Dashboard />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Painel"
+                  primaryTypographyProps={{ fontWeight: isActive("/dashboard") ? 700 : 500 }}
+                />
+              </ListItemButton>
+            </ListItem>
+
+            {/* Projetos Collapsible */}
+            <ListItem disablePadding sx={{ mb: 0.5 }}>
+              <ListItemButton
+                onClick={() => setMobileProjectsOpen(!mobileProjectsOpen)}
+                sx={{
+                  borderRadius: 2,
+                  color: "white",
+                  backgroundColor: isProjectsActive
+                    ? "rgba(255,255,255,0.25)"
+                    : "transparent",
+                  "&:hover": {
+                    backgroundColor: "rgba(255,255,255,0.15)",
+                  },
+                }}
+              >
+                <ListItemIcon sx={{ color: "white", minWidth: 40 }}>
+                  <Assignment />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Projetos"
+                  primaryTypographyProps={{ fontWeight: isProjectsActive ? 700 : 500 }}
+                />
+                {mobileProjectsOpen ? <ExpandLess sx={{ color: 'white' }} /> : <ExpandMore sx={{ color: 'white' }} />}
+              </ListItemButton>
+            </ListItem>
+            <Collapse in={mobileProjectsOpen} timeout="auto" unmountOnExit>
+              <List component="div" disablePadding>
+                {projectsMenuItems.map((item) => (
+                  <ListItem key={item.path} disablePadding sx={{ pl: 2 }}>
+                    <ListItemButton
+                      onClick={() => {
+                        navigate(item.path);
+                        handleDrawerToggle();
+                      }}
+                      sx={{
+                        borderRadius: 2,
+                        color: "white",
+                        backgroundColor: isActive(item.path)
+                          ? "rgba(255,255,255,0.2)"
+                          : "transparent",
+                        "&:hover": {
+                          backgroundColor: "rgba(255,255,255,0.1)",
+                        },
+                      }}
+                    >
+                      <ListItemIcon sx={{ color: "white", minWidth: 36 }}>
+                        {item.icon}
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={item.label}
+                        primaryTypographyProps={{
+                          fontWeight: isActive(item.path) ? 700 : 500,
+                          fontSize: '0.9rem'
+                        }}
+                      />
+                    </ListItemButton>
+                  </ListItem>
+                ))}
+              </List>
+            </Collapse>
+
+            {/* Other Menu Items */}
+            {menuItems.slice(1).map((item) => (
               <ListItem key={item.path} disablePadding sx={{ mb: 1 }}>
                 <ListItemButton
                   onClick={() => {

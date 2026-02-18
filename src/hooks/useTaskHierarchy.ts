@@ -106,16 +106,23 @@ export function useCreateTask() {
   return useMutation({
     mutationFn: async (task: Partial<HierarchicalTask> & { project_id: string; title: string }) => {
       // Get max order_index for this parent
-      const { data: maxOrder } = await supabase
+      // Use different query approach based on whether parent_task_id is null or not
+      let query = supabase
         .from('tasks')
         .select('order_index')
         .eq('project_id', task.project_id)
-        .eq('parent_task_id', task.parent_task_id || null)
         .order('order_index', { ascending: false })
         .limit(1)
-        .single()
 
-      const newOrderIndex = (maxOrder?.order_index || 0) + 1
+      if (task.parent_task_id) {
+        query = query.eq('parent_task_id', task.parent_task_id)
+      } else {
+        query = query.is('parent_task_id', null)
+      }
+
+      const { data: maxOrderData } = await query
+
+      const newOrderIndex = (maxOrderData?.[0]?.order_index || 0) + 1
 
       const { data, error } = await supabase
         .from('tasks')

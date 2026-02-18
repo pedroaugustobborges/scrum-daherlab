@@ -19,6 +19,8 @@ import {
   Tooltip,
   Tabs,
   Tab,
+  Autocomplete,
+  Alert,
 } from '@mui/material'
 import {
   Assignment,
@@ -34,6 +36,10 @@ import {
   Timer,
   Edit as EditIcon,
   Visibility,
+  CalendarMonth,
+  AccountTree,
+  Link as LinkIcon,
+  Warning,
 } from '@mui/icons-material'
 import toast from 'react-hot-toast'
 import Modal from './Modal'
@@ -71,8 +77,29 @@ interface Story {
   priority: string
   story_points: number
   assigned_to: string
+  due_date: string | null
+  start_date: string | null
+  end_date: string | null
+  planned_duration: number | null
+  project_id: string
   assigned_to_profile?: { full_name: string }
   subtasks?: Subtask[]
+}
+
+interface AvailableTask {
+  id: string
+  title: string
+  status: string
+}
+
+interface TaskDependency {
+  id: string
+  predecessor_id: string
+  successor_id: string
+  dependency_type: string
+  lag_days: number
+  predecessor?: { id: string; title: string; status: string }
+  successor?: { id: string; title: string; status: string }
 }
 
 const statusOptions = [
@@ -101,6 +128,10 @@ export default function StoryDetailsModal({ open, onClose, onSuccess, storyId }:
   const [story, setStory] = useState<Story | null>(null)
   const [createSubtaskOpen, setCreateSubtaskOpen] = useState(false)
   const [editingSubtask, setEditingSubtask] = useState<Subtask | null>(null)
+  const [predecessors, setPredecessors] = useState<TaskDependency[]>([])
+  const [successors, setSuccessors] = useState<TaskDependency[]>([])
+  const [availableTasks, setAvailableTasks] = useState<AvailableTask[]>([])
+  const [selectedNewPredecessor, setSelectedNewPredecessor] = useState<AvailableTask | null>(null)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -108,6 +139,9 @@ export default function StoryDetailsModal({ open, onClose, onSuccess, storyId }:
     priority: 'medium',
     story_points: 0,
     assigned_to: '',
+    due_date: '',
+    start_date: '',
+    end_date: '',
   })
 
   // Celebration confetti for subtask completion
@@ -125,6 +159,7 @@ export default function StoryDetailsModal({ open, onClose, onSuccess, storyId }:
     if (open && storyId) {
       fetchStory()
       fetchProfiles()
+      fetchDependencies()
     }
   }, [open, storyId])
 
@@ -146,12 +181,21 @@ export default function StoryDetailsModal({ open, onClose, onSuccess, storyId }:
         .eq('task_id', storyId)
         .order('created_at', { ascending: true })
 
+      // Fetch available tasks for adding predecessors
+      const { data: tasksData } = await supabase
+        .from('tasks')
+        .select('id, title, status')
+        .eq('project_id', storyData.project_id)
+        .neq('id', storyId)
+        .order('title')
+
       const fullStory = {
         ...storyData,
         subtasks: subtasksData || [],
       }
 
       setStory(fullStory)
+      setAvailableTasks(tasksData || [])
       setFormData({
         title: storyData.title,
         description: storyData.description || '',
@@ -159,12 +203,46 @@ export default function StoryDetailsModal({ open, onClose, onSuccess, storyId }:
         priority: storyData.priority,
         story_points: storyData.story_points || 0,
         assigned_to: storyData.assigned_to || '',
+        due_date: storyData.due_date ? storyData.due_date.split('T')[0] : '',
+        start_date: storyData.start_date ? storyData.start_date.split('T')[0] : '',
+        end_date: storyData.end_date ? storyData.end_date.split('T')[0] : '',
       })
     } catch (error) {
       console.error('Error fetching story:', error)
       toast.error('Erro ao carregar história')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchDependencies = async () => {
+    try {
+      // Fetch predecessors (tasks that this task depends on)
+      const { data: predData, error: predError } = await supabase
+        .from('task_dependencies')
+        .select(`
+          *,
+          predecessor:tasks!predecessor_id(id, title, status)
+        `)
+        .eq('successor_id', storyId)
+
+      if (predError) throw predError
+
+      // Fetch successors (tasks that depend on this task)
+      const { data: succData, error: succError } = await supabase
+        .from('task_dependencies')
+        .select(`
+          *,
+          successor:tasks!successor_id(id, title, status)
+        `)
+        .eq('predecessor_id', storyId)
+
+      if (succError) throw succError
+
+      setPredecessors(predData || [])
+      setSuccessors(succData || [])
+    } catch (error) {
+      console.error('Error fetching dependencies:', error)
     }
   }
 
@@ -192,6 +270,18 @@ export default function StoryDetailsModal({ open, onClose, onSuccess, storyId }:
     setSaving(true)
 
     try {
+      // Calculate planned_duration if we have both start and end dates
+      let planned_duration = null
+      if (formData.start_date && formData.end_date) {
+        const [startYear, startMonth, startDay] = formData.start_date.split('-').map(Number)
+        const [endYear, endMonth, endDay] = formData.end_date.split('-').map(Number)
+        const start = new Date(startYear, startMonth - 1, startDay)
+        const end = new Date(endYear, endMonth - 1, endDay)
+        const diffTime = end.getTime() - start.getTime()
+        planned_duration = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1
+        if (planned_duration < 1) planned_duration = 1
+      }
+
       const { error } = await supabase
         .from('tasks')
         .update({
@@ -201,6 +291,10 @@ export default function StoryDetailsModal({ open, onClose, onSuccess, storyId }:
           priority: formData.priority,
           story_points: formData.story_points,
           assigned_to: formData.assigned_to || null,
+          due_date: formData.due_date || null,
+          start_date: formData.start_date || null,
+          end_date: formData.end_date || null,
+          planned_duration: planned_duration,
         })
         .eq('id', storyId)
 
@@ -217,6 +311,61 @@ export default function StoryDetailsModal({ open, onClose, onSuccess, storyId }:
       setSaving(false)
     }
   }
+
+  const handleAddPredecessor = async () => {
+    if (!selectedNewPredecessor) return
+
+    try {
+      const { error } = await supabase
+        .from('task_dependencies')
+        .insert({
+          predecessor_id: selectedNewPredecessor.id,
+          successor_id: storyId,
+          dependency_type: 'FS',
+          lag_days: 0,
+        })
+
+      if (error) {
+        if (error.code === '23505') {
+          toast.error('Esta dependência já existe')
+        } else {
+          throw error
+        }
+        return
+      }
+
+      toast.success('Predecessora adicionada!')
+      setSelectedNewPredecessor(null)
+      await fetchDependencies()
+      onSuccess()
+    } catch (error) {
+      console.error('Error adding predecessor:', error)
+      toast.error('Erro ao adicionar predecessora')
+    }
+  }
+
+  const handleRemoveDependency = async (dependencyId: string) => {
+    try {
+      const { error } = await supabase
+        .from('task_dependencies')
+        .delete()
+        .eq('id', dependencyId)
+
+      if (error) throw error
+
+      toast.success('Dependência removida!')
+      await fetchDependencies()
+      onSuccess()
+    } catch (error) {
+      console.error('Error removing dependency:', error)
+      toast.error('Erro ao remover dependência')
+    }
+  }
+
+  // Check if all predecessors are done
+  const hasIncompletePredecessors = predecessors.some(
+    (dep) => dep.predecessor && dep.predecessor.status !== 'done'
+  )
 
   const handleToggleSubtaskStatus = async (subtask: Subtask) => {
     const newStatus = subtask.status === 'done' ? 'todo' : 'done'
@@ -296,6 +445,7 @@ export default function StoryDetailsModal({ open, onClose, onSuccess, storyId }:
             <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)}>
               <Tab icon={<Visibility />} iconPosition="start" label="Detalhes" />
               <Tab icon={<CheckCircle />} iconPosition="start" label={`Subtarefas (${story.subtasks?.length || 0})`} />
+              <Tab icon={<AccountTree />} iconPosition="start" label={`Dependências (${predecessors.length + successors.length})`} />
             </Tabs>
           </Box>
 
@@ -369,6 +519,67 @@ export default function StoryDetailsModal({ open, onClose, onSuccess, storyId }:
                         }}
                       />
                     )}
+                    {/* Show start_date if set */}
+                    {story.start_date && (
+                      <Tooltip title="Data de Início">
+                        <Chip
+                          icon={<CalendarMonth sx={{ fontSize: 16 }} />}
+                          label={`Início: ${(() => {
+                            const [y, m, d] = story.start_date!.split('T')[0].split('-').map(Number)
+                            return new Date(y, m - 1, d).toLocaleDateString('pt-BR')
+                          })()}`}
+                          sx={{
+                            bgcolor: 'rgba(99, 102, 241, 0.1)',
+                            color: '#6366f1',
+                            fontWeight: 600,
+                          }}
+                        />
+                      </Tooltip>
+                    )}
+                    {/* Show end_date or due_date - prefer end_date for grid tasks, due_date for kanban */}
+                    {(story.end_date || story.due_date) && (
+                      <Tooltip title={story.end_date ? "Data de Término" : "Data de Conclusão"}>
+                        <Chip
+                          icon={<CalendarMonth sx={{ fontSize: 16 }} />}
+                          label={`${story.end_date ? 'Término' : 'Prazo'}: ${(() => {
+                            const dateStr = story.end_date || story.due_date
+                            const [y, m, d] = dateStr!.split('T')[0].split('-').map(Number)
+                            return new Date(y, m - 1, d).toLocaleDateString('pt-BR')
+                          })()}`}
+                          sx={{
+                            bgcolor: (() => {
+                              const dateStr = story.end_date || story.due_date
+                              const [y, m, d] = dateStr!.split('T')[0].split('-').map(Number)
+                              const dateObj = new Date(y, m - 1, d)
+                              const isOverdue = dateObj < new Date() && story.status !== 'done'
+                              return isOverdue ? 'rgba(239, 68, 68, 0.1)' : 'rgba(245, 158, 11, 0.1)'
+                            })(),
+                            color: (() => {
+                              const dateStr = story.end_date || story.due_date
+                              const [y, m, d] = dateStr!.split('T')[0].split('-').map(Number)
+                              const dateObj = new Date(y, m - 1, d)
+                              const isOverdue = dateObj < new Date() && story.status !== 'done'
+                              return isOverdue ? '#ef4444' : '#f59e0b'
+                            })(),
+                            fontWeight: 600,
+                          }}
+                        />
+                      </Tooltip>
+                    )}
+                    {/* Show duration if calculated */}
+                    {story.planned_duration && story.planned_duration > 0 && (
+                      <Tooltip title="Duração planejada">
+                        <Chip
+                          icon={<Timer sx={{ fontSize: 16 }} />}
+                          label={`${story.planned_duration} dia${story.planned_duration > 1 ? 's' : ''}`}
+                          sx={{
+                            bgcolor: 'rgba(139, 92, 246, 0.1)',
+                            color: '#8b5cf6',
+                            fontWeight: 600,
+                          }}
+                        />
+                      </Tooltip>
+                    )}
                     {story.assigned_to_profile?.full_name && (
                       <Chip
                         icon={<Person sx={{ fontSize: 16 }} />}
@@ -380,7 +591,27 @@ export default function StoryDetailsModal({ open, onClose, onSuccess, storyId }:
                         }}
                       />
                     )}
+                    {predecessors.length > 0 && (
+                      <Chip
+                        icon={<AccountTree sx={{ fontSize: 16 }} />}
+                        label={`${predecessors.length} predecessora${predecessors.length > 1 ? 's' : ''}`}
+                        sx={{
+                          bgcolor: hasIncompletePredecessors
+                            ? 'rgba(239, 68, 68, 0.1)'
+                            : 'rgba(16, 185, 129, 0.1)',
+                          color: hasIncompletePredecessors ? '#ef4444' : '#10b981',
+                          fontWeight: 600,
+                        }}
+                      />
+                    )}
                   </Box>
+
+                  {/* Warning for incomplete predecessors */}
+                  {hasIncompletePredecessors && story.status !== 'done' && (
+                    <Alert severity="warning" icon={<Warning />} sx={{ mt: 2 }}>
+                      Esta história possui predecessoras não concluídas. Conclua as predecessoras antes de marcar esta história como concluída.
+                    </Alert>
+                  )}
 
                   {/* Progress */}
                   {story.subtasks && story.subtasks.length > 0 && (
@@ -556,6 +787,59 @@ export default function StoryDetailsModal({ open, onClose, onSuccess, storyId }:
                     </TextField>
                   </Box>
 
+                  {/* Scheduling Dates */}
+                  <Typography variant="subtitle2" fontWeight={600} color="text.secondary" sx={{ mt: 1 }}>
+                    Cronograma
+                  </Typography>
+                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 2 }}>
+                    <TextField
+                      fullWidth
+                      type="date"
+                      label="Data de Início"
+                      value={formData.start_date}
+                      onChange={(e) => handleChange('start_date', e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <CalendarMonth sx={{ color: '#6366f1' }} />
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                    <TextField
+                      fullWidth
+                      type="date"
+                      label="Data de Término"
+                      value={formData.end_date}
+                      onChange={(e) => handleChange('end_date', e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <CalendarMonth sx={{ color: '#6366f1' }} />
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                    <TextField
+                      fullWidth
+                      type="date"
+                      label="Prazo (Ágil)"
+                      value={formData.due_date}
+                      onChange={(e) => handleChange('due_date', e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <CalendarMonth sx={{ color: '#f59e0b' }} />
+                          </InputAdornment>
+                        ),
+                      }}
+                      helperText="Data limite ágil"
+                    />
+                  </Box>
+
                   <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', pt: 2 }}>
                     <Button
                       variant="outlined"
@@ -568,6 +852,9 @@ export default function StoryDetailsModal({ open, onClose, onSuccess, storyId }:
                           priority: story.priority,
                           story_points: story.story_points || 0,
                           assigned_to: story.assigned_to || '',
+                          due_date: story.due_date ? story.due_date.split('T')[0] : '',
+                          start_date: story.start_date ? story.start_date.split('T')[0] : '',
+                          end_date: story.end_date ? story.end_date.split('T')[0] : '',
                         })
                       }}
                       disabled={saving}
@@ -754,6 +1041,214 @@ export default function StoryDetailsModal({ open, onClose, onSuccess, storyId }:
                   </Button>
                 </Box>
               )}
+            </Box>
+          )}
+
+          {/* Tab 2: Dependencies */}
+          {activeTab === 2 && (
+            <Box>
+              {/* Add new predecessor */}
+              <Box sx={{ mb: 4 }}>
+                <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2 }}>
+                  Adicionar Predecessora
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                  <Autocomplete
+                    options={availableTasks.filter(
+                      (t) => !predecessors.some((p) => p.predecessor_id === t.id)
+                    )}
+                    getOptionLabel={(option) => option.title}
+                    value={selectedNewPredecessor}
+                    onChange={(_, newValue) => setSelectedNewPredecessor(newValue)}
+                    sx={{ flex: 1 }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        placeholder="Selecione uma história..."
+                        size="small"
+                      />
+                    )}
+                    renderOption={(props, option) => (
+                      <Box component="li" {...props}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+                          <Typography variant="body2" sx={{ flex: 1 }}>
+                            {option.title}
+                          </Typography>
+                          <Chip
+                            label={option.status === 'done' ? 'Concluída' : option.status === 'in-progress' ? 'Em Progresso' : 'Pendente'}
+                            size="small"
+                            sx={{
+                              height: 20,
+                              fontSize: '0.65rem',
+                              bgcolor: option.status === 'done' ? '#10b98120' : option.status === 'in-progress' ? '#f59e0b20' : '#6b728020',
+                              color: option.status === 'done' ? '#10b981' : option.status === 'in-progress' ? '#f59e0b' : '#6b7280',
+                            }}
+                          />
+                        </Box>
+                      </Box>
+                    )}
+                  />
+                  <Button
+                    variant="contained"
+                    onClick={handleAddPredecessor}
+                    disabled={!selectedNewPredecessor}
+                    startIcon={<Add />}
+                    sx={{ borderRadius: 2 }}
+                  >
+                    Adicionar
+                  </Button>
+                </Box>
+              </Box>
+
+              <Divider sx={{ my: 3 }} />
+
+              {/* Predecessors List */}
+              <Box sx={{ mb: 4 }}>
+                <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <AccountTree sx={{ color: '#6366f1' }} />
+                  Predecessoras ({predecessors.length})
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  Histórias que devem ser concluídas antes desta
+                </Typography>
+
+                {predecessors.length > 0 ? (
+                  <List sx={{ bgcolor: 'background.paper', borderRadius: 2, p: 0, border: '1px solid', borderColor: 'divider' }}>
+                    {predecessors.map((dep, index) => (
+                      <Box key={dep.id}>
+                        <ListItem sx={{ py: 1.5 }}>
+                          <Box
+                            sx={{
+                              width: 8,
+                              height: 8,
+                              borderRadius: '50%',
+                              bgcolor: dep.predecessor?.status === 'done' ? '#10b981' : '#f59e0b',
+                              mr: 2,
+                            }}
+                          />
+                          <ListItemText
+                            primary={dep.predecessor?.title || 'Tarefa não encontrada'}
+                            secondary={
+                              <Chip
+                                label={dep.predecessor?.status === 'done' ? 'Concluída' : dep.predecessor?.status === 'in-progress' ? 'Em Progresso' : 'Pendente'}
+                                size="small"
+                                sx={{
+                                  height: 18,
+                                  fontSize: '0.65rem',
+                                  mt: 0.5,
+                                  bgcolor: dep.predecessor?.status === 'done' ? '#10b98120' : dep.predecessor?.status === 'in-progress' ? '#f59e0b20' : '#6b728020',
+                                  color: dep.predecessor?.status === 'done' ? '#10b981' : dep.predecessor?.status === 'in-progress' ? '#f59e0b' : '#6b7280',
+                                }}
+                              />
+                            }
+                          />
+                          <ListItemSecondaryAction>
+                            <Tooltip title="Remover dependência">
+                              <IconButton
+                                size="small"
+                                onClick={() => handleRemoveDependency(dep.id)}
+                                sx={{ color: 'error.main' }}
+                              >
+                                <Delete fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          </ListItemSecondaryAction>
+                        </ListItem>
+                        {index < predecessors.length - 1 && <Divider />}
+                      </Box>
+                    ))}
+                  </List>
+                ) : (
+                  <Box
+                    sx={{
+                      textAlign: 'center',
+                      py: 4,
+                      px: 3,
+                      borderRadius: 2,
+                      bgcolor: 'rgba(99, 102, 241, 0.05)',
+                      border: '2px dashed rgba(99, 102, 241, 0.2)',
+                    }}
+                  >
+                    <Typography variant="body2" color="text.secondary">
+                      Nenhuma predecessora adicionada
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+
+              {/* Successors List */}
+              <Box>
+                <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <LinkIcon sx={{ color: '#10b981' }} />
+                  Sucessoras ({successors.length})
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  Histórias que dependem desta
+                </Typography>
+
+                {successors.length > 0 ? (
+                  <List sx={{ bgcolor: 'background.paper', borderRadius: 2, p: 0, border: '1px solid', borderColor: 'divider' }}>
+                    {successors.map((dep, index) => (
+                      <Box key={dep.id}>
+                        <ListItem sx={{ py: 1.5 }}>
+                          <Box
+                            sx={{
+                              width: 8,
+                              height: 8,
+                              borderRadius: '50%',
+                              bgcolor: dep.successor?.status === 'done' ? '#10b981' : '#f59e0b',
+                              mr: 2,
+                            }}
+                          />
+                          <ListItemText
+                            primary={dep.successor?.title || 'Tarefa não encontrada'}
+                            secondary={
+                              <Chip
+                                label={dep.successor?.status === 'done' ? 'Concluída' : dep.successor?.status === 'in-progress' ? 'Em Progresso' : 'Pendente'}
+                                size="small"
+                                sx={{
+                                  height: 18,
+                                  fontSize: '0.65rem',
+                                  mt: 0.5,
+                                  bgcolor: dep.successor?.status === 'done' ? '#10b98120' : dep.successor?.status === 'in-progress' ? '#f59e0b20' : '#6b728020',
+                                  color: dep.successor?.status === 'done' ? '#10b981' : dep.successor?.status === 'in-progress' ? '#f59e0b' : '#6b7280',
+                                }}
+                              />
+                            }
+                          />
+                          <ListItemSecondaryAction>
+                            <Tooltip title="Remover dependência">
+                              <IconButton
+                                size="small"
+                                onClick={() => handleRemoveDependency(dep.id)}
+                                sx={{ color: 'error.main' }}
+                              >
+                                <Delete fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          </ListItemSecondaryAction>
+                        </ListItem>
+                        {index < successors.length - 1 && <Divider />}
+                      </Box>
+                    ))}
+                  </List>
+                ) : (
+                  <Box
+                    sx={{
+                      textAlign: 'center',
+                      py: 4,
+                      px: 3,
+                      borderRadius: 2,
+                      bgcolor: 'rgba(16, 185, 129, 0.05)',
+                      border: '2px dashed rgba(16, 185, 129, 0.2)',
+                    }}
+                  >
+                    <Typography variant="body2" color="text.secondary">
+                      Nenhuma história depende desta
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
             </Box>
           )}
         </Box>

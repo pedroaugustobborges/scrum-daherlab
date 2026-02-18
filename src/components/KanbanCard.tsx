@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Box, Typography, Chip, LinearProgress, Avatar, IconButton, Tooltip, Menu, MenuItem, ListItemIcon, ListItemText, Divider } from '@mui/material'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Flag, Functions, Delete, DragIndicator, Assignment, MoreVert, ContentCopy, Inventory } from '@mui/icons-material'
+import { Flag, Functions, Delete, DragIndicator, Assignment, MoreVert, ContentCopy, Inventory, CalendarMonth, AccountTree } from '@mui/icons-material'
 
 interface KanbanCardProps {
   story: {
@@ -11,6 +11,7 @@ interface KanbanCardProps {
     priority: string
     story_points: number
     assigned_to?: string
+    due_date?: string | null
     profiles?: { full_name: string }
     subtasks?: Array<{ status: string }>
   }
@@ -18,6 +19,7 @@ interface KanbanCardProps {
   onClick: (id: string) => void
   onReplicate?: (storyId: string) => void
   onSendToBacklog?: (storyId: string, title: string) => void
+  predecessorInfo?: { total: number; incomplete: number } | null
 }
 
 const priorityConfig: Record<string, { label: string; color: string }> = {
@@ -27,9 +29,13 @@ const priorityConfig: Record<string, { label: string; color: string }> = {
   urgent: { label: 'Urgente', color: '#dc2626' },
 }
 
-export default function KanbanCard({ story, onDelete, onClick, onReplicate, onSendToBacklog }: KanbanCardProps) {
+export default function KanbanCard({ story, onDelete, onClick, onReplicate, onSendToBacklog, predecessorInfo }: KanbanCardProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const menuOpen = Boolean(anchorEl)
+
+  // Check if due date has passed
+  const isDueDatePassed = story.due_date && new Date(story.due_date) < new Date()
+  const hasPendingPredecessors = predecessorInfo && predecessorInfo.incomplete > 0
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: story.id,
@@ -219,6 +225,52 @@ export default function KanbanCard({ story, onDelete, onClick, onReplicate, onSe
                 },
               }}
             />
+          )}
+
+          {story.due_date && (
+            <Tooltip title={`Data de conclusão: ${new Date(story.due_date).toLocaleDateString('pt-BR')}`}>
+              <Chip
+                label={new Date(story.due_date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+                size="small"
+                icon={<CalendarMonth sx={{ fontSize: 12 }} />}
+                sx={{
+                  height: 20,
+                  fontSize: '0.65rem',
+                  bgcolor: isDueDatePassed ? 'rgba(239, 68, 68, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+                  color: isDueDatePassed ? '#ef4444' : '#f59e0b',
+                  fontWeight: 600,
+                  '& .MuiChip-icon': {
+                    fontSize: 12,
+                  },
+                }}
+              />
+            </Tooltip>
+          )}
+
+          {predecessorInfo && (
+            <Tooltip
+              title={
+                hasPendingPredecessors
+                  ? `${predecessorInfo.incomplete} de ${predecessorInfo.total} predecessora(s) pendente(s)`
+                  : `${predecessorInfo.total} predecessora(s) concluída(s)`
+              }
+            >
+              <Chip
+                label={`${predecessorInfo.total}`}
+                size="small"
+                icon={<AccountTree sx={{ fontSize: 12 }} />}
+                sx={{
+                  height: 20,
+                  fontSize: '0.65rem',
+                  bgcolor: hasPendingPredecessors ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+                  color: hasPendingPredecessors ? '#ef4444' : '#10b981',
+                  fontWeight: 600,
+                  '& .MuiChip-icon': {
+                    fontSize: 12,
+                  },
+                }}
+              />
+            </Tooltip>
           )}
         </Box>
 

@@ -118,6 +118,26 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
     setEditValue(value)
   }
 
+  // Helper function to calculate duration in days between two dates
+  const calculateDurationBetweenDates = (startDate: string | null, endDate: string | null): number | null => {
+    if (!startDate || !endDate) return null
+    const [startYear, startMonth, startDay] = startDate.split('T')[0].split('-').map(Number)
+    const [endYear, endMonth, endDay] = endDate.split('T')[0].split('-').map(Number)
+    const start = new Date(startYear, startMonth - 1, startDay)
+    const end = new Date(endYear, endMonth - 1, endDay)
+    const diffTime = end.getTime() - start.getTime()
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1 // +1 to include both days
+    return diffDays > 0 ? diffDays : 1
+  }
+
+  // Helper function to calculate end_date from start_date and duration
+  const calculateEndDate = (startDate: string, durationDays: number): string => {
+    const [year, month, day] = startDate.split('T')[0].split('-').map(Number)
+    const start = new Date(year, month - 1, day)
+    start.setDate(start.getDate() + durationDays - 1) // -1 because start day counts as day 1
+    return start.toISOString().split('T')[0]
+  }
+
   const handleSaveEdit = async () => {
     if (!editingCell) return
 
@@ -126,16 +146,49 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
     if (!task) return
 
     let updateValue: unknown = editValue
+    const additionalUpdates: Record<string, unknown> = {}
 
     // Parse value based on field type
     if (field === 'percent_complete' || field === 'planned_duration' || field === 'story_points') {
       updateValue = parseInt(editValue) || 0
     }
 
+    // Auto-calculate related fields when dates or duration change
+    if (field === 'start_date' && editValue) {
+      // If we have end_date, recalculate duration
+      if (task.end_date) {
+        const newDuration = calculateDurationBetweenDates(editValue, task.end_date)
+        if (newDuration && newDuration > 0) {
+          additionalUpdates.planned_duration = newDuration
+        }
+      }
+      // If we have duration but no end_date, calculate end_date
+      else if (task.planned_duration && task.planned_duration > 0) {
+        additionalUpdates.end_date = calculateEndDate(editValue, task.planned_duration)
+      }
+    }
+
+    if (field === 'end_date' && editValue) {
+      // If we have start_date, recalculate duration
+      if (task.start_date) {
+        const newDuration = calculateDurationBetweenDates(task.start_date, editValue)
+        if (newDuration && newDuration > 0) {
+          additionalUpdates.planned_duration = newDuration
+        }
+      }
+    }
+
+    if (field === 'planned_duration' && updateValue) {
+      // If we have start_date, calculate end_date
+      if (task.start_date) {
+        additionalUpdates.end_date = calculateEndDate(task.start_date.split('T')[0], updateValue as number)
+      }
+    }
+
     await updateTask.mutateAsync({
       id,
       projectId,
-      updates: { [field]: updateValue },
+      updates: { [field]: updateValue, ...additionalUpdates },
     })
 
     setEditingCell(null)
@@ -378,6 +431,14 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
       case 'start_date':
       case 'end_date':
         const dateValue = task[field as 'start_date' | 'end_date']
+        // Fix timezone issue: parse the date as local date, not UTC
+        const formatDateForDisplay = (dateStr: string | null) => {
+          if (!dateStr) return '-'
+          // Parse as YYYY-MM-DD and create local date
+          const [year, month, day] = dateStr.split('T')[0].split('-').map(Number)
+          const localDate = new Date(year, month - 1, day)
+          return localDate.toLocaleDateString('pt-BR')
+        }
         return isEditing ? (
           <TextField
             autoFocus
@@ -394,13 +455,25 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
           <Typography
             variant="body2"
             sx={{ cursor: 'pointer', '&:hover': { bgcolor: 'rgba(99, 102, 241, 0.05)' } }}
-            onClick={() => handleStartEdit(task.id, field, dateValue || '')}
+            onClick={() => handleStartEdit(task.id, field, dateValue ? dateValue.split('T')[0] : '')}
           >
-            {dateValue ? new Date(dateValue).toLocaleDateString('pt-BR') : '-'}
+            {formatDateForDisplay(dateValue)}
           </Typography>
         )
 
       case 'planned_duration':
+        // Calculate duration dynamically from start_date and end_date
+        const calculateDuration = () => {
+          if (!task.start_date || !task.end_date) return task.planned_duration || null
+          const [startYear, startMonth, startDay] = task.start_date.split('T')[0].split('-').map(Number)
+          const [endYear, endMonth, endDay] = task.end_date.split('T')[0].split('-').map(Number)
+          const start = new Date(startYear, startMonth - 1, startDay)
+          const end = new Date(endYear, endMonth - 1, endDay)
+          const diffTime = end.getTime() - start.getTime()
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1 // +1 to include both start and end day
+          return diffDays > 0 ? diffDays : 1
+        }
+        const calculatedDuration = calculateDuration()
         return isEditing ? (
           <TextField
             autoFocus
@@ -417,9 +490,9 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
           <Typography
             variant="body2"
             sx={{ cursor: 'pointer', '&:hover': { bgcolor: 'rgba(99, 102, 241, 0.05)' } }}
-            onClick={() => handleStartEdit(task.id, 'planned_duration', String(task.planned_duration || ''))}
+            onClick={() => handleStartEdit(task.id, 'planned_duration', String(calculatedDuration || ''))}
           >
-            {task.planned_duration ? `${task.planned_duration}d` : '-'}
+            {calculatedDuration ? `${calculatedDuration}d` : '-'}
           </Typography>
         )
 

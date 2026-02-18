@@ -1,11 +1,13 @@
-import { Box, Typography, Chip, LinearProgress, alpha } from '@mui/material'
-import { Flag, CheckCircle, Schedule, Warning } from '@mui/icons-material'
+import { Box, Typography, Chip, LinearProgress, alpha, Tooltip } from '@mui/material'
+import { Flag, CheckCircle, Schedule, Warning, AccountTree } from '@mui/icons-material'
 import type { WBSNode as WBSNodeType, TaskStatus } from '@/types/hybrid'
 
 interface WBSNodeProps {
   node: WBSNodeType
   isSelected?: boolean
   onClick?: () => void
+  predecessorCount?: number
+  successorCount?: number
 }
 
 const statusColors: Record<TaskStatus, string> = {
@@ -24,13 +26,14 @@ const statusIcons: Record<TaskStatus, React.ReactNode> = {
   'blocked': <Warning sx={{ fontSize: 14 }} />,
 }
 
-export default function WBSNode({ node, isSelected, onClick }: WBSNodeProps) {
+export default function WBSNode({ node, isSelected, onClick, predecessorCount = 0, successorCount = 0 }: WBSNodeProps) {
   const status = node.attributes?.status || 'todo'
   const statusColor = statusColors[status] || '#6b7280'
   const hasChildren = node.children && node.children.length > 0
   const isSummary = node.taskType === 'summary' || node.taskType === 'phase' || hasChildren
   const isMilestone = node.taskType === 'milestone'
   const isCritical = node.attributes?.isCritical
+  const hasDependencies = predecessorCount > 0 || successorCount > 0
 
   return (
     <Box
@@ -170,6 +173,44 @@ export default function WBSNode({ node, isSelected, onClick }: WBSNodeProps) {
               color: 'white',
             }}
           />
+        )}
+
+        {/* Dependencies Indicator */}
+        {hasDependencies && (
+          <Box sx={{ display: 'flex', gap: 0.5, mt: 1, flexWrap: 'wrap' }}>
+            {predecessorCount > 0 && (
+              <Tooltip title={`${predecessorCount} predecessora${predecessorCount > 1 ? 's' : ''}`}>
+                <Chip
+                  icon={<AccountTree sx={{ fontSize: 12 }} />}
+                  label={`${predecessorCount} pred`}
+                  size="small"
+                  sx={{
+                    height: 18,
+                    fontSize: '0.55rem',
+                    bgcolor: alpha('#6366f1', 0.1),
+                    color: '#6366f1',
+                    '& .MuiChip-icon': { fontSize: 12 },
+                  }}
+                />
+              </Tooltip>
+            )}
+            {successorCount > 0 && (
+              <Tooltip title={`${successorCount} sucessora${successorCount > 1 ? 's' : ''}`}>
+                <Chip
+                  icon={<AccountTree sx={{ fontSize: 12 }} />}
+                  label={`${successorCount} suc`}
+                  size="small"
+                  sx={{
+                    height: 18,
+                    fontSize: '0.55rem',
+                    bgcolor: alpha('#10b981', 0.1),
+                    color: '#10b981',
+                    '& .MuiChip-icon': { fontSize: 12 },
+                  }}
+                />
+              </Tooltip>
+            )}
+          </Box>
         )}
       </Box>
     </Box>

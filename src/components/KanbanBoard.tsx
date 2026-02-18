@@ -33,8 +33,14 @@ interface UserStory {
   priority: string
   story_points: number
   assigned_to: string
+  due_date?: string | null
   profiles?: { full_name: string }
   subtasks?: Array<{ status: string }>
+}
+
+interface TaskDependency {
+  predecessor_id: string
+  predecessor_status: string
 }
 
 interface KanbanBoardProps {
@@ -84,6 +90,7 @@ export default function KanbanBoard({ stories, onRefresh, onDeleteStory, current
   const [sprintDialogOpen, setSprintDialogOpen] = useState(false)
   const [sprints, setSprints] = useState<Sprint[]>([])
   const [storyToReplicate, setStoryToReplicate] = useState<string | null>(null)
+  const [storyDependencies, setStoryDependencies] = useState<Record<string, TaskDependency[]>>({})
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -144,6 +151,67 @@ export default function KanbanBoard({ stories, onRefresh, onDeleteStory, current
 
     setStoriesByStatus(grouped)
   }, [stories])
+
+  // Fetch dependencies for all stories
+  useEffect(() => {
+    const fetchDependencies = async () => {
+      const storyIds = stories.map((s) => s.id)
+      if (storyIds.length === 0) return
+
+      try {
+        const { data, error } = await supabase
+          .from('task_dependencies')
+          .select(`
+            successor_id,
+            predecessor_id,
+            predecessor:tasks!predecessor_id(status)
+          `)
+          .in('successor_id', storyIds)
+
+        if (error) throw error
+
+        // Group dependencies by successor_id
+        const depsMap: Record<string, TaskDependency[]> = {}
+        data?.forEach((dep: any) => {
+          if (!depsMap[dep.successor_id]) {
+            depsMap[dep.successor_id] = []
+          }
+          depsMap[dep.successor_id].push({
+            predecessor_id: dep.predecessor_id,
+            predecessor_status: dep.predecessor?.status || 'todo',
+          })
+        })
+        setStoryDependencies(depsMap)
+      } catch (error) {
+        console.error('Error fetching dependencies:', error)
+      }
+    }
+
+    fetchDependencies()
+  }, [stories])
+
+  // Check if a story can be moved to done (all predecessors must be done)
+  const canMoveToDone = (storyId: string): { allowed: boolean; reason?: string } => {
+    const deps = storyDependencies[storyId]
+    if (!deps || deps.length === 0) return { allowed: true }
+
+    const incompletePredecessors = deps.filter((d) => d.predecessor_status !== 'done')
+    if (incompletePredecessors.length > 0) {
+      return {
+        allowed: false,
+        reason: `${incompletePredecessors.length} predecessora(s) não concluída(s)`,
+      }
+    }
+    return { allowed: true }
+  }
+
+  // Get predecessor count for a story
+  const getPredecessorInfo = (storyId: string) => {
+    const deps = storyDependencies[storyId]
+    if (!deps || deps.length === 0) return null
+    const incomplete = deps.filter((d) => d.predecessor_status !== 'done').length
+    return { total: deps.length, incomplete }
+  }
 
   // Fetch available sprints when dialog opens
   useEffect(() => {
@@ -371,6 +439,46 @@ export default function KanbanBoard({ stories, onRefresh, onDeleteStory, current
       return
     }
 
+    // Check if moving to "done" and has incomplete predecessors
+    if (newStatus === 'done') {
+      const check = canMoveToDone(storyId)
+      if (!check.allowed) {
+        toast.error(`Não é possível concluir: ${check.reason}`, {
+          duration: 4000,
+          icon: '⚠️',
+          style: {
+            background: '#fef3c7',
+            color: '#92400e',
+            fontWeight: 600,
+          },
+        })
+        // Reset to original state
+        const grouped = columns.reduce((acc, col) => {
+          acc[col.id] = stories.filter((story) => story.status === col.id)
+          return acc
+        }, {} as Record<string, UserStory[]>)
+        setStoriesByStatus(grouped)
+        return
+      }
+    }
+
+    // Check if blocking a story that has successors
+    if (newStatus === 'blocked' && story.status !== 'blocked') {
+      // Check if this story has successors
+      const successorCheck = Object.entries(storyDependencies).some(
+        ([, deps]) => deps.some((d) => d.predecessor_id === storyId)
+      )
+      if (successorCheck) {
+        toast('⚠️ Atenção: esta história possui dependentes que também serão afetados', {
+          duration: 4000,
+          style: {
+            background: '#fef3c7',
+            color: '#92400e',
+          },
+        })
+      }
+    }
+
     try {
       // Update status in database
       const { error } = await supabase.from('tasks').update({ status: newStatus }).eq('id', storyId)
@@ -520,6 +628,7 @@ export default function KanbanBoard({ stories, onRefresh, onDeleteStory, current
                         }}
                         onReplicate={currentSprintId ? handleOpenReplicateDialog : undefined}
                         onSendToBacklog={currentSprintId ? handleSendToBacklog : undefined}
+                        predecessorInfo={getPredecessorInfo(story.id)}
                       />
                     ))
                   )}

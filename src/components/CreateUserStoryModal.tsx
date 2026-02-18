@@ -7,6 +7,9 @@ import {
   Stack,
   InputAdornment,
   CircularProgress,
+  Chip,
+  Autocomplete,
+  Typography,
 } from "@mui/material";
 import {
   Assignment,
@@ -16,6 +19,8 @@ import {
   Person,
   Save,
   Functions,
+  CalendarMonth,
+  AccountTree,
 } from "@mui/icons-material";
 import toast from "react-hot-toast";
 import Modal from "./Modal";
@@ -33,6 +38,12 @@ interface Profile {
   id: string;
   full_name: string;
   email?: string;
+}
+
+interface AvailableTask {
+  id: string;
+  title: string;
+  status: string;
 }
 
 const statusOptions = [
@@ -61,7 +72,10 @@ export default function CreateUserStoryModal({
 }: CreateUserStoryModalProps) {
   const [loading, setLoading] = useState(false);
   const [loadingProfiles, setLoadingProfiles] = useState(false);
+  const [loadingTasks, setLoadingTasks] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [availableTasks, setAvailableTasks] = useState<AvailableTask[]>([]);
+  const [selectedPredecessors, setSelectedPredecessors] = useState<AvailableTask[]>([]);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -69,11 +83,13 @@ export default function CreateUserStoryModal({
     priority: "medium",
     story_points: 0,
     assigned_to: "",
+    due_date: "",
   });
 
   useEffect(() => {
     if (open) {
       fetchProfiles();
+      fetchAvailableTasks();
       setFormData({
         title: "",
         description: "",
@@ -81,9 +97,11 @@ export default function CreateUserStoryModal({
         priority: "medium",
         story_points: 0,
         assigned_to: "",
+        due_date: "",
       });
+      setSelectedPredecessors([]);
     }
-  }, [open]);
+  }, [open, projectId]);
 
   const fetchProfiles = async () => {
     setLoadingProfiles(true);
@@ -100,6 +118,25 @@ export default function CreateUserStoryModal({
       toast.error("Erro ao carregar usuários");
     } finally {
       setLoadingProfiles(false);
+    }
+  };
+
+  const fetchAvailableTasks = async () => {
+    if (!projectId) return;
+    setLoadingTasks(true);
+    try {
+      const { data, error } = await supabase
+        .from("tasks")
+        .select("id, title, status")
+        .eq("project_id", projectId)
+        .order("title");
+
+      if (error) throw error;
+      setAvailableTasks(data || []);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+    } finally {
+      setLoadingTasks(false);
     }
   };
 
@@ -127,7 +164,7 @@ export default function CreateUserStoryModal({
     try {
       const { data: user } = await supabase.auth.getUser();
 
-      const { error } = await supabase.from("tasks").insert([
+      const { data: newTask, error } = await supabase.from("tasks").insert([
         {
           title: formData.title,
           description: formData.description,
@@ -137,11 +174,31 @@ export default function CreateUserStoryModal({
           sprint_id: sprintId || null,
           project_id: projectId,
           assigned_to: formData.assigned_to || null,
+          due_date: formData.due_date || null,
           created_by: user.user?.id,
         },
-      ]);
+      ]).select().single();
 
       if (error) throw error;
+
+      // Create dependencies for selected predecessors
+      if (selectedPredecessors.length > 0 && newTask) {
+        const dependencies = selectedPredecessors.map(pred => ({
+          predecessor_id: pred.id,
+          successor_id: newTask.id,
+          dependency_type: 'FS',
+          lag_days: 0,
+        }));
+
+        const { error: depError } = await supabase
+          .from("task_dependencies")
+          .insert(dependencies);
+
+        if (depError) {
+          console.error("Error creating dependencies:", depError);
+          toast.error("História criada, mas erro ao criar dependências");
+        }
+      }
 
       toast.success(sprintId ? "História de usuário criada com sucesso!" : "Item adicionado ao backlog!");
       onSuccess();
@@ -329,6 +386,88 @@ export default function CreateUserStoryModal({
               ))}
             </TextField>
           </Box>
+
+          {/* Due Date */}
+          <TextField
+            fullWidth
+            type="date"
+            label="Data de Conclusão"
+            value={formData.due_date}
+            onChange={(e) => handleChange("due_date", e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <CalendarMonth sx={{ color: "#6366f1" }} />
+                </InputAdornment>
+              ),
+            }}
+            helperText="Data limite para conclusão da história"
+          />
+
+          {/* Predecessors */}
+          <Autocomplete
+            multiple
+            options={availableTasks}
+            getOptionLabel={(option) => option.title}
+            value={selectedPredecessors}
+            onChange={(_, newValue) => setSelectedPredecessors(newValue)}
+            loading={loadingTasks}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Predecessoras"
+                placeholder="Selecione histórias que devem ser concluídas antes"
+                InputProps={{
+                  ...params.InputProps,
+                  startAdornment: (
+                    <>
+                      <InputAdornment position="start">
+                        <AccountTree sx={{ color: "#6366f1" }} />
+                      </InputAdornment>
+                      {params.InputProps.startAdornment}
+                    </>
+                  ),
+                }}
+                helperText="Histórias que devem ser concluídas antes desta"
+              />
+            )}
+            renderTags={(value, getTagProps) =>
+              value.map((option, index) => (
+                <Chip
+                  {...getTagProps({ index })}
+                  key={option.id}
+                  label={option.title}
+                  size="small"
+                  sx={{
+                    bgcolor: option.status === 'done' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(99, 102, 241, 0.1)',
+                    color: option.status === 'done' ? '#10b981' : '#6366f1',
+                    fontWeight: 500,
+                  }}
+                />
+              ))
+            }
+            renderOption={(props, option) => (
+              <Box component="li" {...props}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+                  <Typography variant="body2" sx={{ flex: 1 }}>
+                    {option.title}
+                  </Typography>
+                  <Chip
+                    label={option.status === 'done' ? 'Concluída' : option.status === 'in-progress' ? 'Em Progresso' : 'Pendente'}
+                    size="small"
+                    sx={{
+                      height: 20,
+                      fontSize: '0.65rem',
+                      bgcolor: option.status === 'done' ? '#10b98120' : option.status === 'in-progress' ? '#f59e0b20' : '#6b728020',
+                      color: option.status === 'done' ? '#10b981' : option.status === 'in-progress' ? '#f59e0b' : '#6b7280',
+                    }}
+                  />
+                </Box>
+              </Box>
+            )}
+          />
 
           <Box
             sx={{

@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import {
   Box,
   Paper,
@@ -21,6 +21,7 @@ import { useTaskHierarchy } from '@/hooks/useTaskHierarchy'
 import { useWBSData } from '@/hooks/useWBSData'
 import type { WBSNode as WBSNodeType } from '@/types/hybrid'
 import WBSNode from './WBSNode'
+import { supabase } from '@/lib/supabase'
 
 interface WBSDiagramProps {
   projectId: string
@@ -29,6 +30,10 @@ interface WBSDiagramProps {
 const MIN_ZOOM = 0.3
 const MAX_ZOOM = 2
 const ZOOM_STEP = 0.1
+
+interface DependencyCounts {
+  [taskId: string]: { predecessors: number; successors: number }
+}
 
 export default function WBSDiagram({ projectId }: WBSDiagramProps) {
   const { data: tasks = [], isLoading } = useTaskHierarchy(projectId)
@@ -40,8 +45,49 @@ export default function WBSDiagram({ projectId }: WBSDiagramProps) {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [dependencyCounts, setDependencyCounts] = useState<DependencyCounts>({})
 
   const containerRef = useRef<HTMLDivElement>(null)
+
+  // Fetch dependency counts for all tasks
+  useEffect(() => {
+    const fetchDependencyCounts = async () => {
+      const taskIds = tasks.map((t: any) => t.id)
+      if (taskIds.length === 0) return
+
+      try {
+        const { data, error } = await supabase
+          .from('task_dependencies')
+          .select('predecessor_id, successor_id')
+          .or(`predecessor_id.in.(${taskIds.join(',')}),successor_id.in.(${taskIds.join(',')})`)
+
+        if (error) throw error
+
+        // Count predecessors and successors for each task
+        const counts: DependencyCounts = {}
+        taskIds.forEach((id: string) => {
+          counts[id] = { predecessors: 0, successors: 0 }
+        })
+
+        data?.forEach((dep: any) => {
+          if (counts[dep.successor_id]) {
+            counts[dep.successor_id].predecessors++
+          }
+          if (counts[dep.predecessor_id]) {
+            counts[dep.predecessor_id].successors++
+          }
+        })
+
+        setDependencyCounts(counts)
+      } catch (error) {
+        console.error('Error fetching dependency counts:', error)
+      }
+    }
+
+    if (tasks.length > 0) {
+      fetchDependencyCounts()
+    }
+  }, [tasks])
 
   const handleZoomIn = () => {
     setZoom((prev) => Math.min(prev + ZOOM_STEP, MAX_ZOOM))
@@ -102,6 +148,7 @@ export default function WBSDiagram({ projectId }: WBSDiagramProps) {
   // Render WBS tree recursively
   const renderTree = (node: WBSNodeType, level = 0): React.ReactNode => {
     const hasChildren = node.children && node.children.length > 0
+    const deps = dependencyCounts[node.id] || { predecessors: 0, successors: 0 }
 
     return (
       <Box
@@ -117,6 +164,8 @@ export default function WBSDiagram({ projectId }: WBSDiagramProps) {
           node={node}
           isSelected={selectedId === node.id}
           onClick={() => setSelectedId(node.id === selectedId ? null : node.id)}
+          predecessorCount={deps.predecessors}
+          successorCount={deps.successors}
         />
 
         {/* Connector line down */}
@@ -341,6 +390,32 @@ export default function WBSDiagram({ projectId }: WBSDiagramProps) {
             }}
           />
           <Typography variant="caption" color="text.secondary">Caminho Crítico</Typography>
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Chip
+            label="pred"
+            size="small"
+            sx={{
+              height: 16,
+              fontSize: '0.6rem',
+              bgcolor: 'rgba(99, 102, 241, 0.1)',
+              color: '#6366f1',
+            }}
+          />
+          <Typography variant="caption" color="text.secondary">Predecessoras</Typography>
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Chip
+            label="suc"
+            size="small"
+            sx={{
+              height: 16,
+              fontSize: '0.6rem',
+              bgcolor: 'rgba(16, 185, 129, 0.1)',
+              color: '#10b981',
+            }}
+          />
+          <Typography variant="caption" color="text.secondary">Sucessoras</Typography>
         </Box>
       </Box>
     </Box>

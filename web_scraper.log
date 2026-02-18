@@ -2089,3 +2089,481 @@ receiveMessage@chrome://remote/content/marionette/actors/MarionetteCommandsChild
 2026-02-18 09:15:47,672 - INFO - Mensagem enviada ao Telegram com sucesso (chat_id=8587977306)
 2026-02-18 09:15:47,883 - INFO - Closing browser in 30 seconds (for verification)...
 2026-02-18 09:16:21,174 - INFO - Browser closed
+2026-02-18 14:31:56,955 - INFO - Initializing Web Scraper...
+2026-02-18 14:32:05,740 - INFO - Google Sheets initialized successfully
+2026-02-18 14:32:06,309 - WARNING - Column 'No SC' not found in header, using index 1
+2026-02-18 14:32:06,309 - INFO - Loaded 48 existing processes from spreadsheet
+2026-02-18 14:32:06,313 - INFO - Initialization complete
+2026-02-18 14:32:06,313 - INFO - Performing login...
+2026-02-18 14:32:08,920 - INFO - Waiting for page to load...
+2026-02-18 14:32:13,921 - INFO - Navigating to requests page...
+2026-02-18 14:32:20,263 - INFO - Applying first filter...
+2026-02-18 14:32:22,347 - INFO - Applying second filter...
+2026-02-18 14:32:24,446 - INFO - Original window: a0718abe-a96a-473d-8392-4cdf9809ce19
+2026-02-18 14:32:24,447 - INFO - ================================================================================
+2026-02-18 14:32:24,447 - INFO - STARTING PROCESSING OF ALL REQUESTS
+2026-02-18 14:32:24,447 - INFO - ================================================================================
+2026-02-18 14:32:24,447 - INFO - ********************************************************************************
+2026-02-18 14:32:24,447 - INFO - LISTING PAGE 1
+2026-02-18 14:32:24,448 - INFO - ********************************************************************************
+2026-02-18 14:32:24,473 - INFO - Found approximately 10 items on this page
+2026-02-18 14:32:24,473 - INFO - 
+>>> Attempting to process item 1 (Page 1) <<<
+2026-02-18 14:32:24,474 - INFO - ################################################################################
+2026-02-18 14:32:24,474 - INFO - PROCESSING REQUEST 1 (table row 2)
+2026-02-18 14:32:24,474 - INFO - ################################################################################
+2026-02-18 14:32:24,479 - INFO - Extracting listing fields (item 0)...
+2026-02-18 14:32:24,520 - WARNING - DUPLICATE DETECTED: Process CTS29.2026.FEV.02744 already exists in spreadsheet. Skipping...
+2026-02-18 14:32:24,520 - INFO - [DUPLICATE] Process CTS29.2026.FEV.02744 already exists. Skipped. (Total duplicates: 1)
+2026-02-18 14:32:25,522 - INFO - 
+>>> Attempting to process item 2 (Page 1) <<<
+2026-02-18 14:32:25,522 - INFO - ################################################################################
+2026-02-18 14:32:25,522 - INFO - PROCESSING REQUEST 2 (table row 3)
+2026-02-18 14:32:25,523 - INFO - ################################################################################
+2026-02-18 14:32:25,527 - INFO - Extracting listing fields (item 1)...
+2026-02-18 14:32:25,562 - WARNING - DUPLICATE DETECTED: Process CTS28.2026.FEV.01705 already exists in spreadsheet. Skipping...
+2026-02-18 14:32:25,562 - INFO - [DUPLICATE] Process CTS28.2026.FEV.01705 already exists. Skipped. (Total duplicates: 2)
+2026-02-18 14:32:26,563 - INFO - 
+>>> Attempting to process item 3 (Page 1) <<<
+2026-02-18 14:32:26,563 - INFO - ################################################################################
+2026-02-18 14:32:26,563 - INFO - PROCESSING REQUEST 3 (table row 4)
+2026-02-18 14:32:26,564 - INFO - ################################################################################
+2026-02-18 14:32:26,568 - INFO - Extracting listing fields (item 2)...
+2026-02-18 14:32:26,628 - WARNING - DUPLICATE DETECTED: Process CTP04.2026.FEV.03291 already exists in spreadsheet. Skipping...
+2026-02-18 14:32:26,642 - INFO - [DUPLICATE] Process CTP04.2026.FEV.03291 already exists. Skipped. (Total duplicates: 3)
+2026-02-18 14:32:27,645 - INFO - 
+>>> Attempting to process item 4 (Page 1) <<<
+2026-02-18 14:32:27,645 - INFO - ################################################################################
+2026-02-18 14:32:27,645 - INFO - PROCESSING REQUEST 4 (table row 5)
+2026-02-18 14:32:27,645 - INFO - ################################################################################
+2026-02-18 14:32:27,649 - INFO - Extracting listing fields (item 3)...
+2026-02-18 14:32:27,670 - WARNING - DUPLICATE DETECTED: Process CTP04.2026.FEV.03289 already exists in spreadsheet. Skipping...
+2026-02-18 14:32:27,671 - INFO - [DUPLICATE] Process CTP04.2026.FEV.03289 already exists. Skipped. (Total duplicates: 4)
+2026-02-18 14:32:28,672 - INFO - 
+>>> Attempting to process item 5 (Page 1) <<<
+2026-02-18 14:32:28,672 - INFO - ################################################################################
+2026-02-18 14:32:28,672 - INFO - PROCESSING REQUEST 5 (table row 6)
+2026-02-18 14:32:28,673 - INFO - ################################################################################
+2026-02-18 14:32:28,676 - INFO - Extracting listing fields (item 4)...
+2026-02-18 14:32:28,708 - WARNING - DUPLICATE DETECTED: Process CTS99.2026.FEV.01820 already exists in spreadsheet. Skipping...
+2026-02-18 14:32:28,709 - INFO - [DUPLICATE] Process CTS99.2026.FEV.01820 already exists. Skipped. (Total duplicates: 5)
+2026-02-18 14:32:29,710 - INFO - 
+>>> Attempting to process item 6 (Page 1) <<<
+2026-02-18 14:32:29,710 - INFO - ################################################################################
+2026-02-18 14:32:29,710 - INFO - PROCESSING REQUEST 6 (table row 7)
+2026-02-18 14:32:29,710 - INFO - ################################################################################
+2026-02-18 14:32:29,713 - INFO - Extracting listing fields (item 5)...
+2026-02-18 14:32:29,736 - WARNING - DUPLICATE DETECTED: Process CTP04.2026.FEV.03282 already exists in spreadsheet. Skipping...
+2026-02-18 14:32:29,736 - INFO - [DUPLICATE] Process CTP04.2026.FEV.03282 already exists. Skipped. (Total duplicates: 6)
+2026-02-18 14:32:30,737 - INFO - 
+>>> Attempting to process item 7 (Page 1) <<<
+2026-02-18 14:32:30,737 - INFO - ################################################################################
+2026-02-18 14:32:30,737 - INFO - PROCESSING REQUEST 7 (table row 8)
+2026-02-18 14:32:30,738 - INFO - ################################################################################
+2026-02-18 14:32:30,740 - INFO - Extracting listing fields (item 6)...
+2026-02-18 14:32:30,775 - WARNING - DUPLICATE DETECTED: Process CTP04.2026.FEV.03281 already exists in spreadsheet. Skipping...
+2026-02-18 14:32:30,776 - INFO - [DUPLICATE] Process CTP04.2026.FEV.03281 already exists. Skipped. (Total duplicates: 7)
+2026-02-18 14:32:31,777 - INFO - 
+>>> Attempting to process item 8 (Page 1) <<<
+2026-02-18 14:32:31,777 - INFO - ################################################################################
+2026-02-18 14:32:31,777 - INFO - PROCESSING REQUEST 8 (table row 9)
+2026-02-18 14:32:31,778 - INFO - ################################################################################
+2026-02-18 14:32:31,781 - INFO - Extracting listing fields (item 7)...
+2026-02-18 14:32:31,818 - WARNING - DUPLICATE DETECTED: Process CTP01.2026.FEV.03396 already exists in spreadsheet. Skipping...
+2026-02-18 14:32:31,818 - INFO - [DUPLICATE] Process CTP01.2026.FEV.03396 already exists. Skipped. (Total duplicates: 8)
+2026-02-18 14:32:32,820 - INFO - 
+>>> Attempting to process item 9 (Page 1) <<<
+2026-02-18 14:32:32,820 - INFO - ################################################################################
+2026-02-18 14:32:32,820 - INFO - PROCESSING REQUEST 9 (table row 10)
+2026-02-18 14:32:32,820 - INFO - ################################################################################
+2026-02-18 14:32:32,825 - INFO - Extracting listing fields (item 8)...
+2026-02-18 14:32:32,855 - WARNING - DUPLICATE DETECTED: Process CTP29.2026.FEV.02736 already exists in spreadsheet. Skipping...
+2026-02-18 14:32:32,855 - INFO - [DUPLICATE] Process CTP29.2026.FEV.02736 already exists. Skipped. (Total duplicates: 9)
+2026-02-18 14:32:33,856 - INFO - 
+>>> Attempting to process item 10 (Page 1) <<<
+2026-02-18 14:32:33,856 - INFO - ################################################################################
+2026-02-18 14:32:33,856 - INFO - PROCESSING REQUEST 10 (table row 11)
+2026-02-18 14:32:33,856 - INFO - ################################################################################
+2026-02-18 14:32:33,860 - INFO - Extracting listing fields (item 9)...
+2026-02-18 14:32:33,894 - WARNING - DUPLICATE DETECTED: Process CTP28.2026.FEV.01698 already exists in spreadsheet. Skipping...
+2026-02-18 14:32:33,894 - INFO - [DUPLICATE] Process CTP28.2026.FEV.01698 already exists. Skipped. (Total duplicates: 10)
+2026-02-18 14:32:34,901 - INFO - Navigating to next listing page...
+2026-02-18 14:32:35,410 - WARNING - Regular click failed: Message: Element <a id="p1_cph1_SCs_GdSCs_GdSCs_GdSCs_LinkButton_Paginacao_Proximo_10" class="link_txt_peq_arial_preto" href="javascript:WebForm_DoPostBackWithOptions(new WebForm_PostBackOptions("ctl00$ctl00$p1$cph1$SCs$GdSCs$GdSCs$ctl13$GdSCs_LinkButton_Paginacao_Proximo", "", true, "", "", false, true))"> is not clickable at point (923,618) because another element <div> obscures it
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:202:5
+ElementClickInterceptedError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:354:5
+webdriverClickElement@chrome://remote/content/marionette/interaction.sys.mjs:175:11
+interaction.clickElement@chrome://remote/content/marionette/interaction.sys.mjs:134:11
+clickElement@chrome://remote/content/marionette/actors/MarionetteCommandsChild.sys.mjs:328:29
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteCommandsChild.sys.mjs:210:31
+. Trying JavaScript click...
+2026-02-18 14:32:35,415 - INFO - JavaScript click successful
+2026-02-18 14:32:39,417 - INFO - ********************************************************************************
+2026-02-18 14:32:39,417 - INFO - LISTING PAGE 2
+2026-02-18 14:32:39,418 - INFO - ********************************************************************************
+2026-02-18 14:32:39,436 - INFO - Found approximately 10 items on this page
+2026-02-18 14:32:39,436 - INFO - 
+>>> Attempting to process item 1 (Page 2) <<<
+2026-02-18 14:32:39,437 - INFO - ################################################################################
+2026-02-18 14:32:39,437 - INFO - PROCESSING REQUEST 1 (table row 2)
+2026-02-18 14:32:39,437 - INFO - ################################################################################
+2026-02-18 14:32:39,440 - INFO - Extracting listing fields (item 0)...
+2026-02-18 14:32:39,474 - WARNING - DUPLICATE DETECTED: Process CTS29.2026.FEV.02735 already exists in spreadsheet. Skipping...
+2026-02-18 14:32:39,474 - INFO - [DUPLICATE] Process CTS29.2026.FEV.02735 already exists. Skipped. (Total duplicates: 11)
+2026-02-18 14:32:40,476 - INFO - 
+>>> Attempting to process item 2 (Page 2) <<<
+2026-02-18 14:32:40,476 - INFO - ################################################################################
+2026-02-18 14:32:40,476 - INFO - PROCESSING REQUEST 2 (table row 3)
+2026-02-18 14:32:40,476 - INFO - ################################################################################
+2026-02-18 14:32:40,481 - INFO - Extracting listing fields (item 1)...
+2026-02-18 14:32:40,515 - WARNING - DUPLICATE DETECTED: Process CTS03.2026.FEV.00373 already exists in spreadsheet. Skipping...
+2026-02-18 14:32:40,515 - INFO - [DUPLICATE] Process CTS03.2026.FEV.00373 already exists. Skipped. (Total duplicates: 12)
+2026-02-18 14:32:41,517 - INFO - 
+>>> Attempting to process item 3 (Page 2) <<<
+2026-02-18 14:32:41,517 - INFO - ################################################################################
+2026-02-18 14:32:41,517 - INFO - PROCESSING REQUEST 3 (table row 4)
+2026-02-18 14:32:41,517 - INFO - ################################################################################
+2026-02-18 14:32:41,521 - INFO - Extracting listing fields (item 2)...
+2026-02-18 14:32:41,551 - WARNING - DUPLICATE DETECTED: Process CTS40.2026.FEV.00258 already exists in spreadsheet. Skipping...
+2026-02-18 14:32:41,551 - INFO - [DUPLICATE] Process CTS40.2026.FEV.00258 already exists. Skipped. (Total duplicates: 13)
+2026-02-18 14:32:42,552 - INFO - 
+>>> Attempting to process item 4 (Page 2) <<<
+2026-02-18 14:32:42,552 - INFO - ################################################################################
+2026-02-18 14:32:42,552 - INFO - PROCESSING REQUEST 4 (table row 5)
+2026-02-18 14:32:42,552 - INFO - ################################################################################
+2026-02-18 14:32:42,556 - INFO - Extracting listing fields (item 3)...
+2026-02-18 14:32:42,583 - WARNING - DUPLICATE DETECTED: Process CTS14.2026.FEV.00123 already exists in spreadsheet. Skipping...
+2026-02-18 14:32:42,583 - INFO - [DUPLICATE] Process CTS14.2026.FEV.00123 already exists. Skipped. (Total duplicates: 14)
+2026-02-18 14:32:43,583 - INFO - 
+>>> Attempting to process item 5 (Page 2) <<<
+2026-02-18 14:32:43,584 - INFO - ################################################################################
+2026-02-18 14:32:43,584 - INFO - PROCESSING REQUEST 5 (table row 6)
+2026-02-18 14:32:43,584 - INFO - ################################################################################
+2026-02-18 14:32:43,584 - INFO - Extracting listing fields (item 4)...
+2026-02-18 14:32:43,619 - WARNING - DUPLICATE DETECTED: Process CTS14.2026.FEV.00122 already exists in spreadsheet. Skipping...
+2026-02-18 14:32:43,620 - INFO - [DUPLICATE] Process CTS14.2026.FEV.00122 already exists. Skipped. (Total duplicates: 15)
+2026-02-18 14:32:44,620 - INFO - 
+>>> Attempting to process item 6 (Page 2) <<<
+2026-02-18 14:32:44,620 - INFO - ################################################################################
+2026-02-18 14:32:44,620 - INFO - PROCESSING REQUEST 6 (table row 7)
+2026-02-18 14:32:44,620 - INFO - ################################################################################
+2026-02-18 14:32:44,620 - INFO - Extracting listing fields (item 5)...
+2026-02-18 14:32:44,655 - WARNING - DUPLICATE DETECTED: Process CTP28.2026.FEV.01677 already exists in spreadsheet. Skipping...
+2026-02-18 14:32:44,655 - INFO - [DUPLICATE] Process CTP28.2026.FEV.01677 already exists. Skipped. (Total duplicates: 16)
+2026-02-18 14:32:45,656 - INFO - 
+>>> Attempting to process item 7 (Page 2) <<<
+2026-02-18 14:32:45,656 - INFO - ################################################################################
+2026-02-18 14:32:45,656 - INFO - PROCESSING REQUEST 7 (table row 8)
+2026-02-18 14:32:45,656 - INFO - ################################################################################
+2026-02-18 14:32:45,660 - INFO - Extracting listing fields (item 6)...
+2026-02-18 14:32:45,691 - WARNING - DUPLICATE DETECTED: Process CTS28.2026.FEV.01676 already exists in spreadsheet. Skipping...
+2026-02-18 14:32:45,691 - INFO - [DUPLICATE] Process CTS28.2026.FEV.01676 already exists. Skipped. (Total duplicates: 17)
+2026-02-18 14:32:46,693 - INFO - 
+>>> Attempting to process item 8 (Page 2) <<<
+2026-02-18 14:32:46,693 - INFO - ################################################################################
+2026-02-18 14:32:46,693 - INFO - PROCESSING REQUEST 8 (table row 9)
+2026-02-18 14:32:46,693 - INFO - ################################################################################
+2026-02-18 14:32:46,697 - INFO - Extracting listing fields (item 7)...
+2026-02-18 14:32:46,718 - WARNING - DUPLICATE DETECTED: Process CTP28.2026.FEV.01674 already exists in spreadsheet. Skipping...
+2026-02-18 14:32:46,718 - INFO - [DUPLICATE] Process CTP28.2026.FEV.01674 already exists. Skipped. (Total duplicates: 18)
+2026-02-18 14:32:47,719 - INFO - 
+>>> Attempting to process item 9 (Page 2) <<<
+2026-02-18 14:32:47,721 - INFO - ################################################################################
+2026-02-18 14:32:47,722 - INFO - PROCESSING REQUEST 9 (table row 10)
+2026-02-18 14:32:47,722 - INFO - ################################################################################
+2026-02-18 14:32:47,726 - INFO - Extracting listing fields (item 8)...
+2026-02-18 14:32:47,752 - WARNING - DUPLICATE DETECTED: Process CTS04.2026.FEV.03258 already exists in spreadsheet. Skipping...
+2026-02-18 14:32:47,753 - INFO - [DUPLICATE] Process CTS04.2026.FEV.03258 already exists. Skipped. (Total duplicates: 19)
+2026-02-18 14:32:48,754 - INFO - 
+>>> Attempting to process item 10 (Page 2) <<<
+2026-02-18 14:32:48,755 - INFO - ################################################################################
+2026-02-18 14:32:48,756 - INFO - PROCESSING REQUEST 10 (table row 11)
+2026-02-18 14:32:48,757 - INFO - ################################################################################
+2026-02-18 14:32:48,770 - INFO - Extracting listing fields (item 9)...
+2026-02-18 14:32:48,814 - WARNING - DUPLICATE DETECTED: Process CTS03.2026.FEV.00362 already exists in spreadsheet. Skipping...
+2026-02-18 14:32:48,814 - INFO - [DUPLICATE] Process CTS03.2026.FEV.00362 already exists. Skipped. (Total duplicates: 20)
+2026-02-18 14:32:49,817 - INFO - Navigating to next listing page...
+2026-02-18 14:32:50,329 - WARNING - Regular click failed: Message: Element <a id="p1_cph1_SCs_GdSCs_GdSCs_GdSCs_LinkButton_Paginacao_Proximo_10" class="link_txt_peq_arial_preto" href="javascript:WebForm_DoPostBackWithOptions(new WebForm_PostBackOptions("ctl00$ctl00$p1$cph1$SCs$GdSCs$GdSCs$ctl13$GdSCs_LinkButton_Paginacao_Proximo", "", true, "", "", false, true))"> is not clickable at point (927,618) because another element <div> obscures it
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:202:5
+ElementClickInterceptedError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:354:5
+webdriverClickElement@chrome://remote/content/marionette/interaction.sys.mjs:175:11
+interaction.clickElement@chrome://remote/content/marionette/interaction.sys.mjs:134:11
+clickElement@chrome://remote/content/marionette/actors/MarionetteCommandsChild.sys.mjs:328:29
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteCommandsChild.sys.mjs:210:31
+. Trying JavaScript click...
+2026-02-18 14:32:50,329 - INFO - JavaScript click successful
+2026-02-18 14:32:54,339 - INFO - ********************************************************************************
+2026-02-18 14:32:54,339 - INFO - LISTING PAGE 3
+2026-02-18 14:32:54,339 - INFO - ********************************************************************************
+2026-02-18 14:32:54,339 - INFO - Found approximately 10 items on this page
+2026-02-18 14:32:54,339 - INFO - 
+>>> Attempting to process item 1 (Page 3) <<<
+2026-02-18 14:32:54,339 - INFO - ################################################################################
+2026-02-18 14:32:54,355 - INFO - PROCESSING REQUEST 1 (table row 2)
+2026-02-18 14:32:54,355 - INFO - ################################################################################
+2026-02-18 14:32:54,358 - INFO - Extracting listing fields (item 0)...
+2026-02-18 14:32:54,385 - WARNING - DUPLICATE DETECTED: Process CTP08.2026.FEV.02076 already exists in spreadsheet. Skipping...
+2026-02-18 14:32:54,385 - INFO - [DUPLICATE] Process CTP08.2026.FEV.02076 already exists. Skipped. (Total duplicates: 21)
+2026-02-18 14:32:55,387 - INFO - 
+>>> Attempting to process item 2 (Page 3) <<<
+2026-02-18 14:32:55,387 - INFO - ################################################################################
+2026-02-18 14:32:55,387 - INFO - PROCESSING REQUEST 2 (table row 3)
+2026-02-18 14:32:55,387 - INFO - ################################################################################
+2026-02-18 14:32:55,387 - INFO - Extracting listing fields (item 1)...
+2026-02-18 14:32:55,409 - WARNING - DUPLICATE DETECTED: Process CTP88.2026.FEV.00493 already exists in spreadsheet. Skipping...
+2026-02-18 14:32:55,409 - INFO - [DUPLICATE] Process CTP88.2026.FEV.00493 already exists. Skipped. (Total duplicates: 22)
+2026-02-18 14:32:56,415 - INFO - 
+>>> Attempting to process item 3 (Page 3) <<<
+2026-02-18 14:32:56,415 - INFO - ################################################################################
+2026-02-18 14:32:56,416 - INFO - PROCESSING REQUEST 3 (table row 4)
+2026-02-18 14:32:56,416 - INFO - ################################################################################
+2026-02-18 14:32:56,416 - INFO - Extracting listing fields (item 2)...
+2026-02-18 14:32:56,439 - WARNING - DUPLICATE DETECTED: Process CTP04.2026.FEV.03246 already exists in spreadsheet. Skipping...
+2026-02-18 14:32:56,439 - INFO - [DUPLICATE] Process CTP04.2026.FEV.03246 already exists. Skipped. (Total duplicates: 23)
+2026-02-18 14:32:57,442 - INFO - 
+>>> Attempting to process item 4 (Page 3) <<<
+2026-02-18 14:32:57,442 - INFO - ################################################################################
+2026-02-18 14:32:57,442 - INFO - PROCESSING REQUEST 4 (table row 5)
+2026-02-18 14:32:57,442 - INFO - ################################################################################
+2026-02-18 14:32:57,447 - INFO - Extracting listing fields (item 3)...
+2026-02-18 14:32:57,473 - WARNING - DUPLICATE DETECTED: Process CTP30.2026.FEV.00704 already exists in spreadsheet. Skipping...
+2026-02-18 14:32:57,473 - INFO - [DUPLICATE] Process CTP30.2026.FEV.00704 already exists. Skipped. (Total duplicates: 24)
+2026-02-18 14:32:58,474 - INFO - 
+>>> Attempting to process item 5 (Page 3) <<<
+2026-02-18 14:32:58,474 - INFO - ################################################################################
+2026-02-18 14:32:58,474 - INFO - PROCESSING REQUEST 5 (table row 6)
+2026-02-18 14:32:58,474 - INFO - ################################################################################
+2026-02-18 14:32:58,474 - INFO - Extracting listing fields (item 4)...
+2026-02-18 14:32:58,498 - WARNING - DUPLICATE DETECTED: Process CTS03.2026.FEV.00359 already exists in spreadsheet. Skipping...
+2026-02-18 14:32:58,498 - INFO - [DUPLICATE] Process CTS03.2026.FEV.00359 already exists. Skipped. (Total duplicates: 25)
+2026-02-18 14:32:59,500 - INFO - 
+>>> Attempting to process item 6 (Page 3) <<<
+2026-02-18 14:32:59,500 - INFO - ################################################################################
+2026-02-18 14:32:59,500 - INFO - PROCESSING REQUEST 6 (table row 7)
+2026-02-18 14:32:59,500 - INFO - ################################################################################
+2026-02-18 14:32:59,500 - INFO - Extracting listing fields (item 5)...
+2026-02-18 14:32:59,522 - WARNING - DUPLICATE DETECTED: Process CTS12.2026.FEV.00038 already exists in spreadsheet. Skipping...
+2026-02-18 14:32:59,522 - INFO - [DUPLICATE] Process CTS12.2026.FEV.00038 already exists. Skipped. (Total duplicates: 26)
+2026-02-18 14:33:00,525 - INFO - 
+>>> Attempting to process item 7 (Page 3) <<<
+2026-02-18 14:33:00,525 - INFO - ################################################################################
+2026-02-18 14:33:00,525 - INFO - PROCESSING REQUEST 7 (table row 8)
+2026-02-18 14:33:00,525 - INFO - ################################################################################
+2026-02-18 14:33:00,525 - INFO - Extracting listing fields (item 6)...
+2026-02-18 14:33:00,551 - WARNING - DUPLICATE DETECTED: Process CTP28.2026.FEV.01647 already exists in spreadsheet. Skipping...
+2026-02-18 14:33:00,552 - INFO - [DUPLICATE] Process CTP28.2026.FEV.01647 already exists. Skipped. (Total duplicates: 27)
+2026-02-18 14:33:01,552 - INFO - 
+>>> Attempting to process item 8 (Page 3) <<<
+2026-02-18 14:33:01,552 - INFO - ################################################################################
+2026-02-18 14:33:01,552 - INFO - PROCESSING REQUEST 8 (table row 9)
+2026-02-18 14:33:01,552 - INFO - ################################################################################
+2026-02-18 14:33:01,552 - INFO - Extracting listing fields (item 7)...
+2026-02-18 14:33:01,617 - WARNING - DUPLICATE DETECTED: Process CTS88.2026.FEV.00471 already exists in spreadsheet. Skipping...
+2026-02-18 14:33:01,617 - INFO - [DUPLICATE] Process CTS88.2026.FEV.00471 already exists. Skipped. (Total duplicates: 28)
+2026-02-18 14:33:02,624 - INFO - 
+>>> Attempting to process item 9 (Page 3) <<<
+2026-02-18 14:33:02,624 - INFO - ################################################################################
+2026-02-18 14:33:02,624 - INFO - PROCESSING REQUEST 9 (table row 10)
+2026-02-18 14:33:02,624 - INFO - ################################################################################
+2026-02-18 14:33:02,627 - INFO - Extracting listing fields (item 8)...
+2026-02-18 14:33:02,874 - WARNING - DUPLICATE DETECTED: Process CTS23.2026.FEV.00241 already exists in spreadsheet. Skipping...
+2026-02-18 14:33:02,874 - INFO - [DUPLICATE] Process CTS23.2026.FEV.00241 already exists. Skipped. (Total duplicates: 29)
+2026-02-18 14:33:03,888 - INFO - 
+>>> Attempting to process item 10 (Page 3) <<<
+2026-02-18 14:33:03,888 - INFO - ################################################################################
+2026-02-18 14:33:03,888 - INFO - PROCESSING REQUEST 10 (table row 11)
+2026-02-18 14:33:03,888 - INFO - ################################################################################
+2026-02-18 14:33:03,888 - INFO - Extracting listing fields (item 9)...
+2026-02-18 14:33:03,916 - WARNING - DUPLICATE DETECTED: Process CTS03.2026.FEV.00339 already exists in spreadsheet. Skipping...
+2026-02-18 14:33:03,916 - INFO - [DUPLICATE] Process CTS03.2026.FEV.00339 already exists. Skipped. (Total duplicates: 30)
+2026-02-18 14:33:04,933 - INFO - Navigating to next listing page...
+2026-02-18 14:33:05,445 - WARNING - Regular click failed: Message: Element <a id="p1_cph1_SCs_GdSCs_GdSCs_GdSCs_LinkButton_Paginacao_Proximo_10" class="link_txt_peq_arial_preto" href="javascript:WebForm_DoPostBackWithOptions(new WebForm_PostBackOptions("ctl00$ctl00$p1$cph1$SCs$GdSCs$GdSCs$ctl13$GdSCs_LinkButton_Paginacao_Proximo", "", true, "", "", false, true))"> is not clickable at point (927,618) because another element <div> obscures it
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:202:5
+ElementClickInterceptedError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:354:5
+webdriverClickElement@chrome://remote/content/marionette/interaction.sys.mjs:175:11
+interaction.clickElement@chrome://remote/content/marionette/interaction.sys.mjs:134:11
+clickElement@chrome://remote/content/marionette/actors/MarionetteCommandsChild.sys.mjs:328:29
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteCommandsChild.sys.mjs:210:31
+. Trying JavaScript click...
+2026-02-18 14:33:05,445 - INFO - JavaScript click successful
+2026-02-18 14:33:09,456 - INFO - ********************************************************************************
+2026-02-18 14:33:09,456 - INFO - LISTING PAGE 4
+2026-02-18 14:33:09,456 - INFO - ********************************************************************************
+2026-02-18 14:33:09,466 - INFO - Found approximately 10 items on this page
+2026-02-18 14:33:09,466 - INFO - 
+>>> Attempting to process item 1 (Page 4) <<<
+2026-02-18 14:33:09,466 - INFO - ################################################################################
+2026-02-18 14:33:09,466 - INFO - PROCESSING REQUEST 1 (table row 2)
+2026-02-18 14:33:09,466 - INFO - ################################################################################
+2026-02-18 14:33:09,476 - INFO - Extracting listing fields (item 0)...
+2026-02-18 14:33:09,500 - WARNING - DUPLICATE DETECTED: Process CTS03.2026.JAN.00332 already exists in spreadsheet. Skipping...
+2026-02-18 14:33:09,500 - INFO - [DUPLICATE] Process CTS03.2026.JAN.00332 already exists. Skipped. (Total duplicates: 31)
+2026-02-18 14:33:10,501 - INFO - 
+>>> Attempting to process item 2 (Page 4) <<<
+2026-02-18 14:33:10,501 - INFO - ################################################################################
+2026-02-18 14:33:10,501 - INFO - PROCESSING REQUEST 2 (table row 3)
+2026-02-18 14:33:10,501 - INFO - ################################################################################
+2026-02-18 14:33:10,507 - INFO - Extracting listing fields (item 1)...
+2026-02-18 14:33:10,532 - WARNING - DUPLICATE DETECTED: Process CTS29.2026.JAN.02643 already exists in spreadsheet. Skipping...
+2026-02-18 14:33:10,532 - INFO - [DUPLICATE] Process CTS29.2026.JAN.02643 already exists. Skipped. (Total duplicates: 32)
+2026-02-18 14:33:11,542 - INFO - 
+>>> Attempting to process item 3 (Page 4) <<<
+2026-02-18 14:33:11,542 - INFO - ################################################################################
+2026-02-18 14:33:11,542 - INFO - PROCESSING REQUEST 3 (table row 4)
+2026-02-18 14:33:11,542 - INFO - ################################################################################
+2026-02-18 14:33:11,544 - INFO - Extracting listing fields (item 2)...
+2026-02-18 14:33:11,573 - WARNING - DUPLICATE DETECTED: Process CTS03.2026.JAN.00323 already exists in spreadsheet. Skipping...
+2026-02-18 14:33:11,574 - INFO - [DUPLICATE] Process CTS03.2026.JAN.00323 already exists. Skipped. (Total duplicates: 33)
+2026-02-18 14:33:12,574 - INFO - 
+>>> Attempting to process item 4 (Page 4) <<<
+2026-02-18 14:33:12,574 - INFO - ################################################################################
+2026-02-18 14:33:12,574 - INFO - PROCESSING REQUEST 4 (table row 5)
+2026-02-18 14:33:12,574 - INFO - ################################################################################
+2026-02-18 14:33:12,587 - INFO - Extracting listing fields (item 3)...
+2026-02-18 14:33:12,633 - WARNING - DUPLICATE DETECTED: Process CTS03.2026.JAN.00321 already exists in spreadsheet. Skipping...
+2026-02-18 14:33:12,633 - INFO - [DUPLICATE] Process CTS03.2026.JAN.00321 already exists. Skipped. (Total duplicates: 34)
+2026-02-18 14:33:13,646 - INFO - 
+>>> Attempting to process item 5 (Page 4) <<<
+2026-02-18 14:33:13,648 - INFO - ################################################################################
+2026-02-18 14:33:13,648 - INFO - PROCESSING REQUEST 5 (table row 6)
+2026-02-18 14:33:13,649 - INFO - ################################################################################
+2026-02-18 14:33:13,657 - INFO - Extracting listing fields (item 4)...
+2026-02-18 14:33:13,682 - WARNING - DUPLICATE DETECTED: Process CTS03.2026.JAN.00319 already exists in spreadsheet. Skipping...
+2026-02-18 14:33:13,682 - INFO - [DUPLICATE] Process CTS03.2026.JAN.00319 already exists. Skipped. (Total duplicates: 35)
+2026-02-18 14:33:14,697 - INFO - 
+>>> Attempting to process item 6 (Page 4) <<<
+2026-02-18 14:33:14,697 - INFO - ################################################################################
+2026-02-18 14:33:14,697 - INFO - PROCESSING REQUEST 6 (table row 7)
+2026-02-18 14:33:14,697 - INFO - ################################################################################
+2026-02-18 14:33:14,697 - INFO - Extracting listing fields (item 5)...
+2026-02-18 14:33:14,726 - WARNING - DUPLICATE DETECTED: Process CTS03.2026.JAN.00318 already exists in spreadsheet. Skipping...
+2026-02-18 14:33:14,726 - INFO - [DUPLICATE] Process CTS03.2026.JAN.00318 already exists. Skipped. (Total duplicates: 36)
+2026-02-18 14:33:15,728 - INFO - 
+>>> Attempting to process item 7 (Page 4) <<<
+2026-02-18 14:33:15,728 - INFO - ################################################################################
+2026-02-18 14:33:15,731 - INFO - PROCESSING REQUEST 7 (table row 8)
+2026-02-18 14:33:15,731 - INFO - ################################################################################
+2026-02-18 14:33:15,748 - INFO - Extracting listing fields (item 6)...
+2026-02-18 14:33:15,785 - WARNING - DUPLICATE DETECTED: Process CTS03.2026.JAN.00313 already exists in spreadsheet. Skipping...
+2026-02-18 14:33:15,786 - INFO - [DUPLICATE] Process CTS03.2026.JAN.00313 already exists. Skipped. (Total duplicates: 37)
+2026-02-18 14:33:16,787 - INFO - 
+>>> Attempting to process item 8 (Page 4) <<<
+2026-02-18 14:33:16,787 - INFO - ################################################################################
+2026-02-18 14:33:16,787 - INFO - PROCESSING REQUEST 8 (table row 9)
+2026-02-18 14:33:16,787 - INFO - ################################################################################
+2026-02-18 14:33:16,787 - INFO - Extracting listing fields (item 7)...
+2026-02-18 14:33:16,819 - WARNING - DUPLICATE DETECTED: Process CTS03.2026.JAN.00311 already exists in spreadsheet. Skipping...
+2026-02-18 14:33:16,819 - INFO - [DUPLICATE] Process CTS03.2026.JAN.00311 already exists. Skipped. (Total duplicates: 38)
+2026-02-18 14:33:17,820 - INFO - 
+>>> Attempting to process item 9 (Page 4) <<<
+2026-02-18 14:33:17,820 - INFO - ################################################################################
+2026-02-18 14:33:17,820 - INFO - PROCESSING REQUEST 9 (table row 10)
+2026-02-18 14:33:17,820 - INFO - ################################################################################
+2026-02-18 14:33:17,820 - INFO - Extracting listing fields (item 8)...
+2026-02-18 14:33:17,836 - WARNING - DUPLICATE DETECTED: Process CTS01.2026.JAN.03308 already exists in spreadsheet. Skipping...
+2026-02-18 14:33:17,836 - INFO - [DUPLICATE] Process CTS01.2026.JAN.03308 already exists. Skipped. (Total duplicates: 39)
+2026-02-18 14:33:18,846 - INFO - 
+>>> Attempting to process item 10 (Page 4) <<<
+2026-02-18 14:33:18,846 - INFO - ################################################################################
+2026-02-18 14:33:18,846 - INFO - PROCESSING REQUEST 10 (table row 11)
+2026-02-18 14:33:18,846 - INFO - ################################################################################
+2026-02-18 14:33:18,846 - INFO - Extracting listing fields (item 9)...
+2026-02-18 14:33:18,882 - WARNING - DUPLICATE DETECTED: Process CTP01.2026.JAN.03303 already exists in spreadsheet. Skipping...
+2026-02-18 14:33:18,882 - INFO - [DUPLICATE] Process CTP01.2026.JAN.03303 already exists. Skipped. (Total duplicates: 40)
+2026-02-18 14:33:19,889 - INFO - Navigating to next listing page...
+2026-02-18 14:33:20,401 - WARNING - Regular click failed: Message: Element <a id="p1_cph1_SCs_GdSCs_GdSCs_GdSCs_LinkButton_Paginacao_Proximo_10" class="link_txt_peq_arial_preto" href="javascript:WebForm_DoPostBackWithOptions(new WebForm_PostBackOptions("ctl00$ctl00$p1$cph1$SCs$GdSCs$GdSCs$ctl13$GdSCs_LinkButton_Paginacao_Proximo", "", true, "", "", false, true))"> is not clickable at point (927,618) because another element <div> obscures it
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:202:5
+ElementClickInterceptedError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:354:5
+webdriverClickElement@chrome://remote/content/marionette/interaction.sys.mjs:175:11
+interaction.clickElement@chrome://remote/content/marionette/interaction.sys.mjs:134:11
+clickElement@chrome://remote/content/marionette/actors/MarionetteCommandsChild.sys.mjs:328:29
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteCommandsChild.sys.mjs:210:31
+. Trying JavaScript click...
+2026-02-18 14:33:20,409 - INFO - JavaScript click successful
+2026-02-18 14:33:24,410 - INFO - ********************************************************************************
+2026-02-18 14:33:24,410 - INFO - LISTING PAGE 5
+2026-02-18 14:33:24,410 - INFO - ********************************************************************************
+2026-02-18 14:33:24,442 - INFO - Found approximately 6 items on this page
+2026-02-18 14:33:24,442 - INFO - 
+>>> Attempting to process item 1 (Page 5) <<<
+2026-02-18 14:33:24,442 - INFO - ################################################################################
+2026-02-18 14:33:24,445 - INFO - PROCESSING REQUEST 1 (table row 2)
+2026-02-18 14:33:24,445 - INFO - ################################################################################
+2026-02-18 14:33:24,445 - INFO - Extracting listing fields (item 0)...
+2026-02-18 14:33:24,464 - WARNING - DUPLICATE DETECTED: Process CTS03.2026.JAN.00284 already exists in spreadsheet. Skipping...
+2026-02-18 14:33:24,464 - INFO - [DUPLICATE] Process CTS03.2026.JAN.00284 already exists. Skipped. (Total duplicates: 41)
+2026-02-18 14:33:25,472 - INFO - 
+>>> Attempting to process item 2 (Page 5) <<<
+2026-02-18 14:33:25,472 - INFO - ################################################################################
+2026-02-18 14:33:25,472 - INFO - PROCESSING REQUEST 2 (table row 3)
+2026-02-18 14:33:25,472 - INFO - ################################################################################
+2026-02-18 14:33:25,472 - INFO - Extracting listing fields (item 1)...
+2026-02-18 14:33:25,498 - WARNING - DUPLICATE DETECTED: Process CTPS30.2026.JAN.00587 already exists in spreadsheet. Skipping...
+2026-02-18 14:33:25,498 - INFO - [DUPLICATE] Process CTPS30.2026.JAN.00587 already exists. Skipped. (Total duplicates: 42)
+2026-02-18 14:33:26,500 - INFO - 
+>>> Attempting to process item 3 (Page 5) <<<
+2026-02-18 14:33:26,500 - INFO - ################################################################################
+2026-02-18 14:33:26,500 - INFO - PROCESSING REQUEST 3 (table row 4)
+2026-02-18 14:33:26,500 - INFO - ################################################################################
+2026-02-18 14:33:26,500 - INFO - Extracting listing fields (item 2)...
+2026-02-18 14:33:26,517 - WARNING - DUPLICATE DETECTED: Process CTS08.2026.JAN.01963 already exists in spreadsheet. Skipping...
+2026-02-18 14:33:26,517 - INFO - [DUPLICATE] Process CTS08.2026.JAN.01963 already exists. Skipped. (Total duplicates: 43)
+2026-02-18 14:33:27,527 - INFO - 
+>>> Attempting to process item 4 (Page 5) <<<
+2026-02-18 14:33:27,527 - INFO - ################################################################################
+2026-02-18 14:33:27,527 - INFO - PROCESSING REQUEST 4 (table row 5)
+2026-02-18 14:33:27,528 - INFO - ################################################################################
+2026-02-18 14:33:27,529 - INFO - Extracting listing fields (item 3)...
+2026-02-18 14:33:27,564 - WARNING - DUPLICATE DETECTED: Process CTS99.2025.DEZ.01693 already exists in spreadsheet. Skipping...
+2026-02-18 14:33:27,565 - INFO - [DUPLICATE] Process CTS99.2025.DEZ.01693 already exists. Skipped. (Total duplicates: 44)
+2026-02-18 14:33:28,565 - INFO - 
+>>> Attempting to process item 5 (Page 5) <<<
+2026-02-18 14:33:28,565 - INFO - ################################################################################
+2026-02-18 14:33:28,565 - INFO - PROCESSING REQUEST 5 (table row 6)
+2026-02-18 14:33:28,565 - INFO - ################################################################################
+2026-02-18 14:33:28,568 - INFO - Extracting listing fields (item 4)...
+2026-02-18 14:33:28,590 - WARNING - DUPLICATE DETECTED: Process CTS08.2025.NOV.01873 already exists in spreadsheet. Skipping...
+2026-02-18 14:33:28,594 - INFO - [DUPLICATE] Process CTS08.2025.NOV.01873 already exists. Skipped. (Total duplicates: 45)
+2026-02-18 14:33:29,595 - INFO - 
+>>> Attempting to process item 6 (Page 5) <<<
+2026-02-18 14:33:29,595 - INFO - ################################################################################
+2026-02-18 14:33:29,595 - INFO - PROCESSING REQUEST 6 (table row 7)
+2026-02-18 14:33:29,595 - INFO - ################################################################################
+2026-02-18 14:33:34,631 - WARNING - Item 6 not found on this page
+2026-02-18 14:33:35,544 - INFO - Data inserted into spreadsheet at row 50
+2026-02-18 14:33:35,553 - INFO - Item 6 not found. Checking if this is the last page...
+2026-02-18 14:33:35,553 - INFO - Next button not found - last page reached
+2026-02-18 14:33:35,553 - INFO - Confirmed: This is the last page and there are no more items.
+2026-02-18 14:33:35,553 - INFO - Ending processing...
+2026-02-18 14:33:35,553 - INFO - Processing completed - termination condition met!
+2026-02-18 14:33:35,553 - INFO - ================================================================================
+2026-02-18 14:33:35,559 - INFO - PROCESSAMENTO CONCLUÍDO!
+2026-02-18 14:33:35,559 - INFO - ================================================================================
+2026-02-18 14:33:35,559 - INFO - Total de solicitações processadas: 0
+2026-02-18 14:33:35,560 - INFO - Solicitações com sucesso: 0
+2026-02-18 14:33:35,560 - INFO - Solicitações com erro: 0
+2026-02-18 14:33:35,560 - INFO - Solicitações duplicadas (ignoradas): 45
+2026-02-18 14:33:35,560 - INFO - Total de solicitações ignoradas: 45
+2026-02-18 14:33:35,560 - INFO - Páginas de listagem processadas: 5
+2026-02-18 14:33:35,561 - INFO - Processos únicos encontrados: 45
+2026-02-18 14:33:35,561 - INFO - ================================================================================
+2026-02-18 14:33:35,561 - INFO - 
+2026-02-18 14:33:35,561 - INFO - ================================================================================
+2026-02-18 14:33:35,562 - INFO - RELATÓRIO DETALHADO DE ERROS
+2026-02-18 14:33:35,562 - INFO - ================================================================================
+2026-02-18 14:33:35,562 - ERROR -   1. Página 5, Índice 5 (ID: p1_cph1_SCs_GdSCs_GdSCs_Lkb_Sc_5)
+2026-02-18 14:33:35,562 - ERROR -      Nº SC: Desconhecido
+2026-02-18 14:33:35,562 - ERROR -      Motivo: NOT_FOUND - Element not found on page
+2026-02-18 14:33:35,563 - INFO - ================================================================================
+2026-02-18 14:33:37,025 - INFO - Mensagem enviada ao Telegram com sucesso (chat_id=6760564985)
+2026-02-18 14:33:38,612 - INFO - Mensagem enviada ao Telegram com sucesso (chat_id=1356469598)
+2026-02-18 14:33:40,204 - INFO - Mensagem enviada ao Telegram com sucesso (chat_id=8587977306)
+2026-02-18 14:33:40,410 - INFO - Closing browser in 30 seconds (for verification)...
+2026-02-18 14:34:13,678 - INFO - Browser closed

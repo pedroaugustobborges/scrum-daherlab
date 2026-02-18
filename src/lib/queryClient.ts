@@ -135,6 +135,20 @@ export const queryKeys = {
     user: (userId: string) => [...queryKeys.resources.all, 'user', userId] as const,
     project: (projectId: string) => [...queryKeys.resources.all, 'project', projectId] as const,
   },
+
+  // Calendar Subscriptions
+  calendarSubscriptions: {
+    all: ['calendarSubscriptions'] as const,
+    list: (userId: string) => [...queryKeys.calendarSubscriptions.all, 'list', userId] as const,
+    detail: (id: string) => [...queryKeys.calendarSubscriptions.all, 'detail', id] as const,
+  },
+
+  // External Calendar Events
+  externalEvents: {
+    all: ['externalEvents'] as const,
+    week: (userId: string, weekStart: string) =>
+      [...queryKeys.externalEvents.all, userId, weekStart] as const,
+  },
 }
 
 /**

@@ -13,6 +13,7 @@ import {
   MenuItem,
   TextField,
   InputAdornment,
+  Button,
 } from '@mui/material'
 import {
   ChevronLeft,
@@ -24,17 +25,23 @@ import {
   SpaceDashboard,
   Folder,
   CalendarMonth,
+  Settings,
+  Download,
+  CloudSync,
 } from '@mui/icons-material'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import Navbar from '@/components/Navbar'
 import StoryDetailsModal from '@/components/StoryDetailsModal'
+import { CalendarSettingsModal } from '@/components/calendar'
+import { useExternalCalendarEvents } from '@/hooks/useCalendarSubscriptions'
+import { exportCalendarToICS } from '@/utils/calendar/icsGenerator'
 
 interface CalendarEvent {
   id: string
   title: string
-  type: 'task' | 'sprint' | 'project' | 'deadline'
+  type: 'task' | 'sprint' | 'project' | 'deadline' | 'external'
   date: Date
   endDate?: Date
   projectId?: string
@@ -43,6 +50,10 @@ interface CalendarEvent {
   assignee?: string
   status?: string
   color: string
+  // External event specific
+  isExternal?: boolean
+  subscriptionName?: string
+  location?: string
 }
 
 const priorityColors: Record<string, string> = {
@@ -52,11 +63,12 @@ const priorityColors: Record<string, string> = {
   urgent: '#dc2626',
 }
 
-const eventTypeConfig = {
+const eventTypeConfig: Record<string, { icon: typeof Assignment; color: string; label: string }> = {
   task: { icon: Assignment, color: '#6366f1', label: 'Tarefa' },
   sprint: { icon: SpaceDashboard, color: '#10b981', label: 'Sprint' },
   project: { icon: Folder, color: '#8b5cf6', label: 'Projeto' },
   deadline: { icon: Flag, color: '#ef4444', label: 'Prazo' },
+  external: { icon: CloudSync, color: '#06b6d4', label: 'Externo' },
 }
 
 export default function Calendar() {
@@ -67,6 +79,7 @@ export default function Calendar() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedStoryId, setSelectedStoryId] = useState<string | null>(null)
   const [showMyTasks, setShowMyTasks] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   // Get week dates
   const weekDates = useMemo(() => {
@@ -153,6 +166,12 @@ export default function Calendar() {
     },
   })
 
+  // Fetch external calendar events
+  const { data: externalEvents = [] } = useExternalCalendarEvents(user?.id, {
+    start: weekStart,
+    end: weekEnd,
+  })
+
   // Convert to calendar events
   const events = useMemo(() => {
     const allEvents: CalendarEvent[] = []
@@ -227,13 +246,37 @@ export default function Calendar() {
       }
     })
 
+    // Add external calendar events
+    externalEvents.forEach((extEvent) => {
+      const [sy, sm, sd] = extEvent.start.split('T')[0].split('-').map(Number)
+      const startDate = new Date(sy, sm - 1, sd)
+
+      allEvents.push({
+        id: `external-${extEvent.uid}`,
+        title: extEvent.summary,
+        type: 'external',
+        date: startDate,
+        endDate: extEvent.end ? (() => {
+          const [ey, em, ed] = extEvent.end.split('T')[0].split('-').map(Number)
+          return new Date(ey, em - 1, ed)
+        })() : undefined,
+        color: extEvent.color,
+        isExternal: true,
+        subscriptionName: extEvent.subscriptionName,
+        location: extEvent.location,
+      })
+    })
+
     return allEvents
-  }, [tasks, sprints])
+  }, [tasks, sprints, externalEvents])
 
   // Filter events
   const filteredEvents = useMemo(() => {
     return events.filter((event) => {
-      if (selectedProject !== 'all' && event.projectId !== selectedProject) return false
+      // External events bypass project filter
+      if (event.type !== 'external') {
+        if (selectedProject !== 'all' && event.projectId !== selectedProject) return false
+      }
       if (searchTerm && !event.title.toLowerCase().includes(searchTerm.toLowerCase())) return false
       if (showMyTasks && event.type === 'task') {
         const task = tasks.find((t: any) => t.id === event.id)
@@ -295,6 +338,30 @@ export default function Calendar() {
     } else if (event.type === 'deadline' && event.id.startsWith('deadline-')) {
       setSelectedStoryId(event.id.replace('deadline-', ''))
     }
+    // External events don't have a detail modal
+  }
+
+  const handleExport = () => {
+    // Export only app events (not external)
+    const exportableEvents = filteredEvents
+      .filter((e) => e.type !== 'external')
+      .map((e) => ({
+        id: e.id,
+        title: e.title,
+        date: e.date,
+        endDate: e.endDate,
+        description: '',
+        projectName: e.projectName,
+        assignee: e.assignee,
+        status: e.status,
+        type: e.type,
+      }))
+
+    exportCalendarToICS(
+      exportableEvents,
+      `scrum-dashboard-${weekStart.toISOString().split('T')[0]}`,
+      'Scrum Dashboard - Calendário'
+    )
   }
 
   return (
@@ -304,28 +371,56 @@ export default function Calendar() {
       <Box sx={{ p: { xs: 2, md: 4 }, maxWidth: 1600, mx: 'auto' }}>
         {/* Header */}
         <Box sx={{ mb: 4 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-            <Box
-              sx={{
-                width: 48,
-                height: 48,
-                borderRadius: 3,
-                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
-              }}
-            >
-              <CalendarMonth sx={{ color: 'white', fontSize: 24 }} />
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box
+                sx={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 3,
+                  background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
+                }}
+              >
+                <CalendarMonth sx={{ color: 'white', fontSize: 24 }} />
+              </Box>
+              <Box>
+                <Typography variant="h4" fontWeight={800} color="#1f2937">
+                  Calendário
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Visualize todas as atividades por semana
+                </Typography>
+              </Box>
             </Box>
-            <Box>
-              <Typography variant="h4" fontWeight={800} color="#1f2937">
-                Calendário
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Visualize todas as atividades por semana
-              </Typography>
+
+            {/* Action Buttons */}
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Tooltip title="Exportar para ICS">
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<Download />}
+                  onClick={handleExport}
+                  sx={{ borderRadius: 2 }}
+                >
+                  Exportar
+                </Button>
+              </Tooltip>
+              <Tooltip title="Configurações">
+                <IconButton
+                  onClick={() => setSettingsOpen(true)}
+                  sx={{
+                    bgcolor: 'rgba(99, 102, 241, 0.1)',
+                    '&:hover': { bgcolor: 'rgba(99, 102, 241, 0.2)' },
+                  }}
+                >
+                  <Settings sx={{ color: '#6366f1' }} />
+                </IconButton>
+              </Tooltip>
             </Box>
           </Box>
         </Box>
@@ -502,7 +597,7 @@ export default function Calendar() {
                   }}
                 >
                   {dayEvents.map((event) => {
-                    const config = eventTypeConfig[event.type]
+                    const config = eventTypeConfig[event.type] || eventTypeConfig.external
                     const Icon = config.icon
 
                     return (
@@ -518,9 +613,19 @@ export default function Calendar() {
                                 Projeto: {event.projectName}
                               </Typography>
                             )}
+                            {event.subscriptionName && (
+                              <Typography variant="caption" display="block">
+                                Calendário: {event.subscriptionName}
+                              </Typography>
+                            )}
                             {event.assignee && (
                               <Typography variant="caption" display="block">
                                 Responsável: {event.assignee}
+                              </Typography>
+                            )}
+                            {event.location && (
+                              <Typography variant="caption" display="block">
+                                Local: {event.location}
                               </Typography>
                             )}
                           </Box>
@@ -532,18 +637,20 @@ export default function Calendar() {
                             p: 1,
                             mb: 0.5,
                             borderRadius: 1.5,
-                            bgcolor: `${config.color}15`,
-                            borderLeft: `3px solid ${config.color}`,
+                            bgcolor: `${event.color}15`,
+                            borderLeft: event.isExternal
+                              ? `3px dashed ${event.color}`
+                              : `3px solid ${config.color}`,
                             cursor: event.type === 'task' || event.type === 'deadline' ? 'pointer' : 'default',
                             transition: 'all 0.2s',
                             '&:hover': {
-                              bgcolor: `${config.color}25`,
+                              bgcolor: `${event.color}25`,
                               transform: 'translateX(2px)',
                             },
                           }}
                         >
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-                            <Icon sx={{ fontSize: 12, color: config.color }} />
+                            <Icon sx={{ fontSize: 12, color: event.color }} />
                             {event.projectName && (
                               <Typography
                                 variant="caption"
@@ -561,6 +668,25 @@ export default function Calendar() {
                                 }}
                               >
                                 {event.projectName}
+                              </Typography>
+                            )}
+                            {event.subscriptionName && (
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  fontSize: '0.6rem',
+                                  bgcolor: `${event.color}20`,
+                                  px: 0.5,
+                                  borderRadius: 0.5,
+                                  color: event.color,
+                                  fontWeight: 600,
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap',
+                                  maxWidth: '100%',
+                                }}
+                              >
+                                {event.subscriptionName}
                               </Typography>
                             )}
                           </Box>
@@ -659,6 +785,22 @@ export default function Calendar() {
               {filteredEvents.filter((e) => e.type === 'deadline').length}
             </Typography>
           </Paper>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 2,
+              borderRadius: 2,
+              border: '2px solid rgba(6, 182, 212, 0.1)',
+              minWidth: 150,
+            }}
+          >
+            <Typography variant="caption" color="text.secondary" fontWeight={600}>
+              Eventos externos
+            </Typography>
+            <Typography variant="h5" fontWeight={700} color="#06b6d4">
+              {filteredEvents.filter((e) => e.type === 'external').length}
+            </Typography>
+          </Paper>
         </Box>
       </Box>
 
@@ -671,6 +813,13 @@ export default function Calendar() {
           onSuccess={() => {}}
         />
       )}
+
+      {/* Calendar Settings Modal */}
+      <CalendarSettingsModal
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        onExport={handleExport}
+      />
     </Box>
   )
 }

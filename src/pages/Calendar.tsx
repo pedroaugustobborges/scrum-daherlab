@@ -28,6 +28,8 @@ import {
   Settings,
   Download,
   CloudSync,
+  PlayArrow,
+  Stop,
 } from '@mui/icons-material'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
@@ -42,8 +44,8 @@ interface CalendarEvent {
   id: string
   title: string
   type: 'task' | 'sprint' | 'project' | 'deadline' | 'external'
+  subType?: 'start' | 'end' // For marking start/end of multi-day events
   date: Date
-  endDate?: Date
   projectId?: string
   projectName?: string
   priority?: string
@@ -65,7 +67,11 @@ const priorityColors: Record<string, string> = {
 
 const eventTypeConfig: Record<string, { icon: typeof Assignment; color: string; label: string }> = {
   task: { icon: Assignment, color: '#6366f1', label: 'Tarefa' },
+  'task-start': { icon: PlayArrow, color: '#6366f1', label: 'Início Tarefa' },
+  'task-end': { icon: Stop, color: '#6366f1', label: 'Término Tarefa' },
   sprint: { icon: SpaceDashboard, color: '#10b981', label: 'Sprint' },
+  'sprint-start': { icon: PlayArrow, color: '#10b981', label: 'Início Sprint' },
+  'sprint-end': { icon: Stop, color: '#10b981', label: 'Fim Sprint' },
   project: { icon: Folder, color: '#8b5cf6', label: 'Projeto' },
   deadline: { icon: Flag, color: '#ef4444', label: 'Prazo' },
   external: { icon: CloudSync, color: '#06b6d4', label: 'Externo' },
@@ -172,6 +178,15 @@ export default function Calendar() {
     end: weekEnd,
   })
 
+  // Helper to check if two dates are the same day
+  const isSameDay = (date1: Date, date2: Date) => {
+    return (
+      date1.getDate() === date2.getDate() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getFullYear() === date2.getFullYear()
+    )
+  }
+
   // Convert to calendar events
   const events = useMemo(() => {
     const allEvents: CalendarEvent[] = []
@@ -180,27 +195,77 @@ export default function Calendar() {
     tasks.forEach((task: any) => {
       const project = task.projects
 
-      // Task with start/end dates (spans multiple days)
+      // Task with start/end dates - show as separate start and end events
       if (task.start_date) {
         const [sy, sm, sd] = task.start_date.split('T')[0].split('-').map(Number)
         const startDate = new Date(sy, sm - 1, sd)
 
-        allEvents.push({
-          id: task.id,
-          title: task.title,
-          type: 'task',
-          date: startDate,
-          endDate: task.end_date ? (() => {
-            const [ey, em, ed] = task.end_date.split('T')[0].split('-').map(Number)
-            return new Date(ey, em - 1, ed)
-          })() : undefined,
-          projectId: project?.id,
-          projectName: project?.name,
-          priority: task.priority,
-          assignee: task.profiles?.full_name,
-          status: task.status,
-          color: priorityColors[task.priority] || '#6366f1',
-        })
+        // Check if task has different end date
+        if (task.end_date) {
+          const [ey, em, ed] = task.end_date.split('T')[0].split('-').map(Number)
+          const endDate = new Date(ey, em - 1, ed)
+
+          // If start and end are different days, show both
+          if (!isSameDay(startDate, endDate)) {
+            // Start event
+            allEvents.push({
+              id: `${task.id}-start`,
+              title: `Início: ${task.title}`,
+              type: 'task',
+              subType: 'start',
+              date: startDate,
+              projectId: project?.id,
+              projectName: project?.name,
+              priority: task.priority,
+              assignee: task.profiles?.full_name,
+              status: task.status,
+              color: priorityColors[task.priority] || '#6366f1',
+            })
+
+            // End event
+            allEvents.push({
+              id: `${task.id}-end`,
+              title: `Término: ${task.title}`,
+              type: 'task',
+              subType: 'end',
+              date: endDate,
+              projectId: project?.id,
+              projectName: project?.name,
+              priority: task.priority,
+              assignee: task.profiles?.full_name,
+              status: task.status,
+              color: priorityColors[task.priority] || '#6366f1',
+            })
+          } else {
+            // Same day - show as single event
+            allEvents.push({
+              id: task.id,
+              title: task.title,
+              type: 'task',
+              date: startDate,
+              projectId: project?.id,
+              projectName: project?.name,
+              priority: task.priority,
+              assignee: task.profiles?.full_name,
+              status: task.status,
+              color: priorityColors[task.priority] || '#6366f1',
+            })
+          }
+        } else {
+          // No end date - show start only
+          allEvents.push({
+            id: task.id,
+            title: task.title,
+            type: 'task',
+            date: startDate,
+            projectId: project?.id,
+            projectName: project?.name,
+            priority: task.priority,
+            assignee: task.profiles?.full_name,
+            status: task.status,
+            color: priorityColors[task.priority] || '#6366f1',
+          })
+        }
       }
 
       // Due date as deadline
@@ -222,49 +287,109 @@ export default function Calendar() {
       }
     })
 
-    // Add sprints
+    // Add sprints - show as separate start and end events
     sprints.forEach((sprint: any) => {
       const project = sprint.projects
+
       if (sprint.start_date) {
         const [sy, sm, sd] = sprint.start_date.split('T')[0].split('-').map(Number)
         const startDate = new Date(sy, sm - 1, sd)
 
+        // Sprint start event
         allEvents.push({
-          id: `sprint-${sprint.id}`,
-          title: sprint.name,
+          id: `sprint-${sprint.id}-start`,
+          title: `Início: ${sprint.name}`,
           type: 'sprint',
+          subType: 'start',
           date: startDate,
-          endDate: sprint.end_date ? (() => {
-            const [ey, em, ed] = sprint.end_date.split('T')[0].split('-').map(Number)
-            return new Date(ey, em - 1, ed)
-          })() : undefined,
           projectId: project?.id,
           projectName: project?.name,
           status: sprint.status,
           color: '#10b981',
         })
+
+        // Sprint end event (if end_date exists and is different)
+        if (sprint.end_date) {
+          const [ey, em, ed] = sprint.end_date.split('T')[0].split('-').map(Number)
+          const endDate = new Date(ey, em - 1, ed)
+
+          if (!isSameDay(startDate, endDate)) {
+            allEvents.push({
+              id: `sprint-${sprint.id}-end`,
+              title: `Fim: ${sprint.name}`,
+              type: 'sprint',
+              subType: 'end',
+              date: endDate,
+              projectId: project?.id,
+              projectName: project?.name,
+              status: sprint.status,
+              color: '#10b981',
+            })
+          }
+        }
       }
     })
 
-    // Add external calendar events
+    // Add external calendar events - show as separate start and end events
     externalEvents.forEach((extEvent) => {
       const [sy, sm, sd] = extEvent.start.split('T')[0].split('-').map(Number)
       const startDate = new Date(sy, sm - 1, sd)
 
-      allEvents.push({
-        id: `external-${extEvent.uid}`,
-        title: extEvent.summary,
-        type: 'external',
-        date: startDate,
-        endDate: extEvent.end ? (() => {
-          const [ey, em, ed] = extEvent.end.split('T')[0].split('-').map(Number)
-          return new Date(ey, em - 1, ed)
-        })() : undefined,
-        color: extEvent.color,
-        isExternal: true,
-        subscriptionName: extEvent.subscriptionName,
-        location: extEvent.location,
-      })
+      if (extEvent.end) {
+        const [ey, em, ed] = extEvent.end.split('T')[0].split('-').map(Number)
+        const endDate = new Date(ey, em - 1, ed)
+
+        if (!isSameDay(startDate, endDate)) {
+          // Multi-day external event - show start and end
+          allEvents.push({
+            id: `external-${extEvent.uid}-start`,
+            title: `Início: ${extEvent.summary}`,
+            type: 'external',
+            subType: 'start',
+            date: startDate,
+            color: extEvent.color,
+            isExternal: true,
+            subscriptionName: extEvent.subscriptionName,
+            location: extEvent.location,
+          })
+
+          allEvents.push({
+            id: `external-${extEvent.uid}-end`,
+            title: `Fim: ${extEvent.summary}`,
+            type: 'external',
+            subType: 'end',
+            date: endDate,
+            color: extEvent.color,
+            isExternal: true,
+            subscriptionName: extEvent.subscriptionName,
+            location: extEvent.location,
+          })
+        } else {
+          // Same day - single event
+          allEvents.push({
+            id: `external-${extEvent.uid}`,
+            title: extEvent.summary,
+            type: 'external',
+            date: startDate,
+            color: extEvent.color,
+            isExternal: true,
+            subscriptionName: extEvent.subscriptionName,
+            location: extEvent.location,
+          })
+        }
+      } else {
+        // No end date - single event
+        allEvents.push({
+          id: `external-${extEvent.uid}`,
+          title: extEvent.summary,
+          type: 'external',
+          date: startDate,
+          color: extEvent.color,
+          isExternal: true,
+          subscriptionName: extEvent.subscriptionName,
+          location: extEvent.location,
+        })
+      }
     })
 
     return allEvents
@@ -286,20 +411,13 @@ export default function Calendar() {
     })
   }, [events, selectedProject, searchTerm, showMyTasks, tasks, user?.id])
 
-  // Get events for a specific date
+  // Get events for a specific date (exact match only)
   const getEventsForDate = (date: Date) => {
     return filteredEvents.filter((event) => {
       const eventDate = new Date(event.date)
       eventDate.setHours(0, 0, 0, 0)
       const checkDate = new Date(date)
       checkDate.setHours(0, 0, 0, 0)
-
-      if (event.endDate) {
-        const endDate = new Date(event.endDate)
-        endDate.setHours(0, 0, 0, 0)
-        return checkDate >= eventDate && checkDate <= endDate
-      }
-
       return eventDate.getTime() === checkDate.getTime()
     })
   }
@@ -334,22 +452,23 @@ export default function Calendar() {
 
   const handleEventClick = (event: CalendarEvent) => {
     if (event.type === 'task') {
-      setSelectedStoryId(event.id)
+      // Remove -start or -end suffix to get the actual task ID
+      const taskId = event.id.replace(/-start$/, '').replace(/-end$/, '')
+      setSelectedStoryId(taskId)
     } else if (event.type === 'deadline' && event.id.startsWith('deadline-')) {
       setSelectedStoryId(event.id.replace('deadline-', ''))
     }
-    // External events don't have a detail modal
+    // External events and sprints don't have a detail modal
   }
 
   const handleExport = () => {
-    // Export only app events (not external)
+    // Export only app events (not external), excluding duplicate start/end events
     const exportableEvents = filteredEvents
-      .filter((e) => e.type !== 'external')
+      .filter((e) => e.type !== 'external' && !e.subType) // Only export main events, not start/end markers
       .map((e) => ({
         id: e.id,
         title: e.title,
         date: e.date,
-        endDate: e.endDate,
         description: '',
         projectName: e.projectName,
         assignee: e.assignee,
@@ -507,21 +626,36 @@ export default function Calendar() {
         </Paper>
 
         {/* Legend */}
-        <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
-          {Object.entries(eventTypeConfig).map(([key, config]) => (
-            <Chip
-              key={key}
-              label={config.label}
-              size="small"
-              icon={<config.icon sx={{ fontSize: 14 }} />}
-              sx={{
-                bgcolor: `${config.color}20`,
-                color: config.color,
-                fontWeight: 600,
-                '& .MuiChip-icon': { color: config.color },
-              }}
-            />
-          ))}
+        <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap', alignItems: 'center' }}>
+          {/* Main event types */}
+          {['task', 'sprint', 'deadline', 'external'].map((key) => {
+            const config = eventTypeConfig[key]
+            return (
+              <Chip
+                key={key}
+                label={config.label}
+                size="small"
+                icon={<config.icon sx={{ fontSize: 14 }} />}
+                sx={{
+                  bgcolor: `${config.color}20`,
+                  color: config.color,
+                  fontWeight: 600,
+                  '& .MuiChip-icon': { color: config.color },
+                }}
+              />
+            )
+          })}
+          {/* Start/End markers legend */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, ml: 1 }}>
+            <PlayArrow sx={{ fontSize: 14, color: '#9ca3af' }} />
+            <Typography variant="caption" color="text.secondary">
+              Início
+            </Typography>
+            <Stop sx={{ fontSize: 14, color: '#9ca3af', ml: 1 }} />
+            <Typography variant="caption" color="text.secondary">
+              Fim
+            </Typography>
+          </Box>
         </Box>
 
         {/* Calendar Grid */}
@@ -597,7 +731,11 @@ export default function Calendar() {
                   }}
                 >
                   {dayEvents.map((event) => {
-                    const config = eventTypeConfig[event.type] || eventTypeConfig.external
+                    // Get the correct config based on type and subType
+                    const configKey = event.subType
+                      ? `${event.type}-${event.subType}`
+                      : event.type
+                    const config = eventTypeConfig[configKey] || eventTypeConfig[event.type] || eventTypeConfig.external
                     const Icon = config.icon
 
                     return (

@@ -118,15 +118,16 @@ export default function Calendar() {
     },
   })
 
-  // Fetch tasks
+  // Fetch tasks from the correct 'tasks' table
   const { data: tasks = [] } = useQuery({
     queryKey: ['calendar-tasks', weekStart, weekEnd],
     queryFn: async () => {
       const startStr = weekStart.toISOString().split('T')[0]
       const endStr = weekEnd.toISOString().split('T')[0]
 
+      // Query all tasks that have any date field set
       const { data, error } = await supabase
-        .from('user_stories')
+        .from('tasks')
         .select(`
           id,
           title,
@@ -137,13 +138,27 @@ export default function Calendar() {
           end_date,
           assigned_to,
           project_id,
-          projects!inner(id, name),
-          profiles(full_name)
+          projects(id, name),
+          assigned_to_profile:profiles!assigned_to(full_name)
         `)
-        .or(`start_date.gte.${startStr},end_date.lte.${endStr},due_date.gte.${startStr},due_date.lte.${endStr},and(start_date.lte.${endStr},end_date.gte.${startStr})`)
+        // Only fetch tasks that have at least one date field
+        .or('start_date.not.is.null,end_date.not.is.null,due_date.not.is.null')
 
       if (error) throw error
-      return data
+
+      // Filter tasks client-side for the specific week range
+      return (data || []).filter((task: any) => {
+        // Check if task has any date that falls within the week
+        const hasStartInRange = task.start_date && task.start_date >= startStr && task.start_date <= endStr
+        const hasEndInRange = task.end_date && task.end_date >= startStr && task.end_date <= endStr
+        const hasDueInRange = task.due_date && task.due_date >= startStr && task.due_date <= endStr
+        // Also include tasks that span the entire week (start before week, end after week)
+        const spansWeek = task.start_date && task.end_date && task.start_date <= startStr && task.end_date >= endStr
+        // Include if start is before week end AND end is after week start (overlapping)
+        const overlapsWeek = task.start_date && task.end_date && task.start_date <= endStr && task.end_date >= startStr
+
+        return hasStartInRange || hasEndInRange || hasDueInRange || spansWeek || overlapsWeek
+      })
     },
   })
 
@@ -194,65 +209,52 @@ export default function Calendar() {
     // Add tasks
     tasks.forEach((task: any) => {
       const project = task.projects
+      const taskColor = priorityColors[task.priority] || '#6366f1'
 
-      // Task with start/end dates - show as separate start and end events
-      if (task.start_date) {
+      // Parse dates if they exist
+      const startDate = task.start_date ? (() => {
         const [sy, sm, sd] = task.start_date.split('T')[0].split('-').map(Number)
-        const startDate = new Date(sy, sm - 1, sd)
+        return new Date(sy, sm - 1, sd)
+      })() : null
 
-        // Check if task has different end date
-        if (task.end_date) {
-          const [ey, em, ed] = task.end_date.split('T')[0].split('-').map(Number)
-          const endDate = new Date(ey, em - 1, ed)
+      const endDate = task.end_date ? (() => {
+        const [ey, em, ed] = task.end_date.split('T')[0].split('-').map(Number)
+        return new Date(ey, em - 1, ed)
+      })() : null
 
-          // If start and end are different days, show both
-          if (!isSameDay(startDate, endDate)) {
-            // Start event
-            allEvents.push({
-              id: `${task.id}-start`,
-              title: `Início: ${task.title}`,
-              type: 'task',
-              subType: 'start',
-              date: startDate,
-              projectId: project?.id,
-              projectName: project?.name,
-              priority: task.priority,
-              assignee: task.profiles?.full_name,
-              status: task.status,
-              color: priorityColors[task.priority] || '#6366f1',
-            })
+      // Case 1: Task has both start and end dates
+      if (startDate && endDate) {
+        if (!isSameDay(startDate, endDate)) {
+          // Different days - show both start and end
+          allEvents.push({
+            id: `${task.id}-start`,
+            title: `Início: ${task.title}`,
+            type: 'task',
+            subType: 'start',
+            date: startDate,
+            projectId: project?.id,
+            projectName: project?.name,
+            priority: task.priority,
+            assignee: task.assigned_to_profile?.full_name,
+            status: task.status,
+            color: taskColor,
+          })
 
-            // End event
-            allEvents.push({
-              id: `${task.id}-end`,
-              title: `Término: ${task.title}`,
-              type: 'task',
-              subType: 'end',
-              date: endDate,
-              projectId: project?.id,
-              projectName: project?.name,
-              priority: task.priority,
-              assignee: task.profiles?.full_name,
-              status: task.status,
-              color: priorityColors[task.priority] || '#6366f1',
-            })
-          } else {
-            // Same day - show as single event
-            allEvents.push({
-              id: task.id,
-              title: task.title,
-              type: 'task',
-              date: startDate,
-              projectId: project?.id,
-              projectName: project?.name,
-              priority: task.priority,
-              assignee: task.profiles?.full_name,
-              status: task.status,
-              color: priorityColors[task.priority] || '#6366f1',
-            })
-          }
+          allEvents.push({
+            id: `${task.id}-end`,
+            title: `Término: ${task.title}`,
+            type: 'task',
+            subType: 'end',
+            date: endDate,
+            projectId: project?.id,
+            projectName: project?.name,
+            priority: task.priority,
+            assignee: task.assigned_to_profile?.full_name,
+            status: task.status,
+            color: taskColor,
+          })
         } else {
-          // No end date - show start only
+          // Same day - show as single event
           allEvents.push({
             id: task.id,
             title: task.title,
@@ -261,14 +263,46 @@ export default function Calendar() {
             projectId: project?.id,
             projectName: project?.name,
             priority: task.priority,
-            assignee: task.profiles?.full_name,
+            assignee: task.assigned_to_profile?.full_name,
             status: task.status,
-            color: priorityColors[task.priority] || '#6366f1',
+            color: taskColor,
           })
         }
       }
+      // Case 2: Task has only start date (no end date)
+      else if (startDate && !endDate) {
+        allEvents.push({
+          id: `${task.id}-start`,
+          title: `Início: ${task.title}`,
+          type: 'task',
+          subType: 'start',
+          date: startDate,
+          projectId: project?.id,
+          projectName: project?.name,
+          priority: task.priority,
+          assignee: task.assigned_to_profile?.full_name,
+          status: task.status,
+          color: taskColor,
+        })
+      }
+      // Case 3: Task has only end date (no start date)
+      else if (!startDate && endDate) {
+        allEvents.push({
+          id: `${task.id}-end`,
+          title: `Término: ${task.title}`,
+          type: 'task',
+          subType: 'end',
+          date: endDate,
+          projectId: project?.id,
+          projectName: project?.name,
+          priority: task.priority,
+          assignee: task.assigned_to_profile?.full_name,
+          status: task.status,
+          color: taskColor,
+        })
+      }
 
-      // Due date as deadline
+      // Due date as deadline (separate from start/end)
       if (task.due_date) {
         const [dy, dm, dd] = task.due_date.split('T')[0].split('-').map(Number)
         const dueDate = new Date(dy, dm - 1, dd)

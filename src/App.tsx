@@ -22,6 +22,7 @@ import ScrumGuide from '@/pages/ScrumGuide'
 import AdminPanel from '@/pages/AdminPanel'
 import Planner from '@/pages/Planner'
 import Calendar from '@/pages/Calendar'
+import ProjectCalendarView from '@/pages/ProjectCalendarView'
 
 // Placeholder component for views not yet implemented
 function PlaceholderView({ title }: { title: string }) {
@@ -141,7 +142,7 @@ function App() {
           <Route path="gantt" element={<GanttView />} />
           <Route path="wbs" element={<WBSView />} />
           <Route path="grid" element={<GridView />} />
-          <Route path="calendar" element={<PlaceholderView title="Calendário" />} />
+          <Route path="calendar" element={<ProjectCalendarView />} />
           <Route path="timeline" element={<PlaceholderView title="Linha do Tempo" />} />
           <Route path="settings" element={<ProjectSettings />} />
         </Route>

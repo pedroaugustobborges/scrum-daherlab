@@ -35,6 +35,7 @@ import {
   Close,
   KeyboardArrowDown,
   ViewList,
+  ViewKanban,
   CalendarMonth,
   ExpandLess,
   ExpandMore,
@@ -43,7 +44,9 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export default function Navbar() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [projectsAnchorEl, setProjectsAnchorEl] = useState<null | HTMLElement>(null);
+  const [projectsAnchorEl, setProjectsAnchorEl] = useState<null | HTMLElement>(
+    null,
+  );
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileProjectsOpen, setMobileProjectsOpen] = useState(false);
   const { user, signOut, isAdmin } = useAuth();
@@ -90,7 +93,7 @@ export default function Navbar() {
   // Main navigation items
   const menuItems = [
     { label: "Painel", path: "/dashboard", icon: <Dashboard /> },
-    { label: "Planner", path: "/planner", icon: <SpaceDashboard /> },
+    { label: "Planner", path: "/planner", icon: <ViewKanban /> },
     { label: "Calendário", path: "/calendar", icon: <CalendarMonth /> },
     { label: "Times", path: "/teams", icon: <People /> },
     { label: "Daher Lab", path: "/scrum-guide", icon: <MenuBook /> },
@@ -106,7 +109,9 @@ export default function Navbar() {
   }
 
   const isActive = (path: string) => location.pathname === path;
-  const isProjectsActive = projectsMenuItems.some(item => location.pathname === item.path);
+  const isProjectsActive = projectsMenuItems.some(
+    (item) => location.pathname === item.path,
+  );
 
   return (
     <AppBar
@@ -141,7 +146,10 @@ export default function Navbar() {
           <Divider
             orientation="vertical"
             flexItem
-            sx={{ bgcolor: "rgba(255,255,255,0.3)", display: { xs: "none", sm: "block" } }}
+            sx={{
+              bgcolor: "rgba(255,255,255,0.3)",
+              display: { xs: "none", sm: "block" },
+            }}
           />
           <Typography
             variant="h6"
@@ -187,10 +195,16 @@ export default function Navbar() {
           <Button
             color="inherit"
             startIcon={<Assignment />}
-            endIcon={<KeyboardArrowDown sx={{
-              transform: Boolean(projectsAnchorEl) ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 0.2s'
-            }} />}
+            endIcon={
+              <KeyboardArrowDown
+                sx={{
+                  transform: Boolean(projectsAnchorEl)
+                    ? "rotate(180deg)"
+                    : "rotate(0deg)",
+                  transition: "transform 0.2s",
+                }}
+              />
+            }
             onClick={handleProjectsMenuOpen}
             sx={{
               display: { xs: "none", md: "flex" },
@@ -227,26 +241,26 @@ export default function Navbar() {
                 mt: 1.5,
                 borderRadius: 3,
                 minWidth: 200,
-                boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
-                border: '1px solid rgba(99, 102, 241, 0.1)',
-                overflow: 'visible',
-                '&:before': {
+                boxShadow: "0 10px 40px rgba(0,0,0,0.15)",
+                border: "1px solid rgba(99, 102, 241, 0.1)",
+                overflow: "visible",
+                "&:before": {
                   content: '""',
-                  display: 'block',
-                  position: 'absolute',
+                  display: "block",
+                  position: "absolute",
                   top: 0,
                   left: 24,
                   width: 12,
                   height: 12,
-                  bgcolor: 'background.paper',
-                  transform: 'translateY(-50%) rotate(45deg)',
-                  borderLeft: '1px solid rgba(99, 102, 241, 0.1)',
-                  borderTop: '1px solid rgba(99, 102, 241, 0.1)',
+                  bgcolor: "background.paper",
+                  transform: "translateY(-50%) rotate(45deg)",
+                  borderLeft: "1px solid rgba(99, 102, 241, 0.1)",
+                  borderTop: "1px solid rgba(99, 102, 241, 0.1)",
                 },
               },
             }}
-            transformOrigin={{ horizontal: 'left', vertical: 'top' }}
-            anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
+            transformOrigin={{ horizontal: "left", vertical: "top" }}
+            anchorOrigin={{ horizontal: "left", vertical: "bottom" }}
           >
             {projectsMenuItems.map((item, index) => (
               <MenuItem
@@ -263,21 +277,23 @@ export default function Navbar() {
                   my: index === 0 ? 1 : 0.5,
                   mb: index === projectsMenuItems.length - 1 ? 1 : 0.5,
                   backgroundColor: isActive(item.path)
-                    ? alpha('#6366f1', 0.1)
-                    : 'transparent',
-                  color: isActive(item.path) ? '#6366f1' : 'inherit',
+                    ? alpha("#6366f1", 0.1)
+                    : "transparent",
+                  color: isActive(item.path) ? "#6366f1" : "inherit",
                   fontWeight: isActive(item.path) ? 600 : 500,
-                  transition: 'all 0.2s',
-                  '&:hover': {
-                    backgroundColor: alpha('#6366f1', 0.08),
-                    transform: 'translateX(4px)',
+                  transition: "all 0.2s",
+                  "&:hover": {
+                    backgroundColor: alpha("#6366f1", 0.08),
+                    transform: "translateX(4px)",
                   },
                 }}
               >
-                <ListItemIcon sx={{
-                  color: isActive(item.path) ? '#6366f1' : 'inherit',
-                  minWidth: 36
-                }}>
+                <ListItemIcon
+                  sx={{
+                    color: isActive(item.path) ? "#6366f1" : "inherit",
+                    minWidth: 36,
+                  }}
+                >
                   {item.icon}
                 </ListItemIcon>
                 {item.label}
@@ -437,13 +453,24 @@ export default function Navbar() {
         }}
       >
         <Box sx={{ p: 2 }}>
-          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 2,
+            }}
+          >
             <img
               src="/logo_branca_sem_slogan.png"
               alt="Daher Lab"
               style={{ height: "36px" }}
             />
-            <IconButton color="inherit" onClick={handleDrawerToggle} sx={{ color: "white" }}>
+            <IconButton
+              color="inherit"
+              onClick={handleDrawerToggle}
+              sx={{ color: "white" }}
+            >
               <Close />
             </IconButton>
           </Box>
@@ -472,7 +499,9 @@ export default function Navbar() {
                 </ListItemIcon>
                 <ListItemText
                   primary="Painel"
-                  primaryTypographyProps={{ fontWeight: isActive("/dashboard") ? 700 : 500 }}
+                  primaryTypographyProps={{
+                    fontWeight: isActive("/dashboard") ? 700 : 500,
+                  }}
                 />
               </ListItemButton>
             </ListItem>
@@ -497,9 +526,15 @@ export default function Navbar() {
                 </ListItemIcon>
                 <ListItemText
                   primary="Projetos"
-                  primaryTypographyProps={{ fontWeight: isProjectsActive ? 700 : 500 }}
+                  primaryTypographyProps={{
+                    fontWeight: isProjectsActive ? 700 : 500,
+                  }}
                 />
-                {mobileProjectsOpen ? <ExpandLess sx={{ color: 'white' }} /> : <ExpandMore sx={{ color: 'white' }} />}
+                {mobileProjectsOpen ? (
+                  <ExpandLess sx={{ color: "white" }} />
+                ) : (
+                  <ExpandMore sx={{ color: "white" }} />
+                )}
               </ListItemButton>
             </ListItem>
             <Collapse in={mobileProjectsOpen} timeout="auto" unmountOnExit>
@@ -529,7 +564,7 @@ export default function Navbar() {
                         primary={item.label}
                         primaryTypographyProps={{
                           fontWeight: isActive(item.path) ? 700 : 500,
-                          fontSize: '0.9rem'
+                          fontSize: "0.9rem",
                         }}
                       />
                     </ListItemButton>
@@ -562,7 +597,9 @@ export default function Navbar() {
                   </ListItemIcon>
                   <ListItemText
                     primary={item.label}
-                    primaryTypographyProps={{ fontWeight: isActive(item.path) ? 700 : 500 }}
+                    primaryTypographyProps={{
+                      fontWeight: isActive(item.path) ? 700 : 500,
+                    }}
                   />
                 </ListItemButton>
               </ListItem>
@@ -573,7 +610,10 @@ export default function Navbar() {
             <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.7)" }}>
               Conectado como
             </Typography>
-            <Typography variant="subtitle2" sx={{ color: "white", fontWeight: 600 }}>
+            <Typography
+              variant="subtitle2"
+              sx={{ color: "white", fontWeight: 600 }}
+            >
               {user?.user_metadata?.full_name || user?.email}
             </Typography>
           </Box>

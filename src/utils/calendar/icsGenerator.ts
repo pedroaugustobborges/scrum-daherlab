@@ -45,11 +45,12 @@ export function generateICSContent(
 
 /**
  * Generate VEVENT lines for a single event
+ * Uses TRANSP:TRANSPARENT so events appear on calendar but don't block time (show as "free")
  */
 function generateEventLines(event: ExportableEvent): string[] {
   const now = new Date()
   const uid = `${event.id}@scrumdashboard.app`
-  const dtstamp = formatICSDate(now)
+  const dtstamp = formatICSDateTime(now)
   const dtstart = formatICSDate(event.date)
   const dtend = event.endDate ? formatICSDate(event.endDate) : formatICSDate(addDays(event.date, 1))
 
@@ -67,6 +68,8 @@ function generateEventLines(event: ExportableEvent): string[] {
     `DTSTART;VALUE=DATE:${dtstart}`,
     `DTEND;VALUE=DATE:${dtend}`,
     `SUMMARY:${escapeICSText(event.title)}`,
+    'TRANSP:TRANSPARENT', // Show as "free" - doesn't block time on calendar
+    'X-MICROSOFT-CDO-BUSYSTATUS:FREE', // Outlook-specific: mark as free
   ]
 
   if (descriptionParts.length > 0) {
@@ -87,6 +90,19 @@ function generateEventLines(event: ExportableEvent): string[] {
   lines.push('END:VEVENT')
 
   return lines
+}
+
+/**
+ * Format datetime for ICS DTSTAMP (YYYYMMDDTHHMMSSZ)
+ */
+function formatICSDateTime(date: Date): string {
+  const year = date.getUTCFullYear()
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0')
+  const day = String(date.getUTCDate()).padStart(2, '0')
+  const hours = String(date.getUTCHours()).padStart(2, '0')
+  const minutes = String(date.getUTCMinutes()).padStart(2, '0')
+  const seconds = String(date.getUTCSeconds()).padStart(2, '0')
+  return `${year}${month}${day}T${hours}${minutes}${seconds}Z`
 }
 
 /**

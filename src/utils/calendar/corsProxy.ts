@@ -1,57 +1,121 @@
 /**
  * CORS Proxy utility for fetching external ICS calendar URLs
  *
- * External calendar URLs (Google, Outlook) typically block cross-origin requests.
- * This utility uses public CORS proxies with a fallback chain for reliability.
+ * Uses Supabase Edge Function as primary proxy (most reliable),
+ * with public CORS proxies as fallback.
  */
 
-const CORS_PROXIES = [
-  'https://api.allorigins.win/raw?url=',
-  'https://corsproxy.io/?',
-  'https://api.codetabs.com/v1/proxy?quest=',
+// Get Supabase URL from environment
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || ''
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+
+interface ProxyConfig {
+  buildUrl: (targetUrl: string) => string
+  name: string
+}
+
+const FALLBACK_PROXIES: ProxyConfig[] = [
+  {
+    name: 'allorigins',
+    buildUrl: (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  },
+  {
+    name: 'corsproxy.io',
+    buildUrl: (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  },
+  {
+    name: 'thingproxy',
+    buildUrl: (url) => `https://thingproxy.freeboard.io/fetch/${url}`,
+  },
 ]
+
+/**
+ * Fetch ICS content using Supabase Edge Function (primary method)
+ */
+async function fetchWithEdgeFunction(url: string): Promise<string | null> {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    console.log('[Calendar Sync] Supabase not configured, skipping edge function')
+    return null
+  }
+
+  try {
+    console.log('[Calendar Sync] Trying Supabase Edge Function...')
+
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/fetch-ics-proxy`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify({ url }),
+    })
+
+    if (response.ok) {
+      const data = await response.json()
+      if (data.content) {
+        console.log('[Calendar Sync] Success with Edge Function')
+        return data.content
+      }
+    } else {
+      const error = await response.json().catch(() => ({}))
+      console.log('[Calendar Sync] Edge Function failed:', error.error || response.status)
+    }
+  } catch (e) {
+    console.log('[Calendar Sync] Edge Function error:', e instanceof Error ? e.message : 'Unknown')
+  }
+
+  return null
+}
 
 /**
  * Fetch content through CORS proxy with fallback chain
  */
 export async function fetchWithCorsProxy(url: string): Promise<string> {
-  // First, try direct fetch (some calendars support CORS)
-  try {
-    const directResponse = await fetch(url, {
-      headers: {
-        'Accept': 'text/calendar, text/plain, */*',
-      },
-    })
-    if (directResponse.ok) {
-      return await directResponse.text()
-    }
-  } catch {
-    // Direct fetch failed, try proxies
-  }
+  const errors: string[] = []
 
-  // Try each proxy in sequence
-  for (const proxy of CORS_PROXIES) {
+  // 1. Try Supabase Edge Function first (most reliable)
+  const edgeFunctionResult = await fetchWithEdgeFunction(url)
+  if (edgeFunctionResult) {
+    return edgeFunctionResult
+  }
+  errors.push('Edge Function: Failed or not available')
+
+  // 2. Add cache-buster for fallback proxies
+  const separator = url.includes('?') ? '&' : '?'
+  const urlWithCacheBuster = `${url}${separator}_cb=${Date.now()}`
+
+  // 3. Try fallback public proxies
+  for (const proxy of FALLBACK_PROXIES) {
     try {
-      const proxyUrl = proxy + encodeURIComponent(url)
+      const proxyUrl = proxy.buildUrl(urlWithCacheBuster)
+      console.log(`[Calendar Sync] Trying fallback proxy: ${proxy.name}`)
+
       const response = await fetch(proxyUrl, {
         headers: {
           'Accept': 'text/calendar, text/plain, */*',
         },
+        cache: 'no-store',
       })
 
       if (response.ok) {
         const content = await response.text()
         // Validate that it looks like ICS content
         if (content.includes('BEGIN:VCALENDAR') || content.includes('BEGIN:VEVENT')) {
+          console.log(`[Calendar Sync] Success with fallback proxy: ${proxy.name}`)
           return content
+        } else {
+          errors.push(`${proxy.name}: Invalid ICS content`)
         }
+      } else {
+        errors.push(`${proxy.name}: HTTP ${response.status}`)
       }
-    } catch {
-      // This proxy failed, try next
+    } catch (e) {
+      errors.push(`${proxy.name}: ${e instanceof Error ? e.message : 'Unknown error'}`)
       continue
     }
   }
 
+  console.error('[Calendar Sync] All methods failed:', errors)
   throw new Error('Falha ao buscar calendário. Verifique se a URL é pública e acessível.')
 }
 

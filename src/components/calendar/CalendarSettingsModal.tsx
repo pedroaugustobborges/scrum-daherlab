@@ -18,6 +18,8 @@ import {
   CircularProgress,
   Alert,
   Tooltip,
+  TextField,
+  InputAdornment,
 } from '@mui/material'
 import {
   Close,
@@ -28,6 +30,8 @@ import {
   Google,
   CalendarMonth,
   CloudSync,
+  ContentCopy,
+  Link as LinkIcon,
 } from '@mui/icons-material'
 import { useAuth } from '@/contexts/AuthContext'
 import {
@@ -35,9 +39,14 @@ import {
   useUpdateCalendarSubscription,
   useDeleteCalendarSubscription,
   useRefreshCalendarSubscription,
+  useCalendarFeedTokens,
+  useCreateCalendarFeedToken,
+  useDeleteCalendarFeedToken,
+  getCalendarFeedUrl,
 } from '@/hooks/useCalendarSubscriptions'
 import { CalendarSubscription } from '@/types/calendar'
 import AddCalendarModal from './AddCalendarModal'
+import toast from 'react-hot-toast'
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -72,6 +81,29 @@ export default function CalendarSettingsModal({
   const updateSubscription = useUpdateCalendarSubscription()
   const deleteSubscription = useDeleteCalendarSubscription()
   const refreshSubscription = useRefreshCalendarSubscription()
+
+  // Calendar feed tokens
+  const { data: feedTokens = [], isLoading: isLoadingTokens } = useCalendarFeedTokens(user?.id)
+  const createFeedToken = useCreateCalendarFeedToken()
+  const deleteFeedToken = useDeleteCalendarFeedToken()
+
+  const handleCreateFeedToken = () => {
+    if (user?.id) {
+      createFeedToken.mutate({ userId: user.id })
+    }
+  }
+
+  const handleDeleteFeedToken = (tokenId: string) => {
+    if (confirm('Deseja remover este link? Quem estiver usando precisará de um novo link.')) {
+      deleteFeedToken.mutate({ id: tokenId, userId: user?.id || '' })
+    }
+  }
+
+  const handleCopyFeedUrl = (token: string) => {
+    const url = getCalendarFeedUrl(token)
+    navigator.clipboard.writeText(url)
+    toast.success('Link copiado!')
+  }
 
   const handleToggleEnabled = (subscription: CalendarSubscription) => {
     updateSubscription.mutate({
@@ -160,6 +192,7 @@ export default function CalendarSettingsModal({
           >
             <Tab label="Importar" />
             <Tab label="Exportar" />
+            <Tab label="Compartilhar" />
           </Tabs>
 
           <Box sx={{ p: 2 }}>
@@ -337,6 +370,127 @@ export default function CalendarSettingsModal({
                 >
                   Baixar Arquivo ICS
                 </Button>
+              </Box>
+            </TabPanel>
+
+            <TabPanel value={tabValue} index={2}>
+              {/* Share Tab - Live ICS Feed */}
+              <Box sx={{ textAlign: 'center', py: 2 }}>
+                <Box
+                  sx={{
+                    width: 80,
+                    height: 80,
+                    borderRadius: 3,
+                    background: 'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mx: 'auto',
+                    mb: 3,
+                  }}
+                >
+                  <LinkIcon sx={{ color: 'white', fontSize: 36 }} />
+                </Box>
+
+                <Typography variant="h6" fontWeight={700} gutterBottom>
+                  Link de Assinatura
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 3, maxWidth: 400, mx: 'auto' }}>
+                  Gere um link para seu calendário que se atualiza automaticamente. O Outlook e Google Calendar
+                  buscarão novos eventos periodicamente.
+                </Typography>
+
+                {isLoadingTokens ? (
+                  <CircularProgress size={32} />
+                ) : feedTokens.length === 0 ? (
+                  <Button
+                    variant="contained"
+                    size="large"
+                    startIcon={<Add />}
+                    onClick={handleCreateFeedToken}
+                    disabled={createFeedToken.isPending}
+                    sx={{
+                      borderRadius: 2,
+                      px: 4,
+                      background: 'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)',
+                    }}
+                  >
+                    {createFeedToken.isPending ? 'Gerando...' : 'Gerar Link do Calendário'}
+                  </Button>
+                ) : (
+                  <Box sx={{ textAlign: 'left' }}>
+                    {feedTokens.map((token) => (
+                      <Box
+                        key={token.id}
+                        sx={{
+                          p: 2,
+                          bgcolor: 'rgba(16, 185, 129, 0.05)',
+                          borderRadius: 2,
+                          border: '1px solid rgba(16, 185, 129, 0.2)',
+                          mb: 2,
+                        }}
+                      >
+                        <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+                          {token.name}
+                        </Typography>
+                        <TextField
+                          fullWidth
+                          size="small"
+                          value={getCalendarFeedUrl(token.token)}
+                          InputProps={{
+                            readOnly: true,
+                            sx: { fontSize: '0.75rem', fontFamily: 'monospace' },
+                            endAdornment: (
+                              <InputAdornment position="end">
+                                <Tooltip title="Copiar link">
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => handleCopyFeedUrl(token.token)}
+                                  >
+                                    <ContentCopy sx={{ fontSize: 18 }} />
+                                  </IconButton>
+                                </Tooltip>
+                              </InputAdornment>
+                            ),
+                          }}
+                          sx={{ mb: 1 }}
+                        />
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Typography variant="caption" color="text.secondary">
+                            Criado em: {new Date(token.created_at).toLocaleDateString('pt-BR')}
+                          </Typography>
+                          <Tooltip title="Remover link">
+                            <IconButton
+                              size="small"
+                              onClick={() => handleDeleteFeedToken(token.id)}
+                              sx={{ color: 'error.main' }}
+                            >
+                              <Delete sx={{ fontSize: 18 }} />
+                            </IconButton>
+                          </Tooltip>
+                        </Box>
+                      </Box>
+                    ))}
+                  </Box>
+                )}
+
+                {/* Help text */}
+                <Box sx={{ mt: 3, p: 2, bgcolor: 'rgba(16, 185, 129, 0.05)', borderRadius: 2, textAlign: 'left' }}>
+                  <Typography variant="subtitle2" fontWeight={700} gutterBottom>
+                    Como usar:
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                    <strong>Outlook:</strong> Arquivo {'>'} Configurações de Conta {'>'} Calendários da Internet{' '}
+                    {'>'} Novo {'>'} Cole o link
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                    <strong>Google Calendar:</strong> Outros calendários {'+'} {'>'} De URL {'>'} Cole o link
+                  </Typography>
+                  <Alert severity="info" sx={{ mt: 2, borderRadius: 2 }}>
+                    O calendário externo buscará atualizações automaticamente (pode levar até 24h no Google Calendar
+                    e algumas horas no Outlook).
+                  </Alert>
+                </Box>
               </Box>
             </TabPanel>
           </Box>

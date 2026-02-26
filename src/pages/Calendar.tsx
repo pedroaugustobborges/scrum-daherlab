@@ -14,6 +14,7 @@ import {
   TextField,
   InputAdornment,
   Button,
+  CircularProgress,
 } from '@mui/material'
 import {
   ChevronLeft,
@@ -30,6 +31,7 @@ import {
   CloudSync,
   PlayArrow,
   Stop,
+  Sync,
 } from '@mui/icons-material'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
@@ -37,7 +39,11 @@ import { useAuth } from '@/contexts/AuthContext'
 import Navbar from '@/components/Navbar'
 import StoryDetailsModal from '@/components/StoryDetailsModal'
 import { CalendarSettingsModal } from '@/components/calendar'
-import { useExternalCalendarEvents } from '@/hooks/useCalendarSubscriptions'
+import {
+  useExternalCalendarEvents,
+  useCalendarSubscriptions,
+  useRefreshCalendarSubscription,
+} from '@/hooks/useCalendarSubscriptions'
 import { exportCalendarToICS } from '@/utils/calendar/icsGenerator'
 
 interface CalendarEvent {
@@ -86,6 +92,26 @@ export default function Calendar() {
   const [selectedStoryId, setSelectedStoryId] = useState<string | null>(null)
   const [showMyTasks, setShowMyTasks] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [isSyncing, setIsSyncing] = useState(false)
+
+  // Calendar subscriptions for sync
+  const { data: subscriptions = [] } = useCalendarSubscriptions(user?.id)
+  const refreshSubscription = useRefreshCalendarSubscription()
+
+  // Sync all external calendars
+  const handleSyncAll = async () => {
+    const enabledSubscriptions = subscriptions.filter((s) => s.is_enabled)
+    if (enabledSubscriptions.length === 0) return
+
+    setIsSyncing(true)
+    try {
+      for (const sub of enabledSubscriptions) {
+        await refreshSubscription.mutateAsync({ subscription: sub })
+      }
+    } finally {
+      setIsSyncing(false)
+    }
+  }
 
   // Get week dates
   const weekDates = useMemo(() => {
@@ -496,19 +522,77 @@ export default function Calendar() {
   }
 
   const handleExport = () => {
-    // Export only app events (not external), excluding duplicate start/end events
-    const exportableEvents = filteredEvents
-      .filter((e) => e.type !== 'external' && !e.subType) // Only export main events, not start/end markers
-      .map((e) => ({
-        id: e.id,
-        title: e.title,
-        date: e.date,
-        description: '',
-        projectName: e.projectName,
-        assignee: e.assignee,
-        status: e.status,
-        type: e.type,
-      }))
+    const exportableEvents: Array<{
+      id: string
+      title: string
+      date: Date
+      endDate?: Date
+      description: string
+      projectName?: string
+      assignee?: string
+      status?: string
+      type: string
+    }> = []
+
+    // Export tasks (filter by project if selected)
+    tasks.forEach((task: any) => {
+      if (selectedProject !== 'all' && task.project_id !== selectedProject) return
+
+      const project = task.projects
+      const startDate = task.start_date ? new Date(task.start_date) : null
+      const endDate = task.end_date ? new Date(task.end_date) : null
+      const dueDate = task.due_date ? new Date(task.due_date) : null
+
+      // Export task with date range if available
+      if (startDate || endDate) {
+        exportableEvents.push({
+          id: task.id,
+          title: task.title,
+          date: startDate || endDate!,
+          endDate: endDate || startDate!,
+          description: '',
+          projectName: project?.name,
+          assignee: task.assigned_to_profile?.full_name,
+          status: task.status,
+          type: 'task',
+        })
+      }
+
+      // Export due date as deadline
+      if (dueDate) {
+        exportableEvents.push({
+          id: `deadline-${task.id}`,
+          title: `Prazo: ${task.title}`,
+          date: dueDate,
+          description: '',
+          projectName: project?.name,
+          status: task.status,
+          type: 'deadline',
+        })
+      }
+    })
+
+    // Export sprints (filter by project if selected)
+    sprints.forEach((sprint: any) => {
+      if (selectedProject !== 'all' && sprint.project_id !== selectedProject) return
+
+      const project = sprint.projects
+      const startDate = sprint.start_date ? new Date(sprint.start_date) : null
+      const endDate = sprint.end_date ? new Date(sprint.end_date) : null
+
+      if (startDate) {
+        exportableEvents.push({
+          id: `sprint-${sprint.id}`,
+          title: sprint.name,
+          date: startDate,
+          endDate: endDate || startDate,
+          description: '',
+          projectName: project?.name,
+          status: sprint.status,
+          type: 'sprint',
+        })
+      }
+    })
 
     exportCalendarToICS(
       exportableEvents,
@@ -552,6 +636,20 @@ export default function Calendar() {
 
             {/* Action Buttons */}
             <Box sx={{ display: 'flex', gap: 1 }}>
+              {subscriptions.filter((s) => s.is_enabled).length > 0 && (
+                <Tooltip title="Sincronizar calendários externos">
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={isSyncing ? <CircularProgress size={16} /> : <Sync />}
+                    onClick={handleSyncAll}
+                    disabled={isSyncing}
+                    sx={{ borderRadius: 2 }}
+                  >
+                    {isSyncing ? 'Sincronizando...' : 'Sincronizar'}
+                  </Button>
+                </Tooltip>
+              )}
               <Tooltip title="Exportar para ICS">
                 <Button
                   variant="outlined"

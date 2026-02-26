@@ -1,0 +1,2 @@
+# Disable JWT verification - called from browser with anon key
+verify_jwt = false

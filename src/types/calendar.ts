@@ -67,3 +67,14 @@ export const CALENDAR_COLORS = [
   '#ec4899', // Pink
   '#84cc16', // Lime
 ]
+
+// Calendar feed token for live ICS subscription
+export interface CalendarFeedToken {
+  id: string
+  user_id: string
+  token: string
+  name: string
+  is_active: boolean
+  created_at: string
+  last_accessed_at: string | null
+}

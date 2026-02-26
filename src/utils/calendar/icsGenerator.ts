@@ -52,7 +52,10 @@ function generateEventLines(event: ExportableEvent): string[] {
   const uid = `${event.id}@scrumdashboard.app`
   const dtstamp = formatICSDateTime(now)
   const dtstart = formatICSDate(event.date)
-  const dtend = event.endDate ? formatICSDate(event.endDate) : formatICSDate(addDays(event.date, 1))
+  // ICS DTEND for all-day events is exclusive (day after the last day)
+  const dtend = event.endDate
+    ? formatICSDate(addDays(event.endDate, 1))
+    : formatICSDate(addDays(event.date, 1))
 
   // Build description with metadata
   const descriptionParts: string[] = []

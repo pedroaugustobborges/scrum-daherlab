@@ -27,7 +27,6 @@ import {
   Folder,
   CalendarMonth,
   Settings,
-  Download,
   CloudSync,
   PlayArrow,
   Stop,
@@ -44,7 +43,6 @@ import {
   useCalendarSubscriptions,
   useRefreshCalendarSubscription,
 } from '@/hooks/useCalendarSubscriptions'
-import { exportCalendarToICS } from '@/utils/calendar/icsGenerator'
 
 interface CalendarEvent {
   id: string
@@ -521,86 +519,6 @@ export default function Calendar() {
     // External events and sprints don't have a detail modal
   }
 
-  const handleExport = () => {
-    const exportableEvents: Array<{
-      id: string
-      title: string
-      date: Date
-      endDate?: Date
-      description: string
-      projectName?: string
-      assignee?: string
-      status?: string
-      type: string
-    }> = []
-
-    // Export tasks (filter by project if selected)
-    tasks.forEach((task: any) => {
-      if (selectedProject !== 'all' && task.project_id !== selectedProject) return
-
-      const project = task.projects
-      const startDate = task.start_date ? new Date(task.start_date) : null
-      const endDate = task.end_date ? new Date(task.end_date) : null
-      const dueDate = task.due_date ? new Date(task.due_date) : null
-
-      // Export task with date range if available
-      if (startDate || endDate) {
-        exportableEvents.push({
-          id: task.id,
-          title: task.title,
-          date: startDate || endDate!,
-          endDate: endDate || startDate!,
-          description: '',
-          projectName: project?.name,
-          assignee: task.assigned_to_profile?.full_name,
-          status: task.status,
-          type: 'task',
-        })
-      }
-
-      // Export due date as deadline
-      if (dueDate) {
-        exportableEvents.push({
-          id: `deadline-${task.id}`,
-          title: `Prazo: ${task.title}`,
-          date: dueDate,
-          description: '',
-          projectName: project?.name,
-          status: task.status,
-          type: 'deadline',
-        })
-      }
-    })
-
-    // Export sprints (filter by project if selected)
-    sprints.forEach((sprint: any) => {
-      if (selectedProject !== 'all' && sprint.project_id !== selectedProject) return
-
-      const project = sprint.projects
-      const startDate = sprint.start_date ? new Date(sprint.start_date) : null
-      const endDate = sprint.end_date ? new Date(sprint.end_date) : null
-
-      if (startDate) {
-        exportableEvents.push({
-          id: `sprint-${sprint.id}`,
-          title: sprint.name,
-          date: startDate,
-          endDate: endDate || startDate,
-          description: '',
-          projectName: project?.name,
-          status: sprint.status,
-          type: 'sprint',
-        })
-      }
-    })
-
-    exportCalendarToICS(
-      exportableEvents,
-      `scrum-dashboard-${weekStart.toISOString().split('T')[0]}`,
-      'Scrum Dashboard - Calendário'
-    )
-  }
-
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
       <Navbar />
@@ -650,17 +568,6 @@ export default function Calendar() {
                   </Button>
                 </Tooltip>
               )}
-              <Tooltip title="Exportar para ICS">
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<Download />}
-                  onClick={handleExport}
-                  sx={{ borderRadius: 2 }}
-                >
-                  Exportar
-                </Button>
-              </Tooltip>
               <Tooltip title="Configurações">
                 <IconButton
                   onClick={() => setSettingsOpen(true)}
@@ -1088,7 +995,6 @@ export default function Calendar() {
       <CalendarSettingsModal
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
-        onExport={handleExport}
       />
     </Box>
   )

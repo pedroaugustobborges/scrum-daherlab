@@ -20,7 +20,6 @@ import {
   Assignment,
   SpaceDashboard,
   Settings,
-  Download,
   CloudSync,
   PlayArrow,
   Stop,
@@ -32,7 +31,6 @@ import { useProjectContext } from '@/pages/ProjectDetail'
 import StoryDetailsModal from '@/components/StoryDetailsModal'
 import { CalendarSettingsModal } from '@/components/calendar'
 import { useExternalCalendarEvents } from '@/hooks/useCalendarSubscriptions'
-import { exportCalendarToICS } from '@/utils/calendar/icsGenerator'
 
 interface CalendarEvent {
   id: string
@@ -429,27 +427,6 @@ export default function ProjectCalendarView() {
     }
   }
 
-  const handleExport = () => {
-    const exportableEvents = filteredEvents
-      .filter((e) => e.type !== 'external' && !e.subType)
-      .map((e) => ({
-        id: e.id,
-        title: e.title,
-        date: e.date,
-        description: '',
-        projectName: project.name,
-        assignee: e.assignee,
-        status: e.status,
-        type: e.type,
-      }))
-
-    exportCalendarToICS(
-      exportableEvents,
-      `${project.name.toLowerCase().replace(/\s+/g, '-')}-${weekStart.toISOString().split('T')[0]}`,
-      `${project.name} - Calendário`
-    )
-  }
-
   return (
     <Box>
       {/* Header with filters */}
@@ -522,18 +499,6 @@ export default function ProjectCalendarView() {
               }}
               sx={{ width: 180 }}
             />
-
-            <Tooltip title="Exportar para ICS">
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={<Download />}
-                onClick={handleExport}
-                sx={{ borderRadius: 2 }}
-              >
-                Exportar
-              </Button>
-            </Tooltip>
 
             <Tooltip title="Configurações">
               <IconButton
@@ -854,7 +819,6 @@ export default function ProjectCalendarView() {
       <CalendarSettingsModal
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
-        onExport={handleExport}
       />
     </Box>
   )

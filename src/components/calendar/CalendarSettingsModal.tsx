@@ -26,7 +26,6 @@ import {
   Add,
   Refresh,
   Delete,
-  Download,
   Google,
   CalendarMonth,
   CloudSync,
@@ -65,13 +64,11 @@ function TabPanel({ children, value, index }: TabPanelProps) {
 interface CalendarSettingsModalProps {
   open: boolean
   onClose: () => void
-  onExport: () => void
 }
 
 export default function CalendarSettingsModal({
   open,
   onClose,
-  onExport,
 }: CalendarSettingsModalProps) {
   const { user } = useAuth()
   const [tabValue, setTabValue] = useState(0)
@@ -191,7 +188,6 @@ export default function CalendarSettingsModal({
             }}
           >
             <Tab label="Importar" />
-            <Tab label="Exportar" />
             <Tab label="Compartilhar" />
           </Tabs>
 
@@ -328,52 +324,6 @@ export default function CalendarSettingsModal({
             </TabPanel>
 
             <TabPanel value={tabValue} index={1}>
-              {/* Export Tab */}
-              <Box sx={{ textAlign: 'center', py: 4 }}>
-                <Box
-                  sx={{
-                    width: 80,
-                    height: 80,
-                    borderRadius: 3,
-                    background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    mx: 'auto',
-                    mb: 3,
-                  }}
-                >
-                  <Download sx={{ color: 'white', fontSize: 36 }} />
-                </Box>
-
-                <Typography variant="h6" fontWeight={700} gutterBottom>
-                  Exportar para ICS
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 3, maxWidth: 400, mx: 'auto' }}>
-                  Baixe um arquivo .ics com todas as suas tarefas, sprints e prazos para importar no Google
-                  Calendar, Outlook ou outros aplicativos de calendário.
-                </Typography>
-
-                <Button
-                  variant="contained"
-                  size="large"
-                  startIcon={<Download />}
-                  onClick={() => {
-                    onExport()
-                    onClose()
-                  }}
-                  sx={{
-                    borderRadius: 2,
-                    px: 4,
-                    background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                  }}
-                >
-                  Baixar Arquivo ICS
-                </Button>
-              </Box>
-            </TabPanel>
-
-            <TabPanel value={tabValue} index={2}>
               {/* Share Tab - Live ICS Feed */}
               <Box sx={{ textAlign: 'center', py: 2 }}>
                 <Box

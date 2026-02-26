@@ -396,7 +396,7 @@ export function useDeleteCalendarFeedToken() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ id, userId }: { id: string; userId: string }) => {
+    mutationFn: async ({ id }: { id: string; userId: string }) => {
       const { error } = await supabase
         .from('calendar_feed_tokens')
         .delete()

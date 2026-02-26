@@ -55,7 +55,6 @@ interface CalendarEvent {
   uid: string;
   summary: string;
   dtstart: Date;
-  dtend?: Date;
   description?: string;
   categories?: string;
 }
@@ -76,10 +75,8 @@ function generateICSContent(events: CalendarEvent[], calendarName: string): stri
   for (const event of events) {
     const dtstamp = formatICSDateTime(now);
     const dtstart = formatICSDate(event.dtstart);
-    // ICS DTEND for all-day events is exclusive (day after the last day)
-    const dtend = event.dtend
-      ? formatICSDate(addDays(event.dtend, 1))
-      : formatICSDate(addDays(event.dtstart, 1));
+    // ICS DTEND for all-day events is exclusive (day after the event day)
+    const dtend = formatICSDate(addDays(event.dtstart, 1));
 
     lines.push("BEGIN:VEVENT");
     lines.push(`UID:${event.uid}`);
@@ -191,6 +188,13 @@ Deno.serve(async (req) => {
       throw new Error("Failed to fetch sprints");
     }
 
+    // Helper to check if two dates are the same day
+    const isSameDay = (d1: Date, d2: Date): boolean => {
+      return d1.getFullYear() === d2.getFullYear() &&
+             d1.getMonth() === d2.getMonth() &&
+             d1.getDate() === d2.getDate();
+    };
+
     // Build calendar events
     const calendarEvents: CalendarEvent[] = [];
 
@@ -202,16 +206,51 @@ Deno.serve(async (req) => {
       if (task.status) descriptionParts.push(`Status: ${task.status}`);
       if (task.priority) descriptionParts.push(`Prioridade: ${task.priority}`);
 
-      // Task with date range
-      if (task.start_date || task.end_date) {
-        const startDate = task.start_date ? new Date(task.start_date) : new Date(task.end_date!);
-        const endDate = task.end_date ? new Date(task.end_date) : new Date(task.start_date!);
+      const startDate = task.start_date ? new Date(task.start_date) : null;
+      const endDate = task.end_date ? new Date(task.end_date) : null;
 
+      // Task with date range - create separate start/end events
+      if (startDate && endDate && !isSameDay(startDate, endDate)) {
+        // Different days - create start and end events
+        calendarEvents.push({
+          uid: `task-${task.id}-start@agiragil.app`,
+          summary: `Início: ${task.title}`,
+          dtstart: startDate,
+          description: descriptionParts.join("\\n"),
+          categories: "Tarefa",
+        });
+
+        calendarEvents.push({
+          uid: `task-${task.id}-end@agiragil.app`,
+          summary: `Término: ${task.title}`,
+          dtstart: endDate,
+          description: descriptionParts.join("\\n"),
+          categories: "Tarefa",
+        });
+      } else if (startDate && endDate && isSameDay(startDate, endDate)) {
+        // Same day - single event
         calendarEvents.push({
           uid: `task-${task.id}@agiragil.app`,
           summary: task.title,
           dtstart: startDate,
-          dtend: endDate,
+          description: descriptionParts.join("\\n"),
+          categories: "Tarefa",
+        });
+      } else if (startDate && !endDate) {
+        // Only start date
+        calendarEvents.push({
+          uid: `task-${task.id}-start@agiragil.app`,
+          summary: `Início: ${task.title}`,
+          dtstart: startDate,
+          description: descriptionParts.join("\\n"),
+          categories: "Tarefa",
+        });
+      } else if (!startDate && endDate) {
+        // Only end date
+        calendarEvents.push({
+          uid: `task-${task.id}-end@agiragil.app`,
+          summary: `Término: ${task.title}`,
+          dtstart: endDate,
           description: descriptionParts.join("\\n"),
           categories: "Tarefa",
         });
@@ -239,16 +278,35 @@ Deno.serve(async (req) => {
       if (sprint.status) descriptionParts.push(`Status: ${sprint.status}`);
 
       const startDate = new Date(sprint.start_date);
-      const endDate = sprint.end_date ? new Date(sprint.end_date) : startDate;
+      const endDate = sprint.end_date ? new Date(sprint.end_date) : null;
 
-      calendarEvents.push({
-        uid: `sprint-${sprint.id}@agiragil.app`,
-        summary: sprint.name,
-        dtstart: startDate,
-        dtend: endDate,
-        description: descriptionParts.join("\\n"),
-        categories: "Sprint",
-      });
+      if (endDate && !isSameDay(startDate, endDate)) {
+        // Different days - create start and end events
+        calendarEvents.push({
+          uid: `sprint-${sprint.id}-start@agiragil.app`,
+          summary: `Início: ${sprint.name}`,
+          dtstart: startDate,
+          description: descriptionParts.join("\\n"),
+          categories: "Sprint",
+        });
+
+        calendarEvents.push({
+          uid: `sprint-${sprint.id}-end@agiragil.app`,
+          summary: `Fim: ${sprint.name}`,
+          dtstart: endDate,
+          description: descriptionParts.join("\\n"),
+          categories: "Sprint",
+        });
+      } else {
+        // Same day or no end date - single event
+        calendarEvents.push({
+          uid: `sprint-${sprint.id}@agiragil.app`,
+          summary: sprint.name,
+          dtstart: startDate,
+          description: descriptionParts.join("\\n"),
+          categories: "Sprint",
+        });
+      }
     }
 
     // Generate ICS content

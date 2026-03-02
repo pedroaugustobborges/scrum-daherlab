@@ -290,6 +290,45 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
     const margin = 18
     let yPosition = margin
 
+    // Helper to render "agir ágil" text as image using Canvas with custom font
+    const renderAgirAgilAsImage = async (): Promise<string | null> => {
+      try {
+        // Ensure the font is loaded
+        await document.fonts.load("bold 48px 'Kozuka Gothic Pro'")
+
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')
+        if (!ctx) return null
+
+        const text = 'agir ágil'
+        const fontSize = 72
+
+        // Set font and measure text
+        ctx.font = `bold ${fontSize}px 'Kozuka Gothic Pro', sans-serif`
+        const metrics = ctx.measureText(text)
+
+        // Set canvas size with padding
+        const padding = 10
+        canvas.width = Math.ceil(metrics.width) + padding * 2
+        canvas.height = fontSize + padding * 2
+
+        // Clear and set font again (canvas reset clears font)
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        ctx.font = `bold ${fontSize}px 'Kozuka Gothic Pro', sans-serif`
+        ctx.fillStyle = 'white'
+        ctx.textBaseline = 'middle'
+        ctx.textAlign = 'center'
+
+        // Draw text
+        ctx.fillText(text, canvas.width / 2, canvas.height / 2)
+
+        return canvas.toDataURL('image/png')
+      } catch (error) {
+        console.warn('Could not render agir ágil as image:', error)
+        return null
+      }
+    }
+
     // Colors
     const primaryColor: [number, number, number] = [99, 102, 241] // #6366f1
     const secondaryColor: [number, number, number] = [139, 92, 246] // #8b5cf6
@@ -457,10 +496,21 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
     doc.setTextColor(255, 255, 255)
     const centerX = pageWidth / 2
 
-    // H1: Product name
-    doc.setFontSize(26)
+    // H1: Product name - renderizar com fonte customizada via Canvas
+    const agirAgilImage = await renderAgirAgilAsImage()
+    if (agirAgilImage) {
+      // Usar imagem renderizada com fonte customizada
+      const imgWidth = 45 // largura em mm
+      const imgHeight = 12 // altura em mm
+      const imgX = centerX - imgWidth / 2
+      doc.addImage(agirAgilImage, 'PNG', imgX, 10, imgWidth, imgHeight)
+    } else {
+      // Fallback para helvetica
+      doc.setFontSize(26)
+      doc.setFont('helvetica', 'bold')
+      doc.text('agir ágil', centerX, 18, { align: 'center' })
+    }
     doc.setFont('helvetica', 'bold')
-    doc.text('agir ágil', centerX, 18, { align: 'center' })
 
     // H2: Report type
     doc.setFontSize(14)

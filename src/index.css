@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Fonte customizada para "agir ágil" */
+@font-face {
+  font-family: 'Kozuka Gothic Pro';
+  src: url('/Kozuka Gothic Pro B.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-agir-agil {
+  font-family: 'Kozuka Gothic Pro', 'Inter', sans-serif;
+  font-weight: 700;
+}
+
 :root {
   font-family: 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.6;

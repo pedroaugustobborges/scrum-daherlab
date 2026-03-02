@@ -262,8 +262,10 @@ export default function Login() {
             component="h1"
             gutterBottom
             align="center"
+            className="font-agir-agil"
             sx={{
-              fontWeight: 800,
+              fontFamily: "'Kozuka Gothic Pro', 'Inter', sans-serif",
+              fontWeight: 700,
               background:
                 "linear-gradient(135deg, #06b6d4 0%, #6366f1 50%, #10b981 100%)",
               backgroundClip: "text",
@@ -272,8 +274,8 @@ export default function Login() {
               mb: 2,
               letterSpacing: "-0.02em",
               filter: "drop-shadow(0 2px 8px rgba(6, 182, 212, 0.3))",
-              lineHeight: 1.4, // Dá mais espaço vertical para a fonte
-              paddingBottom: "10px", // Garante que o corte do container não pegue a sombra/letra
+              lineHeight: 1.4,
+              paddingBottom: "10px",
             }}
           >
             agir ágil

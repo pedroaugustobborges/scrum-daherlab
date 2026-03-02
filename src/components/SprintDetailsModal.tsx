@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   Box,
   Typography,
@@ -21,6 +21,8 @@ import {
   ToggleButtonGroup,
   Tabs,
   Tab,
+  alpha,
+  Skeleton,
 } from '@mui/material'
 import {
   Add,
@@ -36,6 +38,9 @@ import {
   ViewList,
   EmojiEvents,
   Visibility,
+  AutoAwesome,
+  Refresh,
+  LightbulbOutlined,
 } from '@mui/icons-material'
 import toast from 'react-hot-toast'
 import Modal from './Modal'
@@ -58,6 +63,9 @@ interface SprintDetailsModalProps {
     team_id: string
     start_date: string
     end_date: string
+    goal?: string
+    status?: string
+    velocity?: number
   }
 }
 
@@ -108,12 +116,165 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
   const [selectedStoryId, setSelectedStoryId] = useState<string>('')
   const [viewMode, setViewMode] = useState<'list' | 'kanban'>('kanban')
   const [activeTab, setActiveTab] = useState(0)
+  const [aiTip, setAiTip] = useState<string>('')
+  const [aiTipLoading, setAiTipLoading] = useState(false)
+  const [aiTipError, setAiTipError] = useState(false)
+  const [sprintDetails, setSprintDetails] = useState<{
+    goal?: string
+    status?: string
+    velocity?: number
+  }>({ goal: sprint.goal, status: sprint.status, velocity: sprint.velocity })
+  const [averageVelocity, setAverageVelocity] = useState<number>(0)
 
   useEffect(() => {
     if (open) {
       fetchUserStories()
+      fetchSprintDetails()
+      fetchAverageVelocity()
     }
   }, [open, sprint.id])
+
+  // Generate AI tip when stories are loaded and sprint is not completed
+  useEffect(() => {
+    if (!loading && stories.length >= 0 && sprintDetails.status !== 'completed' && !aiTip && open) {
+      generateAiTip()
+    }
+  }, [loading, stories, sprintDetails.status, open])
+
+  const fetchSprintDetails = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('sprints')
+        .select('goal, status, velocity')
+        .eq('id', sprint.id)
+        .single()
+
+      if (error) throw error
+
+      if (data) {
+        setSprintDetails({
+          goal: data.goal,
+          status: data.status,
+          velocity: data.velocity,
+        })
+      }
+    } catch (error) {
+      console.error('Error fetching sprint details:', error)
+    }
+  }
+
+  const fetchAverageVelocity = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('sprints')
+        .select('velocity')
+        .eq('team_id', sprint.team_id)
+        .eq('status', 'completed')
+        .not('velocity', 'is', null)
+        .order('end_date', { ascending: false })
+        .limit(5)
+
+      if (error) throw error
+
+      if (data && data.length > 0) {
+        const avg = data.reduce((sum, s) => sum + (s.velocity || 0), 0) / data.length
+        setAverageVelocity(Math.round(avg))
+      }
+    } catch (error) {
+      console.error('Error fetching average velocity:', error)
+    }
+  }
+
+  const fetchPreviousSprintActions = async (): Promise<string> => {
+    try {
+      // Find the previous sprint
+      const { data: prevSprint, error: sprintError } = await supabase
+        .from('sprints')
+        .select('id')
+        .eq('team_id', sprint.team_id)
+        .lt('end_date', sprint.start_date)
+        .order('end_date', { ascending: false })
+        .limit(1)
+        .single()
+
+      if (sprintError || !prevSprint) return ''
+
+      // Find the retrospective
+      const { data: retro, error: retroError } = await supabase
+        .from('sprint_retrospectives')
+        .select('id')
+        .eq('sprint_id', prevSprint.id)
+        .single()
+
+      if (retroError || !retro) return ''
+
+      // Get action items
+      const { data: actions, error: actionsError } = await supabase
+        .from('retrospective_items')
+        .select('content')
+        .eq('retrospective_id', retro.id)
+        .eq('category', 'action_item')
+        .limit(3)
+
+      if (actionsError || !actions) return ''
+
+      return actions.map((a) => a.content).join('; ')
+    } catch (error) {
+      console.error('Error fetching previous sprint actions:', error)
+      return ''
+    }
+  }
+
+  const generateAiTip = useCallback(async () => {
+    if (sprintDetails.status === 'completed') return
+
+    setAiTipLoading(true)
+    setAiTipError(false)
+
+    try {
+      const completedTasks = stories.filter((s) => s.status === 'done').length
+      const blockedTasks = stories.filter((s) => s.status === 'blocked').length
+      const completedPoints = stories
+        .filter((s) => s.status === 'done')
+        .reduce((sum, s) => sum + (s.story_points || 0), 0)
+      const totalPoints = stories.reduce((sum, s) => sum + (s.story_points || 0), 0)
+
+      // Calculate days remaining
+      const endDate = new Date(sprint.end_date)
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const daysRemaining = Math.max(0, Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)))
+
+      // Fetch previous sprint actions
+      const previousSprintActions = await fetchPreviousSprintActions()
+
+      const response = await supabase.functions.invoke('generate-sprint-tip', {
+        body: {
+          sprintName: sprint.name,
+          sprintGoal: sprintDetails.goal || '',
+          totalTasks: stories.length,
+          completedTasks,
+          totalPoints,
+          completedPoints,
+          blockedTasks,
+          daysRemaining,
+          averageVelocity,
+          previousSprintActions,
+        },
+      })
+
+      if (response.error) throw response.error
+
+      if (response.data?.tip) {
+        setAiTip(response.data.tip)
+      }
+    } catch (error) {
+      console.error('Error generating AI tip:', error)
+      setAiTipError(true)
+    } finally {
+      setAiTipLoading(false)
+    }
+  }, [stories, sprint, sprintDetails, averageVelocity])
 
   const fetchUserStories = async () => {
     setLoading(true)
@@ -432,12 +593,234 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
               </Button>
             </Box>
           ) : viewMode === 'kanban' ? (
-            <KanbanBoard
-              stories={stories}
-              onRefresh={fetchUserStories}
-              onDeleteStory={handleDeleteStory}
-              currentSprintId={sprint.id}
-            />
+            <>
+              <KanbanBoard
+                stories={stories}
+                onRefresh={fetchUserStories}
+                onDeleteStory={handleDeleteStory}
+                currentSprintId={sprint.id}
+              />
+
+              {/* AI Tips Section */}
+              {sprintDetails.status !== 'completed' && (
+                <Box
+                  sx={{
+                    mt: 3,
+                    p: 0,
+                    borderRadius: 4,
+                    background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(99, 102, 241, 0.08) 50%, rgba(236, 72, 153, 0.08) 100%)',
+                    border: '2px solid',
+                    borderColor: alpha('#8b5cf6', 0.2),
+                    overflow: 'hidden',
+                    position: 'relative',
+                  }}
+                >
+                  {/* Decorative gradient bar */}
+                  <Box
+                    sx={{
+                      height: 4,
+                      background: 'linear-gradient(90deg, #8b5cf6 0%, #6366f1 50%, #ec4899 100%)',
+                    }}
+                  />
+
+                  <Box sx={{ p: 3 }}>
+                    {/* Header */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Box
+                          sx={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: 2,
+                            background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)',
+                          }}
+                        >
+                          <AutoAwesome sx={{ color: 'white', fontSize: 22 }} />
+                        </Box>
+                        <Box>
+                          <Typography
+                            variant="subtitle1"
+                            fontWeight={700}
+                            sx={{
+                              background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                              backgroundClip: 'text',
+                              WebkitBackgroundClip: 'text',
+                              WebkitTextFillColor: 'transparent',
+                            }}
+                          >
+                            Dicas da IA
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            Insights personalizados para o seu sprint
+                          </Typography>
+                        </Box>
+                      </Box>
+
+                      <Tooltip title="Gerar nova dica">
+                        <IconButton
+                          onClick={generateAiTip}
+                          disabled={aiTipLoading}
+                          sx={{
+                            bgcolor: alpha('#8b5cf6', 0.1),
+                            '&:hover': {
+                              bgcolor: alpha('#8b5cf6', 0.2),
+                            },
+                            '&.Mui-disabled': {
+                              bgcolor: alpha('#8b5cf6', 0.05),
+                            },
+                          }}
+                        >
+                          <Refresh
+                            sx={{
+                              color: '#8b5cf6',
+                              animation: aiTipLoading ? 'spin 1s linear infinite' : 'none',
+                              '@keyframes spin': {
+                                '0%': { transform: 'rotate(0deg)' },
+                                '100%': { transform: 'rotate(360deg)' },
+                              },
+                            }}
+                          />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+
+                    {/* Tip Content */}
+                    <Box
+                      sx={{
+                        p: 2.5,
+                        borderRadius: 3,
+                        bgcolor: 'white',
+                        border: '1px solid',
+                        borderColor: alpha('#8b5cf6', 0.15),
+                        position: 'relative',
+                        minHeight: 80,
+                      }}
+                    >
+                      {aiTipLoading ? (
+                        <Box>
+                          <Skeleton variant="text" width="100%" height={24} />
+                          <Skeleton variant="text" width="90%" height={24} />
+                          <Skeleton variant="text" width="75%" height={24} />
+                        </Box>
+                      ) : aiTipError ? (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <LightbulbOutlined sx={{ color: '#f59e0b', fontSize: 28 }} />
+                          <Box>
+                            <Typography variant="body2" color="text.secondary">
+                              Não foi possível gerar a dica no momento.
+                            </Typography>
+                            <Button
+                              size="small"
+                              onClick={generateAiTip}
+                              sx={{ mt: 1, textTransform: 'none' }}
+                            >
+                              Tentar novamente
+                            </Button>
+                          </Box>
+                        </Box>
+                      ) : aiTip ? (
+                        <Box sx={{ display: 'flex', gap: 2 }}>
+                          <LightbulbOutlined
+                            sx={{
+                              color: '#f59e0b',
+                              fontSize: 28,
+                              flexShrink: 0,
+                              mt: 0.25,
+                            }}
+                          />
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              lineHeight: 1.7,
+                              color: 'text.primary',
+                              fontWeight: 500,
+                            }}
+                          >
+                            {aiTip}
+                          </Typography>
+                        </Box>
+                      ) : (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <LightbulbOutlined sx={{ color: '#9ca3af', fontSize: 28 }} />
+                          <Typography variant="body2" color="text.secondary">
+                            Clique no botão de atualizar para gerar uma dica personalizada para o seu sprint.
+                          </Typography>
+                        </Box>
+                      )}
+                    </Box>
+
+                    {/* Footer info */}
+                    {aiTip && !aiTipLoading && (
+                      <Box sx={{ mt: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                        <Chip
+                          label={`${getTotalPoints() > 0 ? Math.round((getCompletedPoints() / getTotalPoints()) * 100) : 0}% concluído`}
+                          size="small"
+                          sx={{
+                            bgcolor: alpha('#10b981', 0.1),
+                            color: '#10b981',
+                            fontWeight: 600,
+                            fontSize: '0.7rem',
+                          }}
+                        />
+                        <Chip
+                          label={`${stories.filter((s) => s.status === 'blocked').length} bloqueadas`}
+                          size="small"
+                          sx={{
+                            bgcolor: alpha('#ef4444', 0.1),
+                            color: '#ef4444',
+                            fontWeight: 600,
+                            fontSize: '0.7rem',
+                          }}
+                        />
+                        <Chip
+                          label={`${(() => {
+                            const endDate = new Date(sprint.end_date)
+                            const today = new Date()
+                            today.setHours(0, 0, 0, 0)
+                            return Math.max(0, Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)))
+                          })()} dias restantes`}
+                          size="small"
+                          sx={{
+                            bgcolor: alpha('#6366f1', 0.1),
+                            color: '#6366f1',
+                            fontWeight: 600,
+                            fontSize: '0.7rem',
+                          }}
+                        />
+                      </Box>
+                    )}
+                  </Box>
+                </Box>
+              )}
+
+              {/* Show locked message when sprint is completed */}
+              {sprintDetails.status === 'completed' && aiTip && (
+                <Box
+                  sx={{
+                    mt: 3,
+                    p: 3,
+                    borderRadius: 4,
+                    background: 'linear-gradient(135deg, rgba(107, 114, 128, 0.05) 0%, rgba(107, 114, 128, 0.1) 100%)',
+                    border: '2px solid',
+                    borderColor: alpha('#6b7280', 0.2),
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+                    <AutoAwesome sx={{ color: '#6b7280', fontSize: 22 }} />
+                    <Typography variant="subtitle2" fontWeight={700} color="text.secondary">
+                      Dica da IA (Sprint Concluída)
+                    </Typography>
+                  </Box>
+                  <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+                    {aiTip}
+                  </Typography>
+                </Box>
+              )}
+            </>
           ) : (
             <Stack spacing={2}>
               {stories.map((story) => (

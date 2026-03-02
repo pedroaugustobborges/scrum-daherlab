@@ -44,6 +44,7 @@ import KanbanBoard from '@/components/KanbanBoard'
 import CreateUserStoryModal from '@/components/CreateUserStoryModal'
 import CreateSubtaskModal from '@/components/CreateSubtaskModal'
 import { supabase } from '@/lib/supabase'
+import { useUserRole } from '@/hooks/useUserRole'
 
 interface UserStory {
   id: string
@@ -96,6 +97,7 @@ const priorityConfig: Record<string, { label: string; color: string }> = {
 
 export default function KanbanView() {
   const { project } = useProjectContext()
+  const { isStakeholder, canEdit } = useUserRole(project?.id)
   const [loading, setLoading] = useState(true)
   const [stories, setStories] = useState<UserStory[]>([])
   const [sprints, setSprints] = useState<Sprint[]>([])
@@ -358,18 +360,20 @@ export default function KanbanView() {
               </ToggleButton>
             </ToggleButtonGroup>
 
-            <Button
-              variant="contained"
-              startIcon={<Add />}
-              onClick={() => setCreateStoryOpen(true)}
-              sx={{
-                px: 3,
-                py: 1,
-                borderRadius: 2,
-              }}
-            >
-              Nova História
-            </Button>
+            {!isStakeholder && (
+              <Button
+                variant="contained"
+                startIcon={<Add />}
+                onClick={() => setCreateStoryOpen(true)}
+                sx={{
+                  px: 3,
+                  py: 1,
+                  borderRadius: 2,
+                }}
+              >
+                Nova História
+              </Button>
+            )}
           </Box>
         </Box>
 
@@ -432,14 +436,16 @@ export default function KanbanView() {
               ? 'O backlog está vazio'
               : 'Este sprint não tem histórias'}
           </Typography>
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={() => setCreateStoryOpen(true)}
-            sx={{ px: 4, py: 1.5 }}
-          >
-            Criar Primeira História
-          </Button>
+          {!isStakeholder && (
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={() => setCreateStoryOpen(true)}
+              sx={{ px: 4, py: 1.5 }}
+            >
+              Criar Primeira História
+            </Button>
+          )}
         </Box>
       ) : viewMode === 'kanban' ? (
         <KanbanBoard
@@ -447,6 +453,7 @@ export default function KanbanView() {
           onRefresh={fetchStories}
           onDeleteStory={handleDeleteStory}
           currentSprintId={selectedSprintId !== 'all' && selectedSprintId !== 'backlog' ? selectedSprintId : undefined}
+          isStakeholder={isStakeholder}
         />
       ) : (
         <Stack spacing={2}>
@@ -542,22 +549,24 @@ export default function KanbanView() {
                     </Box>
                   </Box>
 
-                  <Tooltip title="Excluir História">
-                    <IconButton
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleDeleteStory(story.id, story.title)
-                      }}
-                      sx={{
-                        bgcolor: 'rgba(239, 68, 68, 0.1)',
-                        '&:hover': {
-                          bgcolor: 'rgba(239, 68, 68, 0.2)',
-                        },
-                      }}
-                    >
-                      <Delete sx={{ color: '#ef4444' }} />
-                    </IconButton>
-                  </Tooltip>
+                  {!isStakeholder && (
+                    <Tooltip title="Excluir História">
+                      <IconButton
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDeleteStory(story.id, story.title)
+                        }}
+                        sx={{
+                          bgcolor: 'rgba(239, 68, 68, 0.1)',
+                          '&:hover': {
+                            bgcolor: 'rgba(239, 68, 68, 0.2)',
+                          },
+                        }}
+                      >
+                        <Delete sx={{ color: '#ef4444' }} />
+                      </IconButton>
+                    </Tooltip>
+                  )}
                 </Box>
               </AccordionSummary>
 
@@ -601,14 +610,16 @@ export default function KanbanView() {
                     <Typography variant="subtitle2" fontWeight={700}>
                       Subtarefas ({story.subtasks?.length || 0})
                     </Typography>
-                    <Button
-                      size="small"
-                      startIcon={<Add />}
-                      onClick={() => handleOpenSubtaskModal(story.id)}
-                      sx={{ px: 2, py: 0.5, fontSize: '0.875rem' }}
-                    >
-                      Adicionar
-                    </Button>
+                    {!isStakeholder && (
+                      <Button
+                        size="small"
+                        startIcon={<Add />}
+                        onClick={() => handleOpenSubtaskModal(story.id)}
+                        sx={{ px: 2, py: 0.5, fontSize: '0.875rem' }}
+                      >
+                        Adicionar
+                      </Button>
+                    )}
                   </Box>
 
                   {story.subtasks && story.subtasks.length > 0 ? (
@@ -621,13 +632,19 @@ export default function KanbanView() {
                               '&:hover': { bgcolor: 'rgba(99, 102, 241, 0.05)' },
                             }}
                           >
-                            <Tooltip title={subtask.status === 'done' ? 'Marcar como pendente' : 'Marcar como concluído'}>
-                              <IconButton size="small" onClick={() => handleToggleSubtaskStatus(subtask)} sx={{ mr: 1 }}>
-                                <CheckCircle
-                                  sx={{ color: subtask.status === 'done' ? '#10b981' : '#d1d5db' }}
-                                />
-                              </IconButton>
-                            </Tooltip>
+                            {!isStakeholder ? (
+                              <Tooltip title={subtask.status === 'done' ? 'Marcar como pendente' : 'Marcar como concluído'}>
+                                <IconButton size="small" onClick={() => handleToggleSubtaskStatus(subtask)} sx={{ mr: 1 }}>
+                                  <CheckCircle
+                                    sx={{ color: subtask.status === 'done' ? '#10b981' : '#d1d5db' }}
+                                  />
+                                </IconButton>
+                              </Tooltip>
+                            ) : (
+                              <CheckCircle
+                                sx={{ color: subtask.status === 'done' ? '#10b981' : '#d1d5db', mr: 1, ml: 1 }}
+                              />
+                            )}
                             <ListItemText
                               primary={
                                 <Typography
@@ -671,16 +688,18 @@ export default function KanbanView() {
                                 </Box>
                               }
                             />
-                            <ListItemSecondaryAction>
-                              <IconButton
-                                edge="end"
-                                size="small"
-                                onClick={() => handleDeleteSubtask(subtask.id)}
-                                sx={{ color: 'error.main', '&:hover': { bgcolor: 'error.lighter' } }}
-                              >
-                                <Delete fontSize="small" />
-                              </IconButton>
-                            </ListItemSecondaryAction>
+                            {!isStakeholder && (
+                              <ListItemSecondaryAction>
+                                <IconButton
+                                  edge="end"
+                                  size="small"
+                                  onClick={() => handleDeleteSubtask(subtask.id)}
+                                  sx={{ color: 'error.main', '&:hover': { bgcolor: 'error.lighter' } }}
+                                >
+                                  <Delete fontSize="small" />
+                                </IconButton>
+                              </ListItemSecondaryAction>
+                            )}
                           </ListItem>
                           {index < story.subtasks!.length - 1 && <Divider />}
                         </Box>

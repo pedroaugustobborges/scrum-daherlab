@@ -46,7 +46,7 @@ const roleOptions = [
   { value: 'product_owner', label: 'Product Owner', color: '#6366f1' },
   { value: 'scrum_master', label: 'Scrum Master', color: '#8b5cf6' },
   { value: 'developer', label: 'Developer', color: '#10b981' },
-  { value: 'member', label: 'Membro', color: '#6b7280' },
+  { value: 'stakeholder', label: 'Stakeholder', color: '#6b7280' },
 ]
 
 export default function AddTeamMembersModal({

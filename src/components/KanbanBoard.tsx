@@ -50,6 +50,7 @@ interface KanbanBoardProps {
   onRefresh: () => void
   onDeleteStory: (storyId: string, title: string) => void
   currentSprintId?: string
+  isStakeholder?: boolean
 }
 
 const columns = [
@@ -84,7 +85,7 @@ function DroppableColumn({ id, children }: { id: string; children: React.ReactNo
   )
 }
 
-export default function KanbanBoard({ stories, onRefresh, onDeleteStory, currentSprintId }: KanbanBoardProps) {
+export default function KanbanBoard({ stories, onRefresh, onDeleteStory, currentSprintId, isStakeholder = false }: KanbanBoardProps) {
   const [activeId, setActiveId] = useState<string | null>(null)
   const [storiesByStatus, setStoriesByStatus] = useState<Record<string, UserStory[]>>({})
   const [storyDetailsOpen, setStoryDetailsOpen] = useState(false)
@@ -623,14 +624,15 @@ export default function KanbanBoard({ stories, onRefresh, onDeleteStory, current
                       <KanbanCard
                         key={story.id}
                         story={story}
-                        onDelete={onDeleteStory}
+                        onDelete={isStakeholder ? undefined : onDeleteStory}
                         onClick={(storyId) => {
                           setSelectedStoryId(storyId)
                           setStoryDetailsOpen(true)
                         }}
-                        onReplicate={currentSprintId ? handleOpenReplicateDialog : undefined}
-                        onSendToBacklog={currentSprintId ? handleSendToBacklog : undefined}
+                        onReplicate={currentSprintId && !isStakeholder ? handleOpenReplicateDialog : undefined}
+                        onSendToBacklog={currentSprintId && !isStakeholder ? handleSendToBacklog : undefined}
                         predecessorInfo={getPredecessorInfo(story.id)}
+                        isStakeholder={isStakeholder}
                       />
                     ))
                   )}
@@ -672,6 +674,7 @@ export default function KanbanBoard({ stories, onRefresh, onDeleteStory, current
           }}
           onSuccess={onRefresh}
           storyId={selectedStoryId}
+          isStakeholder={isStakeholder}
         />
       )}
 

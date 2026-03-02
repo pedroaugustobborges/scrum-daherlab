@@ -37,6 +37,7 @@ import toast from 'react-hot-toast'
 import { useProjectContext } from './ProjectDetail'
 import CreateBacklogItemModal from '@/components/CreateBacklogItemModal'
 import { supabase } from '@/lib/supabase'
+import { useUserRole } from '@/hooks/useUserRole'
 import {
   DndContext,
   DragEndEvent,
@@ -94,11 +95,13 @@ function SortableBacklogCard({
   onEdit,
   onDelete,
   onMoveToSprint,
+  isStakeholder = false,
 }: {
   item: BacklogItem
   onEdit: (item: BacklogItem) => void
   onDelete: (id: string, title: string) => void
   onMoveToSprint: (itemId: string) => void
+  isStakeholder?: boolean
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: item.id,
@@ -132,22 +135,24 @@ function SortableBacklogCard({
     >
       <CardContent sx={{ p: 2.5 }}>
         <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-          {/* Drag Handle */}
-          <Box
-            {...attributes}
-            {...listeners}
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              color: '#9ca3af',
-              cursor: 'grab',
-              '&:active': { cursor: 'grabbing' },
-              mt: 0.5,
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <DragIndicator sx={{ fontSize: 20 }} />
-          </Box>
+          {/* Drag Handle - hidden for stakeholders */}
+          {!isStakeholder && (
+            <Box
+              {...attributes}
+              {...listeners}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                color: '#9ca3af',
+                cursor: 'grab',
+                '&:active': { cursor: 'grabbing' },
+                mt: 0.5,
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <DragIndicator sx={{ fontSize: 20 }} />
+            </Box>
+          )}
 
           <Box sx={{ flex: 1 }}>
             <Typography variant="body1" fontWeight={600} gutterBottom>
@@ -208,34 +213,36 @@ function SortableBacklogCard({
             </Box>
           </Box>
 
-          {/* Actions */}
-          <Box sx={{ display: 'flex', gap: 0.5 }} onClick={(e) => e.stopPropagation()}>
-            <Tooltip title="Mover para Sprint">
-              <IconButton
-                size="small"
-                onClick={() => onMoveToSprint(item.id)}
-                sx={{
-                  bgcolor: 'rgba(99, 102, 241, 0.1)',
-                  '&:hover': { bgcolor: 'rgba(99, 102, 241, 0.2)' },
-                }}
-              >
-                <MoveUp sx={{ fontSize: 18, color: '#6366f1' }} />
-              </IconButton>
-            </Tooltip>
+          {/* Actions - hidden for stakeholders */}
+          {!isStakeholder && (
+            <Box sx={{ display: 'flex', gap: 0.5 }} onClick={(e) => e.stopPropagation()}>
+              <Tooltip title="Mover para Sprint">
+                <IconButton
+                  size="small"
+                  onClick={() => onMoveToSprint(item.id)}
+                  sx={{
+                    bgcolor: 'rgba(99, 102, 241, 0.1)',
+                    '&:hover': { bgcolor: 'rgba(99, 102, 241, 0.2)' },
+                  }}
+                >
+                  <MoveUp sx={{ fontSize: 18, color: '#6366f1' }} />
+                </IconButton>
+              </Tooltip>
 
-            <Tooltip title="Excluir">
-              <IconButton
-                size="small"
-                onClick={() => onDelete(item.id, item.title)}
-                sx={{
-                  bgcolor: 'rgba(239, 68, 68, 0.1)',
-                  '&:hover': { bgcolor: 'rgba(239, 68, 68, 0.2)' },
-                }}
-              >
-                <Delete sx={{ fontSize: 18, color: '#ef4444' }} />
-              </IconButton>
-            </Tooltip>
-          </Box>
+              <Tooltip title="Excluir">
+                <IconButton
+                  size="small"
+                  onClick={() => onDelete(item.id, item.title)}
+                  sx={{
+                    bgcolor: 'rgba(239, 68, 68, 0.1)',
+                    '&:hover': { bgcolor: 'rgba(239, 68, 68, 0.2)' },
+                  }}
+                >
+                  <Delete sx={{ fontSize: 18, color: '#ef4444' }} />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          )}
         </Box>
       </CardContent>
     </Card>
@@ -244,6 +251,7 @@ function SortableBacklogCard({
 
 export default function BacklogView() {
   const { project } = useProjectContext()
+  const { isStakeholder } = useUserRole(project?.id)
   const [loading, setLoading] = useState(true)
   const [backlogItems, setBacklogItems] = useState<BacklogItem[]>([])
   const [sprints, setSprints] = useState<Sprint[]>([])
@@ -445,28 +453,30 @@ export default function BacklogView() {
               </Select>
             </FormControl>
 
-            <Button
-              variant="contained"
-              startIcon={<Add />}
-              onClick={() => {
-                setEditItem(null)
-                setCreateModalOpen(true)
-              }}
-              sx={{
-                px: 3,
-                py: 1,
-                borderRadius: 2,
-                fontWeight: 600,
-                background: 'linear-gradient(135deg, #f59e0b 0%, #f97316 100%)',
-                boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)',
-                '&:hover': {
-                  background: 'linear-gradient(135deg, #d97706 0%, #ea580c 100%)',
-                  boxShadow: '0 6px 16px rgba(245, 158, 11, 0.4)',
-                },
-              }}
-            >
-              Novo Item
-            </Button>
+            {!isStakeholder && (
+              <Button
+                variant="contained"
+                startIcon={<Add />}
+                onClick={() => {
+                  setEditItem(null)
+                  setCreateModalOpen(true)
+                }}
+                sx={{
+                  px: 3,
+                  py: 1,
+                  borderRadius: 2,
+                  fontWeight: 600,
+                  background: 'linear-gradient(135deg, #f59e0b 0%, #f97316 100%)',
+                  boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #d97706 0%, #ea580c 100%)',
+                    boxShadow: '0 6px 16px rgba(245, 158, 11, 0.4)',
+                  },
+                }}
+              >
+                Novo Item
+              </Button>
+            )}
           </Box>
         </Box>
 
@@ -525,30 +535,32 @@ export default function BacklogView() {
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
             Adicione itens ao backlog deste projeto
           </Typography>
-          <Button
-            variant="outlined"
-            startIcon={<Add />}
-            onClick={() => {
-              setEditItem(null)
-              setCreateModalOpen(true)
-            }}
-            sx={{
-              px: 4,
-              py: 1.5,
-              borderRadius: 2,
-              borderWidth: 2,
-              borderColor: '#f59e0b',
-              color: '#f59e0b',
-              fontWeight: 600,
-              '&:hover': {
+          {!isStakeholder && (
+            <Button
+              variant="outlined"
+              startIcon={<Add />}
+              onClick={() => {
+                setEditItem(null)
+                setCreateModalOpen(true)
+              }}
+              sx={{
+                px: 4,
+                py: 1.5,
+                borderRadius: 2,
                 borderWidth: 2,
                 borderColor: '#f59e0b',
-                bgcolor: 'rgba(245, 158, 11, 0.05)',
-              },
-            }}
-          >
-            Criar Primeiro Item
-          </Button>
+                color: '#f59e0b',
+                fontWeight: 600,
+                '&:hover': {
+                  borderWidth: 2,
+                  borderColor: '#f59e0b',
+                  bgcolor: 'rgba(245, 158, 11, 0.05)',
+                },
+              }}
+            >
+              Criar Primeiro Item
+            </Button>
+          )}
         </Box>
       ) : (
         <DndContext
@@ -566,6 +578,7 @@ export default function BacklogView() {
                   onEdit={handleEditItem}
                   onDelete={handleDeleteItem}
                   onMoveToSprint={handleOpenMoveDialog}
+                  isStakeholder={isStakeholder}
                 />
               ))}
             </Stack>

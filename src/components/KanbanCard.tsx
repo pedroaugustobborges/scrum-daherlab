@@ -17,11 +17,12 @@ interface KanbanCardProps {
     profiles?: { full_name: string }
     subtasks?: Array<{ status: string }>
   }
-  onDelete: (id: string, title: string) => void
+  onDelete?: (id: string, title: string) => void
   onClick: (id: string) => void
   onReplicate?: (storyId: string) => void
   onSendToBacklog?: (storyId: string, title: string) => void
   predecessorInfo?: { total: number; incomplete: number } | null
+  isStakeholder?: boolean
 }
 
 const priorityConfig: Record<string, { label: string; color: string }> = {
@@ -31,7 +32,7 @@ const priorityConfig: Record<string, { label: string; color: string }> = {
   urgent: { label: 'Urgente', color: '#dc2626' },
 }
 
-export default function KanbanCard({ story, onDelete, onClick, onReplicate, onSendToBacklog, predecessorInfo }: KanbanCardProps) {
+export default function KanbanCard({ story, onDelete, onClick, onReplicate, onSendToBacklog, predecessorInfo, isStakeholder = false }: KanbanCardProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const menuOpen = Boolean(anchorEl)
 
@@ -52,6 +53,7 @@ export default function KanbanCard({ story, onDelete, onClick, onReplicate, onSe
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: story.id,
+    disabled: isStakeholder,
   })
 
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -87,7 +89,7 @@ export default function KanbanCard({ story, onDelete, onClick, onReplicate, onSe
         borderRadius: 3,
         bgcolor: 'white',
         border: '2px solid rgba(99, 102, 241, 0.1)',
-        cursor: isDragging ? 'grabbing' : 'grab',
+        cursor: isStakeholder ? 'default' : isDragging ? 'grabbing' : 'grab',
         transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
         '&:hover': {
           border: '2px solid rgba(99, 102, 241, 0.3)',
@@ -96,92 +98,97 @@ export default function KanbanCard({ story, onDelete, onClick, onReplicate, onSe
         },
       }}
     >
-      {/* Drag Handle & Delete Button */}
+      {/* Drag Handle & Actions Button */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1.5 }}>
         <Box
-          {...attributes}
-          {...listeners}
+          {...(isStakeholder ? {} : { ...attributes, ...listeners })}
           sx={{
             display: 'flex',
             alignItems: 'center',
             gap: 0.5,
             color: '#9ca3af',
-            cursor: 'grab',
+            cursor: isStakeholder ? 'default' : 'grab',
             '&:active': {
-              cursor: 'grabbing',
+              cursor: isStakeholder ? 'default' : 'grabbing',
             },
           }}
         >
-          <DragIndicator sx={{ fontSize: 18 }} />
+          {!isStakeholder && <DragIndicator sx={{ fontSize: 18 }} />}
           <Assignment sx={{ fontSize: 18, color: '#6366f1' }} />
         </Box>
 
-        <Tooltip title="Ações">
-          <IconButton
-            size="small"
-            onClick={handleMenuClick}
-            sx={{
-              width: 24,
-              height: 24,
-              bgcolor: 'rgba(99, 102, 241, 0.1)',
-              '&:hover': {
-                bgcolor: 'rgba(99, 102, 241, 0.2)',
-              },
-            }}
-          >
-            <MoreVert sx={{ fontSize: 14, color: '#6366f1' }} />
-          </IconButton>
-        </Tooltip>
+        {!isStakeholder && (onDelete || onReplicate || onSendToBacklog) && (
+          <>
+            <Tooltip title="Ações">
+              <IconButton
+                size="small"
+                onClick={handleMenuClick}
+                sx={{
+                  width: 24,
+                  height: 24,
+                  bgcolor: 'rgba(99, 102, 241, 0.1)',
+                  '&:hover': {
+                    bgcolor: 'rgba(99, 102, 241, 0.2)',
+                  },
+                }}
+              >
+                <MoreVert sx={{ fontSize: 14, color: '#6366f1' }} />
+              </IconButton>
+            </Tooltip>
 
-        {/* Actions Menu */}
-        <Menu
-          anchorEl={anchorEl}
-          open={menuOpen}
-          onClose={handleMenuClose}
-          onClick={(e) => e.stopPropagation()}
-          transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-        >
-          {onReplicate && (
-            <MenuItem
-              onClick={() => {
-                onReplicate(story.id)
-                handleMenuClose()
-              }}
+            {/* Actions Menu */}
+            <Menu
+              anchorEl={anchorEl}
+              open={menuOpen}
+              onClose={handleMenuClose}
+              onClick={(e) => e.stopPropagation()}
+              transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+              anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
             >
-              <ListItemIcon>
-                <ContentCopy fontSize="small" sx={{ color: '#6366f1' }} />
-              </ListItemIcon>
-              <ListItemText>Replicar para Sprint</ListItemText>
-            </MenuItem>
-          )}
-          {onSendToBacklog && (
-            <MenuItem
-              onClick={() => {
-                onSendToBacklog(story.id, story.title)
-                handleMenuClose()
-              }}
-            >
-              <ListItemIcon>
-                <Inventory fontSize="small" sx={{ color: '#f59e0b' }} />
-              </ListItemIcon>
-              <ListItemText>Enviar para Backlog</ListItemText>
-            </MenuItem>
-          )}
-          {(onReplicate || onSendToBacklog) && <Divider />}
-          <MenuItem
-            onClick={() => {
-              onDelete(story.id, story.title)
-              handleMenuClose()
-            }}
-            sx={{ color: 'error.main' }}
-          >
-            <ListItemIcon>
-              <Delete fontSize="small" color="error" />
-            </ListItemIcon>
-            <ListItemText>Excluir</ListItemText>
-          </MenuItem>
-        </Menu>
+              {onReplicate && (
+                <MenuItem
+                  onClick={() => {
+                    onReplicate(story.id)
+                    handleMenuClose()
+                  }}
+                >
+                  <ListItemIcon>
+                    <ContentCopy fontSize="small" sx={{ color: '#6366f1' }} />
+                  </ListItemIcon>
+                  <ListItemText>Replicar para Sprint</ListItemText>
+                </MenuItem>
+              )}
+              {onSendToBacklog && (
+                <MenuItem
+                  onClick={() => {
+                    onSendToBacklog(story.id, story.title)
+                    handleMenuClose()
+                  }}
+                >
+                  <ListItemIcon>
+                    <Inventory fontSize="small" sx={{ color: '#f59e0b' }} />
+                  </ListItemIcon>
+                  <ListItemText>Enviar para Backlog</ListItemText>
+                </MenuItem>
+              )}
+              {(onReplicate || onSendToBacklog) && onDelete && <Divider />}
+              {onDelete && (
+                <MenuItem
+                  onClick={() => {
+                    onDelete(story.id, story.title)
+                    handleMenuClose()
+                  }}
+                  sx={{ color: 'error.main' }}
+                >
+                  <ListItemIcon>
+                    <Delete fontSize="small" color="error" />
+                  </ListItemIcon>
+                  <ListItemText>Excluir</ListItemText>
+                </MenuItem>
+              )}
+            </Menu>
+          </>
+        )}
       </Box>
 
       {/* Card Content */}

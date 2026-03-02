@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   Box,
   Container,
@@ -96,16 +96,19 @@ function PlannerCard({
   task,
   onClick,
   onNavigateToProject,
+  isStakeholder = false,
 }: {
   task: Task
   onClick: (id: string) => void
   onNavigateToProject: (projectId: string) => void
+  isStakeholder?: boolean
 }) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const menuOpen = Boolean(anchorEl)
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: task.id,
+    disabled: isStakeholder,
   })
 
   const style = {
@@ -152,7 +155,7 @@ function PlannerCard({
         borderRadius: 3,
         bgcolor: 'white',
         border: '2px solid rgba(99, 102, 241, 0.1)',
-        cursor: isDragging ? 'grabbing' : 'grab',
+        cursor: isStakeholder ? 'default' : isDragging ? 'grabbing' : 'grab',
         transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
         '&:hover': {
           border: '2px solid rgba(99, 102, 241, 0.3)',
@@ -164,18 +167,17 @@ function PlannerCard({
       {/* Header with drag handle and project badge */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1.5 }}>
         <Box
-          {...attributes}
-          {...listeners}
+          {...(isStakeholder ? {} : { ...attributes, ...listeners })}
           sx={{
             display: 'flex',
             alignItems: 'center',
             gap: 0.5,
             color: '#9ca3af',
-            cursor: 'grab',
-            '&:active': { cursor: 'grabbing' },
+            cursor: isStakeholder ? 'default' : 'grab',
+            '&:active': { cursor: isStakeholder ? 'default' : 'grabbing' },
           }}
         >
-          <DragIndicator sx={{ fontSize: 18 }} />
+          {!isStakeholder && <DragIndicator sx={{ fontSize: 18 }} />}
           <Assignment sx={{ fontSize: 18, color: '#6366f1' }} />
         </Box>
 
@@ -205,22 +207,24 @@ function PlannerCard({
             </Tooltip>
           )}
 
-          <Tooltip title="Ações">
-            <IconButton
-              size="small"
-              onClick={handleMenuClick}
-              sx={{
-                width: 24,
-                height: 24,
-                bgcolor: 'rgba(99, 102, 241, 0.1)',
-                '&:hover': {
-                  bgcolor: 'rgba(99, 102, 241, 0.2)',
-                },
-              }}
-            >
-              <MoreVert sx={{ fontSize: 14, color: '#6366f1' }} />
-            </IconButton>
-          </Tooltip>
+          {!isStakeholder && (
+            <Tooltip title="Ações">
+              <IconButton
+                size="small"
+                onClick={handleMenuClick}
+                sx={{
+                  width: 24,
+                  height: 24,
+                  bgcolor: 'rgba(99, 102, 241, 0.1)',
+                  '&:hover': {
+                    bgcolor: 'rgba(99, 102, 241, 0.2)',
+                  },
+                }}
+              >
+                <MoreVert sx={{ fontSize: 14, color: '#6366f1' }} />
+              </IconButton>
+            </Tooltip>
+          )}
         </Box>
 
         {/* Actions Menu */}
@@ -425,6 +429,7 @@ export default function Planner() {
   const [storyDetailsOpen, setStoryDetailsOpen] = useState(false)
   const [selectedTaskId, setSelectedTaskId] = useState<string>('')
   const [activeId, setActiveId] = useState<string | null>(null)
+  const [stakeholderProjectIds, setStakeholderProjectIds] = useState<Set<string>>(new Set())
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -433,6 +438,62 @@ export default function Planner() {
       },
     })
   )
+
+  // Fetch which projects the user is a stakeholder in
+  const fetchStakeholderProjects = useCallback(async (projectIds: string[]) => {
+    if (!user?.id || projectIds.length === 0) return new Set<string>()
+
+    const stakeholderProjects = new Set<string>()
+
+    for (const projectId of projectIds) {
+      const teamIdsSet = new Set<string>()
+
+      // Method 1: Check project_teams junction table
+      const { data: projectTeamsData } = await supabase
+        .from('project_teams')
+        .select('team_id')
+        .eq('project_id', projectId)
+
+      if (projectTeamsData) {
+        projectTeamsData.forEach((pt) => {
+          if (pt.team_id) teamIdsSet.add(pt.team_id)
+        })
+      }
+
+      // Method 2: Check sprints table
+      const { data: sprintsData } = await supabase
+        .from('sprints')
+        .select('team_id')
+        .eq('project_id', projectId)
+
+      if (sprintsData) {
+        sprintsData.forEach((s) => {
+          if (s.team_id) teamIdsSet.add(s.team_id)
+        })
+      }
+
+      const teamIds = Array.from(teamIdsSet)
+
+      if (teamIds.length > 0) {
+        // Check user's role in those teams
+        const { data: memberData } = await supabase
+          .from('team_members')
+          .select('role')
+          .eq('user_id', user.id)
+          .in('team_id', teamIds)
+
+        if (memberData && memberData.length > 0) {
+          const roles = memberData.map((d) => d.role)
+          const allStakeholder = roles.every((r) => r === 'stakeholder')
+          if (allStakeholder) {
+            stakeholderProjects.add(projectId)
+          }
+        }
+      }
+    }
+
+    return stakeholderProjects
+  }, [user?.id])
 
   useEffect(() => {
     fetchData()
@@ -498,6 +559,11 @@ export default function Planner() {
         new Map((tasksData || []).filter((t) => t.project).map((t) => [t.project.id, t.project])).values()
       )
       setProjects(uniqueProjects)
+
+      // Check which projects the user is a stakeholder in
+      const projectIds = uniqueProjects.map((p) => p.id)
+      const stakeholderSet = await fetchStakeholderProjects(projectIds)
+      setStakeholderProjectIds(stakeholderSet)
     } catch (error) {
       console.error('Error fetching data:', error)
       toast.error('Erro ao carregar tarefas')
@@ -564,6 +630,11 @@ export default function Planner() {
 
     if (!activeTask) return
 
+    // Prevent stakeholders from moving tasks
+    if (activeTask.project_id && stakeholderProjectIds.has(activeTask.project_id)) {
+      return
+    }
+
     const isOverColumn = columns.some((col) => col.id === overId)
     let targetColumn = overId
 
@@ -612,6 +683,16 @@ export default function Planner() {
 
     const task = tasks.find((t) => t.id === taskId)
     if (!task) {
+      const grouped = columns.reduce((acc, col) => {
+        acc[col.id] = filteredTasks.filter((task) => task.status === col.id)
+        return acc
+      }, {} as Record<string, Task[]>)
+      setTasksByStatus(grouped)
+      return
+    }
+
+    // Prevent stakeholders from changing status
+    if (task.project_id && stakeholderProjectIds.has(task.project_id)) {
       const grouped = columns.reduce((acc, col) => {
         acc[col.id] = filteredTasks.filter((task) => task.status === col.id)
         return acc
@@ -912,6 +993,7 @@ export default function Planner() {
                               setStoryDetailsOpen(true)
                             }}
                             onNavigateToProject={(projectId) => navigate(`/projects/${projectId}/kanban`)}
+                            isStakeholder={task.project_id ? stakeholderProjectIds.has(task.project_id) : false}
                           />
                         ))
                       )}
@@ -970,6 +1052,10 @@ export default function Planner() {
             fetchData()
           }}
           storyId={selectedTaskId}
+          isStakeholder={(() => {
+            const task = tasks.find((t) => t.id === selectedTaskId)
+            return task?.project_id ? stakeholderProjectIds.has(task.project_id) : false
+          })()}
         />
       )}
     </Box>

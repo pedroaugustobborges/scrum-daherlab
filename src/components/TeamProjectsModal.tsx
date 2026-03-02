@@ -188,7 +188,7 @@ export default function TeamProjectsModal({
       product_owner: '#6366f1',
       scrum_master: '#8b5cf6',
       developer: '#10b981',
-      member: '#6b7280',
+      stakeholder: '#6b7280',
     }
     return colors[role] || '#6b7280'
   }

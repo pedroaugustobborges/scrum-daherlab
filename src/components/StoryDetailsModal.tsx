@@ -52,6 +52,7 @@ interface StoryDetailsModalProps {
   onClose: () => void
   onSuccess: () => void
   storyId: string
+  isStakeholder?: boolean
 }
 
 interface Profile {
@@ -119,7 +120,7 @@ const priorityOptions = [
 
 const fibonacciOptions = [1, 2, 3, 5, 8, 13, 21, 34, 55, 89]
 
-export default function StoryDetailsModal({ open, onClose, onSuccess, storyId }: StoryDetailsModalProps) {
+export default function StoryDetailsModal({ open, onClose, onSuccess, storyId, isStakeholder = false }: StoryDetailsModalProps) {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [editMode, setEditMode] = useState(false)
@@ -459,24 +460,26 @@ export default function StoryDetailsModal({ open, onClose, onSuccess, storyId }:
                     <Typography variant="h5" fontWeight={700} sx={{ flex: 1 }}>
                       {story.title}
                     </Typography>
-                    <Button
-                      variant="outlined"
-                      startIcon={<EditIcon />}
-                      onClick={() => setEditMode(true)}
-                      sx={{
-                        borderRadius: 2,
-                        borderWidth: 2,
-                        borderColor: 'rgba(99, 102, 241, 0.3)',
-                        color: '#6366f1',
-                        fontWeight: 600,
-                        '&:hover': {
+                    {!isStakeholder && (
+                      <Button
+                        variant="outlined"
+                        startIcon={<EditIcon />}
+                        onClick={() => setEditMode(true)}
+                        sx={{
+                          borderRadius: 2,
                           borderWidth: 2,
-                          borderColor: '#6366f1',
-                        },
-                      }}
-                    >
-                      Editar
-                    </Button>
+                          borderColor: 'rgba(99, 102, 241, 0.3)',
+                          color: '#6366f1',
+                          fontWeight: 600,
+                          '&:hover': {
+                            borderWidth: 2,
+                            borderColor: '#6366f1',
+                          },
+                        }}
+                      >
+                        Editar
+                      </Button>
+                    )}
                   </Box>
 
                   {story.description && (
@@ -900,18 +903,20 @@ export default function StoryDetailsModal({ open, onClose, onSuccess, storyId }:
                 <Typography variant="h6" fontWeight={700}>
                   Subtarefas ({story.subtasks?.length || 0})
                 </Typography>
-                <Button
-                  variant="contained"
-                  startIcon={<Add />}
-                  onClick={() => setCreateSubtaskOpen(true)}
-                  sx={{
-                    px: 3,
-                    py: 1.5,
-                    borderRadius: 2,
-                  }}
-                >
-                  Adicionar Subtarefa
-                </Button>
+                {!isStakeholder && (
+                  <Button
+                    variant="contained"
+                    startIcon={<Add />}
+                    onClick={() => setCreateSubtaskOpen(true)}
+                    sx={{
+                      px: 3,
+                      py: 1.5,
+                      borderRadius: 2,
+                    }}
+                  >
+                    Adicionar Subtarefa
+                  </Button>
+                )}
               </Box>
 
               {story.subtasks && story.subtasks.length > 0 ? (
@@ -926,16 +931,27 @@ export default function StoryDetailsModal({ open, onClose, onSuccess, storyId }:
                           },
                         }}
                       >
-                        <Tooltip title={subtask.status === 'done' ? 'Marcar como pendente' : 'Marcar como concluído'}>
-                          <IconButton size="small" onClick={() => handleToggleSubtaskStatus(subtask)} sx={{ mr: 2 }}>
-                            <CheckCircle
-                              sx={{
-                                color: subtask.status === 'done' ? '#10b981' : '#d1d5db',
-                                fontSize: 28,
-                              }}
-                            />
-                          </IconButton>
-                        </Tooltip>
+                        {!isStakeholder ? (
+                          <Tooltip title={subtask.status === 'done' ? 'Marcar como pendente' : 'Marcar como concluído'}>
+                            <IconButton size="small" onClick={() => handleToggleSubtaskStatus(subtask)} sx={{ mr: 2 }}>
+                              <CheckCircle
+                                sx={{
+                                  color: subtask.status === 'done' ? '#10b981' : '#d1d5db',
+                                  fontSize: 28,
+                                }}
+                              />
+                            </IconButton>
+                          </Tooltip>
+                        ) : (
+                          <CheckCircle
+                            sx={{
+                              color: subtask.status === 'done' ? '#10b981' : '#d1d5db',
+                              fontSize: 28,
+                              mr: 2,
+                              ml: 1,
+                            }}
+                          />
+                        )}
                         <ListItemText
                           primary={
                             <Typography
@@ -980,34 +996,36 @@ export default function StoryDetailsModal({ open, onClose, onSuccess, storyId }:
                             </Box>
                           }
                         />
-                        <ListItemSecondaryAction>
-                          <Tooltip title="Editar subtarefa">
+                        {!isStakeholder && (
+                          <ListItemSecondaryAction>
+                            <Tooltip title="Editar subtarefa">
+                              <IconButton
+                                onClick={() => setEditingSubtask(subtask)}
+                                sx={{
+                                  color: '#6366f1',
+                                  mr: 1,
+                                  '&:hover': {
+                                    bgcolor: 'rgba(99, 102, 241, 0.1)',
+                                  },
+                                }}
+                              >
+                                <EditIcon />
+                              </IconButton>
+                            </Tooltip>
                             <IconButton
-                              onClick={() => setEditingSubtask(subtask)}
+                              edge="end"
+                              onClick={() => handleDeleteSubtask(subtask.id)}
                               sx={{
-                                color: '#6366f1',
-                                mr: 1,
+                                color: 'error.main',
                                 '&:hover': {
-                                  bgcolor: 'rgba(99, 102, 241, 0.1)',
+                                  bgcolor: 'error.lighter',
                                 },
                               }}
                             >
-                              <EditIcon />
+                              <Delete />
                             </IconButton>
-                          </Tooltip>
-                          <IconButton
-                            edge="end"
-                            onClick={() => handleDeleteSubtask(subtask.id)}
-                            sx={{
-                              color: 'error.main',
-                              '&:hover': {
-                                bgcolor: 'error.lighter',
-                              },
-                            }}
-                          >
-                            <Delete />
-                          </IconButton>
-                        </ListItemSecondaryAction>
+                          </ListItemSecondaryAction>
+                        )}
                       </ListItem>
                       {index < story.subtasks!.length - 1 && <Divider />}
                     </Box>
@@ -1029,16 +1047,18 @@ export default function StoryDetailsModal({ open, onClose, onSuccess, storyId }:
                     Nenhuma subtarefa adicionada
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                    Adicione subtarefas para quebrar esta história em tarefas menores
+                    {isStakeholder ? 'Esta história não possui subtarefas' : 'Adicione subtarefas para quebrar esta história em tarefas menores'}
                   </Typography>
-                  <Button
-                    variant="contained"
-                    startIcon={<Add />}
-                    onClick={() => setCreateSubtaskOpen(true)}
-                    sx={{ px: 4, py: 1.5 }}
-                  >
-                    Adicionar Primeira Subtarefa
-                  </Button>
+                  {!isStakeholder && (
+                    <Button
+                      variant="contained"
+                      startIcon={<Add />}
+                      onClick={() => setCreateSubtaskOpen(true)}
+                      sx={{ px: 4, py: 1.5 }}
+                    >
+                      Adicionar Primeira Subtarefa
+                    </Button>
+                  )}
                 </Box>
               )}
             </Box>
@@ -1047,60 +1067,64 @@ export default function StoryDetailsModal({ open, onClose, onSuccess, storyId }:
           {/* Tab 2: Dependencies */}
           {activeTab === 2 && (
             <Box>
-              {/* Add new predecessor */}
-              <Box sx={{ mb: 4 }}>
-                <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2 }}>
-                  Adicionar Predecessora
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 2 }}>
-                  <Autocomplete
-                    options={availableTasks.filter(
-                      (t) => !predecessors.some((p) => p.predecessor_id === t.id)
-                    )}
-                    getOptionLabel={(option) => option.title}
-                    value={selectedNewPredecessor}
-                    onChange={(_, newValue) => setSelectedNewPredecessor(newValue)}
-                    sx={{ flex: 1 }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        placeholder="Selecione uma história..."
-                        size="small"
-                      />
-                    )}
-                    renderOption={(props, option) => (
-                      <Box component="li" {...props}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
-                          <Typography variant="body2" sx={{ flex: 1 }}>
-                            {option.title}
-                          </Typography>
-                          <Chip
-                            label={option.status === 'done' ? 'Concluída' : option.status === 'in-progress' ? 'Em Progresso' : 'Pendente'}
+              {/* Add new predecessor - hidden for stakeholders */}
+              {!isStakeholder && (
+                <>
+                  <Box sx={{ mb: 4 }}>
+                    <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2 }}>
+                      Adicionar Predecessora
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                      <Autocomplete
+                        options={availableTasks.filter(
+                          (t) => !predecessors.some((p) => p.predecessor_id === t.id)
+                        )}
+                        getOptionLabel={(option) => option.title}
+                        value={selectedNewPredecessor}
+                        onChange={(_, newValue) => setSelectedNewPredecessor(newValue)}
+                        sx={{ flex: 1 }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            placeholder="Selecione uma história..."
                             size="small"
-                            sx={{
-                              height: 20,
-                              fontSize: '0.65rem',
-                              bgcolor: option.status === 'done' ? '#10b98120' : option.status === 'in-progress' ? '#f59e0b20' : '#6b728020',
-                              color: option.status === 'done' ? '#10b981' : option.status === 'in-progress' ? '#f59e0b' : '#6b7280',
-                            }}
                           />
-                        </Box>
-                      </Box>
-                    )}
-                  />
-                  <Button
-                    variant="contained"
-                    onClick={handleAddPredecessor}
-                    disabled={!selectedNewPredecessor}
-                    startIcon={<Add />}
-                    sx={{ borderRadius: 2 }}
-                  >
-                    Adicionar
-                  </Button>
-                </Box>
-              </Box>
+                        )}
+                        renderOption={(props, option) => (
+                          <Box component="li" {...props}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+                              <Typography variant="body2" sx={{ flex: 1 }}>
+                                {option.title}
+                              </Typography>
+                              <Chip
+                                label={option.status === 'done' ? 'Concluída' : option.status === 'in-progress' ? 'Em Progresso' : 'Pendente'}
+                                size="small"
+                                sx={{
+                                  height: 20,
+                                  fontSize: '0.65rem',
+                                  bgcolor: option.status === 'done' ? '#10b98120' : option.status === 'in-progress' ? '#f59e0b20' : '#6b728020',
+                                  color: option.status === 'done' ? '#10b981' : option.status === 'in-progress' ? '#f59e0b' : '#6b7280',
+                                }}
+                              />
+                            </Box>
+                          </Box>
+                        )}
+                      />
+                      <Button
+                        variant="contained"
+                        onClick={handleAddPredecessor}
+                        disabled={!selectedNewPredecessor}
+                        startIcon={<Add />}
+                        sx={{ borderRadius: 2 }}
+                      >
+                        Adicionar
+                      </Button>
+                    </Box>
+                  </Box>
 
-              <Divider sx={{ my: 3 }} />
+                  <Divider sx={{ my: 3 }} />
+                </>
+              )}
 
               {/* Predecessors List */}
               <Box sx={{ mb: 4 }}>
@@ -1142,17 +1166,19 @@ export default function StoryDetailsModal({ open, onClose, onSuccess, storyId }:
                               />
                             }
                           />
-                          <ListItemSecondaryAction>
-                            <Tooltip title="Remover dependência">
-                              <IconButton
-                                size="small"
-                                onClick={() => handleRemoveDependency(dep.id)}
-                                sx={{ color: 'error.main' }}
-                              >
-                                <Delete fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                          </ListItemSecondaryAction>
+                          {!isStakeholder && (
+                            <ListItemSecondaryAction>
+                              <Tooltip title="Remover dependência">
+                                <IconButton
+                                  size="small"
+                                  onClick={() => handleRemoveDependency(dep.id)}
+                                  sx={{ color: 'error.main' }}
+                                >
+                                  <Delete fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            </ListItemSecondaryAction>
+                          )}
                         </ListItem>
                         {index < predecessors.length - 1 && <Divider />}
                       </Box>
@@ -1216,17 +1242,19 @@ export default function StoryDetailsModal({ open, onClose, onSuccess, storyId }:
                               />
                             }
                           />
-                          <ListItemSecondaryAction>
-                            <Tooltip title="Remover dependência">
-                              <IconButton
-                                size="small"
-                                onClick={() => handleRemoveDependency(dep.id)}
-                                sx={{ color: 'error.main' }}
-                              >
-                                <Delete fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                          </ListItemSecondaryAction>
+                          {!isStakeholder && (
+                            <ListItemSecondaryAction>
+                              <Tooltip title="Remover dependência">
+                                <IconButton
+                                  size="small"
+                                  onClick={() => handleRemoveDependency(dep.id)}
+                                  sx={{ color: 'error.main' }}
+                                >
+                                  <Delete fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            </ListItemSecondaryAction>
+                          )}
                         </ListItem>
                         {index < successors.length - 1 && <Divider />}
                       </Box>

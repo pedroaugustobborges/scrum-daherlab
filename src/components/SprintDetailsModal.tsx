@@ -41,7 +41,10 @@ import {
   AutoAwesome,
   Refresh,
   LightbulbOutlined,
+  PictureAsPdf,
 } from '@mui/icons-material'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 import toast from 'react-hot-toast'
 import Modal from './Modal'
 import CreateUserStoryModal from './CreateUserStoryModal'
@@ -276,6 +279,642 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
     }
   }, [stories, sprint, sprintDetails, averageVelocity])
 
+  const generatePDF = async () => {
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+    })
+    const pageWidth = doc.internal.pageSize.getWidth()
+    const pageHeight = doc.internal.pageSize.getHeight()
+    const margin = 18
+    let yPosition = margin
+
+    // Colors
+    const primaryColor: [number, number, number] = [99, 102, 241] // #6366f1
+    const secondaryColor: [number, number, number] = [139, 92, 246] // #8b5cf6
+    const successColor: [number, number, number] = [16, 185, 129] // #10b981
+    const warningColor: [number, number, number] = [245, 158, 11] // #f59e0b
+    const dangerColor: [number, number, number] = [239, 68, 68] // #ef4444
+    const grayColor: [number, number, number] = [107, 114, 128] // #6b7280
+    const darkColor: [number, number, number] = [31, 41, 55] // #1f2937
+    const lightBgColor: [number, number, number] = [248, 250, 252] // #f8fafc
+
+    // Fetch project name
+    let projectName = ''
+    try {
+      const { data: projectData } = await supabase
+        .from('projects')
+        .select('name')
+        .eq('id', sprint.project_id)
+        .single()
+      if (projectData) {
+        projectName = projectData.name
+      }
+    } catch (error) {
+      console.warn('Could not fetch project name:', error)
+    }
+
+    // Fetch retrospective data
+    interface RetroItem {
+      category: string
+      content: string
+      votes: number
+    }
+    let retroItems: RetroItem[] = []
+    let retroMoodRating = 0
+    try {
+      const { data: retroData } = await supabase
+        .from('sprint_retrospectives')
+        .select('id, mood_rating')
+        .eq('sprint_id', sprint.id)
+        .single()
+
+      if (retroData) {
+        retroMoodRating = retroData.mood_rating || 0
+        const { data: itemsData } = await supabase
+          .from('retrospective_items')
+          .select('category, content, votes')
+          .eq('retrospective_id', retroData.id)
+          .order('votes', { ascending: false })
+
+        if (itemsData) {
+          retroItems = itemsData
+        }
+      }
+    } catch (error) {
+      console.warn('Could not fetch retrospective:', error)
+    }
+
+    // Helper function to load image with proper aspect ratio
+    const loadImageWithDimensions = (url: string): Promise<{ base64: string; width: number; height: number }> => {
+      return new Promise((resolve, reject) => {
+        const img = new Image()
+        img.crossOrigin = 'Anonymous'
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          canvas.width = img.width
+          canvas.height = img.height
+          const ctx = canvas.getContext('2d')
+          if (ctx) {
+            ctx.drawImage(img, 0, 0)
+            resolve({
+              base64: canvas.toDataURL('image/png'),
+              width: img.width,
+              height: img.height,
+            })
+          } else {
+            reject(new Error('Could not get canvas context'))
+          }
+        }
+        img.onerror = reject
+        img.src = url
+      })
+    }
+
+    // Helper to add page footer
+    const addFooter = (pageNum: number, totalPages: number) => {
+      const footerY = pageHeight - 10
+
+      // Footer line
+      doc.setDrawColor(200, 200, 200)
+      doc.setLineWidth(0.3)
+      doc.line(margin, footerY - 5, pageWidth - margin, footerY - 5)
+
+      // Timestamp
+      const timestamp = new Date().toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+      doc.setTextColor(...grayColor)
+      doc.setFontSize(9)
+      doc.setFont('helvetica', 'normal')
+      doc.text(`Gerado em: ${timestamp}`, margin, footerY)
+
+      // Page number
+      doc.text(`Página ${pageNum} de ${totalPages}`, pageWidth / 2, footerY, { align: 'center' })
+
+      // Powered by DaherLab
+      doc.setFont('helvetica', 'italic')
+      doc.text('Powered by DaherLab', pageWidth - margin, footerY, { align: 'right' })
+    }
+
+    // Helper to check if we need a new page
+    const checkNewPage = (neededHeight: number): boolean => {
+      if (yPosition + neededHeight > pageHeight - 20) {
+        doc.addPage()
+        yPosition = margin
+        return true
+      }
+      return false
+    }
+
+    // Helper to add section header
+    const addSectionHeader = (title: string, color: [number, number, number]) => {
+      checkNewPage(18)
+      doc.setFillColor(...color)
+      doc.roundedRect(margin, yPosition, pageWidth - margin * 2, 10, 2, 2, 'F')
+      doc.setTextColor(255, 255, 255)
+      doc.setFontSize(12)
+      doc.setFont('helvetica', 'bold')
+      doc.text(title, margin + 6, yPosition + 7)
+      yPosition += 14
+    }
+
+    // ========== HEADER ==========
+    // Gradient header background
+    const headerHeight = 55
+    for (let i = 0; i < headerHeight; i++) {
+      const ratio = i / headerHeight
+      const r = Math.round(primaryColor[0] + (secondaryColor[0] - primaryColor[0]) * ratio)
+      const g = Math.round(primaryColor[1] + (secondaryColor[1] - primaryColor[1]) * ratio)
+      const b = Math.round(primaryColor[2] + (secondaryColor[2] - primaryColor[2]) * ratio)
+      doc.setFillColor(r, g, b)
+      doc.rect(0, i, pageWidth, 1.2, 'F')
+    }
+
+    // Logo DaherLab - canto superior direito, menor
+    try {
+      const logoData = await loadImageWithDimensions('/logo_branca_sem_slogan.png')
+      const maxLogoHeight = 18
+      const maxLogoWidth = 18
+      const aspectRatio = logoData.width / logoData.height
+      let logoWidth = maxLogoWidth
+      let logoHeight = logoWidth / aspectRatio
+      if (logoHeight > maxLogoHeight) {
+        logoHeight = maxLogoHeight
+        logoWidth = logoHeight * aspectRatio
+      }
+      doc.addImage(logoData.base64, 'PNG', pageWidth - margin - logoWidth, 8, logoWidth, logoHeight)
+    } catch (error) {
+      console.warn('Could not load logo:', error)
+    }
+
+    // Header text - CENTRALIZADO
+    doc.setTextColor(255, 255, 255)
+    const centerX = pageWidth / 2
+
+    // H1: Product name
+    doc.setFontSize(26)
+    doc.setFont('helvetica', 'bold')
+    doc.text('agir ágil', centerX, 18, { align: 'center' })
+
+    // H2: Report type
+    doc.setFontSize(14)
+    doc.setFont('helvetica', 'normal')
+    doc.text('Relatório da Sprint', centerX, 28, { align: 'center' })
+
+    // H3: Project and Sprint context
+    doc.setFontSize(11)
+    doc.setFont('helvetica', 'normal')
+    const contextText = projectName ? `Projeto: ${projectName}  |  Sprint: ${sprint.name}` : `Sprint: ${sprint.name}`
+    doc.text(contextText, centerX, 38, { align: 'center' })
+
+    yPosition = headerHeight + 8
+
+    // ========== SPRINT INFO BOX ==========
+    // Calcular altura dinâmica baseada no objetivo
+    let goalLines: string[] = []
+    if (sprintDetails.goal) {
+      doc.setFontSize(11)
+      goalLines = doc.splitTextToSize(sprintDetails.goal, pageWidth - margin * 2 - 50)
+    }
+    const goalLinesCount = Math.min(goalLines.length, 3)
+    const infoBoxHeight = 22 + (goalLinesCount > 0 ? 8 + goalLinesCount * 5 : 0)
+
+    doc.setFillColor(...lightBgColor)
+    doc.roundedRect(margin, yPosition, pageWidth - margin * 2, infoBoxHeight, 4, 4, 'F')
+    doc.setDrawColor(...primaryColor)
+    doc.setLineWidth(0.4)
+    doc.roundedRect(margin, yPosition, pageWidth - margin * 2, infoBoxHeight, 4, 4, 'S')
+
+    // Sprint metadata
+    doc.setTextColor(...darkColor)
+    doc.setFontSize(12)
+    doc.setFont('helvetica', 'bold')
+    doc.text('Informações da Sprint', margin + 8, yPosition + 8)
+
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(11)
+    let infoY = yPosition + 18
+
+    // Dates
+    const startDate = new Date(sprint.start_date).toLocaleDateString('pt-BR')
+    const endDate = new Date(sprint.end_date).toLocaleDateString('pt-BR')
+    doc.setTextColor(...grayColor)
+    doc.text('Período:', margin + 8, infoY)
+    doc.setTextColor(...darkColor)
+    doc.text(`${startDate} - ${endDate}`, margin + 35, infoY)
+
+    // Status
+    if (sprintDetails.status) {
+      const statusLabels: Record<string, string> = {
+        planning: 'Planejamento',
+        active: 'Ativo',
+        completed: 'Concluído',
+        cancelled: 'Cancelado',
+      }
+      const statusColors: Record<string, [number, number, number]> = {
+        planning: warningColor,
+        active: primaryColor,
+        completed: successColor,
+        cancelled: dangerColor,
+      }
+      doc.setTextColor(...grayColor)
+      doc.text('Status:', margin + 90, infoY)
+      doc.setTextColor(...(statusColors[sprintDetails.status] || primaryColor))
+      doc.setFont('helvetica', 'bold')
+      doc.text(statusLabels[sprintDetails.status] || sprintDetails.status, margin + 112, infoY)
+      doc.setFont('helvetica', 'normal')
+    }
+
+    // Goal - com quebra de linha correta
+    if (sprintDetails.goal && goalLines.length > 0) {
+      infoY += 8
+      doc.setTextColor(...grayColor)
+      doc.text('Objetivo:', margin + 8, infoY)
+      doc.setTextColor(...darkColor)
+      doc.setFontSize(11)
+      const displayLines = goalLines.slice(0, 3)
+      displayLines.forEach((line: string, idx: number) => {
+        doc.text(line, margin + 35, infoY + idx * 5)
+      })
+    }
+
+    yPosition += infoBoxHeight + 10
+
+    // ========== STATISTICS ==========
+    addSectionHeader('Estatísticas', primaryColor)
+
+    const totalStories = stories.length
+    const completedStories = stories.filter((s) => s.status === 'done').length
+    const inProgressStories = stories.filter((s) => s.status === 'in-progress').length
+    const totalPoints = stories.reduce((sum, s) => sum + (s.story_points || 0), 0)
+    const completedPoints = stories.filter((s) => s.status === 'done').reduce((sum, s) => sum + (s.story_points || 0), 0)
+    const blockedStories = stories.filter((s) => s.status === 'blocked').length
+    const progressPercent = totalPoints > 0 ? Math.round((completedPoints / totalPoints) * 100) : 0
+
+    // Stats grid - 5 columns
+    const statsBoxWidth = (pageWidth - margin * 2 - 20) / 5
+    const stats = [
+      { label: 'Total', value: totalStories.toString(), color: primaryColor },
+      { label: 'Concluídas', value: completedStories.toString(), color: successColor },
+      { label: 'Em Progresso', value: inProgressStories.toString(), color: warningColor },
+      { label: 'Bloqueadas', value: blockedStories.toString(), color: blockedStories > 0 ? dangerColor : grayColor },
+      { label: 'Progresso', value: `${progressPercent}%`, color: progressPercent >= 70 ? successColor : progressPercent >= 40 ? warningColor : dangerColor },
+    ]
+
+    stats.forEach((stat, index) => {
+      const x = margin + index * (statsBoxWidth + 5)
+      doc.setFillColor(...lightBgColor)
+      doc.roundedRect(x, yPosition, statsBoxWidth, 26, 3, 3, 'F')
+
+      doc.setTextColor(...stat.color)
+      doc.setFontSize(18)
+      doc.setFont('helvetica', 'bold')
+      doc.text(stat.value, x + statsBoxWidth / 2, yPosition + 12, { align: 'center' })
+
+      doc.setTextColor(...grayColor)
+      doc.setFontSize(9)
+      doc.setFont('helvetica', 'normal')
+      doc.text(stat.label, x + statsBoxWidth / 2, yPosition + 21, { align: 'center' })
+    })
+
+    yPosition += 32
+
+    // Story Points summary
+    doc.setFillColor(250, 245, 255)
+    doc.roundedRect(margin, yPosition, pageWidth - margin * 2, 16, 3, 3, 'F')
+    doc.setTextColor(...secondaryColor)
+    doc.setFontSize(11)
+    doc.setFont('helvetica', 'bold')
+    doc.text(`Story Points: ${completedPoints} de ${totalPoints} concluídos`, margin + 10, yPosition + 11)
+
+    // Progress bar
+    const barWidth = 70
+    const barX = pageWidth - margin - barWidth - 10
+    doc.setFillColor(220, 220, 220)
+    doc.roundedRect(barX, yPosition + 5, barWidth, 6, 2, 2, 'F')
+    if (progressPercent > 0) {
+      doc.setFillColor(...(progressPercent >= 70 ? successColor : progressPercent >= 40 ? warningColor : dangerColor))
+      doc.roundedRect(barX, yPosition + 5, (barWidth * progressPercent) / 100, 6, 2, 2, 'F')
+    }
+
+    yPosition += 22
+
+    // ========== USER STORIES TABLE ==========
+    if (stories.length > 0) {
+      addSectionHeader(`Histórias de Usuário (${stories.length})`, secondaryColor)
+
+      const statusLabels: Record<string, string> = {
+        todo: 'A Fazer',
+        'in-progress': 'Em Progresso',
+        review: 'Em Revisão',
+        done: 'Concluído',
+        blocked: 'Bloqueado',
+      }
+      const priorityLabels: Record<string, string> = {
+        low: 'Baixa',
+        medium: 'Média',
+        high: 'Alta',
+        urgent: 'Urgente',
+      }
+
+      const tableData = stories.map((story) => [
+        story.title,
+        statusLabels[story.status] || story.status,
+        priorityLabels[story.priority] || story.priority,
+        story.story_points?.toString() || '-',
+        story.assigned_to_profile?.full_name || '-',
+      ])
+
+      autoTable(doc, {
+        startY: yPosition,
+        head: [['Título', 'Status', 'Prioridade', 'Pts', 'Responsável']],
+        body: tableData,
+        theme: 'striped',
+        headStyles: {
+          fillColor: primaryColor,
+          textColor: [255, 255, 255],
+          fontStyle: 'bold',
+          fontSize: 11,
+          cellPadding: 4,
+        },
+        bodyStyles: {
+          fontSize: 11,
+          textColor: darkColor,
+          cellPadding: 3,
+        },
+        alternateRowStyles: {
+          fillColor: lightBgColor,
+        },
+        margin: { left: margin, right: margin },
+        columnStyles: {
+          0: { cellWidth: 65 },
+          1: { cellWidth: 28 },
+          2: { cellWidth: 24 },
+          3: { cellWidth: 14, halign: 'center' },
+          4: { cellWidth: 38 },
+        },
+        didParseCell: (data) => {
+          // Color code status column
+          if (data.column.index === 1 && data.section === 'body') {
+            const status = data.cell.text[0]
+            if (status === 'Concluído') data.cell.styles.textColor = successColor
+            else if (status === 'Em Progresso') data.cell.styles.textColor = warningColor
+            else if (status === 'Bloqueado') data.cell.styles.textColor = dangerColor
+            else if (status === 'Em Revisão') data.cell.styles.textColor = secondaryColor
+          }
+          // Color code priority column
+          if (data.column.index === 2 && data.section === 'body') {
+            const priority = data.cell.text[0]
+            if (priority === 'Urgente' || priority === 'Alta') data.cell.styles.textColor = dangerColor
+            else if (priority === 'Média') data.cell.styles.textColor = warningColor
+          }
+        },
+        didDrawPage: () => {
+          // Reset yPosition after page break
+          yPosition = margin
+        },
+      })
+
+      // @ts-ignore - autoTable adds finalY property
+      yPosition = doc.lastAutoTable.finalY + 12
+    }
+
+    // ========== KANBAN SUMMARY ==========
+    const todoStories = stories.filter((s) => s.status === 'todo')
+    const inProgress = stories.filter((s) => s.status === 'in-progress')
+    const inReview = stories.filter((s) => s.status === 'review')
+    const done = stories.filter((s) => s.status === 'done')
+    const blocked = stories.filter((s) => s.status === 'blocked')
+
+    if (stories.length > 0) {
+      checkNewPage(60)
+      addSectionHeader('Visão Kanban', primaryColor)
+
+      // Usar autoTable para o Kanban - garante que o texto não será cortado
+      const kanbanColumns = [
+        { title: 'A Fazer', items: todoStories, color: grayColor },
+        { title: 'Em Progresso', items: inProgress, color: warningColor },
+        { title: 'Em Revisão', items: inReview, color: secondaryColor },
+        { title: 'Concluído', items: done, color: successColor },
+        { title: 'Bloqueado', items: blocked, color: dangerColor },
+      ]
+
+      // Encontrar o máximo de itens em qualquer coluna
+      const maxItems = Math.max(...kanbanColumns.map((col) => col.items.length))
+
+      // Criar dados da tabela - cada linha é uma "row" do kanban
+      const kanbanTableData: string[][] = []
+      for (let i = 0; i < maxItems; i++) {
+        const row = kanbanColumns.map((col) => col.items[i]?.title || '')
+        kanbanTableData.push(row)
+      }
+
+      // Se não houver itens, mostrar uma linha vazia
+      if (kanbanTableData.length === 0) {
+        kanbanTableData.push(['', '', '', '', ''])
+      }
+
+      autoTable(doc, {
+        startY: yPosition,
+        head: [[
+          `A Fazer (${todoStories.length})`,
+          `Em Progresso (${inProgress.length})`,
+          `Em Revisão (${inReview.length})`,
+          `Concluído (${done.length})`,
+          `Bloqueado (${blocked.length})`,
+        ]],
+        body: kanbanTableData,
+        theme: 'grid',
+        headStyles: {
+          fillColor: primaryColor,
+          textColor: [255, 255, 255],
+          fontStyle: 'bold',
+          fontSize: 9,
+          cellPadding: 3,
+          halign: 'center',
+          valign: 'middle',
+        },
+        bodyStyles: {
+          fontSize: 9,
+          textColor: darkColor,
+          cellPadding: 5,
+          valign: 'top',
+        },
+        columnStyles: {
+          0: { cellWidth: 'auto', fillColor: [248, 250, 252] },
+          1: { cellWidth: 'auto', fillColor: [255, 251, 235] },
+          2: { cellWidth: 'auto', fillColor: [245, 243, 255] },
+          3: { cellWidth: 'auto', fillColor: [236, 253, 245] },
+          4: { cellWidth: 'auto', fillColor: [254, 242, 242] },
+        },
+        didParseCell: (data) => {
+          // Colorir cabeçalhos individualmente
+          if (data.section === 'head') {
+            const colors = [grayColor, warningColor, secondaryColor, successColor, dangerColor]
+            data.cell.styles.fillColor = colors[data.column.index]
+          }
+        },
+        margin: { left: margin, right: margin },
+        tableWidth: 'auto',
+      })
+
+      // @ts-ignore - autoTable adds finalY property
+      yPosition = doc.lastAutoTable.finalY + 12
+    }
+
+    // ========== RETROSPECTIVE ==========
+    if (retroItems.length > 0 || retroMoodRating > 0) {
+      checkNewPage(50)
+      addSectionHeader('Retrospectiva', secondaryColor)
+
+      // Team mood
+      if (retroMoodRating > 0) {
+        const moodLabels: Record<number, string> = {
+          1: 'Muito ruim',
+          2: 'Ruim',
+          3: 'Neutro',
+          4: 'Bom',
+          5: 'Excelente',
+        }
+        const moodColors: Record<number, [number, number, number]> = {
+          1: dangerColor,
+          2: warningColor,
+          3: grayColor,
+          4: successColor,
+          5: primaryColor,
+        }
+        doc.setFillColor(250, 245, 255)
+        doc.roundedRect(margin, yPosition, pageWidth - margin * 2, 14, 3, 3, 'F')
+        doc.setTextColor(...grayColor)
+        doc.setFontSize(11)
+        doc.setFont('helvetica', 'normal')
+        doc.text('Humor do Time:', margin + 10, yPosition + 9)
+        doc.setTextColor(...(moodColors[retroMoodRating] || grayColor))
+        doc.setFont('helvetica', 'bold')
+        doc.text(moodLabels[retroMoodRating] || 'Não avaliado', margin + 55, yPosition + 9)
+        yPosition += 18
+      }
+
+      // Retrospective categories
+      const retroCategories = [
+        { id: 'went_well', title: 'O que foi bem', color: successColor },
+        { id: 'to_improve', title: 'O que melhorar', color: warningColor },
+        { id: 'action_item', title: 'Ações para o próximo sprint', color: primaryColor },
+      ]
+
+      retroCategories.forEach((category) => {
+        const items = retroItems.filter((item) => item.category === category.id)
+        if (items.length === 0) return
+
+        checkNewPage(20 + items.length * 12)
+
+        // Category header
+        doc.setFillColor(...category.color)
+        doc.roundedRect(margin, yPosition, 5, 12, 1, 1, 'F')
+        doc.setTextColor(...darkColor)
+        doc.setFontSize(11)
+        doc.setFont('helvetica', 'bold')
+        doc.text(`${category.title} (${items.length})`, margin + 10, yPosition + 8)
+        yPosition += 16
+
+        // Items
+        items.forEach((item) => {
+          checkNewPage(14)
+          doc.setFillColor(...lightBgColor)
+          doc.roundedRect(margin + 5, yPosition, pageWidth - margin * 2 - 10, 10, 2, 2, 'F')
+          doc.setTextColor(...darkColor)
+          doc.setFontSize(11)
+          doc.setFont('helvetica', 'normal')
+          const itemText = item.content.length > 70 ? item.content.substring(0, 67) + '...' : item.content
+          doc.text(`• ${itemText}`, margin + 10, yPosition + 7)
+
+          // Votes badge
+          if (item.votes > 0) {
+            doc.setTextColor(...grayColor)
+            doc.setFontSize(9)
+            doc.text(`${item.votes} votos`, pageWidth - margin - 15, yPosition + 7)
+          }
+          yPosition += 12
+        })
+
+        yPosition += 6
+      })
+    }
+
+    // ========== AI TIP ==========
+    if (aiTip) {
+      checkNewPage(45)
+
+      // Header
+      doc.setFillColor(250, 245, 255)
+      doc.roundedRect(margin, yPosition, pageWidth - margin * 2, 12, 2, 2, 'F')
+      doc.setTextColor(...secondaryColor)
+      doc.setFontSize(12)
+      doc.setFont('helvetica', 'bold')
+      doc.text('Dica da IA', margin + 10, yPosition + 8)
+      yPosition += 16
+
+      // Content box - texto justificado
+      const contentWidth = pageWidth - margin * 2 - 20
+      doc.setFontSize(11)
+      const tipLines = doc.splitTextToSize(aiTip, contentWidth)
+      const lineHeight = 6
+      const maxLines = 10
+      const displayLines = tipLines.slice(0, maxLines)
+      const tipBoxHeight = Math.max(displayLines.length * lineHeight + 14, 30)
+
+      doc.setFillColor(255, 255, 255)
+      doc.roundedRect(margin, yPosition, pageWidth - margin * 2, tipBoxHeight, 3, 3, 'F')
+      doc.setDrawColor(220, 210, 240)
+      doc.setLineWidth(0.5)
+      doc.roundedRect(margin, yPosition, pageWidth - margin * 2, tipBoxHeight, 3, 3, 'S')
+
+      doc.setTextColor(...darkColor)
+      doc.setFontSize(11)
+      doc.setFont('helvetica', 'normal')
+
+      // Texto justificado
+      const textX = margin + 10
+      const textMaxWidth = contentWidth
+      displayLines.forEach((line: string, idx: number) => {
+        const isLastLine = idx === displayLines.length - 1 || idx === maxLines - 1
+        const lineY = yPosition + 12 + idx * lineHeight
+
+        if (isLastLine) {
+          // Última linha: alinhamento à esquerda
+          doc.text(line, textX, lineY)
+        } else {
+          // Outras linhas: justificado
+          doc.text(line, textX, lineY, {
+            maxWidth: textMaxWidth,
+            align: 'justify',
+          })
+        }
+      })
+      yPosition += tipBoxHeight + 10
+    }
+
+    // ========== ADD FOOTERS TO ALL PAGES ==========
+    const totalPages = doc.getNumberOfPages()
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i)
+      addFooter(i, totalPages)
+    }
+
+    // Save PDF
+    const safeSprintName = sprint.name.replace(/[^a-zA-Z0-9]/g, '_')
+    const safeProjectName = projectName ? projectName.replace(/[^a-zA-Z0-9]/g, '_') + '_' : ''
+    const fileName = `${safeProjectName}Sprint_${safeSprintName}_${new Date().toISOString().split('T')[0]}.pdf`
+    doc.save(fileName)
+    toast.success('PDF exportado com sucesso!')
+  }
+
   const fetchUserStories = async () => {
     setLoading(true)
     try {
@@ -496,6 +1135,27 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
                 >
                   Nova História
                 </Button>
+
+                <Tooltip title="Exportar PDF">
+                  <Button
+                    variant="outlined"
+                    startIcon={<PictureAsPdf />}
+                    onClick={generatePDF}
+                    sx={{
+                      px: 2,
+                      py: 1,
+                      borderRadius: 2,
+                      borderColor: alpha('#ef4444', 0.5),
+                      color: '#ef4444',
+                      '&:hover': {
+                        borderColor: '#ef4444',
+                        bgcolor: alpha('#ef4444', 0.08),
+                      },
+                    }}
+                  >
+                    Exportar
+                  </Button>
+                </Tooltip>
               </Box>
             </Box>
 

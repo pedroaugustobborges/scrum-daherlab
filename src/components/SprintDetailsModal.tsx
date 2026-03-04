@@ -464,8 +464,11 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
     }
 
     // ========== HEADER ==========
-    // Gradient header background
+    // Gradient header background with rounded bottom corners
     const headerHeight = 55
+    const cornerRadius = 12
+
+    // Draw gradient
     for (let i = 0; i < headerHeight; i++) {
       const ratio = i / headerHeight
       const r = Math.round(primaryColor[0] + (secondaryColor[0] - primaryColor[0]) * ratio)
@@ -474,6 +477,27 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
       doc.setFillColor(r, g, b)
       doc.rect(0, i, pageWidth, 1.2, 'F')
     }
+
+    // Create rounded bottom corners by drawing white quarter circles
+    doc.setFillColor(255, 255, 255)
+    // Bottom-left corner
+    doc.rect(0, headerHeight - cornerRadius, cornerRadius, cornerRadius, 'F')
+    doc.setFillColor(
+      Math.round(primaryColor[0] + (secondaryColor[0] - primaryColor[0]) * 0.95),
+      Math.round(primaryColor[1] + (secondaryColor[1] - primaryColor[1]) * 0.95),
+      Math.round(primaryColor[2] + (secondaryColor[2] - primaryColor[2]) * 0.95)
+    )
+    doc.ellipse(cornerRadius, headerHeight - cornerRadius, cornerRadius, cornerRadius, 'F')
+
+    // Bottom-right corner
+    doc.setFillColor(255, 255, 255)
+    doc.rect(pageWidth - cornerRadius, headerHeight - cornerRadius, cornerRadius, cornerRadius, 'F')
+    doc.setFillColor(
+      Math.round(primaryColor[0] + (secondaryColor[0] - primaryColor[0]) * 0.95),
+      Math.round(primaryColor[1] + (secondaryColor[1] - primaryColor[1]) * 0.95),
+      Math.round(primaryColor[2] + (secondaryColor[2] - primaryColor[2]) * 0.95)
+    )
+    doc.ellipse(pageWidth - cornerRadius, headerHeight - cornerRadius, cornerRadius, cornerRadius, 'F')
 
     // Logo DaherLab - canto superior direito, menor
     try {

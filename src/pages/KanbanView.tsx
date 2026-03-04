@@ -97,7 +97,7 @@ const priorityConfig: Record<string, { label: string; color: string }> = {
 
 export default function KanbanView() {
   const { project } = useProjectContext()
-  const { isStakeholder, canEdit } = useUserRole(project?.id)
+  const { isStakeholder } = useUserRole(project?.id)
   const [loading, setLoading] = useState(true)
   const [stories, setStories] = useState<UserStory[]>([])
   const [sprints, setSprints] = useState<Sprint[]>([])

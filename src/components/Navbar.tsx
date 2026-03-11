@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   AppBar,
@@ -26,7 +26,6 @@ import {
   People,
   Settings,
   Logout,
-  AccountCircle,
   SpaceDashboard,
   MenuBook,
   Inventory,
@@ -41,6 +40,7 @@ import {
   ExpandMore,
 } from "@mui/icons-material";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
 
 export default function Navbar() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -49,7 +49,50 @@ export default function Navbar() {
   );
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileProjectsOpen, setMobileProjectsOpen] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const { user, signOut, isAdmin } = useAuth();
+
+  // Fetch avatar from profiles table
+  useEffect(() => {
+    const fetchAvatar = async () => {
+      if (!user?.id) return;
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("avatar_url")
+        .eq("id", user.id)
+        .single();
+
+      if (data?.avatar_url) {
+        setAvatarUrl(data.avatar_url);
+      }
+    };
+
+    fetchAvatar();
+
+    // Subscribe to realtime changes on the profiles table for this user
+    const channel = supabase
+      .channel("navbar-avatar")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "profiles",
+          filter: `id=eq.${user?.id}`,
+        },
+        (payload) => {
+          if (payload.new?.avatar_url !== undefined) {
+            setAvatarUrl(payload.new.avatar_url);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -109,6 +152,16 @@ export default function Navbar() {
   }
 
   const isActive = (path: string) => location.pathname === path;
+
+  const getInitials = () => {
+    const name = user?.user_metadata?.full_name || user?.email || "";
+    return name
+      .split(" ")
+      .map((n: string) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
   const isProjectsActive = projectsMenuItems.some(
     (item) => location.pathname === item.path,
   );
@@ -345,15 +398,19 @@ export default function Navbar() {
             color="inherit"
             sx={{ ml: 1 }}
           >
-            {user?.user_metadata?.avatar_url ? (
-              <Avatar
-                src={user.user_metadata.avatar_url}
-                alt={user.user_metadata?.full_name || "User"}
-                sx={{ width: 32, height: 32 }}
-              />
-            ) : (
-              <AccountCircle />
-            )}
+            <Avatar
+              src={avatarUrl || undefined}
+              alt={user?.user_metadata?.full_name || "User"}
+              sx={{
+                width: 32,
+                height: 32,
+                bgcolor: avatarUrl ? "transparent" : "#7c3aed",
+                fontSize: "0.875rem",
+                fontWeight: 600,
+              }}
+            >
+              {!avatarUrl && getInitials()}
+            </Avatar>
           </IconButton>
 
           <Menu

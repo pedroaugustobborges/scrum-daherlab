@@ -12,7 +12,12 @@ import {
   AvatarGroup,
   Tooltip as MuiTooltip,
 } from "@mui/material";
-import { KeyboardArrowLeft, KeyboardArrowRight, Settings, TrendingUp } from "@mui/icons-material";
+import {
+  KeyboardArrowLeft,
+  KeyboardArrowRight,
+  Settings,
+  TrendingUp,
+} from "@mui/icons-material";
 import {
   PieChart,
   Pie,
@@ -92,8 +97,19 @@ const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType | null> = {
 };
 
 // Widget grid sizes
-const TOP_ROW_WIDGETS: WidgetType[] = ['activeProjects', 'activeSprints', 'teamMetrics', 'actionItems'];
-const BOTTOM_ROW_WIDGETS: WidgetType[] = ['activityOverview', 'taskDistribution', 'recentActivity', 'productivityTrend', 'teamWorkload'];
+const TOP_ROW_WIDGETS: WidgetType[] = [
+  "activeProjects",
+  "activeSprints",
+  "teamMetrics",
+  "actionItems",
+];
+const BOTTOM_ROW_WIDGETS: WidgetType[] = [
+  "activityOverview",
+  "taskDistribution",
+  "recentActivity",
+  "productivityTrend",
+  "teamWorkload",
+];
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -160,7 +176,8 @@ export default function Dashboard() {
 
       const stats: TaskStats = {
         todo: tasks?.filter((t) => t.status === "todo").length || 0,
-        in_progress: tasks?.filter((t) => t.status === "in-progress").length || 0,
+        in_progress:
+          tasks?.filter((t) => t.status === "in-progress").length || 0,
         review: tasks?.filter((t) => t.status === "review").length || 0,
         done: tasks?.filter((t) => t.status === "done").length || 0,
         blocked: tasks?.filter((t) => t.status === "blocked").length || 0,
@@ -179,7 +196,8 @@ export default function Dashboard() {
       const pStats: ProjectStats = {
         total: projects?.length || 0,
         active: projects?.filter((p) => p.status === "active").length || 0,
-        completed: projects?.filter((p) => p.status === "completed").length || 0,
+        completed:
+          projects?.filter((p) => p.status === "completed").length || 0,
         onHold: projects?.filter((p) => p.status === "on-hold").length || 0,
       };
 
@@ -215,7 +233,9 @@ export default function Dashboard() {
           }).length;
 
           weekData.push({
-            day: dayNames[new Date(now.getTime() - i * 24 * 60 * 60 * 1000).getDay()],
+            day: dayNames[
+              new Date(now.getTime() - i * 24 * 60 * 60 * 1000).getDay()
+            ],
             created,
             completed,
           });
@@ -231,16 +251,21 @@ export default function Dashboard() {
         .limit(6);
 
       if (!profilesError && profiles && tasks) {
-        const workloadData: TeamMember[] = profiles.map((profile) => {
-          const memberTasks = tasks.filter((t) => t.assigned_to === profile.id);
-          return {
-            id: profile.id,
-            full_name: profile.full_name,
-            avatar_url: profile.avatar_url,
-            tasks_count: memberTasks.length,
-            completed_count: memberTasks.filter((t) => t.status === "done").length,
-          };
-        }).filter((m) => m.tasks_count > 0);
+        const workloadData: TeamMember[] = profiles
+          .map((profile) => {
+            const memberTasks = tasks.filter(
+              (t) => t.assigned_to === profile.id,
+            );
+            return {
+              id: profile.id,
+              full_name: profile.full_name,
+              avatar_url: profile.avatar_url,
+              tasks_count: memberTasks.length,
+              completed_count: memberTasks.filter((t) => t.status === "done")
+                .length,
+            };
+          })
+          .filter((m) => m.tasks_count > 0);
 
         setTeamWorkload(workloadData);
       }
@@ -254,19 +279,21 @@ export default function Dashboard() {
 
       if (tasksActivityError) throw tasksActivityError;
 
-      const { data: recentSprints, error: sprintsActivityError } = await supabase
-        .from("sprints")
-        .select("id, name, created_at")
-        .order("created_at", { ascending: false })
-        .limit(5);
+      const { data: recentSprints, error: sprintsActivityError } =
+        await supabase
+          .from("sprints")
+          .select("id, name, created_at")
+          .order("created_at", { ascending: false })
+          .limit(5);
 
       if (sprintsActivityError) throw sprintsActivityError;
 
-      const { data: recentProjects, error: projectsActivityError } = await supabase
-        .from("projects")
-        .select("id, name, created_at")
-        .order("created_at", { ascending: false })
-        .limit(5);
+      const { data: recentProjects, error: projectsActivityError } =
+        await supabase
+          .from("projects")
+          .select("id, name, created_at")
+          .order("created_at", { ascending: false })
+          .limit(5);
 
       if (projectsActivityError) throw projectsActivityError;
 
@@ -340,8 +367,10 @@ export default function Dashboard() {
   const summaryText = useMemo(() => {
     if (!projectStats) return "";
     const parts: string[] = [];
-    if (projectStats.completed > 0) parts.push(`${projectStats.completed} projetos concluídos`);
-    if (projectStats.active > 0) parts.push(`${projectStats.active} ativos`);
+    if (projectStats.completed > 0)
+      parts.push(`${projectStats.completed} projetos concluídos`);
+    if (projectStats.active > 0)
+      parts.push(`${projectStats.active} projetos ativos`);
     if (projectStats.onHold > 0) parts.push(`${projectStats.onHold} em espera`);
     return parts.join(" · ") || "Nenhum projeto ainda";
   }, [projectStats]);
@@ -373,9 +402,11 @@ export default function Dashboard() {
         <Box
           sx={{
             display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            mb: 3,
+            justifyContent: "center",
+            alignItems: "center",
+            position: "relative",
+            mb: 4,
+            textAlign: "center",
           }}
         >
           <Box>
@@ -396,6 +427,7 @@ export default function Dashboard() {
                 color: "text.secondary",
                 display: "flex",
                 alignItems: "center",
+                justifyContent: "center",
                 gap: 0.5,
               }}
             >
@@ -410,6 +442,8 @@ export default function Dashboard() {
           <IconButton
             onClick={() => setCustomizeModalOpen(true)}
             sx={{
+              position: "absolute",
+              right: 0,
               bgcolor: "rgba(99, 102, 241, 0.08)",
               color: "#6366f1",
               "&:hover": {
@@ -436,10 +470,17 @@ export default function Dashboard() {
         {bottomRowWidgets.length > 0 && (
           <Grid container spacing={2.5}>
             {/* Productivity Trend - Line Chart */}
-            {isWidgetVisible('productivityTrend') && (
+            {isWidgetVisible("productivityTrend") && (
               <Grid item xs={12} lg={6}>
                 <IOSWidget accentColor="#10b981">
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      mb: 2,
+                    }}
+                  >
                     <Typography variant="h6" fontWeight={700}>
                       Produtividade Semanal
                     </Typography>
@@ -457,24 +498,29 @@ export default function Dashboard() {
                   </Box>
 
                   {loading ? (
-                    <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+                    <Box
+                      sx={{ display: "flex", justifyContent: "center", py: 6 }}
+                    >
                       <CircularProgress />
                     </Box>
                   ) : (
                     <Box sx={{ height: 250 }}>
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={weeklyData}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+                          <CartesianGrid
+                            strokeDasharray="3 3"
+                            stroke="rgba(0,0,0,0.06)"
+                          />
                           <XAxis
                             dataKey="day"
                             axisLine={false}
                             tickLine={false}
-                            tick={{ fill: '#6b7280', fontSize: 12 }}
+                            tick={{ fill: "#6b7280", fontSize: 12 }}
                           />
                           <YAxis
                             axisLine={false}
                             tickLine={false}
-                            tick={{ fill: '#6b7280', fontSize: 12 }}
+                            tick={{ fill: "#6b7280", fontSize: 12 }}
                           />
                           <Tooltip
                             contentStyle={{
@@ -491,8 +537,16 @@ export default function Dashboard() {
                           />
                           <Legend
                             formatter={(value) => (
-                              <span style={{ color: '#4b5563', fontSize: 13, fontWeight: 500 }}>
-                                {value === "completed" ? "Concluídas" : "Criadas"}
+                              <span
+                                style={{
+                                  color: "#4b5563",
+                                  fontSize: 13,
+                                  fontWeight: 500,
+                                }}
+                              >
+                                {value === "completed"
+                                  ? "Concluídas"
+                                  : "Criadas"}
                               </span>
                             )}
                           />
@@ -521,10 +575,17 @@ export default function Dashboard() {
             )}
 
             {/* Team Workload with Avatars - ClickUp style */}
-            {isWidgetVisible('teamWorkload') && (
+            {isWidgetVisible("teamWorkload") && (
               <Grid item xs={12} lg={6}>
                 <IOSWidget accentColor="#7c3aed">
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      mb: 2,
+                    }}
+                  >
                     <Typography variant="h6" fontWeight={700}>
                       Carga de Trabalho do Time
                     </Typography>
@@ -554,18 +615,33 @@ export default function Dashboard() {
                   </Box>
 
                   {loading ? (
-                    <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+                    <Box
+                      sx={{ display: "flex", justifyContent: "center", py: 6 }}
+                    >
                       <CircularProgress />
                     </Box>
                   ) : teamWorkload.length > 0 ? (
-                    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                    <Box
+                      sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+                    >
                       {teamWorkload.slice(0, 5).map((member) => {
-                        const progress = member.tasks_count > 0
-                          ? Math.round((member.completed_count / member.tasks_count) * 100)
-                          : 0;
+                        const progress =
+                          member.tasks_count > 0
+                            ? Math.round(
+                                (member.completed_count / member.tasks_count) *
+                                  100,
+                              )
+                            : 0;
 
                         return (
-                          <Box key={member.id} sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                          <Box
+                            key={member.id}
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 2,
+                            }}
+                          >
                             <MuiTooltip title={member.full_name} arrow>
                               <Avatar
                                 src={member.avatar_url}
@@ -583,12 +659,27 @@ export default function Dashboard() {
                               </Avatar>
                             </MuiTooltip>
                             <Box sx={{ flex: 1 }}>
-                              <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
-                                <Typography variant="body2" fontWeight={600} noWrap sx={{ maxWidth: 150 }}>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                  mb: 0.5,
+                                }}
+                              >
+                                <Typography
+                                  variant="body2"
+                                  fontWeight={600}
+                                  noWrap
+                                  sx={{ maxWidth: 150 }}
+                                >
                                   {member.full_name.split(" ")[0]}
                                 </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  {member.completed_count}/{member.tasks_count} tarefas
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                >
+                                  {member.completed_count}/{member.tasks_count}{" "}
+                                  tarefas
                                 </Typography>
                               </Box>
                               <LinearProgress
@@ -600,7 +691,12 @@ export default function Dashboard() {
                                   bgcolor: "rgba(124, 58, 237, 0.1)",
                                   "& .MuiLinearProgress-bar": {
                                     borderRadius: 4,
-                                    bgcolor: progress >= 75 ? "#10b981" : progress >= 50 ? "#f59e0b" : "#7c3aed",
+                                    bgcolor:
+                                      progress >= 75
+                                        ? "#10b981"
+                                        : progress >= 50
+                                          ? "#f59e0b"
+                                          : "#7c3aed",
                                   },
                                 }}
                               />
@@ -609,7 +705,12 @@ export default function Dashboard() {
                               variant="caption"
                               fontWeight={700}
                               sx={{
-                                color: progress >= 75 ? "#10b981" : progress >= 50 ? "#f59e0b" : "#7c3aed",
+                                color:
+                                  progress >= 75
+                                    ? "#10b981"
+                                    : progress >= 50
+                                      ? "#f59e0b"
+                                      : "#7c3aed",
                                 minWidth: 36,
                                 textAlign: "right",
                               }}
@@ -632,7 +733,7 @@ export default function Dashboard() {
             )}
 
             {/* Activity Overview */}
-            {isWidgetVisible('activityOverview') && (
+            {isWidgetVisible("activityOverview") && (
               <Grid item xs={12} md={6} lg={4}>
                 <IOSWidget accentColor="#6366f1">
                   <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
@@ -640,13 +741,21 @@ export default function Dashboard() {
                   </Typography>
 
                   {loading ? (
-                    <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+                    <Box
+                      sx={{ display: "flex", justifyContent: "center", py: 6 }}
+                    >
                       <CircularProgress />
                     </Box>
                   ) : taskStats && taskStats.total > 0 ? (
                     <Box>
                       <Box sx={{ mb: 3 }}>
-                        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            mb: 1,
+                          }}
+                        >
                           <Typography variant="body2" color="text.secondary">
                             Progresso Geral
                           </Typography>
@@ -663,11 +772,31 @@ export default function Dashboard() {
 
                       <Grid container spacing={1.5}>
                         {[
-                          { label: "A Fazer", value: taskStats.todo, color: "#6b7280" },
-                          { label: "Em Progresso", value: taskStats.in_progress, color: "#f59e0b" },
-                          { label: "Em Revisão", value: taskStats.review, color: "#8b5cf6" },
-                          { label: "Concluído", value: taskStats.done, color: "#10b981" },
-                          { label: "Bloqueado", value: taskStats.blocked, color: "#ef4444" },
+                          {
+                            label: "A Fazer",
+                            value: taskStats.todo,
+                            color: "#6b7280",
+                          },
+                          {
+                            label: "Em Progresso",
+                            value: taskStats.in_progress,
+                            color: "#f59e0b",
+                          },
+                          {
+                            label: "Em Revisão",
+                            value: taskStats.review,
+                            color: "#8b5cf6",
+                          },
+                          {
+                            label: "Concluído",
+                            value: taskStats.done,
+                            color: "#10b981",
+                          },
+                          {
+                            label: "Bloqueado",
+                            value: taskStats.blocked,
+                            color: "#ef4444",
+                          },
                         ].map((stat) => (
                           <Grid item xs={6} key={stat.label}>
                             <Box
@@ -679,10 +808,17 @@ export default function Dashboard() {
                                 borderColor: `${stat.color}20`,
                               }}
                             >
-                              <Typography variant="caption" color="text.secondary">
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
                                 {stat.label}
                               </Typography>
-                              <Typography variant="h6" fontWeight={700} sx={{ color: stat.color }}>
+                              <Typography
+                                variant="h6"
+                                fontWeight={700}
+                                sx={{ color: stat.color }}
+                              >
                                 {stat.value}
                               </Typography>
                             </Box>
@@ -702,7 +838,7 @@ export default function Dashboard() {
             )}
 
             {/* Donut Chart - Task Distribution */}
-            {isWidgetVisible('taskDistribution') && (
+            {isWidgetVisible("taskDistribution") && (
               <Grid item xs={12} md={6} lg={4}>
                 <IOSWidget accentColor="#8b5cf6">
                   <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
@@ -710,7 +846,9 @@ export default function Dashboard() {
                   </Typography>
 
                   {loading ? (
-                    <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+                    <Box
+                      sx={{ display: "flex", justifyContent: "center", py: 6 }}
+                    >
                       <CircularProgress />
                     </Box>
                   ) : taskStats && taskStats.total > 0 ? (
@@ -719,11 +857,31 @@ export default function Dashboard() {
                         <PieChart>
                           <Pie
                             data={[
-                              { name: "A Fazer", value: taskStats.todo, color: "#6b7280" },
-                              { name: "Em Progresso", value: taskStats.in_progress, color: "#f59e0b" },
-                              { name: "Em Revisão", value: taskStats.review, color: "#8b5cf6" },
-                              { name: "Concluído", value: taskStats.done, color: "#10b981" },
-                              { name: "Bloqueado", value: taskStats.blocked, color: "#ef4444" },
+                              {
+                                name: "A Fazer",
+                                value: taskStats.todo,
+                                color: "#6b7280",
+                              },
+                              {
+                                name: "Em Progresso",
+                                value: taskStats.in_progress,
+                                color: "#f59e0b",
+                              },
+                              {
+                                name: "Em Revisão",
+                                value: taskStats.review,
+                                color: "#8b5cf6",
+                              },
+                              {
+                                name: "Concluído",
+                                value: taskStats.done,
+                                color: "#10b981",
+                              },
+                              {
+                                name: "Bloqueado",
+                                value: taskStats.blocked,
+                                color: "#ef4444",
+                              },
                             ].filter((item) => item.value > 0)}
                             cx="50%"
                             cy="50%"
@@ -734,19 +892,45 @@ export default function Dashboard() {
                             stroke="none"
                           >
                             {[
-                              { name: "A Fazer", value: taskStats.todo, color: "#6b7280" },
-                              { name: "Em Progresso", value: taskStats.in_progress, color: "#f59e0b" },
-                              { name: "Em Revisão", value: taskStats.review, color: "#8b5cf6" },
-                              { name: "Concluído", value: taskStats.done, color: "#10b981" },
-                              { name: "Bloqueado", value: taskStats.blocked, color: "#ef4444" },
+                              {
+                                name: "A Fazer",
+                                value: taskStats.todo,
+                                color: "#6b7280",
+                              },
+                              {
+                                name: "Em Progresso",
+                                value: taskStats.in_progress,
+                                color: "#f59e0b",
+                              },
+                              {
+                                name: "Em Revisão",
+                                value: taskStats.review,
+                                color: "#8b5cf6",
+                              },
+                              {
+                                name: "Concluído",
+                                value: taskStats.done,
+                                color: "#10b981",
+                              },
+                              {
+                                name: "Bloqueado",
+                                value: taskStats.blocked,
+                                color: "#ef4444",
+                              },
                             ]
                               .filter((item) => item.value > 0)
                               .map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.color} />
+                                <Cell
+                                  key={`cell-${index}`}
+                                  fill={entry.color}
+                                />
                               ))}
                           </Pie>
                           <Tooltip
-                            formatter={(value, name) => [`${value} tarefas`, name]}
+                            formatter={(value, name) => [
+                              `${value} tarefas`,
+                              name,
+                            ]}
                             contentStyle={{
                               backgroundColor: "#ffffff",
                               border: "1px solid rgba(0,0,0,0.08)",
@@ -765,7 +949,11 @@ export default function Dashboard() {
                           textAlign: "center",
                         }}
                       >
-                        <Typography variant="h5" fontWeight={800} color="primary.main">
+                        <Typography
+                          variant="h5"
+                          fontWeight={800}
+                          color="primary.main"
+                        >
                           {taskStats.total}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
@@ -785,7 +973,7 @@ export default function Dashboard() {
             )}
 
             {/* Recent Activity */}
-            {isWidgetVisible('recentActivity') && (
+            {isWidgetVisible("recentActivity") && (
               <Grid item xs={12} md={6} lg={4}>
                 <IOSWidget accentColor="#6366f1">
                   <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
@@ -793,7 +981,9 @@ export default function Dashboard() {
                   </Typography>
 
                   {loading ? (
-                    <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+                    <Box
+                      sx={{ display: "flex", justifyContent: "center", py: 4 }}
+                    >
                       <CircularProgress />
                     </Box>
                   ) : recentActivities.length > 0 ? (
@@ -804,31 +994,72 @@ export default function Dashboard() {
                             key={item.id}
                             sx={{
                               py: 1.5,
-                              borderBottom: index < paginatedActivities.length - 1 ? "1px solid" : "none",
+                              borderBottom:
+                                index < paginatedActivities.length - 1
+                                  ? "1px solid"
+                                  : "none",
                               borderColor: "divider",
                             }}
                           >
                             <Typography variant="body2" fontWeight={600}>
                               {item.action}
                             </Typography>
-                            <Typography variant="caption" color="text.secondary" noWrap>
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                              noWrap
+                            >
                               {item.task}
                             </Typography>
-                            <Typography variant="caption" display="block" color="text.secondary" sx={{ mt: 0.25 }}>
+                            <Typography
+                              variant="caption"
+                              display="block"
+                              color="text.secondary"
+                              sx={{ mt: 0.25 }}
+                            >
                               {item.time}
                             </Typography>
                           </Box>
                         ))}
                       </Box>
                       {totalActivitiesPages > 1 && (
-                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1, mt: 2, pt: 1.5, borderTop: "1px solid", borderColor: "divider" }}>
-                          <IconButton size="small" onClick={() => setActivitiesPage((prev) => Math.max(prev - 1, 1))} disabled={activitiesPage === 1}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: 1,
+                            mt: 2,
+                            pt: 1.5,
+                            borderTop: "1px solid",
+                            borderColor: "divider",
+                          }}
+                        >
+                          <IconButton
+                            size="small"
+                            onClick={() =>
+                              setActivitiesPage((prev) => Math.max(prev - 1, 1))
+                            }
+                            disabled={activitiesPage === 1}
+                          >
                             <KeyboardArrowLeft fontSize="small" />
                           </IconButton>
-                          <Typography variant="caption" fontWeight={600} color="text.secondary">
+                          <Typography
+                            variant="caption"
+                            fontWeight={600}
+                            color="text.secondary"
+                          >
                             {activitiesPage} / {totalActivitiesPages}
                           </Typography>
-                          <IconButton size="small" onClick={() => setActivitiesPage((prev) => Math.min(prev + 1, totalActivitiesPages))} disabled={activitiesPage === totalActivitiesPages}>
+                          <IconButton
+                            size="small"
+                            onClick={() =>
+                              setActivitiesPage((prev) =>
+                                Math.min(prev + 1, totalActivitiesPages),
+                              )
+                            }
+                            disabled={activitiesPage === totalActivitiesPages}
+                          >
                             <KeyboardArrowRight fontSize="small" />
                           </IconButton>
                         </Box>

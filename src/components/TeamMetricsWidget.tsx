@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { Box, Paper, Typography, CircularProgress, Avatar, AvatarGroup } from '@mui/material'
+import { Box, Typography, CircularProgress, Avatar, AvatarGroup } from '@mui/material'
 import { People, TrendingUp, Speed } from '@mui/icons-material'
 import { supabase } from '@/lib/supabase'
+import { IOSWidget } from './ui'
 
 interface TeamMember {
   id: string
@@ -90,41 +91,16 @@ export default function TeamMetricsWidget() {
 
   if (loading) {
     return (
-      <Paper
-        elevation={0}
-        sx={{
-          p: 3,
-          height: '100%',
-          background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)',
-          border: '2px solid rgba(124, 58, 237, 0.2)',
-          borderRadius: 3,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <CircularProgress size={40} sx={{ color: '#7c3aed' }} />
-      </Paper>
+      <IOSWidget accentColor="#7c3aed">
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 200 }}>
+          <CircularProgress size={40} sx={{ color: '#7c3aed' }} />
+        </Box>
+      </IOSWidget>
     )
   }
 
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        p: 3,
-        height: '100%',
-        background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)',
-        border: '2px solid rgba(124, 58, 237, 0.2)',
-        borderRadius: 3,
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: '0 12px 24px rgba(124, 58, 237, 0.15)',
-          border: '2px solid rgba(124, 58, 237, 0.4)',
-        },
-      }}
-    >
+    <IOSWidget accentColor="#7c3aed">
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
         <Box
           sx={{
@@ -230,6 +206,6 @@ export default function TeamMetricsWidget() {
           Nenhum membro cadastrado
         </Typography>
       )}
-    </Paper>
+    </IOSWidget>
   )
 }

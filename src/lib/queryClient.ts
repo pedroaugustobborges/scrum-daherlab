@@ -149,6 +149,12 @@ export const queryKeys = {
     week: (userId: string, weekStart: string) =>
       [...queryKeys.externalEvents.all, userId, weekStart] as const,
   },
+
+  // Dashboard Configuration
+  dashboardConfig: {
+    all: ['dashboardConfig'] as const,
+    user: (userId: string) => [...queryKeys.dashboardConfig.all, userId] as const,
+  },
 }
 
 /**
@@ -183,6 +189,11 @@ export const invalidateQueries = {
     queryClient.invalidateQueries({ queryKey: queryKeys.dependencies.list(projectId) })
     queryClient.invalidateQueries({ queryKey: queryKeys.gantt.dependencies(projectId) })
     queryClient.invalidateQueries({ queryKey: queryKeys.gantt.criticalPath(projectId) })
+  },
+
+  // Invalidate dashboard config
+  dashboardConfig: (userId: string) => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.dashboardConfig.user(userId) })
   },
 
   // Invalidate all queries (use sparingly)

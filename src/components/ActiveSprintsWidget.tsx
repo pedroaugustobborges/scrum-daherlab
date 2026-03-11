@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Box, Paper, Typography, CircularProgress, Chip, LinearProgress, IconButton } from '@mui/material'
+import { Box, Typography, CircularProgress, Chip, LinearProgress, IconButton } from '@mui/material'
 import { SpaceDashboard, CalendarToday, KeyboardArrowUp, KeyboardArrowDown } from '@mui/icons-material'
 import { supabase } from '@/lib/supabase'
 import SprintDetailsModal from './SprintDetailsModal'
+import { IOSWidget } from './ui'
 
 interface ActiveSprint {
   id: string
@@ -117,41 +118,16 @@ export default function ActiveSprintsWidget() {
 
   if (loading) {
     return (
-      <Paper
-        elevation={0}
-        sx={{
-          p: 3,
-          height: '100%',
-          background: 'linear-gradient(135deg, rgba(8, 145, 178, 0.05) 0%, rgba(6, 182, 212, 0.05) 100%)',
-          border: '2px solid rgba(8, 145, 178, 0.2)',
-          borderRadius: 3,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <CircularProgress size={40} sx={{ color: '#0891b2' }} />
-      </Paper>
+      <IOSWidget accentColor="#0891b2">
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 200 }}>
+          <CircularProgress size={40} sx={{ color: '#0891b2' }} />
+        </Box>
+      </IOSWidget>
     )
   }
 
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        p: 3,
-        height: '100%',
-        background: 'linear-gradient(135deg, rgba(8, 145, 178, 0.05) 0%, rgba(6, 182, 212, 0.05) 100%)',
-        border: '2px solid rgba(8, 145, 178, 0.2)',
-        borderRadius: 3,
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: '0 12px 24px rgba(8, 145, 178, 0.15)',
-          border: '2px solid rgba(8, 145, 178, 0.4)',
-        },
-      }}
-    >
+    <IOSWidget accentColor="#0891b2">
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
         <Box
           sx={{
@@ -335,6 +311,6 @@ export default function ActiveSprintsWidget() {
           }}
         />
       )}
-    </Paper>
+    </IOSWidget>
   )
 }

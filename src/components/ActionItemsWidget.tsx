@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { Box, Paper, Typography, CircularProgress, Chip, Stack } from '@mui/material'
+import { Box, Typography, CircularProgress, Chip, Stack } from '@mui/material'
 import { CheckCircle, Person, TrendingUp } from '@mui/icons-material'
 import { supabase } from '@/lib/supabase'
+import { IOSWidget } from './ui'
 
 interface ActionItem {
   id: string
@@ -103,41 +104,16 @@ export default function ActionItemsWidget() {
 
   if (loading) {
     return (
-      <Paper
-        elevation={0}
-        sx={{
-          p: 3,
-          height: '100%',
-          background: 'linear-gradient(135deg, rgba(5, 150, 105, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%)',
-          border: '2px solid rgba(5, 150, 105, 0.2)',
-          borderRadius: 3,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <CircularProgress size={40} sx={{ color: '#059669' }} />
-      </Paper>
+      <IOSWidget accentColor="#059669">
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 200 }}>
+          <CircularProgress size={40} sx={{ color: '#059669' }} />
+        </Box>
+      </IOSWidget>
     )
   }
 
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        p: 3,
-        height: '100%',
-        background: 'linear-gradient(135deg, rgba(5, 150, 105, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%)',
-        border: '2px solid rgba(5, 150, 105, 0.2)',
-        borderRadius: 3,
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: '0 12px 24px rgba(5, 150, 105, 0.15)',
-          border: '2px solid rgba(5, 150, 105, 0.4)',
-        },
-      }}
-    >
+    <IOSWidget accentColor="#059669">
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
         <Box
           sx={{
@@ -281,6 +257,6 @@ export default function ActionItemsWidget() {
           Nenhuma ação pendente
         </Typography>
       )}
-    </Paper>
+    </IOSWidget>
   )
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Box, Typography, CircularProgress, Chip, Stack } from '@mui/material'
-import { CheckCircle, Person, TrendingUp } from '@mui/icons-material'
+import { Box, Typography, CircularProgress, Chip, Stack, IconButton } from '@mui/material'
+import { CheckCircle, Person, TrendingUp, KeyboardArrowUp, KeyboardArrowDown } from '@mui/icons-material'
 import { supabase } from '@/lib/supabase'
 import { IOSWidget } from './ui'
 
@@ -13,11 +13,18 @@ interface ActionItem {
   votes: number
 }
 
+const ITEMS_PER_PAGE = 2
+
 export default function ActionItemsWidget() {
   const [loading, setLoading] = useState(true)
   const [actionItems, setActionItems] = useState<ActionItem[]>([])
   const [totalCount, setTotalCount] = useState(0)
   const [completionRate, setCompletionRate] = useState(0)
+  const [currentPage, setCurrentPage] = useState(1)
+
+  const totalPages = Math.ceil(actionItems.length / ITEMS_PER_PAGE)
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+  const paginatedItems = actionItems.slice(startIndex, startIndex + ITEMS_PER_PAGE)
 
   useEffect(() => {
     fetchActionItems()
@@ -71,7 +78,7 @@ export default function ActionItemsWidget() {
       // Filter pending items
       const pendingItems = transformedItems.filter((item) => item.status === 'pending' || item.status === 'in_progress')
 
-      setActionItems(pendingItems.slice(0, 5))
+      setActionItems(pendingItems)
       setTotalCount(pendingItems.length)
 
       // Calculate completion rate
@@ -114,6 +121,7 @@ export default function ActionItemsWidget() {
 
   return (
     <IOSWidget accentColor="#059669">
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
         <Box
           sx={{
@@ -160,8 +168,8 @@ export default function ActionItemsWidget() {
 
       {actionItems.length > 0 ? (
         <>
-          <Stack spacing={1.5}>
-            {actionItems.map((item) => {
+          <Stack spacing={1.5} sx={{ flex: 1, overflowY: 'auto' }}>
+            {paginatedItems.map((item) => {
               const statusStyle = getStatusColor(item.status)
               return (
                 <Box
@@ -242,14 +250,46 @@ export default function ActionItemsWidget() {
             })}
           </Stack>
 
-          {totalCount > 5 && (
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ display: 'block', mt: 1.5, textAlign: 'center', fontWeight: 600 }}
+          {totalPages > 1 && (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 1,
+                mt: 2,
+                pt: 1.5,
+                borderTop: '1px solid rgba(5, 150, 105, 0.1)',
+              }}
             >
-              +{totalCount - 5} {totalCount - 5 === 1 ? 'outra ação' : 'outras ações'}
-            </Typography>
+              <IconButton
+                size="small"
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                sx={{
+                  color: '#059669',
+                  '&:disabled': { color: 'rgba(5, 150, 105, 0.3)' },
+                  '&:hover': { bgcolor: 'rgba(5, 150, 105, 0.1)' },
+                }}
+              >
+                <KeyboardArrowUp fontSize="small" />
+              </IconButton>
+              <Typography variant="caption" fontWeight={600} sx={{ color: '#059669' }}>
+                {currentPage} / {totalPages}
+              </Typography>
+              <IconButton
+                size="small"
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                sx={{
+                  color: '#059669',
+                  '&:disabled': { color: 'rgba(5, 150, 105, 0.3)' },
+                  '&:hover': { bgcolor: 'rgba(5, 150, 105, 0.1)' },
+                }}
+              >
+                <KeyboardArrowDown fontSize="small" />
+              </IconButton>
+            </Box>
           )}
         </>
       ) : (
@@ -257,6 +297,7 @@ export default function ActionItemsWidget() {
           Nenhuma ação pendente
         </Typography>
       )}
+      </Box>
     </IOSWidget>
   )
 }

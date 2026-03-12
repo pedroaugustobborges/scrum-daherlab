@@ -973,6 +973,7 @@ export default function Dashboard() {
             {isWidgetVisible("recentActivity") && (
               <Grid item xs={12} md={6} lg={4}>
                 <IOSWidget accentColor="#6366f1">
+                  <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
                   <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
                     Atividade Recente
                   </Typography>
@@ -985,7 +986,7 @@ export default function Dashboard() {
                     </Box>
                   ) : recentActivities.length > 0 ? (
                     <>
-                      <Box sx={{ maxHeight: 200, overflowY: "auto" }}>
+                      <Box sx={{ flex: 1, overflowY: "auto" }}>
                         {paginatedActivities.map((item, index) => (
                           <Box
                             key={item.id}
@@ -1069,6 +1070,7 @@ export default function Dashboard() {
                       </Typography>
                     </Box>
                   )}
+                  </Box>
                 </IOSWidget>
               </Grid>
             )}

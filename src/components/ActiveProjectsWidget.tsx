@@ -140,6 +140,7 @@ export default function ActiveProjectsWidget() {
 
   return (
     <IOSWidget accentColor="#1e40af">
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
         <Box
           sx={{
@@ -186,7 +187,7 @@ export default function ActiveProjectsWidget() {
 
           <Box
             sx={{
-              maxHeight: 180,
+              flex: 1,
               overflowY: 'auto',
               display: 'flex',
               flexDirection: 'column',
@@ -334,6 +335,7 @@ export default function ActiveProjectsWidget() {
           Nenhum projeto ativo no momento
         </Typography>
       )}
+      </Box>
 
       {selectedProject && (
         <ProjectDetailsModal

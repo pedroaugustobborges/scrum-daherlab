@@ -128,6 +128,7 @@ export default function ActiveSprintsWidget() {
 
   return (
     <IOSWidget accentColor="#0891b2">
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
         <Box
           sx={{
@@ -174,7 +175,7 @@ export default function ActiveSprintsWidget() {
 
           <Box
             sx={{
-              maxHeight: 180,
+              flex: 1,
               overflowY: 'auto',
               display: 'flex',
               flexDirection: 'column',
@@ -296,6 +297,7 @@ export default function ActiveSprintsWidget() {
           Nenhum sprint ativo no momento
         </Typography>
       )}
+      </Box>
 
       {selectedSprint && (
         <SprintDetailsModal

@@ -97,7 +97,7 @@ export const WIDGET_LABELS: Record<WidgetType, string> = {
   activeSprints: 'Sprints Ativos',
   actionItems: 'Ações Pendentes',
   activityOverview: 'Visão Geral',
-  taskDistribution: 'Distribuição de Tarefas',
+  taskDistribution: 'Status das Tarefas',
   recentActivity: 'Atividade Recente',
   productivityTrend: 'Produtividade Semanal',
   teamWorkload: 'Carga do Time',

@@ -740,12 +740,56 @@ export default function Dashboard() {
           </IOSWidget>
         );
 
-      case "taskDistribution":
+      case "taskDistribution": {
+        // Generate insight text for data storytelling
+        const getInsightText = () => {
+          if (!taskStats || taskStats.total === 0) return "";
+
+          const completedPercent = Math.round((taskStats.done / taskStats.total) * 100);
+
+          // Priority: blocked tasks (alert), then completion rate
+          if (taskStats.blocked > 0) {
+            return `${taskStats.blocked} ${taskStats.blocked === 1 ? "tarefa bloqueada" : "tarefas bloqueadas"} requer atenção`;
+          }
+          if (completedPercent >= 75) {
+            return `${completedPercent}% das tarefas concluídas`;
+          }
+          if (taskStats.in_progress > 0) {
+            return `${taskStats.in_progress} ${taskStats.in_progress === 1 ? "tarefa" : "tarefas"} em andamento`;
+          }
+          return `${completedPercent}% das tarefas concluídas`;
+        };
+
+        const taskStatusData = [
+          { name: "A Fazer", value: taskStats?.todo || 0, color: "#6b7280" },
+          { name: "Em Progresso", value: taskStats?.in_progress || 0, color: "#f59e0b" },
+          { name: "Em Revisão", value: taskStats?.review || 0, color: "#8b5cf6" },
+          { name: "Concluído", value: taskStats?.done || 0, color: "#10b981" },
+          { name: "Bloqueado", value: taskStats?.blocked || 0, color: "#ef4444" },
+        ].filter((item) => item.value > 0);
+
+        const insightText = getInsightText();
+        const insightColor = taskStats?.blocked && taskStats.blocked > 0 ? "#ef4444" : "#6b7280";
+
         return (
           <IOSWidget accentColor="#8b5cf6">
-            <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
-              Distribuição de Tarefas
-            </Typography>
+            <Box sx={{ mb: 1.5 }}>
+              <Typography variant="h6" fontWeight={700}>
+                Status das Tarefas
+              </Typography>
+              {taskStats && taskStats.total > 0 && (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: insightColor,
+                    fontWeight: 500,
+                    mt: 0.5,
+                  }}
+                >
+                  {insightText}
+                </Typography>
+              )}
+            </Box>
 
             {loading ? (
               <Box
@@ -754,113 +798,108 @@ export default function Dashboard() {
                 <CircularProgress />
               </Box>
             ) : taskStats && taskStats.total > 0 ? (
-              <Box sx={{ position: "relative", height: 220 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={[
-                        {
-                          name: "A Fazer",
-                          value: taskStats.todo,
-                          color: "#6b7280",
-                        },
-                        {
-                          name: "Em Progresso",
-                          value: taskStats.in_progress,
-                          color: "#f59e0b",
-                        },
-                        {
-                          name: "Em Revisão",
-                          value: taskStats.review,
-                          color: "#8b5cf6",
-                        },
-                        {
-                          name: "Concluído",
-                          value: taskStats.done,
-                          color: "#10b981",
-                        },
-                        {
-                          name: "Bloqueado",
-                          value: taskStats.blocked,
-                          color: "#ef4444",
-                        },
-                      ].filter((item) => item.value > 0)}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={50}
-                      outerRadius={80}
-                      paddingAngle={3}
-                      dataKey="value"
-                      stroke="none"
-                    >
-                      {[
-                        {
-                          name: "A Fazer",
-                          value: taskStats.todo,
-                          color: "#6b7280",
-                        },
-                        {
-                          name: "Em Progresso",
-                          value: taskStats.in_progress,
-                          color: "#f59e0b",
-                        },
-                        {
-                          name: "Em Revisão",
-                          value: taskStats.review,
-                          color: "#8b5cf6",
-                        },
-                        {
-                          name: "Concluído",
-                          value: taskStats.done,
-                          color: "#10b981",
-                        },
-                        {
-                          name: "Bloqueado",
-                          value: taskStats.blocked,
-                          color: "#ef4444",
-                        },
-                      ]
-                        .filter((item) => item.value > 0)
-                        .map((entry, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={entry.color}
-                          />
+              <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                {/* Donut Chart - Centered and larger */}
+                <Box sx={{ position: "relative", width: 200, height: 200 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={taskStatusData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={55}
+                        outerRadius={90}
+                        paddingAngle={2}
+                        dataKey="value"
+                        stroke="none"
+                      >
+                        {taskStatusData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
-                    </Pie>
-                    <Tooltip
-                      formatter={(value, name) => [
-                        `${value} tarefas`,
-                        name,
-                      ]}
-                      contentStyle={{
-                        backgroundColor: "#ffffff",
-                        border: "1px solid rgba(0,0,0,0.08)",
-                        borderRadius: 12,
-                        padding: "10px 14px",
-                      }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
+                      </Pie>
+                      <Tooltip
+                        formatter={(value, name) => [`${value} tarefas`, name]}
+                        contentStyle={{
+                          backgroundColor: "#ffffff",
+                          border: "1px solid rgba(0,0,0,0.08)",
+                          borderRadius: 12,
+                          padding: "10px 14px",
+                          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                        }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  {/* Center label */}
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      transform: "translate(-50%, -50%)",
+                      textAlign: "center",
+                    }}
+                  >
+                    <Typography
+                      variant="h4"
+                      fontWeight={800}
+                      sx={{ color: "#6366f1" }}
+                    >
+                      {taskStats.total}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" fontWeight={500}>
+                      Total
+                    </Typography>
+                  </Box>
+                </Box>
+
+                {/* Labels - Below the chart */}
                 <Box
                   sx={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    textAlign: "center",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    justifyContent: "center",
+                    gap: 1.5,
+                    mt: 2,
+                    width: "100%",
                   }}
                 >
-                  <Typography
-                    variant="h5"
-                    fontWeight={800}
-                    color="primary.main"
-                  >
-                    {taskStats.total}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Total
-                  </Typography>
+                  {taskStatusData.map((item) => {
+                    const percentage = Math.round((item.value / taskStats.total) * 100);
+                    return (
+                      <Box
+                        key={item.name}
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 0.75,
+                          px: 1.5,
+                          py: 0.5,
+                          borderRadius: 2,
+                          bgcolor: `${item.color}10`,
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: "50%",
+                            bgcolor: item.color,
+                            flexShrink: 0,
+                          }}
+                        />
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: item.color,
+                            fontWeight: 600,
+                            fontSize: "0.75rem",
+                          }}
+                        >
+                          {item.name} {percentage}%
+                        </Typography>
+                      </Box>
+                    );
+                  })}
                 </Box>
               </Box>
             ) : (
@@ -872,6 +911,7 @@ export default function Dashboard() {
             )}
           </IOSWidget>
         );
+      }
 
       case "recentActivity":
         return (

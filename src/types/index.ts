@@ -59,7 +59,6 @@ export interface Task {
 export type WidgetType =
   | 'activeProjects'
   | 'activeSprints'
-  | 'teamMetrics'
   | 'actionItems'
   | 'activityOverview'
   | 'taskDistribution'
@@ -83,13 +82,12 @@ export const DEFAULT_DASHBOARD_CONFIG: DashboardConfig = {
   widgets: [
     { id: '1', type: 'activeProjects', visible: true, order: 0 },
     { id: '2', type: 'activeSprints', visible: true, order: 1 },
-    { id: '3', type: 'teamMetrics', visible: true, order: 2 },
-    { id: '4', type: 'actionItems', visible: true, order: 3 },
-    { id: '5', type: 'productivityTrend', visible: true, order: 4 },
-    { id: '6', type: 'teamWorkload', visible: true, order: 5 },
-    { id: '7', type: 'activityOverview', visible: true, order: 6 },
-    { id: '8', type: 'taskDistribution', visible: true, order: 7 },
-    { id: '9', type: 'recentActivity', visible: true, order: 8 },
+    { id: '3', type: 'actionItems', visible: true, order: 2 },
+    { id: '4', type: 'productivityTrend', visible: true, order: 3 },
+    { id: '5', type: 'teamWorkload', visible: true, order: 4 },
+    { id: '6', type: 'activityOverview', visible: true, order: 5 },
+    { id: '7', type: 'taskDistribution', visible: true, order: 6 },
+    { id: '8', type: 'recentActivity', visible: true, order: 7 },
   ],
   layout: 'default'
 }
@@ -97,7 +95,6 @@ export const DEFAULT_DASHBOARD_CONFIG: DashboardConfig = {
 export const WIDGET_LABELS: Record<WidgetType, string> = {
   activeProjects: 'Projetos Ativos',
   activeSprints: 'Sprints Ativos',
-  teamMetrics: 'Métricas do Time',
   actionItems: 'Ações Pendentes',
   activityOverview: 'Visão Geral',
   taskDistribution: 'Distribuição de Tarefas',

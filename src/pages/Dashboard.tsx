@@ -34,7 +34,6 @@ import {
 import Navbar from "@/components/Navbar";
 import ActiveProjectsWidget from "@/components/ActiveProjectsWidget";
 import ActiveSprintsWidget from "@/components/ActiveSprintsWidget";
-import TeamMetricsWidget from "@/components/TeamMetricsWidget";
 import ActionItemsWidget from "@/components/ActionItemsWidget";
 import { WidgetCustomizationModal } from "@/components/dashboard";
 import { IOSWidget } from "@/components/ui";
@@ -87,7 +86,6 @@ const ACTIVITIES_PER_PAGE = 4;
 const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType | null> = {
   activeProjects: ActiveProjectsWidget,
   activeSprints: ActiveSprintsWidget,
-  teamMetrics: TeamMetricsWidget,
   actionItems: ActionItemsWidget,
   activityOverview: null,
   taskDistribution: null,
@@ -100,7 +98,6 @@ const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType | null> = {
 const TOP_ROW_WIDGETS: WidgetType[] = [
   "activeProjects",
   "activeSprints",
-  "teamMetrics",
   "actionItems",
 ];
 const BOTTOM_ROW_WIDGETS: WidgetType[] = [
@@ -459,7 +456,7 @@ export default function Dashboard() {
         {topRowWidgets.length > 0 && (
           <Grid container spacing={2.5} sx={{ mb: 3 }}>
             {topRowWidgets.map((widget) => (
-              <Grid item xs={12} sm={6} md={3} key={widget.id}>
+              <Grid item xs={12} md={6} lg={4} key={widget.id}>
                 {renderWidgetComponent(widget.type)}
               </Grid>
             ))}

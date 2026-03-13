@@ -35,7 +35,7 @@ import Navbar from "@/components/Navbar";
 import ActiveProjectsWidget from "@/components/ActiveProjectsWidget";
 import ActiveSprintsWidget from "@/components/ActiveSprintsWidget";
 import ActionItemsWidget from "@/components/ActionItemsWidget";
-import { WidgetCustomizationModal, TeamMemberDetailModal } from "@/components/dashboard";
+import { WidgetCustomizationModal, TeamMemberDetailModal, TasksByStatusModal } from "@/components/dashboard";
 import { IOSWidget } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
@@ -113,6 +113,12 @@ export default function Dashboard() {
   const [teamWorkload, setTeamWorkload] = useState<TeamMember[]>([]);
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
   const [memberDetailOpen, setMemberDetailOpen] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<{
+    key: string;
+    label: string;
+    color: string;
+  } | null>(null);
+  const [statusModalOpen, setStatusModalOpen] = useState(false);
 
   const totalActivitiesPages = Math.ceil(
     recentActivities.length / ACTIVITIES_PER_PAGE,
@@ -374,6 +380,12 @@ export default function Dashboard() {
   const handleMemberClick = (member: TeamMember) => {
     setSelectedMember(member);
     setMemberDetailOpen(true);
+  };
+
+  // Handle status click to open tasks modal
+  const handleStatusClick = (statusKey: string, label: string, color: string) => {
+    setSelectedStatus({ key: statusKey, label, color });
+    setStatusModalOpen(true);
   };
 
   // Render a widget by type
@@ -700,26 +712,31 @@ export default function Dashboard() {
                 <Grid container spacing={1.5}>
                   {[
                     {
+                      key: "todo",
                       label: "A Fazer",
                       value: taskStats.todo,
                       color: "#6b7280",
                     },
                     {
+                      key: "in-progress",
                       label: "Em Progresso",
                       value: taskStats.in_progress,
                       color: "#f59e0b",
                     },
                     {
+                      key: "review",
                       label: "Em Revisão",
                       value: taskStats.review,
                       color: "#8b5cf6",
                     },
                     {
+                      key: "done",
                       label: "Concluído",
                       value: taskStats.done,
                       color: "#10b981",
                     },
                     {
+                      key: "blocked",
                       label: "Bloqueado",
                       value: taskStats.blocked,
                       color: "#ef4444",
@@ -727,12 +744,21 @@ export default function Dashboard() {
                   ].map((stat) => (
                     <Grid item xs={6} key={stat.label}>
                       <Box
+                        onClick={() => stat.value > 0 && handleStatusClick(stat.key, stat.label, stat.color)}
                         sx={{
                           p: 1.5,
                           borderRadius: 2,
                           bgcolor: `${stat.color}08`,
                           border: "1px solid",
                           borderColor: `${stat.color}20`,
+                          cursor: stat.value > 0 ? "pointer" : "default",
+                          transition: "all 0.2s ease",
+                          "&:hover": stat.value > 0 ? {
+                            transform: "translateY(-2px)",
+                            boxShadow: `0 4px 12px ${stat.color}25`,
+                            borderColor: `${stat.color}40`,
+                            bgcolor: `${stat.color}12`,
+                          } : {},
                         }}
                       >
                         <Typography
@@ -1153,6 +1179,17 @@ export default function Dashboard() {
         memberId={selectedMember?.id || null}
         memberName={selectedMember?.full_name || ""}
         memberAvatar={selectedMember?.avatar_url}
+      />
+
+      <TasksByStatusModal
+        open={statusModalOpen}
+        onClose={() => {
+          setStatusModalOpen(false);
+          setSelectedStatus(null);
+        }}
+        status={selectedStatus?.key || null}
+        statusLabel={selectedStatus?.label || ""}
+        statusColor={selectedStatus?.color || "#6366f1"}
       />
     </Box>
   );

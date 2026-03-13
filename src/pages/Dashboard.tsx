@@ -35,7 +35,7 @@ import Navbar from "@/components/Navbar";
 import ActiveProjectsWidget from "@/components/ActiveProjectsWidget";
 import ActiveSprintsWidget from "@/components/ActiveSprintsWidget";
 import ActionItemsWidget from "@/components/ActionItemsWidget";
-import { WidgetCustomizationModal } from "@/components/dashboard";
+import { WidgetCustomizationModal, TeamMemberDetailModal } from "@/components/dashboard";
 import { IOSWidget } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
@@ -111,6 +111,8 @@ export default function Dashboard() {
   const [customizeModalOpen, setCustomizeModalOpen] = useState(false);
   const [weeklyData, setWeeklyData] = useState<WeeklyData[]>([]);
   const [teamWorkload, setTeamWorkload] = useState<TeamMember[]>([]);
+  const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
+  const [memberDetailOpen, setMemberDetailOpen] = useState(false);
 
   const totalActivitiesPages = Math.ceil(
     recentActivities.length / ACTIVITIES_PER_PAGE,
@@ -368,6 +370,12 @@ export default function Dashboard() {
       .slice(0, 2);
   };
 
+  // Handle member click to open detail modal
+  const handleMemberClick = (member: TeamMember) => {
+    setSelectedMember(member);
+    setMemberDetailOpen(true);
+  };
+
   // Render a widget by type
   const renderWidget = (type: WidgetType) => {
     // Component-based widgets
@@ -542,13 +550,23 @@ export default function Dashboard() {
                   return (
                     <Box
                       key={member.id}
+                      onClick={() => handleMemberClick(member)}
                       sx={{
                         display: "flex",
                         alignItems: "center",
                         gap: 2,
+                        p: 1,
+                        mx: -1,
+                        borderRadius: 2,
+                        cursor: "pointer",
+                        transition: "all 0.2s ease",
+                        "&:hover": {
+                          bgcolor: "rgba(124, 58, 237, 0.06)",
+                          transform: "translateX(4px)",
+                        },
                       }}
                     >
-                      <MuiTooltip title={member.full_name} arrow>
+                      <MuiTooltip title={`Ver detalhes de ${member.full_name}`} arrow>
                         <Avatar
                           src={member.avatar_url}
                           sx={{
@@ -559,6 +577,11 @@ export default function Dashboard() {
                             borderColor: "rgba(124, 58, 237, 0.2)",
                             fontSize: "0.875rem",
                             fontWeight: 600,
+                            transition: "all 0.2s ease",
+                            "&:hover": {
+                              borderColor: "#7c3aed",
+                              transform: "scale(1.05)",
+                            },
                           }}
                         >
                           {getInitials(member.full_name)}
@@ -1119,6 +1142,17 @@ export default function Dashboard() {
       <WidgetCustomizationModal
         open={customizeModalOpen}
         onClose={() => setCustomizeModalOpen(false)}
+      />
+
+      <TeamMemberDetailModal
+        open={memberDetailOpen}
+        onClose={() => {
+          setMemberDetailOpen(false);
+          setSelectedMember(null);
+        }}
+        memberId={selectedMember?.id || null}
+        memberName={selectedMember?.full_name || ""}
+        memberAvatar={selectedMember?.avatar_url}
       />
     </Box>
   );

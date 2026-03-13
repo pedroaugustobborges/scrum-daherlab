@@ -8105,3 +8105,1288 @@ receiveMessage@chrome://remote/content/marionette/actors/MarionetteCommandsChild
 2026-03-12 08:16:56,215 - INFO - Mensagem enviada ao Telegram com sucesso (chat_id=8587977306)
 2026-03-12 08:16:56,420 - INFO - Closing browser in 30 seconds (for verification)...
 2026-03-12 08:17:29,731 - INFO - Browser closed
+2026-03-13 11:59:11,205 - INFO - Initializing Web Scraper...
+2026-03-13 11:59:22,542 - INFO - Google Sheets initialized successfully
+2026-03-13 11:59:23,137 - INFO - Loaded 102 existing processes from spreadsheet
+2026-03-13 11:59:23,137 - INFO - Initialization complete
+2026-03-13 11:59:23,137 - INFO - Performing login...
+2026-03-13 11:59:27,314 - INFO - Waiting for page to load...
+2026-03-13 11:59:32,315 - INFO - Navigating to requests page...
+2026-03-13 11:59:36,374 - INFO - Applying first filter...
+2026-03-13 11:59:38,475 - INFO - Applying second filter...
+2026-03-13 11:59:40,559 - INFO - Original window: 8181b5a8-d363-42d1-864a-d30ac92fd895
+2026-03-13 11:59:40,559 - INFO - Found 102 existing processes in spreadsheet before processing
+2026-03-13 11:59:40,559 - INFO - ================================================================================
+2026-03-13 11:59:40,559 - INFO - STARTING PROCESSING OF ALL REQUESTS
+2026-03-13 11:59:40,559 - INFO - ================================================================================
+2026-03-13 11:59:40,559 - INFO - ********************************************************************************
+2026-03-13 11:59:40,559 - INFO - LISTING PAGE 1
+2026-03-13 11:59:40,559 - INFO - ********************************************************************************
+2026-03-13 11:59:40,586 - INFO - Found approximately 10 items on this page
+2026-03-13 11:59:40,586 - INFO - 
+>>> Attempting to process item 1 (Page 1) <<<
+2026-03-13 11:59:40,586 - INFO - ################################################################################
+2026-03-13 11:59:40,586 - INFO - PROCESSING REQUEST 1 (table row 2)
+2026-03-13 11:59:40,587 - INFO - ################################################################################
+2026-03-13 11:59:40,590 - INFO - Extracting listing fields (item 0)...
+2026-03-13 11:59:40,627 - INFO - Clicking link to open details...
+2026-03-13 11:59:40,877 - INFO - Waiting for new window to open...
+2026-03-13 11:59:42,882 - INFO - Switched to popup window
+2026-03-13 11:59:44,885 - INFO - Page loaded successfully!
+2026-03-13 11:59:44,885 - INFO - ============================================================
+2026-03-13 11:59:44,885 - INFO - EXTRACTING REQUEST DATA
+2026-03-13 11:59:44,885 - INFO - ============================================================
+2026-03-13 11:59:44,885 - INFO - Extracting request fields...
+2026-03-13 11:59:45,323 - INFO - ============================================================
+2026-03-13 11:59:45,323 - INFO - EXTRACTING MODAL FIELDS
+2026-03-13 11:59:45,323 - INFO - ============================================================
+2026-03-13 11:59:45,323 - INFO - Extracting: OBJETO DO CONTRATO
+2026-03-13 12:00:17,799 - INFO -   Empty/Not found
+2026-03-13 12:00:17,799 - INFO - Extracting: ESPECIFICAÇÃO TÉCNICA
+2026-03-13 12:00:20,019 - INFO -   OK: ESPECIFICIDADES DA CONTRATAÇÃO Prestação de Serviços Médicos...
+2026-03-13 12:00:20,019 - INFO - Extracting: QUALIFICAÇÃO TÉCNICA
+2026-03-13 12:00:22,196 - INFO -   OK: Para fins de qualificação técnica: a) No mínimo 01 (um) Ates...
+2026-03-13 12:00:22,196 - INFO - Extracting: GLOSAS
+2026-03-13 12:00:24,361 - INFO -   OK: Não se aplica
+2026-03-13 12:00:24,361 - INFO - Extracting: SLA (ACORDO DE NÍVEL DE SERVIÇO)
+2026-03-13 12:00:26,519 - INFO -   OK: Não se aplica
+2026-03-13 12:00:26,519 - INFO - Modal fields filled: 4/5
+2026-03-13 12:00:26,519 - INFO - ============================================================
+2026-03-13 12:00:26,519 - INFO - EXTRACTING TABLE ITEMS
+2026-03-13 12:00:26,519 - INFO - ============================================================
+2026-03-13 12:00:26,519 - INFO - Page 1:
+2026-03-13 12:00:26,571 - INFO -   Found 1 items on this page
+2026-03-13 12:00:26,571 - INFO -   No more pages (Next button not found)
+2026-03-13 12:00:26,571 - INFO - ============================================================
+2026-03-13 12:00:26,571 - INFO - Total items extracted: 1 (in 1 page(s))
+2026-03-13 12:00:26,571 - INFO - Extracting Históricos Observação de Revisões...
+2026-03-13 12:00:26,598 - INFO -   Found 1 histórico entries
+2026-03-13 12:00:26,598 - INFO - New process CTS12.2026.MAR.00076, setting Situação to 'SOLICITAÇÃO NOVA'
+2026-03-13 12:00:26,598 - INFO - ============================================================
+2026-03-13 12:00:26,598 - INFO - SUMMARY - Request 1
+2026-03-13 12:00:26,598 - INFO - ============================================================
+2026-03-13 12:00:26,598 - INFO -   Entidade: CLÍNICA TEIA UNIDADE III CAIC DR. AFRÂNIO SOARES
+2026-03-13 12:00:26,601 - INFO -   Nº SC: CTS12.2026.MAR.00076
+2026-03-13 12:00:26,601 - INFO -   Título: CONTRATAÇÃO DE UM MÉDICO PEDIATRA/NEUROPEDIATRA PA...
+2026-03-13 12:00:26,601 - INFO -   Fields filled: 37/38
+2026-03-13 12:00:26,601 - INFO -   Situação: SOLICITAÇÃO NOVA
+2026-03-13 12:00:26,601 - INFO -   Items: 1
+2026-03-13 12:00:26,601 - INFO -   Histórico entries: 1
+2026-03-13 12:00:26,602 - INFO - Inserting new data into spreadsheet...
+2026-03-13 12:00:27,550 - INFO - Data inserted into spreadsheet at row 104
+2026-03-13 12:00:27,550 - INFO - Inserted data successfully!
+2026-03-13 12:00:27,550 - INFO - Closing popup...
+2026-03-13 12:00:28,604 - INFO - Returned to main window
+2026-03-13 12:00:29,606 - INFO - [NEW] New request inserted! (Total new: 1)
+2026-03-13 12:00:30,607 - INFO - 
+>>> Attempting to process item 2 (Page 1) <<<
+2026-03-13 12:00:30,607 - INFO - ################################################################################
+2026-03-13 12:00:30,608 - INFO - PROCESSING REQUEST 2 (table row 3)
+2026-03-13 12:00:30,608 - INFO - ################################################################################
+2026-03-13 12:00:30,611 - INFO - Extracting listing fields (item 1)...
+2026-03-13 12:00:30,643 - INFO - Clicking link to open details...
+2026-03-13 12:00:30,908 - INFO - Waiting for new window to open...
+2026-03-13 12:00:32,915 - INFO - Switched to popup window
+2026-03-13 12:00:34,922 - INFO - Page loaded successfully!
+2026-03-13 12:00:34,922 - INFO - ============================================================
+2026-03-13 12:00:34,922 - INFO - EXTRACTING REQUEST DATA
+2026-03-13 12:00:34,923 - INFO - ============================================================
+2026-03-13 12:00:34,923 - INFO - Extracting request fields...
+2026-03-13 12:00:35,348 - INFO - ============================================================
+2026-03-13 12:00:35,348 - INFO - EXTRACTING MODAL FIELDS
+2026-03-13 12:00:35,348 - INFO - ============================================================
+2026-03-13 12:00:35,348 - INFO - Extracting: OBJETO DO CONTRATO
+2026-03-13 12:00:37,519 - INFO -   OK: Trata-se de contratação de empresa para locação de Torre de ...
+2026-03-13 12:00:37,519 - INFO - Extracting: ESPECIFICAÇÃO TÉCNICA
+2026-03-13 12:00:40,185 - INFO -   OK: Aba: ESPECIFICAÇÃO TÉCNICA: Trata-se de locação de Torre de ...
+2026-03-13 12:00:40,185 - INFO - Extracting: QUALIFICAÇÃO TÉCNICA
+2026-03-13 12:00:42,364 - INFO -   OK: Aba: QUALIFICAÇÃO TÉCNICA: No mínimo 01 (um) Atestado de Cap...
+2026-03-13 12:00:42,364 - INFO - Extracting: GLOSAS
+2026-03-13 12:00:44,521 - INFO -   OK: Caso o equipamento fique inoperante por tempo superior ao ac...
+2026-03-13 12:00:44,521 - INFO - Extracting: SLA (ACORDO DE NÍVEL DE SERVIÇO)
+2026-03-13 12:00:46,686 - INFO -   OK: NA
+2026-03-13 12:00:46,686 - INFO - Modal fields filled: 5/5
+2026-03-13 12:00:46,686 - INFO - ============================================================
+2026-03-13 12:00:46,686 - INFO - EXTRACTING TABLE ITEMS
+2026-03-13 12:00:46,686 - INFO - ============================================================
+2026-03-13 12:00:46,686 - INFO - Page 1:
+2026-03-13 12:00:46,718 - INFO -   Found 1 items on this page
+2026-03-13 12:00:46,722 - INFO -   No more pages (Next button not found)
+2026-03-13 12:00:46,722 - INFO - ============================================================
+2026-03-13 12:00:46,723 - INFO - Total items extracted: 1 (in 1 page(s))
+2026-03-13 12:00:46,723 - INFO - Extracting Históricos Observação de Revisões...
+2026-03-13 12:00:46,734 - INFO -   Found 1 histórico entries
+2026-03-13 12:00:46,735 - INFO - New process CTS28.2026.MAR.01813, setting Situação to 'SOLICITAÇÃO NOVA'
+2026-03-13 12:00:46,735 - INFO - ============================================================
+2026-03-13 12:00:46,735 - INFO - SUMMARY - Request 2
+2026-03-13 12:00:46,736 - INFO - ============================================================
+2026-03-13 12:00:46,736 - INFO -   Entidade: COMPLEXO HOSPITALAR SUL
+2026-03-13 12:00:46,736 - INFO -   Nº SC: CTS28.2026.MAR.01813
+2026-03-13 12:00:46,736 - INFO -   Título: SERV DE LOCAÇÃO DE TORRE DE VIDEO
+2026-03-13 12:00:46,737 - INFO -   Fields filled: 38/38
+2026-03-13 12:00:46,737 - INFO -   Situação: SOLICITAÇÃO NOVA
+2026-03-13 12:00:46,737 - INFO -   Items: 1
+2026-03-13 12:00:46,738 - INFO -   Histórico entries: 1
+2026-03-13 12:00:46,738 - INFO - Inserting new data into spreadsheet...
+2026-03-13 12:00:47,601 - INFO - Data inserted into spreadsheet at row 105
+2026-03-13 12:00:47,601 - INFO - Inserted data successfully!
+2026-03-13 12:00:47,601 - INFO - Closing popup...
+2026-03-13 12:00:48,651 - INFO - Returned to main window
+2026-03-13 12:00:49,653 - INFO - [NEW] New request inserted! (Total new: 2)
+2026-03-13 12:00:50,654 - INFO - 
+>>> Attempting to process item 3 (Page 1) <<<
+2026-03-13 12:00:50,654 - INFO - ################################################################################
+2026-03-13 12:00:50,654 - INFO - PROCESSING REQUEST 3 (table row 4)
+2026-03-13 12:00:50,654 - INFO - ################################################################################
+2026-03-13 12:00:50,654 - INFO - Extracting listing fields (item 2)...
+2026-03-13 12:00:50,689 - INFO - Clicking link to open details...
+2026-03-13 12:00:50,915 - INFO - Waiting for new window to open...
+2026-03-13 12:00:52,917 - INFO - Switched to popup window
+2026-03-13 12:00:54,921 - INFO - Page loaded successfully!
+2026-03-13 12:00:54,921 - INFO - ============================================================
+2026-03-13 12:00:54,921 - INFO - EXTRACTING REQUEST DATA
+2026-03-13 12:00:54,921 - INFO - ============================================================
+2026-03-13 12:00:54,921 - INFO - Extracting request fields...
+2026-03-13 12:00:55,296 - INFO - ============================================================
+2026-03-13 12:00:55,296 - INFO - EXTRACTING MODAL FIELDS
+2026-03-13 12:00:55,296 - INFO - ============================================================
+2026-03-13 12:00:55,296 - INFO - Extracting: OBJETO DO CONTRATO
+2026-03-13 12:00:57,468 - INFO -   OK: Trata-se da contratação de empresa especializada para presta...
+2026-03-13 12:00:57,468 - INFO - Extracting: ESPECIFICAÇÃO TÉCNICA
+2026-03-13 12:00:59,733 - INFO -   OK: Trata-se da contratação de empresa especializada para presta...
+2026-03-13 12:00:59,734 - INFO - Extracting: QUALIFICAÇÃO TÉCNICA
+2026-03-13 12:01:01,900 - INFO -   OK: A título de qualificação técnico-operacional, as empresas de...
+2026-03-13 12:01:01,900 - INFO - Extracting: GLOSAS
+2026-03-13 12:01:04,070 - INFO -   OK: N/A
+2026-03-13 12:01:04,070 - INFO - Extracting: SLA (ACORDO DE NÍVEL DE SERVIÇO)
+2026-03-13 12:01:06,315 - INFO -   OK: 1. DISPOSIÇÕES GERAIS: 1.1. . Fica estabelecido entre as par...
+2026-03-13 12:01:06,315 - INFO - Modal fields filled: 5/5
+2026-03-13 12:01:06,315 - INFO - ============================================================
+2026-03-13 12:01:06,315 - INFO - EXTRACTING TABLE ITEMS
+2026-03-13 12:01:06,315 - INFO - ============================================================
+2026-03-13 12:01:06,315 - INFO - Page 1:
+2026-03-13 12:01:06,347 - INFO -   Found 1 items on this page
+2026-03-13 12:01:06,351 - INFO -   No more pages (Next button not found)
+2026-03-13 12:01:06,352 - INFO - ============================================================
+2026-03-13 12:01:06,352 - INFO - Total items extracted: 1 (in 1 page(s))
+2026-03-13 12:01:06,352 - INFO - Extracting Históricos Observação de Revisões...
+2026-03-13 12:01:06,364 - INFO -   Found 1 histórico entries
+2026-03-13 12:01:06,364 - INFO - New process CTS03.2026.MAR.00439, setting Situação to 'SOLICITAÇÃO NOVA'
+2026-03-13 12:01:06,365 - INFO - ============================================================
+2026-03-13 12:01:06,365 - INFO - SUMMARY - Request 3
+2026-03-13 12:01:06,365 - INFO - ============================================================
+2026-03-13 12:01:06,365 - INFO -   Entidade: HOSPITAL ESTADUAL DE JATAÍ DR. SERAFIM DE CARVALHO
+2026-03-13 12:01:06,366 - INFO -   Nº SC: CTS03.2026.MAR.00439
+2026-03-13 12:01:06,366 - INFO -   Título: PRESTAÇÃO DE SERVIÇOS MÉDICOS PARA REALIZAÇÃO DE E...
+2026-03-13 12:01:06,366 - INFO -   Fields filled: 37/38
+2026-03-13 12:01:06,366 - INFO -   Situação: SOLICITAÇÃO NOVA
+2026-03-13 12:01:06,367 - INFO -   Items: 1
+2026-03-13 12:01:06,367 - INFO -   Histórico entries: 1
+2026-03-13 12:01:06,367 - INFO - Inserting new data into spreadsheet...
+2026-03-13 12:01:07,308 - INFO - Data inserted into spreadsheet at row 106
+2026-03-13 12:01:07,308 - INFO - Inserted data successfully!
+2026-03-13 12:01:07,308 - INFO - Closing popup...
+2026-03-13 12:01:08,361 - INFO - Returned to main window
+2026-03-13 12:01:09,364 - INFO - [NEW] New request inserted! (Total new: 3)
+2026-03-13 12:01:10,364 - INFO - 
+>>> Attempting to process item 4 (Page 1) <<<
+2026-03-13 12:01:10,365 - INFO - ################################################################################
+2026-03-13 12:01:10,365 - INFO - PROCESSING REQUEST 4 (table row 5)
+2026-03-13 12:01:10,365 - INFO - ################################################################################
+2026-03-13 12:01:10,365 - INFO - Extracting listing fields (item 3)...
+2026-03-13 12:01:10,395 - INFO - Clicking link to open details...
+2026-03-13 12:01:10,614 - INFO - Waiting for new window to open...
+2026-03-13 12:01:12,615 - INFO - Switched to popup window
+2026-03-13 12:01:14,621 - INFO - Page loaded successfully!
+2026-03-13 12:01:14,621 - INFO - ============================================================
+2026-03-13 12:01:14,621 - INFO - EXTRACTING REQUEST DATA
+2026-03-13 12:01:14,621 - INFO - ============================================================
+2026-03-13 12:01:14,621 - INFO - Extracting request fields...
+2026-03-13 12:01:14,954 - INFO - ============================================================
+2026-03-13 12:01:14,954 - INFO - EXTRACTING MODAL FIELDS
+2026-03-13 12:01:14,954 - INFO - ============================================================
+2026-03-13 12:01:14,954 - INFO - Extracting: OBJETO DO CONTRATO
+2026-03-13 12:01:47,320 - INFO -   Empty/Not found
+2026-03-13 12:01:47,320 - INFO - Extracting: ESPECIFICAÇÃO TÉCNICA
+2026-03-13 12:01:49,494 - INFO -   OK: Especificação Geral - Impressora multifuncional para impress...
+2026-03-13 12:01:49,494 - INFO - Extracting: QUALIFICAÇÃO TÉCNICA
+2026-03-13 12:01:51,642 - INFO -   OK: O equipamento se destina a impressão de Exames por Imagem e ...
+2026-03-13 12:01:51,642 - INFO - Extracting: GLOSAS
+2026-03-13 12:01:53,792 - INFO -   OK: N/A.
+2026-03-13 12:01:53,792 - INFO - Extracting: SLA (ACORDO DE NÍVEL DE SERVIÇO)
+2026-03-13 12:01:55,936 - INFO -   OK: N/A.
+2026-03-13 12:01:55,936 - INFO - Modal fields filled: 4/5
+2026-03-13 12:01:55,936 - INFO - ============================================================
+2026-03-13 12:01:55,936 - INFO - EXTRACTING TABLE ITEMS
+2026-03-13 12:01:55,936 - INFO - ============================================================
+2026-03-13 12:01:55,936 - INFO - Page 1:
+2026-03-13 12:01:55,964 - INFO -   Found 1 items on this page
+2026-03-13 12:01:55,964 - INFO -   No more pages (Next button not found)
+2026-03-13 12:01:55,964 - INFO - ============================================================
+2026-03-13 12:01:55,964 - INFO - Total items extracted: 1 (in 1 page(s))
+2026-03-13 12:01:55,976 - INFO - Extracting Históricos Observação de Revisões...
+2026-03-13 12:01:55,977 - INFO -   Found 1 histórico entries
+2026-03-13 12:01:55,977 - INFO - New process CTS04.2026.MAR.03373, setting Situação to 'SOLICITAÇÃO NOVA'
+2026-03-13 12:01:55,977 - INFO - ============================================================
+2026-03-13 12:01:55,977 - INFO - SUMMARY - Request 4
+2026-03-13 12:01:55,977 - INFO - ============================================================
+2026-03-13 12:01:55,977 - INFO -   Entidade: CENTRO ESTADUAL DE REABILITAÇÃO E READAPTAÇÃO DR HENRIQUE SANTILLO
+2026-03-13 12:01:55,977 - INFO -   Nº SC: CTS04.2026.MAR.03373
+2026-03-13 12:01:55,977 - INFO -   Título: CONTRATAÇÃO DE PRESTAÇÃO DE SERVIÇO DE IMPRESSÃO D...
+2026-03-13 12:01:55,987 - INFO -   Fields filled: 36/38
+2026-03-13 12:01:55,987 - INFO -   Situação: SOLICITAÇÃO NOVA
+2026-03-13 12:01:55,987 - INFO -   Items: 1
+2026-03-13 12:01:55,987 - INFO -   Histórico entries: 1
+2026-03-13 12:01:55,987 - INFO - Inserting new data into spreadsheet...
+2026-03-13 12:01:57,125 - INFO - Data inserted into spreadsheet at row 107
+2026-03-13 12:01:57,125 - INFO - Inserted data successfully!
+2026-03-13 12:01:57,125 - INFO - Closing popup...
+2026-03-13 12:01:58,177 - INFO - Returned to main window
+2026-03-13 12:01:59,179 - INFO - [NEW] New request inserted! (Total new: 4)
+2026-03-13 12:02:00,180 - INFO - 
+>>> Attempting to process item 5 (Page 1) <<<
+2026-03-13 12:02:00,180 - INFO - ################################################################################
+2026-03-13 12:02:00,180 - INFO - PROCESSING REQUEST 5 (table row 6)
+2026-03-13 12:02:00,180 - INFO - ################################################################################
+2026-03-13 12:02:00,180 - INFO - Extracting listing fields (item 4)...
+2026-03-13 12:02:00,209 - INFO - Clicking link to open details...
+2026-03-13 12:02:00,439 - INFO - Waiting for new window to open...
+2026-03-13 12:02:02,446 - INFO - Switched to popup window
+2026-03-13 12:02:04,448 - INFO - Page loaded successfully!
+2026-03-13 12:02:04,448 - INFO - ============================================================
+2026-03-13 12:02:04,448 - INFO - EXTRACTING REQUEST DATA
+2026-03-13 12:02:04,448 - INFO - ============================================================
+2026-03-13 12:02:04,448 - INFO - Extracting request fields...
+2026-03-13 12:02:04,784 - INFO - ============================================================
+2026-03-13 12:02:04,784 - INFO - EXTRACTING MODAL FIELDS
+2026-03-13 12:02:04,784 - INFO - ============================================================
+2026-03-13 12:02:04,784 - INFO - Extracting: OBJETO DO CONTRATO
+2026-03-13 12:02:37,173 - INFO -   OK: CONDIÇÕES GERAIS DE EXECUÇÃO
+2026-03-13 12:02:37,173 - INFO - Extracting: ESPECIFICAÇÃO TÉCNICA
+2026-03-13 12:02:39,386 - INFO -   OK: CONDIÇÕES GERAIS DE EXECUÇÃO Trata-se de contratação de empr...
+2026-03-13 12:02:39,386 - INFO - Extracting: QUALIFICAÇÃO TÉCNICA
+2026-03-13 12:02:41,548 - INFO -   OK: A título de qualificação técnico-operacional, as empresas de...
+2026-03-13 12:02:41,548 - INFO - Extracting: GLOSAS
+2026-03-13 12:02:43,698 - INFO -   OK: n/a
+2026-03-13 12:02:43,698 - INFO - Extracting: SLA (ACORDO DE NÍVEL DE SERVIÇO)
+2026-03-13 12:02:45,873 - INFO -   OK: DISPOSIÇÕES GERAIS 1.1 Fica estabelecido entre as partes o A...
+2026-03-13 12:02:45,873 - INFO - Modal fields filled: 5/5
+2026-03-13 12:02:45,873 - INFO - ============================================================
+2026-03-13 12:02:45,873 - INFO - EXTRACTING TABLE ITEMS
+2026-03-13 12:02:45,873 - INFO - ============================================================
+2026-03-13 12:02:45,873 - INFO - Page 1:
+2026-03-13 12:02:45,920 - INFO -   Found 2 items on this page
+2026-03-13 12:02:45,936 - INFO -   No more pages (Next button not found)
+2026-03-13 12:02:45,936 - INFO - ============================================================
+2026-03-13 12:02:45,936 - INFO - Total items extracted: 2 (in 1 page(s))
+2026-03-13 12:02:45,936 - INFO - Extracting Históricos Observação de Revisões...
+2026-03-13 12:02:45,936 - INFO -   Found 1 histórico entries
+2026-03-13 12:02:45,936 - INFO - New process CTS23.2026.MAR.00259, setting Situação to 'SOLICITAÇÃO NOVA'
+2026-03-13 12:02:45,946 - INFO - ============================================================
+2026-03-13 12:02:45,946 - INFO - SUMMARY - Request 5
+2026-03-13 12:02:45,946 - INFO - ============================================================
+2026-03-13 12:02:45,946 - INFO -   Entidade: CENTRO TEIA SP
+2026-03-13 12:02:45,946 - INFO -   Nº SC: CTS23.2026.MAR.00259
+2026-03-13 12:02:45,946 - INFO -   Título: CONTRATAÇÃO DE EMPRESA PARA A INSTALAÇÃO DE SERVIÇ...
+2026-03-13 12:02:45,946 - INFO -   Fields filled: 37/38
+2026-03-13 12:02:45,948 - INFO -   Situação: SOLICITAÇÃO NOVA
+2026-03-13 12:02:45,948 - INFO -   Items: 2
+2026-03-13 12:02:45,948 - INFO -   Histórico entries: 1
+2026-03-13 12:02:45,948 - INFO - Inserting new data into spreadsheet...
+2026-03-13 12:02:46,687 - INFO - Data inserted into spreadsheet at row 108
+2026-03-13 12:02:46,688 - INFO - Inserted data successfully!
+2026-03-13 12:02:46,688 - INFO - Closing popup...
+2026-03-13 12:02:47,738 - INFO - Returned to main window
+2026-03-13 12:02:48,739 - INFO - [NEW] New request inserted! (Total new: 5)
+2026-03-13 12:02:49,740 - INFO - 
+>>> Attempting to process item 6 (Page 1) <<<
+2026-03-13 12:02:49,740 - INFO - ################################################################################
+2026-03-13 12:02:49,740 - INFO - PROCESSING REQUEST 6 (table row 7)
+2026-03-13 12:02:49,740 - INFO - ################################################################################
+2026-03-13 12:02:49,740 - INFO - Extracting listing fields (item 5)...
+2026-03-13 12:02:49,759 - INFO - Process CTP01.2026.MAR.03471 exists in spreadsheet. Will open and check for updates...
+2026-03-13 12:02:49,759 - INFO - Clicking link to open details...
+2026-03-13 12:02:49,998 - INFO - Waiting for new window to open...
+2026-03-13 12:02:52,005 - INFO - Switched to popup window
+2026-03-13 12:02:54,010 - INFO - Page loaded successfully!
+2026-03-13 12:02:54,010 - INFO - ============================================================
+2026-03-13 12:02:54,010 - INFO - EXTRACTING REQUEST DATA
+2026-03-13 12:02:54,010 - INFO - ============================================================
+2026-03-13 12:02:54,010 - INFO - Extracting request fields...
+2026-03-13 12:02:54,354 - INFO - ============================================================
+2026-03-13 12:02:54,354 - INFO - EXTRACTING MODAL FIELDS
+2026-03-13 12:02:54,354 - INFO - ============================================================
+2026-03-13 12:02:54,355 - INFO - Extracting: OBJETO DO CONTRATO
+2026-03-13 12:03:26,731 - INFO -   OK: ·
+2026-03-13 12:03:26,731 - INFO - Extracting: ESPECIFICAÇÃO TÉCNICA
+2026-03-13 12:03:28,990 - INFO -   OK: DOS EQUIPAMENTOS EM COMODATO 1.1. A CONTRATADA deverá fornec...
+2026-03-13 12:03:28,990 - INFO - Extracting: QUALIFICAÇÃO TÉCNICA
+2026-03-13 12:03:31,160 - INFO -   OK: A título de qualificação técnica, as empresas deverão aprese...
+2026-03-13 12:03:31,160 - INFO - Extracting: GLOSAS
+2026-03-13 12:03:33,311 - INFO -   OK: Não se aplica
+2026-03-13 12:03:33,312 - INFO - Extracting: SLA (ACORDO DE NÍVEL DE SERVIÇO)
+2026-03-13 12:03:35,466 - INFO -   OK: Não se aplica
+2026-03-13 12:03:35,466 - INFO - Modal fields filled: 5/5
+2026-03-13 12:03:35,466 - INFO - ============================================================
+2026-03-13 12:03:35,469 - INFO - EXTRACTING TABLE ITEMS
+2026-03-13 12:03:35,469 - INFO - ============================================================
+2026-03-13 12:03:35,480 - INFO - Page 1:
+2026-03-13 12:03:35,620 - INFO -   Found 5 items on this page
+2026-03-13 12:03:35,623 - INFO -   Navigating to next page...
+2026-03-13 12:03:37,186 - INFO - Page 2:
+2026-03-13 12:03:37,313 - INFO -   Found 5 items on this page
+2026-03-13 12:03:37,313 - INFO -   Navigating to next page...
+2026-03-13 12:03:38,898 - INFO - Page 3:
+2026-03-13 12:03:38,924 - INFO -   Found 1 items on this page
+2026-03-13 12:03:38,931 - INFO -   No more pages (Next button not found)
+2026-03-13 12:03:38,932 - INFO - ============================================================
+2026-03-13 12:03:38,932 - INFO - Total items extracted: 11 (in 3 page(s))
+2026-03-13 12:03:38,932 - INFO - Extracting Históricos Observação de Revisões...
+2026-03-13 12:03:38,940 - INFO -   Found 3 histórico entries
+2026-03-13 12:03:38,940 - INFO - Data changed for CTP01.2026.MAR.03471, setting Situação to 'ANÁLISE INICIADA'
+2026-03-13 12:03:38,940 - INFO - ============================================================
+2026-03-13 12:03:38,940 - INFO - SUMMARY - Request 6
+2026-03-13 12:03:38,946 - INFO - ============================================================
+2026-03-13 12:03:38,946 - INFO -   Entidade: HOSPITAL ESTADUAL DE URGÊNCIAS GOVERNADOR OTÁVIO LAGE DE SIQUEIRA
+2026-03-13 12:03:38,946 - INFO -   Nº SC: CTP01.2026.MAR.03471
+2026-03-13 12:03:38,946 - INFO -   Título: FORNECIMENTO CONTÍNUO DE INSUMOS VIA CONSIGNAÇÃO P...
+2026-03-13 12:03:38,947 - INFO -   Fields filled: 36/38
+2026-03-13 12:03:38,947 - INFO -   Situação: ANÁLISE INICIADA
+2026-03-13 12:03:38,947 - INFO -   Items: 11
+2026-03-13 12:03:38,947 - INFO -   Histórico entries: 3
+2026-03-13 12:03:38,948 - INFO - Updating existing data in spreadsheet...
+2026-03-13 12:03:39,217 - INFO - Data updated in spreadsheet at row 82
+2026-03-13 12:03:39,217 - INFO - Updated data successfully!
+2026-03-13 12:03:39,217 - INFO - Closing popup...
+2026-03-13 12:03:40,271 - INFO - Returned to main window
+2026-03-13 12:03:41,274 - INFO - [UPDATED] Process CTP01.2026.MAR.03471 updated. (Total updated: 1)
+2026-03-13 12:03:42,275 - INFO - 
+>>> Attempting to process item 7 (Page 1) <<<
+2026-03-13 12:03:42,275 - INFO - ################################################################################
+2026-03-13 12:03:42,275 - INFO - PROCESSING REQUEST 7 (table row 8)
+2026-03-13 12:03:42,275 - INFO - ################################################################################
+2026-03-13 12:03:42,279 - INFO - Extracting listing fields (item 6)...
+2026-03-13 12:03:42,307 - INFO - Process CTP01.2026.FEV.03445 exists in spreadsheet. Will open and check for updates...
+2026-03-13 12:03:42,308 - INFO - Clicking link to open details...
+2026-03-13 12:03:42,537 - INFO - Waiting for new window to open...
+2026-03-13 12:03:44,542 - INFO - Switched to popup window
+2026-03-13 12:03:46,543 - INFO - Page loaded successfully!
+2026-03-13 12:03:46,543 - INFO - ============================================================
+2026-03-13 12:03:46,543 - INFO - EXTRACTING REQUEST DATA
+2026-03-13 12:03:46,543 - INFO - ============================================================
+2026-03-13 12:03:46,543 - INFO - Extracting request fields...
+2026-03-13 12:03:46,896 - INFO - ============================================================
+2026-03-13 12:03:46,896 - INFO - EXTRACTING MODAL FIELDS
+2026-03-13 12:03:46,896 - INFO - ============================================================
+2026-03-13 12:03:46,896 - INFO - Extracting: OBJETO DO CONTRATO
+2026-03-13 12:03:49,072 - INFO -   OK: CONTRATAÇÃO DE EMPRESA PARA FORNECIMENTO DE STENT PERIFERICO...
+2026-03-13 12:03:49,072 - INFO - Extracting: ESPECIFICAÇÃO TÉCNICA
+2026-03-13 12:03:51,272 - INFO -   OK: 1. Trata–se de contratação de empresa para o fornecimento de...
+2026-03-13 12:03:51,272 - INFO - Extracting: QUALIFICAÇÃO TÉCNICA
+2026-03-13 12:03:53,435 - INFO -   OK: A título de qualificação técnica, as empresas deverão aprese...
+2026-03-13 12:03:53,435 - INFO - Extracting: GLOSAS
+2026-03-13 12:03:55,620 - INFO -   OK: Não se Aplica
+2026-03-13 12:03:55,620 - INFO - Extracting: SLA (ACORDO DE NÍVEL DE SERVIÇO)
+2026-03-13 12:03:57,779 - INFO -   OK: Não se Aplica
+2026-03-13 12:03:57,779 - INFO - Modal fields filled: 5/5
+2026-03-13 12:03:57,779 - INFO - ============================================================
+2026-03-13 12:03:57,779 - INFO - EXTRACTING TABLE ITEMS
+2026-03-13 12:03:57,779 - INFO - ============================================================
+2026-03-13 12:03:57,781 - INFO - Page 1:
+2026-03-13 12:03:57,913 - INFO -   Found 5 items on this page
+2026-03-13 12:03:57,913 - INFO -   Navigating to next page...
+2026-03-13 12:03:59,494 - INFO - Page 2:
+2026-03-13 12:03:59,639 - INFO -   Found 5 items on this page
+2026-03-13 12:03:59,643 - INFO -   Navigating to next page...
+2026-03-13 12:04:01,212 - INFO - Page 3:
+2026-03-13 12:04:01,346 - INFO -   Found 5 items on this page
+2026-03-13 12:04:01,347 - INFO -   Navigating to next page...
+2026-03-13 12:04:02,912 - INFO - Page 4:
+2026-03-13 12:04:03,046 - INFO -   Found 5 items on this page
+2026-03-13 12:04:03,052 - INFO -   Navigating to next page...
+2026-03-13 12:04:04,612 - INFO - Page 5:
+2026-03-13 12:04:04,785 - INFO -   Found 5 items on this page
+2026-03-13 12:04:04,790 - INFO -   Navigating to next page...
+2026-03-13 12:04:06,361 - INFO - Page 6:
+2026-03-13 12:04:06,459 - INFO -   Found 3 items on this page
+2026-03-13 12:04:06,459 - INFO -   No more pages (Next button not found)
+2026-03-13 12:04:06,459 - INFO - ============================================================
+2026-03-13 12:04:06,459 - INFO - Total items extracted: 28 (in 6 page(s))
+2026-03-13 12:04:06,459 - INFO - Extracting Históricos Observação de Revisões...
+2026-03-13 12:04:06,483 - INFO -   Found 1 histórico entries
+2026-03-13 12:04:06,483 - INFO - No changes detected for CTP01.2026.FEV.03445, keeping existing Situação
+2026-03-13 12:04:06,483 - INFO - ============================================================
+2026-03-13 12:04:06,483 - INFO - SUMMARY - Request 7
+2026-03-13 12:04:06,484 - INFO - ============================================================
+2026-03-13 12:04:06,484 - INFO -   Entidade: HOSPITAL ESTADUAL DE URGÊNCIAS GOVERNADOR OTÁVIO LAGE DE SIQUEIRA
+2026-03-13 12:04:06,484 - INFO -   Nº SC: CTP01.2026.FEV.03445
+2026-03-13 12:04:06,484 - INFO -   Título: CONTRATAÇÃO DE EMPRESA PARA FORNECIMENTO DE STENT ...
+2026-03-13 12:04:06,485 - INFO -   Fields filled: 36/38
+2026-03-13 12:04:06,485 - INFO -   Situação: ANÁLISE INICIADA
+2026-03-13 12:04:06,485 - INFO -   Items: 28
+2026-03-13 12:04:06,485 - INFO -   Histórico entries: 1
+2026-03-13 12:04:06,486 - INFO - Updating existing data in spreadsheet...
+2026-03-13 12:04:06,758 - INFO - Data updated in spreadsheet at row 75
+2026-03-13 12:04:06,758 - INFO - Updated data successfully!
+2026-03-13 12:04:06,758 - INFO - Closing popup...
+2026-03-13 12:04:07,828 - INFO - Returned to main window
+2026-03-13 12:04:08,833 - INFO - [UPDATED] Process CTP01.2026.FEV.03445 updated. (Total updated: 2)
+2026-03-13 12:04:09,835 - INFO - 
+>>> Attempting to process item 8 (Page 1) <<<
+2026-03-13 12:04:09,835 - INFO - ################################################################################
+2026-03-13 12:04:09,835 - INFO - PROCESSING REQUEST 8 (table row 9)
+2026-03-13 12:04:09,835 - INFO - ################################################################################
+2026-03-13 12:04:09,835 - INFO - Extracting listing fields (item 7)...
+2026-03-13 12:04:09,868 - INFO - Process CTS29.2026.FEV.02744 exists in spreadsheet. Will open and check for updates...
+2026-03-13 12:04:09,868 - INFO - Clicking link to open details...
+2026-03-13 12:04:10,123 - INFO - Waiting for new window to open...
+2026-03-13 12:04:12,133 - INFO - Switched to popup window
+2026-03-13 12:04:14,146 - INFO - Page loaded successfully!
+2026-03-13 12:04:14,146 - INFO - ============================================================
+2026-03-13 12:04:14,146 - INFO - EXTRACTING REQUEST DATA
+2026-03-13 12:04:14,146 - INFO - ============================================================
+2026-03-13 12:04:14,146 - INFO - Extracting request fields...
+2026-03-13 12:04:14,480 - INFO - ============================================================
+2026-03-13 12:04:14,480 - INFO - EXTRACTING MODAL FIELDS
+2026-03-13 12:04:14,480 - INFO - ============================================================
+2026-03-13 12:04:14,480 - INFO - Extracting: OBJETO DO CONTRATO
+2026-03-13 12:04:16,668 - INFO -   OK: Prestação de serviços médicos especializados em Pediatria, c...
+2026-03-13 12:04:16,668 - INFO - Extracting: ESPECIFICAÇÃO TÉCNICA
+2026-03-13 12:04:18,889 - INFO -   OK: 4322S - SERV MED ENDOCRINOLOGIA PEDIATRICA CONSULTA 1. Descr...
+2026-03-13 12:04:18,889 - INFO - Extracting: QUALIFICAÇÃO TÉCNICA
+2026-03-13 12:04:21,091 - INFO -   OK: 1. Qualificação Técnico-Operacional (da empresa) a) Comprova...
+2026-03-13 12:04:21,091 - INFO - Extracting: GLOSAS
+2026-03-13 12:04:23,280 - INFO -   OK: N/A
+2026-03-13 12:04:23,280 - INFO - Extracting: SLA (ACORDO DE NÍVEL DE SERVIÇO)
+2026-03-13 12:04:25,509 - INFO -   OK: ACORDO DE NÍVEL DE SERVIÇO – SLA 1. DISPOSIÇÕES GERAIS: Fica...
+2026-03-13 12:04:25,510 - INFO - Modal fields filled: 5/5
+2026-03-13 12:04:25,510 - INFO - ============================================================
+2026-03-13 12:04:25,511 - INFO - EXTRACTING TABLE ITEMS
+2026-03-13 12:04:25,511 - INFO - ============================================================
+2026-03-13 12:04:25,520 - INFO - Page 1:
+2026-03-13 12:04:25,607 - INFO -   Found 3 items on this page
+2026-03-13 12:04:25,607 - INFO -   No more pages (Next button not found)
+2026-03-13 12:04:25,607 - INFO - ============================================================
+2026-03-13 12:04:25,607 - INFO - Total items extracted: 3 (in 1 page(s))
+2026-03-13 12:04:25,607 - INFO - Extracting Históricos Observação de Revisões...
+2026-03-13 12:04:25,630 - INFO -   Found 5 histórico entries
+2026-03-13 12:04:25,630 - INFO - Data changed for CTS29.2026.FEV.02744, setting Situação to 'ANÁLISE INICIADA'
+2026-03-13 12:04:25,630 - INFO - ============================================================
+2026-03-13 12:04:25,630 - INFO - SUMMARY - Request 8
+2026-03-13 12:04:25,638 - INFO - ============================================================
+2026-03-13 12:04:25,638 - INFO -   Entidade: HOSPITAL ESTADUAL DA CRIANÇA E DO ADOLESCENTE
+2026-03-13 12:04:25,638 - INFO -   Nº SC: CTS29.2026.FEV.02744
+2026-03-13 12:04:25,639 - INFO -   Título: SERVIÇOS MÉDICOS ESPECIALIZADOS EM ENDOCRINOLOGIA ...
+2026-03-13 12:04:25,639 - INFO -   Fields filled: 37/38
+2026-03-13 12:04:25,639 - INFO -   Situação: ANÁLISE INICIADA
+2026-03-13 12:04:25,639 - INFO -   Items: 3
+2026-03-13 12:04:25,640 - INFO -   Histórico entries: 5
+2026-03-13 12:04:25,640 - INFO - Updating existing data in spreadsheet...
+2026-03-13 12:04:26,223 - INFO - Data updated in spreadsheet at row 38
+2026-03-13 12:04:26,226 - INFO - Updated data successfully!
+2026-03-13 12:04:26,226 - INFO - Closing popup...
+2026-03-13 12:04:27,279 - INFO - Returned to main window
+2026-03-13 12:04:28,282 - INFO - [UPDATED] Process CTS29.2026.FEV.02744 updated. (Total updated: 3)
+2026-03-13 12:04:29,283 - INFO - 
+>>> Attempting to process item 9 (Page 1) <<<
+2026-03-13 12:04:29,283 - INFO - ################################################################################
+2026-03-13 12:04:29,283 - INFO - PROCESSING REQUEST 9 (table row 10)
+2026-03-13 12:04:29,283 - INFO - ################################################################################
+2026-03-13 12:04:29,283 - INFO - Extracting listing fields (item 8)...
+2026-03-13 12:04:29,310 - INFO - Process CTS03.2026.FEV.00339 exists in spreadsheet. Will open and check for updates...
+2026-03-13 12:04:29,311 - INFO - Clicking link to open details...
+2026-03-13 12:04:29,545 - INFO - Waiting for new window to open...
+2026-03-13 12:04:31,547 - INFO - Switched to popup window
+2026-03-13 12:04:33,552 - INFO - Page loaded successfully!
+2026-03-13 12:04:33,552 - INFO - ============================================================
+2026-03-13 12:04:33,552 - INFO - EXTRACTING REQUEST DATA
+2026-03-13 12:04:33,552 - INFO - ============================================================
+2026-03-13 12:04:33,552 - INFO - Extracting request fields...
+2026-03-13 12:04:33,949 - INFO - ============================================================
+2026-03-13 12:04:33,949 - INFO - EXTRACTING MODAL FIELDS
+2026-03-13 12:04:33,949 - INFO - ============================================================
+2026-03-13 12:04:33,949 - INFO - Extracting: OBJETO DO CONTRATO
+2026-03-13 12:04:36,127 - INFO -   OK: Trata-se de contratação para prestação de serviços técnicos ...
+2026-03-13 12:04:36,127 - INFO - Extracting: ESPECIFICAÇÃO TÉCNICA
+2026-03-13 12:04:38,372 - INFO -   OK: Prestação de serviços técnicos em radiologia, sem fornecimen...
+2026-03-13 12:04:38,373 - INFO - Extracting: QUALIFICAÇÃO TÉCNICA
+2026-03-13 12:04:40,573 - INFO -   OK: As empresas deverão apresentar, junto à proposta: a) Comprov...
+2026-03-13 12:04:40,573 - INFO - Extracting: GLOSAS
+2026-03-13 12:04:42,772 - INFO -   OK: O pagamento será efetuado apenas pelos serviços efetivamente...
+2026-03-13 12:04:42,772 - INFO - Extracting: SLA (ACORDO DE NÍVEL DE SERVIÇO)
+2026-03-13 12:04:45,031 - INFO -   OK: . DISPOSIÇÕES GERAIS: 1.1. Fica estabelecido entre as partes...
+2026-03-13 12:04:45,031 - INFO - Modal fields filled: 5/5
+2026-03-13 12:04:45,031 - INFO - ============================================================
+2026-03-13 12:04:45,031 - INFO - EXTRACTING TABLE ITEMS
+2026-03-13 12:04:45,031 - INFO - ============================================================
+2026-03-13 12:04:45,031 - INFO - Page 1:
+2026-03-13 12:04:45,065 - INFO -   Found 1 items on this page
+2026-03-13 12:04:45,067 - INFO -   No more pages (Next button not found)
+2026-03-13 12:04:45,068 - INFO - ============================================================
+2026-03-13 12:04:45,068 - INFO - Total items extracted: 1 (in 1 page(s))
+2026-03-13 12:04:45,068 - INFO - Extracting Históricos Observação de Revisões...
+2026-03-13 12:04:45,078 - INFO -   Found 1 histórico entries
+2026-03-13 12:04:45,078 - INFO - Data changed for CTS03.2026.FEV.00339, setting Situação to 'ANÁLISE INICIADA'
+2026-03-13 12:04:45,079 - INFO - ============================================================
+2026-03-13 12:04:45,079 - INFO - SUMMARY - Request 9
+2026-03-13 12:04:45,079 - INFO - ============================================================
+2026-03-13 12:04:45,079 - INFO -   Entidade: HOSPITAL ESTADUAL DE JATAÍ DR. SERAFIM DE CARVALHO
+2026-03-13 12:04:45,080 - INFO -   Nº SC: CTS03.2026.FEV.00339
+2026-03-13 12:04:45,080 - INFO -   Título: PRESTAÇÃO DE SERVIÇO DE TÉCNICOS EM RADIOLOGIA
+2026-03-13 12:04:45,080 - INFO -   Fields filled: 37/38
+2026-03-13 12:04:45,080 - INFO -   Situação: ANÁLISE INICIADA
+2026-03-13 12:04:45,080 - INFO -   Items: 1
+2026-03-13 12:04:45,080 - INFO -   Histórico entries: 1
+2026-03-13 12:04:45,080 - INFO - Updating existing data in spreadsheet...
+2026-03-13 12:04:45,573 - INFO - Data updated in spreadsheet at row 24
+2026-03-13 12:04:45,573 - INFO - Updated data successfully!
+2026-03-13 12:04:45,573 - INFO - Closing popup...
+2026-03-13 12:04:46,634 - INFO - Returned to main window
+2026-03-13 12:04:47,636 - INFO - [UPDATED] Process CTS03.2026.FEV.00339 updated. (Total updated: 4)
+2026-03-13 12:04:48,637 - INFO - 
+>>> Attempting to process item 10 (Page 1) <<<
+2026-03-13 12:04:48,637 - INFO - ################################################################################
+2026-03-13 12:04:48,637 - INFO - PROCESSING REQUEST 10 (table row 11)
+2026-03-13 12:04:48,637 - INFO - ################################################################################
+2026-03-13 12:04:48,637 - INFO - Extracting listing fields (item 9)...
+2026-03-13 12:04:48,673 - INFO - Clicking link to open details...
+2026-03-13 12:04:48,898 - INFO - Waiting for new window to open...
+2026-03-13 12:04:50,911 - INFO - Switched to popup window
+2026-03-13 12:04:52,917 - INFO - Page loaded successfully!
+2026-03-13 12:04:52,917 - INFO - ============================================================
+2026-03-13 12:04:52,917 - INFO - EXTRACTING REQUEST DATA
+2026-03-13 12:04:52,917 - INFO - ============================================================
+2026-03-13 12:04:52,917 - INFO - Extracting request fields...
+2026-03-13 12:04:53,269 - INFO - ============================================================
+2026-03-13 12:04:53,269 - INFO - EXTRACTING MODAL FIELDS
+2026-03-13 12:04:53,269 - INFO - ============================================================
+2026-03-13 12:04:53,269 - INFO - Extracting: OBJETO DO CONTRATO
+2026-03-13 12:05:25,807 - INFO -   Empty/Not found
+2026-03-13 12:05:25,807 - INFO - Extracting: ESPECIFICAÇÃO TÉCNICA
+2026-03-13 12:05:27,986 - INFO -   OK: 1. Trata-se da contratação de empresa para prestar serviço d...
+2026-03-13 12:05:27,986 - INFO - Extracting: QUALIFICAÇÃO TÉCNICA
+2026-03-13 12:05:30,150 - INFO -   OK: 1. Para fins de qualificação técnico-operacional, as empresa...
+2026-03-13 12:05:30,150 - INFO - Extracting: GLOSAS
+2026-03-13 12:05:32,323 - INFO -   OK: N/A
+2026-03-13 12:05:32,323 - INFO - Extracting: SLA (ACORDO DE NÍVEL DE SERVIÇO)
+2026-03-13 12:05:34,508 - INFO -   OK: ACORDO DE NÍVEL DE SERVIÇO – SLA 1. DISPOSIÇÕES GERAIS 1.1. ...
+2026-03-13 12:05:34,508 - INFO - Modal fields filled: 4/5
+2026-03-13 12:05:34,508 - INFO - ============================================================
+2026-03-13 12:05:34,508 - INFO - EXTRACTING TABLE ITEMS
+2026-03-13 12:05:34,508 - INFO - ============================================================
+2026-03-13 12:05:34,508 - INFO - Page 1:
+2026-03-13 12:05:34,537 - INFO -   Found 1 items on this page
+2026-03-13 12:05:34,537 - INFO -   No more pages (Next button not found)
+2026-03-13 12:05:34,537 - INFO - ============================================================
+2026-03-13 12:05:34,537 - INFO - Total items extracted: 1 (in 1 page(s))
+2026-03-13 12:05:34,537 - INFO - Extracting Históricos Observação de Revisões...
+2026-03-13 12:05:34,551 - INFO -   Found 1 histórico entries
+2026-03-13 12:05:34,552 - INFO - New process CTS14.2026.JAN.00109, setting Situação to 'SOLICITAÇÃO NOVA'
+2026-03-13 12:05:34,552 - INFO - ============================================================
+2026-03-13 12:05:34,552 - INFO - SUMMARY - Request 10
+2026-03-13 12:05:34,552 - INFO - ============================================================
+2026-03-13 12:05:34,552 - INFO -   Entidade: CLÍNICA TEIA UNIDADE II CAIC DR. GILSON MOREIRA
+2026-03-13 12:05:34,552 - INFO -   Nº SC: CTS14.2026.JAN.00109
+2026-03-13 12:05:34,552 - INFO -   Título: SOLICITAÇÃO DE SERVIÇO DE MANUTENÇÃO SPLIT
+2026-03-13 12:05:34,553 - INFO -   Fields filled: 35/38
+2026-03-13 12:05:34,553 - INFO -   Situação: SOLICITAÇÃO NOVA
+2026-03-13 12:05:34,553 - INFO -   Items: 1
+2026-03-13 12:05:34,553 - INFO -   Histórico entries: 1
+2026-03-13 12:05:34,553 - INFO - Inserting new data into spreadsheet...
+2026-03-13 12:05:35,287 - INFO - Data inserted into spreadsheet at row 109
+2026-03-13 12:05:35,288 - INFO - Inserted data successfully!
+2026-03-13 12:05:35,288 - INFO - Closing popup...
+2026-03-13 12:05:36,348 - INFO - Returned to main window
+2026-03-13 12:05:37,350 - INFO - [NEW] New request inserted! (Total new: 6)
+2026-03-13 12:05:38,357 - INFO - Navigating to next listing page...
+2026-03-13 12:05:42,936 - INFO - ********************************************************************************
+2026-03-13 12:05:42,936 - INFO - LISTING PAGE 2
+2026-03-13 12:05:42,936 - INFO - ********************************************************************************
+2026-03-13 12:05:42,955 - INFO - Found approximately 7 items on this page
+2026-03-13 12:05:42,955 - INFO - 
+>>> Attempting to process item 1 (Page 2) <<<
+2026-03-13 12:05:42,955 - INFO - ################################################################################
+2026-03-13 12:05:42,956 - INFO - PROCESSING REQUEST 1 (table row 2)
+2026-03-13 12:05:42,956 - INFO - ################################################################################
+2026-03-13 12:05:42,958 - INFO - Extracting listing fields (item 0)...
+2026-03-13 12:05:42,981 - INFO - Process CTS03.2026.JAN.00319 exists in spreadsheet. Will open and check for updates...
+2026-03-13 12:05:42,981 - INFO - Clicking link to open details...
+2026-03-13 12:05:43,224 - INFO - Waiting for new window to open...
+2026-03-13 12:05:45,227 - INFO - Switched to popup window
+2026-03-13 12:05:47,233 - INFO - Page loaded successfully!
+2026-03-13 12:05:47,233 - INFO - ============================================================
+2026-03-13 12:05:47,233 - INFO - EXTRACTING REQUEST DATA
+2026-03-13 12:05:47,233 - INFO - ============================================================
+2026-03-13 12:05:47,233 - INFO - Extracting request fields...
+2026-03-13 12:05:47,573 - INFO - ============================================================
+2026-03-13 12:05:47,573 - INFO - EXTRACTING MODAL FIELDS
+2026-03-13 12:05:47,573 - INFO - ============================================================
+2026-03-13 12:05:47,573 - INFO - Extracting: OBJETO DO CONTRATO
+2026-03-13 12:05:49,780 - INFO -   OK: Trata-se da contratação de prestação serviços de exames de d...
+2026-03-13 12:05:49,780 - INFO - Extracting: ESPECIFICAÇÃO TÉCNICA
+2026-03-13 12:05:52,202 - INFO -   OK: Item Descrição do Serviço Quant. Mensal Quant. 36 meses Valo...
+2026-03-13 12:05:52,202 - INFO - Extracting: QUALIFICAÇÃO TÉCNICA
+2026-03-13 12:05:54,389 - INFO -   OK: A título de qualificação técnico-operacional, as empresas de...
+2026-03-13 12:05:54,389 - INFO - Extracting: GLOSAS
+2026-03-13 12:05:56,547 - INFO -   OK: O pagamento se dará apenas por laudo/exame executado, quando...
+2026-03-13 12:05:56,547 - INFO - Extracting: SLA (ACORDO DE NÍVEL DE SERVIÇO)
+2026-03-13 12:05:58,792 - INFO -   OK: 1. DISPOSIÇÕES GERAIS: 1.1. Fica estabelecido entre as parte...
+2026-03-13 12:05:58,792 - INFO - Modal fields filled: 5/5
+2026-03-13 12:05:58,792 - INFO - ============================================================
+2026-03-13 12:05:58,792 - INFO - EXTRACTING TABLE ITEMS
+2026-03-13 12:05:58,792 - INFO - ============================================================
+2026-03-13 12:05:58,792 - INFO - Page 1:
+2026-03-13 12:05:58,846 - INFO -   Found 2 items on this page
+2026-03-13 12:05:58,856 - INFO -   No more pages (Next button not found)
+2026-03-13 12:05:58,856 - INFO - ============================================================
+2026-03-13 12:05:58,856 - INFO - Total items extracted: 2 (in 1 page(s))
+2026-03-13 12:05:58,856 - INFO - Extracting Históricos Observação de Revisões...
+2026-03-13 12:05:58,868 - INFO -   Found 5 histórico entries
+2026-03-13 12:05:58,868 - INFO - Data changed for CTS03.2026.JAN.00319, setting Situação to 'ANÁLISE INICIADA'
+2026-03-13 12:05:58,868 - INFO - ============================================================
+2026-03-13 12:05:58,868 - INFO - SUMMARY - Request 1
+2026-03-13 12:05:58,868 - INFO - ============================================================
+2026-03-13 12:05:58,868 - INFO -   Entidade: HOSPITAL ESTADUAL DE JATAÍ DR. SERAFIM DE CARVALHO
+2026-03-13 12:05:58,868 - INFO -   Nº SC: CTS03.2026.JAN.00319
+2026-03-13 12:05:58,868 - INFO -   Título: PRESTAÇÃO DE SERVIÇOS MÉDICOS EM RADIOLOGIA E DIAG...
+2026-03-13 12:05:58,868 - INFO -   Fields filled: 37/38
+2026-03-13 12:05:58,868 - INFO -   Situação: ANÁLISE INICIADA
+2026-03-13 12:05:58,868 - INFO -   Items: 2
+2026-03-13 12:05:58,868 - INFO -   Histórico entries: 5
+2026-03-13 12:05:58,868 - INFO - Updating existing data in spreadsheet...
+2026-03-13 12:05:59,155 - INFO - Data updated in spreadsheet at row 29
+2026-03-13 12:05:59,155 - INFO - Updated data successfully!
+2026-03-13 12:05:59,161 - INFO - Closing popup...
+2026-03-13 12:06:00,225 - INFO - Returned to main window
+2026-03-13 12:06:01,228 - INFO - [UPDATED] Process CTS03.2026.JAN.00319 updated. (Total updated: 5)
+2026-03-13 12:06:02,230 - INFO - 
+>>> Attempting to process item 2 (Page 2) <<<
+2026-03-13 12:06:02,230 - INFO - ################################################################################
+2026-03-13 12:06:02,230 - INFO - PROCESSING REQUEST 2 (table row 3)
+2026-03-13 12:06:02,230 - INFO - ################################################################################
+2026-03-13 12:06:02,244 - INFO - Extracting listing fields (item 1)...
+2026-03-13 12:06:02,272 - INFO - Process CTS03.2026.JAN.00313 exists in spreadsheet. Will open and check for updates...
+2026-03-13 12:06:02,272 - INFO - Clicking link to open details...
+2026-03-13 12:06:02,493 - INFO - Waiting for new window to open...
+2026-03-13 12:06:04,496 - INFO - Switched to popup window
+2026-03-13 12:06:06,502 - INFO - Page loaded successfully!
+2026-03-13 12:06:06,502 - INFO - ============================================================
+2026-03-13 12:06:06,502 - INFO - EXTRACTING REQUEST DATA
+2026-03-13 12:06:06,502 - INFO - ============================================================
+2026-03-13 12:06:06,502 - INFO - Extracting request fields...
+2026-03-13 12:06:06,851 - INFO - ============================================================
+2026-03-13 12:06:06,851 - INFO - EXTRACTING MODAL FIELDS
+2026-03-13 12:06:06,851 - INFO - ============================================================
+2026-03-13 12:06:06,851 - INFO - Extracting: OBJETO DO CONTRATO
+2026-03-13 12:06:09,049 - INFO -   OK: Trata-se da contratação de empresa com especialistas na área...
+2026-03-13 12:06:09,049 - INFO - Extracting: ESPECIFICAÇÃO TÉCNICA
+2026-03-13 12:06:11,488 - INFO -   OK: Trata-se da contratação de empresa especializada para presta...
+2026-03-13 12:06:11,488 - INFO - Extracting: QUALIFICAÇÃO TÉCNICA
+2026-03-13 12:06:13,680 - INFO -   OK: A título de qualificação técnico-operacional, as empresas de...
+2026-03-13 12:06:13,680 - INFO - Extracting: GLOSAS
+2026-03-13 12:06:15,865 - INFO -   OK: O pagamento se dará apenas por agenda executada e/ou procedi...
+2026-03-13 12:06:15,865 - INFO - Extracting: SLA (ACORDO DE NÍVEL DE SERVIÇO)
+2026-03-13 12:06:18,127 - INFO -   OK: 1. DISPOSIÇÕES GERAIS: 1.1. Fica estabelecido entre as parte...
+2026-03-13 12:06:18,127 - INFO - Modal fields filled: 5/5
+2026-03-13 12:06:18,127 - INFO - ============================================================
+2026-03-13 12:06:18,127 - INFO - EXTRACTING TABLE ITEMS
+2026-03-13 12:06:18,127 - INFO - ============================================================
+2026-03-13 12:06:18,127 - INFO - Page 1:
+2026-03-13 12:06:18,262 - INFO -   Found 5 items on this page
+2026-03-13 12:06:18,262 - INFO -   No more pages (Next button not found)
+2026-03-13 12:06:18,262 - INFO - ============================================================
+2026-03-13 12:06:18,262 - INFO - Total items extracted: 5 (in 1 page(s))
+2026-03-13 12:06:18,262 - INFO - Extracting Históricos Observação de Revisões...
+2026-03-13 12:06:18,278 - INFO -   Found 3 histórico entries
+2026-03-13 12:06:18,278 - INFO - No changes detected for CTS03.2026.JAN.00313, keeping existing Situação
+2026-03-13 12:06:18,278 - INFO - ============================================================
+2026-03-13 12:06:18,278 - INFO - SUMMARY - Request 2
+2026-03-13 12:06:18,279 - INFO - ============================================================
+2026-03-13 12:06:18,279 - INFO -   Entidade: HOSPITAL ESTADUAL DE JATAÍ DR. SERAFIM DE CARVALHO
+2026-03-13 12:06:18,279 - INFO -   Nº SC: CTS03.2026.JAN.00313
+2026-03-13 12:06:18,279 - INFO -   Título: PRESTAÇÃO DE SERVIÇOS MÉDICOS EM GINECOLOGIA E OBS...
+2026-03-13 12:06:18,279 - INFO -   Fields filled: 37/38
+2026-03-13 12:06:18,279 - INFO -   Situação: ANÁLISE INICIADA
+2026-03-13 12:06:18,280 - INFO -   Items: 5
+2026-03-13 12:06:18,280 - INFO -   Histórico entries: 3
+2026-03-13 12:06:18,280 - INFO - Updating existing data in spreadsheet...
+2026-03-13 12:06:18,575 - INFO - Data updated in spreadsheet at row 31
+2026-03-13 12:06:18,575 - INFO - Updated data successfully!
+2026-03-13 12:06:18,591 - INFO - Closing popup...
+2026-03-13 12:06:19,652 - INFO - Returned to main window
+2026-03-13 12:06:20,654 - INFO - [UPDATED] Process CTS03.2026.JAN.00313 updated. (Total updated: 6)
+2026-03-13 12:06:21,655 - INFO - 
+>>> Attempting to process item 3 (Page 2) <<<
+2026-03-13 12:06:21,655 - INFO - ################################################################################
+2026-03-13 12:06:21,655 - INFO - PROCESSING REQUEST 3 (table row 4)
+2026-03-13 12:06:21,655 - INFO - ################################################################################
+2026-03-13 12:06:21,659 - INFO - Extracting listing fields (item 2)...
+2026-03-13 12:06:21,686 - INFO - Process CTS03.2026.JAN.00311 exists in spreadsheet. Will open and check for updates...
+2026-03-13 12:06:21,687 - INFO - Clicking link to open details...
+2026-03-13 12:06:21,915 - INFO - Waiting for new window to open...
+2026-03-13 12:06:23,917 - INFO - Switched to popup window
+2026-03-13 12:06:25,922 - INFO - Page loaded successfully!
+2026-03-13 12:06:25,922 - INFO - ============================================================
+2026-03-13 12:06:25,922 - INFO - EXTRACTING REQUEST DATA
+2026-03-13 12:06:25,922 - INFO - ============================================================
+2026-03-13 12:06:25,922 - INFO - Extracting request fields...
+2026-03-13 12:06:26,270 - INFO - ============================================================
+2026-03-13 12:06:26,271 - INFO - EXTRACTING MODAL FIELDS
+2026-03-13 12:06:26,271 - INFO - ============================================================
+2026-03-13 12:06:26,271 - INFO - Extracting: OBJETO DO CONTRATO
+2026-03-13 12:06:28,488 - INFO -   OK: Trata-se da contratação de empresa com especialistas na área...
+2026-03-13 12:06:28,488 - INFO - Extracting: ESPECIFICAÇÃO TÉCNICA
+2026-03-13 12:06:31,024 - INFO -   OK: Trata-se da contratação de empresa especializada para presta...
+2026-03-13 12:06:31,024 - INFO - Extracting: QUALIFICAÇÃO TÉCNICA
+2026-03-13 12:06:33,223 - INFO -   OK: A título de qualificação técnico-operacional, as empresas de...
+2026-03-13 12:06:33,223 - INFO - Extracting: GLOSAS
+2026-03-13 12:06:35,371 - INFO -   OK: N/A
+2026-03-13 12:06:35,371 - INFO - Extracting: SLA (ACORDO DE NÍVEL DE SERVIÇO)
+2026-03-13 12:06:37,617 - INFO -   OK: 1.1. Fica estabelecido entre as partes este Acordo de Nível ...
+2026-03-13 12:06:37,617 - INFO - Modal fields filled: 5/5
+2026-03-13 12:06:37,617 - INFO - ============================================================
+2026-03-13 12:06:37,617 - INFO - EXTRACTING TABLE ITEMS
+2026-03-13 12:06:37,617 - INFO - ============================================================
+2026-03-13 12:06:37,617 - INFO - Page 1:
+2026-03-13 12:06:37,732 - INFO -   Found 4 items on this page
+2026-03-13 12:06:37,732 - INFO -   No more pages (Next button not found)
+2026-03-13 12:06:37,732 - INFO - ============================================================
+2026-03-13 12:06:37,732 - INFO - Total items extracted: 4 (in 1 page(s))
+2026-03-13 12:06:37,732 - INFO - Extracting Históricos Observação de Revisões...
+2026-03-13 12:06:37,747 - INFO -   Found 3 histórico entries
+2026-03-13 12:06:37,747 - INFO - Data changed for CTS03.2026.JAN.00311, setting Situação to 'ANÁLISE INICIADA'
+2026-03-13 12:06:37,747 - INFO - ============================================================
+2026-03-13 12:06:37,747 - INFO - SUMMARY - Request 3
+2026-03-13 12:06:37,747 - INFO - ============================================================
+2026-03-13 12:06:37,748 - INFO -   Entidade: HOSPITAL ESTADUAL DE JATAÍ DR. SERAFIM DE CARVALHO
+2026-03-13 12:06:37,748 - INFO -   Nº SC: CTS03.2026.JAN.00311
+2026-03-13 12:06:37,748 - INFO -   Título: PRESTAÇÃO DE SERVIÇOS MÉDICOS EM ORTOPEDIA
+2026-03-13 12:06:37,748 - INFO -   Fields filled: 37/38
+2026-03-13 12:06:37,748 - INFO -   Situação: ANÁLISE INICIADA
+2026-03-13 12:06:37,748 - INFO -   Items: 4
+2026-03-13 12:06:37,749 - INFO -   Histórico entries: 3
+2026-03-13 12:06:37,749 - INFO - Updating existing data in spreadsheet...
+2026-03-13 12:06:38,118 - INFO - Data updated in spreadsheet at row 32
+2026-03-13 12:06:38,118 - INFO - Updated data successfully!
+2026-03-13 12:06:38,118 - INFO - Closing popup...
+2026-03-13 12:06:39,175 - INFO - Returned to main window
+2026-03-13 12:06:40,178 - INFO - [UPDATED] Process CTS03.2026.JAN.00311 updated. (Total updated: 7)
+2026-03-13 12:06:41,179 - INFO - 
+>>> Attempting to process item 4 (Page 2) <<<
+2026-03-13 12:06:41,179 - INFO - ################################################################################
+2026-03-13 12:06:41,179 - INFO - PROCESSING REQUEST 4 (table row 5)
+2026-03-13 12:06:41,179 - INFO - ################################################################################
+2026-03-13 12:06:41,179 - INFO - Extracting listing fields (item 3)...
+2026-03-13 12:06:41,209 - INFO - Process CTS03.2026.JAN.00287 exists in spreadsheet. Will open and check for updates...
+2026-03-13 12:06:41,209 - INFO - Clicking link to open details...
+2026-03-13 12:06:41,421 - INFO - Waiting for new window to open...
+2026-03-13 12:06:43,428 - INFO - Switched to popup window
+2026-03-13 12:06:45,439 - INFO - Page loaded successfully!
+2026-03-13 12:06:45,439 - INFO - ============================================================
+2026-03-13 12:06:45,440 - INFO - EXTRACTING REQUEST DATA
+2026-03-13 12:06:45,440 - INFO - ============================================================
+2026-03-13 12:06:45,440 - INFO - Extracting request fields...
+2026-03-13 12:06:45,805 - INFO - ============================================================
+2026-03-13 12:06:45,805 - INFO - EXTRACTING MODAL FIELDS
+2026-03-13 12:06:45,805 - INFO - ============================================================
+2026-03-13 12:06:45,805 - INFO - Extracting: OBJETO DO CONTRATO
+2026-03-13 12:06:47,980 - INFO -   OK: Trata-se de contratação de empresa para prestação de serviço...
+2026-03-13 12:06:47,980 - INFO - Extracting: ESPECIFICAÇÃO TÉCNICA
+2026-03-13 12:06:50,504 - INFO -   OK: Cód. Corporativo Item Procedimento Contemplados Valor Unitár...
+2026-03-13 12:06:50,504 - INFO - Extracting: QUALIFICAÇÃO TÉCNICA
+2026-03-13 12:06:52,672 - INFO -   OK: A título de qualificação técnico-operacional, as empresas de...
+2026-03-13 12:06:52,672 - INFO - Extracting: GLOSAS
+2026-03-13 12:06:54,865 - INFO -   OK: N/A
+2026-03-13 12:06:54,865 - INFO - Extracting: SLA (ACORDO DE NÍVEL DE SERVIÇO)
+2026-03-13 12:06:57,115 - INFO -   OK: 1. DISPOSIÇÕES GERAIS: 1.1. Fica estabelecido entre as parte...
+2026-03-13 12:06:57,115 - INFO - Modal fields filled: 5/5
+2026-03-13 12:06:57,115 - INFO - ============================================================
+2026-03-13 12:06:57,115 - INFO - EXTRACTING TABLE ITEMS
+2026-03-13 12:06:57,115 - INFO - ============================================================
+2026-03-13 12:06:57,115 - INFO - Page 1:
+2026-03-13 12:06:57,221 - INFO -   Found 4 items on this page
+2026-03-13 12:06:57,221 - INFO -   No more pages (Next button not found)
+2026-03-13 12:06:57,221 - INFO - ============================================================
+2026-03-13 12:06:57,221 - INFO - Total items extracted: 4 (in 1 page(s))
+2026-03-13 12:06:57,238 - INFO - Extracting Históricos Observação de Revisões...
+2026-03-13 12:06:57,254 - INFO -   Found 7 histórico entries
+2026-03-13 12:06:57,254 - INFO - Data changed for CTS03.2026.JAN.00287, setting Situação to 'ANÁLISE INICIADA'
+2026-03-13 12:06:57,255 - INFO - ============================================================
+2026-03-13 12:06:57,255 - INFO - SUMMARY - Request 4
+2026-03-13 12:06:57,255 - INFO - ============================================================
+2026-03-13 12:06:57,255 - INFO -   Entidade: HOSPITAL ESTADUAL DE JATAÍ DR. SERAFIM DE CARVALHO
+2026-03-13 12:06:57,256 - INFO -   Nº SC: CTS03.2026.JAN.00287
+2026-03-13 12:06:57,256 - INFO -   Título: PRESTAÇÃO DE SERVIÇOS MÉDICOS EM UROLOGIA
+2026-03-13 12:06:57,257 - INFO -   Fields filled: 37/38
+2026-03-13 12:06:57,257 - INFO -   Situação: ANÁLISE INICIADA
+2026-03-13 12:06:57,257 - INFO -   Items: 4
+2026-03-13 12:06:57,258 - INFO -   Histórico entries: 7
+2026-03-13 12:06:57,258 - INFO - Updating existing data in spreadsheet...
+2026-03-13 12:06:57,696 - INFO - Data updated in spreadsheet at row 102
+2026-03-13 12:06:57,696 - INFO - Updated data successfully!
+2026-03-13 12:06:57,700 - INFO - Closing popup...
+2026-03-13 12:06:58,776 - INFO - Returned to main window
+2026-03-13 12:06:59,783 - INFO - [UPDATED] Process CTS03.2026.JAN.00287 updated. (Total updated: 8)
+2026-03-13 12:07:00,785 - INFO - 
+>>> Attempting to process item 5 (Page 2) <<<
+2026-03-13 12:07:00,785 - INFO - ################################################################################
+2026-03-13 12:07:00,787 - INFO - PROCESSING REQUEST 5 (table row 6)
+2026-03-13 12:07:00,788 - INFO - ################################################################################
+2026-03-13 12:07:00,797 - INFO - Extracting listing fields (item 4)...
+2026-03-13 12:07:00,822 - INFO - Process CTS08.2025.DEZ.01956 exists in spreadsheet. Will open and check for updates...
+2026-03-13 12:07:00,822 - INFO - Clicking link to open details...
+2026-03-13 12:07:01,038 - INFO - Waiting for new window to open...
+2026-03-13 12:07:03,047 - INFO - Switched to popup window
+2026-03-13 12:07:05,050 - INFO - Page loaded successfully!
+2026-03-13 12:07:05,050 - INFO - ============================================================
+2026-03-13 12:07:05,050 - INFO - EXTRACTING REQUEST DATA
+2026-03-13 12:07:05,050 - INFO - ============================================================
+2026-03-13 12:07:05,050 - INFO - Extracting request fields...
+2026-03-13 12:07:05,402 - INFO - ============================================================
+2026-03-13 12:07:05,402 - INFO - EXTRACTING MODAL FIELDS
+2026-03-13 12:07:05,402 - INFO - ============================================================
+2026-03-13 12:07:05,402 - INFO - Extracting: OBJETO DO CONTRATO
+2026-03-13 12:07:37,974 - INFO -   OK: ESPECIFICIDADES DA CONTRATAÇÃO
+2026-03-13 12:07:37,974 - INFO - Extracting: ESPECIFICAÇÃO TÉCNICA
+2026-03-13 12:07:42,548 - INFO -   OK: DESCRIÇÃO TÉCNICA E EXECUÇÃO ESPECIFICIDADES DA CONTRATAÇÃO ...
+2026-03-13 12:07:42,548 - INFO - Extracting: QUALIFICAÇÃO TÉCNICA
+2026-03-13 12:07:44,736 - INFO -   OK: Para fins de habilitação técnico-operacional: a) Comprovante...
+2026-03-13 12:07:44,736 - INFO - Extracting: GLOSAS
+2026-03-13 12:07:46,973 - INFO -   OK: TABELA – DOS DESCONTOS, PONTUAÇÃO, AJUSTE NO PAGAMENTO PONTU...
+2026-03-13 12:07:46,973 - INFO - Extracting: SLA (ACORDO DE NÍVEL DE SERVIÇO)
+2026-03-13 12:07:49,231 - INFO -   OK: ANEXO IV ACORDO DE NÍVEL DE SERVIÇO – SLA 1. DISPOSIÇÕES GER...
+2026-03-13 12:07:49,231 - INFO - Modal fields filled: 5/5
+2026-03-13 12:07:49,231 - INFO - ============================================================
+2026-03-13 12:07:49,231 - INFO - EXTRACTING TABLE ITEMS
+2026-03-13 12:07:49,231 - INFO - ============================================================
+2026-03-13 12:07:49,231 - INFO - Page 1:
+2026-03-13 12:07:49,287 - INFO -   Found 2 items on this page
+2026-03-13 12:07:49,298 - INFO -   No more pages (Next button not found)
+2026-03-13 12:07:49,298 - INFO - ============================================================
+2026-03-13 12:07:49,298 - INFO - Total items extracted: 2 (in 1 page(s))
+2026-03-13 12:07:49,298 - INFO - Extracting Históricos Observação de Revisões...
+2026-03-13 12:07:49,308 - INFO -   Found 3 histórico entries
+2026-03-13 12:07:49,308 - INFO - Data changed for CTS08.2025.DEZ.01956, setting Situação to 'ANÁLISE INICIADA'
+2026-03-13 12:07:49,313 - INFO - ============================================================
+2026-03-13 12:07:49,313 - INFO - SUMMARY - Request 5
+2026-03-13 12:07:49,313 - INFO - ============================================================
+2026-03-13 12:07:49,314 - INFO -   Entidade: HOSPITAL ESTADUAL DE DERMATOLOGIA SANITÁRIA COLÔNIA SANTA MARTA
+2026-03-13 12:07:49,314 - INFO -   Nº SC: CTS08.2025.DEZ.01956
+2026-03-13 12:07:49,314 - INFO -   Título: CONTRATO DE LOCAÇÃO E MANUTENÇÃO PREVENTIVA E CORR...
+2026-03-13 12:07:49,314 - INFO -   Fields filled: 37/38
+2026-03-13 12:07:49,315 - INFO -   Situação: ANÁLISE INICIADA
+2026-03-13 12:07:49,315 - INFO -   Items: 2
+2026-03-13 12:07:49,315 - INFO -   Histórico entries: 3
+2026-03-13 12:07:49,315 - INFO - Updating existing data in spreadsheet...
+2026-03-13 12:07:49,316 - WARNING - Campo 'ESPECIFICAÇÃO TÉCNICA' excede 50.000 caracteres. Substituído por mensagem de aviso.
+2026-03-13 12:07:49,316 - INFO - Campos truncados nesta solicitação: ESPECIFICAÇÃO TÉCNICA
+2026-03-13 12:07:49,579 - INFO - Data updated in spreadsheet at row 71
+2026-03-13 12:07:49,579 - INFO - Updated data successfully!
+2026-03-13 12:07:49,587 - INFO - Closing popup...
+2026-03-13 12:07:50,649 - INFO - Returned to main window
+2026-03-13 12:07:51,651 - INFO - [UPDATED] Process CTS08.2025.DEZ.01956 updated. (Total updated: 9)
+2026-03-13 12:07:52,652 - INFO - 
+>>> Attempting to process item 6 (Page 2) <<<
+2026-03-13 12:07:52,652 - INFO - ################################################################################
+2026-03-13 12:07:52,652 - INFO - PROCESSING REQUEST 6 (table row 7)
+2026-03-13 12:07:52,652 - INFO - ################################################################################
+2026-03-13 12:07:52,655 - INFO - Extracting listing fields (item 5)...
+2026-03-13 12:07:52,680 - INFO - Clicking link to open details...
+2026-03-13 12:07:52,910 - INFO - Waiting for new window to open...
+2026-03-13 12:07:54,914 - INFO - Switched to popup window
+2026-03-13 12:07:56,924 - INFO - Page loaded successfully!
+2026-03-13 12:07:56,924 - INFO - ============================================================
+2026-03-13 12:07:56,924 - INFO - EXTRACTING REQUEST DATA
+2026-03-13 12:07:56,924 - INFO - ============================================================
+2026-03-13 12:07:56,924 - INFO - Extracting request fields...
+2026-03-13 12:07:57,279 - INFO - ============================================================
+2026-03-13 12:07:57,279 - INFO - EXTRACTING MODAL FIELDS
+2026-03-13 12:07:57,279 - INFO - ============================================================
+2026-03-13 12:07:57,279 - INFO - Extracting: OBJETO DO CONTRATO
+2026-03-13 12:08:29,787 - INFO -   Empty/Not found
+2026-03-13 12:08:29,787 - INFO - Extracting: ESPECIFICAÇÃO TÉCNICA
+2026-03-13 12:08:31,975 - INFO -   OK: Contratação de empresa para prestação de serviço de Software...
+2026-03-13 12:08:31,975 - INFO - Extracting: QUALIFICAÇÃO TÉCNICA
+2026-03-13 12:08:34,176 - INFO -   OK: Para fins de qualificação técnico-operacional: a) No mínimo ...
+2026-03-13 12:08:34,176 - INFO - Extracting: GLOSAS
+2026-03-13 12:08:36,342 - INFO -   OK: Caso o aplicativo fique inoperante por tempo superior ao aco...
+2026-03-13 12:08:36,342 - INFO - Extracting: SLA (ACORDO DE NÍVEL DE SERVIÇO)
+2026-03-13 12:08:38,502 - INFO -   OK: dfdfdf
+2026-03-13 12:08:38,502 - INFO - Modal fields filled: 4/5
+2026-03-13 12:08:38,502 - INFO - ============================================================
+2026-03-13 12:08:38,502 - INFO - EXTRACTING TABLE ITEMS
+2026-03-13 12:08:38,502 - INFO - ============================================================
+2026-03-13 12:08:38,502 - INFO - Page 1:
+2026-03-13 12:08:38,532 - INFO -   Found 1 items on this page
+2026-03-13 12:08:38,534 - INFO -   No more pages (Next button not found)
+2026-03-13 12:08:38,534 - INFO - ============================================================
+2026-03-13 12:08:38,536 - INFO - Total items extracted: 1 (in 1 page(s))
+2026-03-13 12:08:38,536 - INFO - Extracting Históricos Observação de Revisões...
+2026-03-13 12:08:38,550 - INFO -   Found 5 histórico entries
+2026-03-13 12:08:38,550 - INFO - New process CTS08.2025.FEV.01152, setting Situação to 'SOLICITAÇÃO NOVA'
+2026-03-13 12:08:38,550 - INFO - ============================================================
+2026-03-13 12:08:38,550 - INFO - SUMMARY - Request 6
+2026-03-13 12:08:38,550 - INFO - ============================================================
+2026-03-13 12:08:38,550 - INFO -   Entidade: HOSPITAL ESTADUAL DE DERMATOLOGIA SANITÁRIA COLÔNIA SANTA MARTA
+2026-03-13 12:08:38,550 - INFO -   Nº SC: CTS08.2025.FEV.01152
+2026-03-13 12:08:38,552 - INFO -   Título: SERV SOFTWARE P/ ANALISE E TTO DE FERIDAS ATRAVES ...
+2026-03-13 12:08:38,552 - INFO -   Fields filled: 36/38
+2026-03-13 12:08:38,552 - INFO -   Situação: SOLICITAÇÃO NOVA
+2026-03-13 12:08:38,552 - INFO -   Items: 1
+2026-03-13 12:08:38,553 - INFO -   Histórico entries: 5
+2026-03-13 12:08:38,553 - INFO - Inserting new data into spreadsheet...
+2026-03-13 12:08:39,431 - INFO - Data inserted into spreadsheet at row 110
+2026-03-13 12:08:39,431 - INFO - Inserted data successfully!
+2026-03-13 12:08:39,431 - INFO - Closing popup...
+2026-03-13 12:08:40,491 - INFO - Returned to main window
+2026-03-13 12:08:41,493 - INFO - [NEW] New request inserted! (Total new: 7)
+2026-03-13 12:08:42,495 - INFO - 
+>>> Attempting to process item 7 (Page 2) <<<
+2026-03-13 12:08:42,495 - INFO - ################################################################################
+2026-03-13 12:08:42,495 - INFO - PROCESSING REQUEST 7 (table row 8)
+2026-03-13 12:08:42,495 - INFO - ################################################################################
+2026-03-13 12:08:47,586 - WARNING - Item 7 not found on this page
+2026-03-13 12:08:47,586 - ERROR - Error accessing item 7 (table row 8): Element not found at XPath: //*[@id="p1_cph1_SCs_GdSCs_GdSCs_Lkb_Sc_6"]
+2026-03-13 12:08:47,586 - INFO - Item 7 not found. Checking if this is the last page...
+2026-03-13 12:08:47,586 - INFO - Next button not found - last page reached
+2026-03-13 12:08:47,586 - INFO - Confirmed: This is the last page and there are no more items.
+2026-03-13 12:08:47,586 - INFO - Ending processing...
+2026-03-13 12:08:47,586 - INFO - Processing completed - termination condition met!
+2026-03-13 12:08:47,586 - INFO - ================================================================================
+2026-03-13 12:08:47,595 - INFO - CHECKING FOR PROCESSES THAT LEFT SEGECON
+2026-03-13 12:08:47,595 - INFO - ================================================================================
+2026-03-13 12:08:47,596 - INFO - Found 93 processes that are no longer in ecompras
+2026-03-13 12:08:47,596 - INFO - Marking CTS12.2026.FEV.00067 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:08:48,087 - INFO - Process CTS12.2026.FEV.00067 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 88
+2026-03-13 12:08:48,087 - INFO - Marking CTS29.2026.JAN.02643 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:08:48,532 - INFO - Process CTS29.2026.JAN.02643 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 26
+2026-03-13 12:08:48,533 - INFO - Marking CTS28.2026.FEV.01705 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:08:48,971 - INFO - Process CTS28.2026.FEV.01705 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 39
+2026-03-13 12:08:48,971 - INFO - Marking CTP03.2026.MAR.00413 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:08:49,413 - INFO - Process CTP03.2026.MAR.00413 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 81
+2026-03-13 12:08:49,413 - INFO - Marking CTS08.2026.JAN.01963 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:08:49,866 - INFO - Process CTS08.2026.JAN.01963 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 35
+2026-03-13 12:08:49,866 - INFO - Marking CTS30.2026.JAN.00627 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:08:50,308 - INFO - Process CTS30.2026.JAN.00627 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 96
+2026-03-13 12:08:50,308 - INFO - Marking CTP04.2026.FEV.03289 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:08:50,799 - INFO - Process CTP04.2026.FEV.03289 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 41
+2026-03-13 12:08:50,799 - INFO - Marking CTS12.2026.FEV.00052 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:08:51,253 - INFO - Process CTS12.2026.FEV.00052 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 61
+2026-03-13 12:08:51,255 - INFO - Marking CTS29.2026.FEV.02807 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:08:51,698 - INFO - Process CTS29.2026.FEV.02807 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 89
+2026-03-13 12:08:51,698 - INFO - Marking CTS03.2025.DEZ.00231 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:08:52,167 - INFO - Process CTS03.2025.DEZ.00231 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 93
+2026-03-13 12:08:52,168 - INFO - Marking CTS29.2026.FEV.02726 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:08:52,597 - INFO - Process CTS29.2026.FEV.02726 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 6
+2026-03-13 12:08:52,597 - INFO - Marking CTS28.2026.FEV.01676 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:08:53,029 - INFO - Process CTS28.2026.FEV.01676 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 11
+2026-03-13 12:08:53,029 - INFO - Marking CTS03.2026.JAN.00314 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:08:53,473 - INFO - Process CTS03.2026.JAN.00314 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 80
+2026-03-13 12:08:53,473 - INFO - Marking CTP04.2026.MAR.03376 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:08:53,931 - INFO - Process CTP04.2026.MAR.03376 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 103
+2026-03-13 12:08:53,931 - INFO - Marking CTP28.2026.FEV.01647 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:08:54,433 - INFO - Process CTP28.2026.FEV.01647 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 21
+2026-03-13 12:08:54,433 - INFO - Marking CTS03.2026.JAN.00332 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:08:54,902 - INFO - Process CTS03.2026.JAN.00332 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 25
+2026-03-13 12:08:54,902 - INFO - Marking CTS88.2026.FEV.00530 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:08:55,355 - INFO - Process CTS88.2026.FEV.00530 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 73
+2026-03-13 12:08:55,355 - INFO - Marking CTP28.2026.FEV.01674 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:08:55,787 - INFO - Process CTP28.2026.FEV.01674 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 12
+2026-03-13 12:08:55,787 - INFO - Marking CTP28.2026.FEV.01677 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:08:56,220 - INFO - Process CTP28.2026.FEV.01677 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 10
+2026-03-13 12:08:56,235 - INFO - Marking CTS28.2026.MAR.01790 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:08:56,663 - INFO - Process CTS28.2026.MAR.01790 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 100
+2026-03-13 12:08:56,663 - INFO - Marking CTS03.2026.JAN.00318 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:08:57,105 - INFO - Process CTS03.2026.JAN.00318 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 30
+2026-03-13 12:08:57,105 - INFO - Marking CTS03.2026.JAN.00320 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:08:57,548 - INFO - Process CTS03.2026.JAN.00320 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 54
+2026-03-13 12:08:57,548 - INFO - Marking CTS29.2026.MAR.02812 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:08:58,007 - INFO - Process CTS29.2026.MAR.02812 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 84
+2026-03-13 12:08:58,007 - INFO - Marking CTP04.2026.FEV.03300 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:08:58,449 - INFO - Process CTP04.2026.FEV.03300 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 51
+2026-03-13 12:08:58,451 - INFO - Marking CTS03.2026.JAN.00284 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:08:58,882 - INFO - Process CTS03.2026.JAN.00284 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 34
+2026-03-13 12:08:58,883 - INFO - Marking CTS12.2026.FEV.00053 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:08:59,309 - INFO - Process CTS12.2026.FEV.00053 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 60
+2026-03-13 12:08:59,309 - INFO - Marking CTS29.2026.FEV.02736 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:08:59,769 - INFO - Process CTS29.2026.FEV.02736 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 77
+2026-03-13 12:08:59,769 - INFO - Marking CTS03.2026.FEV.00359 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:00,242 - INFO - Process CTS03.2026.FEV.00359 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 19
+2026-03-13 12:09:00,242 - INFO - Marking CTS03.2026.FEV.00362 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:00,754 - INFO - Process CTS03.2026.FEV.00362 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 14
+2026-03-13 12:09:00,754 - INFO - Marking CTS59.2026.MAR.00366 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:01,197 - INFO - Process CTS59.2026.MAR.00366 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 83
+2026-03-13 12:09:01,197 - INFO - Marking CTP28.2026.FEV.01698 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:01,589 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_location': 'global', 'quota_limit_value': '60', 'quota_unit': '1/min/{project}/{user}', 'quota_metric': 'sheets.googleapis.com/write_requests', 'service': 'sheets.googleapis.com', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'consumer': 'projects/110493255608'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:01,591 - ERROR - Failed to mark CTP28.2026.FEV.01698 as left
+2026-03-13 12:09:01,592 - INFO - Marking CTP01.2026.FEV.03396 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:01,746 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_location': 'global', 'quota_limit_value': '60', 'quota_unit': '1/min/{project}/{user}', 'quota_metric': 'sheets.googleapis.com/write_requests', 'service': 'sheets.googleapis.com', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'consumer': 'projects/110493255608'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:01,746 - ERROR - Failed to mark CTP01.2026.FEV.03396 as left
+2026-03-13 12:09:01,746 - INFO - Marking CTS04.2026.FEV.03258 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:01,898 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_location': 'global', 'quota_limit_value': '60', 'quota_unit': '1/min/{project}/{user}', 'quota_metric': 'sheets.googleapis.com/write_requests', 'service': 'sheets.googleapis.com', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'consumer': 'projects/110493255608'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:01,898 - ERROR - Failed to mark CTS04.2026.FEV.03258 as left
+2026-03-13 12:09:01,898 - INFO - Marking CTS08.2025.NOV.01873 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:02,065 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_location': 'global', 'quota_limit_value': '60', 'quota_unit': '1/min/{project}/{user}', 'quota_metric': 'sheets.googleapis.com/write_requests', 'service': 'sheets.googleapis.com', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'consumer': 'projects/110493255608'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:02,066 - ERROR - Failed to mark CTS08.2025.NOV.01873 as left
+2026-03-13 12:09:02,066 - INFO - Marking CTPS29.2026.MAR.02810 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:02,230 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_location': 'global', 'quota_limit_value': '60', 'quota_unit': '1/min/{project}/{user}', 'quota_metric': 'sheets.googleapis.com/write_requests', 'service': 'sheets.googleapis.com', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'consumer': 'projects/110493255608'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:02,230 - ERROR - Failed to mark CTPS29.2026.MAR.02810 as left
+2026-03-13 12:09:02,230 - INFO - Marking CTP04.2026.FEV.03282 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:02,390 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_location': 'global', 'quota_limit_value': '60', 'quota_unit': '1/min/{project}/{user}', 'quota_metric': 'sheets.googleapis.com/write_requests', 'service': 'sheets.googleapis.com', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'consumer': 'projects/110493255608'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:02,390 - ERROR - Failed to mark CTP04.2026.FEV.03282 as left
+2026-03-13 12:09:02,390 - INFO - Marking CTP01.2026.FEV.03351 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:02,549 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_location': 'global', 'quota_limit_value': '60', 'quota_unit': '1/min/{project}/{user}', 'quota_metric': 'sheets.googleapis.com/write_requests', 'service': 'sheets.googleapis.com', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'consumer': 'projects/110493255608'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:02,549 - ERROR - Failed to mark CTP01.2026.FEV.03351 as left
+2026-03-13 12:09:02,549 - INFO - Marking CTS29.2026.FEV.02802 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:02,716 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_location': 'global', 'quota_limit_value': '60', 'quota_unit': '1/min/{project}/{user}', 'quota_metric': 'sheets.googleapis.com/write_requests', 'service': 'sheets.googleapis.com', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'consumer': 'projects/110493255608'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:02,716 - ERROR - Failed to mark CTS29.2026.FEV.02802 as left
+2026-03-13 12:09:02,716 - INFO - Marking CTP01.2026.FEV.03357 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:02,875 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_location': 'global', 'quota_limit_value': '60', 'quota_unit': '1/min/{project}/{user}', 'quota_metric': 'sheets.googleapis.com/write_requests', 'service': 'sheets.googleapis.com', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'consumer': 'projects/110493255608'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:02,875 - ERROR - Failed to mark CTP01.2026.FEV.03357 as left
+2026-03-13 12:09:02,875 - INFO - Marking CTP04.2026.MAR.03350 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:03,030 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_location': 'global', 'quota_limit_value': '60', 'quota_unit': '1/min/{project}/{user}', 'quota_metric': 'sheets.googleapis.com/write_requests', 'service': 'sheets.googleapis.com', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'consumer': 'projects/110493255608'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:03,033 - ERROR - Failed to mark CTP04.2026.MAR.03350 as left
+2026-03-13 12:09:03,034 - INFO - Marking CTP03.2026.JAN.00335 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:03,176 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_location': 'global', 'quota_limit_value': '60', 'quota_unit': '1/min/{project}/{user}', 'quota_metric': 'sheets.googleapis.com/write_requests', 'service': 'sheets.googleapis.com', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'consumer': 'projects/110493255608'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:03,176 - ERROR - Failed to mark CTP03.2026.JAN.00335 as left
+2026-03-13 12:09:03,176 - INFO - Marking CTS28.2026.FEV.01698 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:03,348 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_location': 'global', 'quota_limit_value': '60', 'quota_unit': '1/min/{project}/{user}', 'quota_metric': 'sheets.googleapis.com/write_requests', 'service': 'sheets.googleapis.com', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'consumer': 'projects/110493255608'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:03,348 - ERROR - Failed to mark CTS28.2026.FEV.01698 as left
+2026-03-13 12:09:03,348 - INFO - Marking CTS30.2026.FEV.00704 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:03,502 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_location': 'global', 'quota_limit_value': '60', 'quota_unit': '1/min/{project}/{user}', 'quota_metric': 'sheets.googleapis.com/write_requests', 'service': 'sheets.googleapis.com', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'consumer': 'projects/110493255608'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:03,502 - ERROR - Failed to mark CTS30.2026.FEV.00704 as left
+2026-03-13 12:09:03,502 - INFO - Marking CTS02.2025.OUT.00260 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:03,661 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_unit': '1/min/{project}/{user}', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_metric': 'sheets.googleapis.com/write_requests', 'service': 'sheets.googleapis.com', 'quota_limit_value': '60', 'quota_location': 'global', 'consumer': 'projects/110493255608'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:03,662 - ERROR - Failed to mark CTS02.2025.OUT.00260 as left
+2026-03-13 12:09:03,663 - INFO - Marking CTP88.2026.FEV.00493 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:03,803 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_unit': '1/min/{project}/{user}', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_metric': 'sheets.googleapis.com/write_requests', 'service': 'sheets.googleapis.com', 'quota_limit_value': '60', 'quota_location': 'global', 'consumer': 'projects/110493255608'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:03,803 - ERROR - Failed to mark CTP88.2026.FEV.00493 as left
+2026-03-13 12:09:03,803 - INFO - Marking CTS40.2026.FEV.00258 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:03,978 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_unit': '1/min/{project}/{user}', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_metric': 'sheets.googleapis.com/write_requests', 'service': 'sheets.googleapis.com', 'quota_limit_value': '60', 'quota_location': 'global', 'consumer': 'projects/110493255608'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:03,978 - ERROR - Failed to mark CTS40.2026.FEV.00258 as left
+2026-03-13 12:09:03,978 - INFO - Marking CTS03.2026.JAN.00323 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:04,147 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_unit': '1/min/{project}/{user}', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_metric': 'sheets.googleapis.com/write_requests', 'service': 'sheets.googleapis.com', 'quota_limit_value': '60', 'quota_location': 'global', 'consumer': 'projects/110493255608'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:04,147 - ERROR - Failed to mark CTS03.2026.JAN.00323 as left
+2026-03-13 12:09:04,147 - INFO - Marking CTS03.2026.FEV.00373 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:04,305 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_unit': '1/min/{project}/{user}', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_metric': 'sheets.googleapis.com/write_requests', 'service': 'sheets.googleapis.com', 'quota_limit_value': '60', 'quota_location': 'global', 'consumer': 'projects/110493255608'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:04,305 - ERROR - Failed to mark CTS03.2026.FEV.00373 as left
+2026-03-13 12:09:04,305 - INFO - Marking CTS30.2026.FEV.00743 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:04,477 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_unit': '1/min/{project}/{user}', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_metric': 'sheets.googleapis.com/write_requests', 'service': 'sheets.googleapis.com', 'quota_limit_value': '60', 'quota_location': 'global', 'consumer': 'projects/110493255608'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:04,479 - ERROR - Failed to mark CTS30.2026.FEV.00743 as left
+2026-03-13 12:09:04,479 - INFO - Marking CTP30.2026.FEV.00704 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:04,620 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_unit': '1/min/{project}/{user}', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_metric': 'sheets.googleapis.com/write_requests', 'service': 'sheets.googleapis.com', 'quota_limit_value': '60', 'quota_location': 'global', 'consumer': 'projects/110493255608'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:04,635 - ERROR - Failed to mark CTP30.2026.FEV.00704 as left
+2026-03-13 12:09:04,635 - INFO - Marking CTS12.2026.FEV.00066 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:04,796 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_unit': '1/min/{project}/{user}', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_metric': 'sheets.googleapis.com/write_requests', 'service': 'sheets.googleapis.com', 'quota_limit_value': '60', 'quota_location': 'global', 'consumer': 'projects/110493255608'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:04,796 - ERROR - Failed to mark CTS12.2026.FEV.00066 as left
+2026-03-13 12:09:04,796 - INFO - Marking CTS14.2026.FEV.00123 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:04,946 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_unit': '1/min/{project}/{user}', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_metric': 'sheets.googleapis.com/write_requests', 'service': 'sheets.googleapis.com', 'quota_limit_value': '60', 'quota_location': 'global', 'consumer': 'projects/110493255608'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:04,946 - ERROR - Failed to mark CTS14.2026.FEV.00123 as left
+2026-03-13 12:09:04,946 - INFO - Marking CTPS30.2026.JAN.00587 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:05,137 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_unit': '1/min/{project}/{user}', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_metric': 'sheets.googleapis.com/write_requests', 'service': 'sheets.googleapis.com', 'quota_limit_value': '60', 'quota_location': 'global', 'consumer': 'projects/110493255608'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:05,147 - ERROR - Failed to mark CTPS30.2026.JAN.00587 as left
+2026-03-13 12:09:05,147 - INFO - Marking CTS99.2026.FEV.01826 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:05,280 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_unit': '1/min/{project}/{user}', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_metric': 'sheets.googleapis.com/write_requests', 'service': 'sheets.googleapis.com', 'quota_limit_value': '60', 'quota_location': 'global', 'consumer': 'projects/110493255608'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:05,296 - ERROR - Failed to mark CTS99.2026.FEV.01826 as left
+2026-03-13 12:09:05,296 - INFO - Marking CTS08.2026.FEV.02076 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:05,447 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_unit': '1/min/{project}/{user}', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_metric': 'sheets.googleapis.com/write_requests', 'service': 'sheets.googleapis.com', 'quota_limit_value': '60', 'quota_location': 'global', 'consumer': 'projects/110493255608'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:05,447 - ERROR - Failed to mark CTS08.2026.FEV.02076 as left
+2026-03-13 12:09:05,447 - INFO - Marking CTS88.2026.FEV.00493 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:05,607 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_unit': '1/min/{project}/{user}', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_metric': 'sheets.googleapis.com/write_requests', 'service': 'sheets.googleapis.com', 'quota_limit_value': '60', 'quota_location': 'global', 'consumer': 'projects/110493255608'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:05,609 - ERROR - Failed to mark CTS88.2026.FEV.00493 as left
+2026-03-13 12:09:05,609 - INFO - Marking CTS01.2026.FEV.03422 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:05,762 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_location': 'global', 'consumer': 'projects/110493255608', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_unit': '1/min/{project}/{user}', 'service': 'sheets.googleapis.com', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_limit_value': '60'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:05,762 - ERROR - Failed to mark CTS01.2026.FEV.03422 as left
+2026-03-13 12:09:05,762 - INFO - Marking CTS12.2026.FEV.00051 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:05,911 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_location': 'global', 'consumer': 'projects/110493255608', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_unit': '1/min/{project}/{user}', 'service': 'sheets.googleapis.com', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_limit_value': '60'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:05,911 - ERROR - Failed to mark CTS12.2026.FEV.00051 as left
+2026-03-13 12:09:05,911 - INFO - Marking CTP04.2026.FEV.03281 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:06,078 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_location': 'global', 'consumer': 'projects/110493255608', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_unit': '1/min/{project}/{user}', 'service': 'sheets.googleapis.com', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_limit_value': '60'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:06,078 - ERROR - Failed to mark CTP04.2026.FEV.03281 as left
+2026-03-13 12:09:06,082 - INFO - Marking CTS14.2026.FEV.00135 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:06,243 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_location': 'global', 'consumer': 'projects/110493255608', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_unit': '1/min/{project}/{user}', 'service': 'sheets.googleapis.com', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_limit_value': '60'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:06,244 - ERROR - Failed to mark CTS14.2026.FEV.00135 as left
+2026-03-13 12:09:06,245 - INFO - Marking CTP08.2026.FEV.02076 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:06,383 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_location': 'global', 'consumer': 'projects/110493255608', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_unit': '1/min/{project}/{user}', 'service': 'sheets.googleapis.com', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_limit_value': '60'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:06,383 - ERROR - Failed to mark CTP08.2026.FEV.02076 as left
+2026-03-13 12:09:06,399 - INFO - Marking CTS12.2026.FEV.00050 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:06,546 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_location': 'global', 'consumer': 'projects/110493255608', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_unit': '1/min/{project}/{user}', 'service': 'sheets.googleapis.com', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_limit_value': '60'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:06,562 - ERROR - Failed to mark CTS12.2026.FEV.00050 as left
+2026-03-13 12:09:06,562 - INFO - Marking CTS02.2025.NOV.00307 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:06,713 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_location': 'global', 'consumer': 'projects/110493255608', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_unit': '1/min/{project}/{user}', 'service': 'sheets.googleapis.com', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_limit_value': '60'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:06,713 - ERROR - Failed to mark CTS02.2025.NOV.00307 as left
+2026-03-13 12:09:06,713 - INFO - Marking CTS01.2026.FEV.03396 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:06,884 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_location': 'global', 'consumer': 'projects/110493255608', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_unit': '1/min/{project}/{user}', 'service': 'sheets.googleapis.com', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_limit_value': '60'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:06,884 - ERROR - Failed to mark CTS01.2026.FEV.03396 as left
+2026-03-13 12:09:06,884 - INFO - Marking CTS12.2026.FEV.00055 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:07,036 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_location': 'global', 'consumer': 'projects/110493255608', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_unit': '1/min/{project}/{user}', 'service': 'sheets.googleapis.com', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_limit_value': '60'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:07,036 - ERROR - Failed to mark CTS12.2026.FEV.00055 as left
+2026-03-13 12:09:07,036 - INFO - Marking CTS14.2026.FEV.00122 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:07,196 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_location': 'global', 'consumer': 'projects/110493255608', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_unit': '1/min/{project}/{user}', 'service': 'sheets.googleapis.com', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_limit_value': '60'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:07,196 - ERROR - Failed to mark CTS14.2026.FEV.00122 as left
+2026-03-13 12:09:07,196 - INFO - Marking CTP30.2026.JAN.00535 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:07,346 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_location': 'global', 'consumer': 'projects/110493255608', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_unit': '1/min/{project}/{user}', 'service': 'sheets.googleapis.com', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_limit_value': '60'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:07,346 - ERROR - Failed to mark CTP30.2026.JAN.00535 as left
+2026-03-13 12:09:07,346 - INFO - Marking CTP01.2026.JAN.03303 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:07,510 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_location': 'global', 'consumer': 'projects/110493255608', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_unit': '1/min/{project}/{user}', 'service': 'sheets.googleapis.com', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_limit_value': '60'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:07,510 - ERROR - Failed to mark CTP01.2026.JAN.03303 as left
+2026-03-13 12:09:07,510 - INFO - Marking CTS29.2026.FEV.02735 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:07,665 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_location': 'global', 'consumer': 'projects/110493255608', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_unit': '1/min/{project}/{user}', 'service': 'sheets.googleapis.com', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_limit_value': '60'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:07,669 - ERROR - Failed to mark CTS29.2026.FEV.02735 as left
+2026-03-13 12:09:07,669 - INFO - Marking CTS12.2026.FEV.00038 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:07,810 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_unit': '1/min/{project}/{user}', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_limit_value': '60', 'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:07,810 - ERROR - Failed to mark CTS12.2026.FEV.00038 as left
+2026-03-13 12:09:07,810 - INFO - Marking CTS30.2026.FEV.00677 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:07,985 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_unit': '1/min/{project}/{user}', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_limit_value': '60', 'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:07,985 - ERROR - Failed to mark CTS30.2026.FEV.00677 as left
+2026-03-13 12:09:07,985 - INFO - Marking CTP04.2026.FEV.03291 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:08,161 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_unit': '1/min/{project}/{user}', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_limit_value': '60', 'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:08,161 - ERROR - Failed to mark CTP04.2026.FEV.03291 as left
+2026-03-13 12:09:08,161 - INFO - Marking CTS02.2025.OUT.00222 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:08,336 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_unit': '1/min/{project}/{user}', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_limit_value': '60', 'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:08,336 - ERROR - Failed to mark CTS02.2025.OUT.00222 as left
+2026-03-13 12:09:08,336 - INFO - Marking CTS03.2026.JAN.00321 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:08,487 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_unit': '1/min/{project}/{user}', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_limit_value': '60', 'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:08,487 - ERROR - Failed to mark CTS03.2026.JAN.00321 as left
+2026-03-13 12:09:08,487 - INFO - Marking CTS02.2025.SET.00198 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:08,635 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_unit': '1/min/{project}/{user}', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_limit_value': '60', 'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:08,635 - ERROR - Failed to mark CTS02.2025.SET.00198 as left
+2026-03-13 12:09:08,635 - INFO - Marking CTS88.2026.JAN.00440 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:08,811 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_unit': '1/min/{project}/{user}', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_limit_value': '60', 'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:08,812 - ERROR - Failed to mark CTS88.2026.JAN.00440 as left
+2026-03-13 12:09:08,813 - INFO - Marking CTS99.2025.DEZ.01693 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:08,977 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_unit': '1/min/{project}/{user}', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_limit_value': '60', 'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:08,977 - ERROR - Failed to mark CTS99.2025.DEZ.01693 as left
+2026-03-13 12:09:08,977 - INFO - Marking CTS99.2026.FEV.01820 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:09,137 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_unit': '1/min/{project}/{user}', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_limit_value': '60', 'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:09,147 - ERROR - Failed to mark CTS99.2026.FEV.01820 as left
+2026-03-13 12:09:09,147 - INFO - Marking CTP28.2026.FEV.01731 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:09,297 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_unit': '1/min/{project}/{user}', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_limit_value': '60', 'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:09,297 - ERROR - Failed to mark CTP28.2026.FEV.01731 as left
+2026-03-13 12:09:09,297 - INFO - Marking CTP01.2025.SET.02776 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:09,470 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_unit': '1/min/{project}/{user}', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_limit_value': '60', 'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:09,486 - ERROR - Failed to mark CTP01.2025.SET.02776 as left
+2026-03-13 12:09:09,487 - INFO - Marking CTP29.2026.FEV.02736 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:09,635 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_unit': '1/min/{project}/{user}', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_limit_value': '60', 'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:09,635 - ERROR - Failed to mark CTP29.2026.FEV.02736 as left
+2026-03-13 12:09:09,635 - INFO - Marking CTS23.2026.FEV.00241 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:09,796 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_unit': '1/min/{project}/{user}', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_limit_value': '60', 'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:09,796 - ERROR - Failed to mark CTS23.2026.FEV.00241 as left
+2026-03-13 12:09:09,796 - INFO - Marking CTS01.2026.JAN.03308 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:09,961 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_limit_value': '60', 'quota_location': 'global', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_unit': '1/min/{project}/{user}', 'quota_metric': 'sheets.googleapis.com/write_requests'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:09,961 - ERROR - Failed to mark CTS01.2026.JAN.03308 as left
+2026-03-13 12:09:09,961 - INFO - Marking CTS88.2026.MAR.00538 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:10,127 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_limit_value': '60', 'quota_location': 'global', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_unit': '1/min/{project}/{user}', 'quota_metric': 'sheets.googleapis.com/write_requests'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:10,127 - ERROR - Failed to mark CTS88.2026.MAR.00538 as left
+2026-03-13 12:09:10,127 - INFO - Marking CTS02.2026.MAR.00445 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:10,296 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_limit_value': '60', 'quota_location': 'global', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_unit': '1/min/{project}/{user}', 'quota_metric': 'sheets.googleapis.com/write_requests'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:10,296 - ERROR - Failed to mark CTS02.2026.MAR.00445 as left
+2026-03-13 12:09:10,296 - INFO - Marking CTS88.2026.FEV.00532 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:10,462 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_limit_value': '60', 'quota_location': 'global', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_unit': '1/min/{project}/{user}', 'quota_metric': 'sheets.googleapis.com/write_requests'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:10,462 - ERROR - Failed to mark CTS88.2026.FEV.00532 as left
+2026-03-13 12:09:10,462 - INFO - Marking CTP04.2026.FEV.03246 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:10,619 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_limit_value': '60', 'quota_location': 'global', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_unit': '1/min/{project}/{user}', 'quota_metric': 'sheets.googleapis.com/write_requests'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:10,619 - ERROR - Failed to mark CTP04.2026.FEV.03246 as left
+2026-03-13 12:09:10,635 - INFO - Marking CTS23.2026.MAR.00255 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:10,802 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_limit_value': '60', 'quota_location': 'global', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_unit': '1/min/{project}/{user}', 'quota_metric': 'sheets.googleapis.com/write_requests'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:10,803 - ERROR - Failed to mark CTS23.2026.MAR.00255 as left
+2026-03-13 12:09:10,803 - INFO - Marking CTS12.2026.FEV.00054 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:10,947 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_limit_value': '60', 'quota_location': 'global', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_unit': '1/min/{project}/{user}', 'quota_metric': 'sheets.googleapis.com/write_requests'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:10,947 - ERROR - Failed to mark CTS12.2026.FEV.00054 as left
+2026-03-13 12:09:10,947 - INFO - Marking CTS28.2026.MAR.01769 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:11,112 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_limit_value': '60', 'quota_location': 'global', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_unit': '1/min/{project}/{user}', 'quota_metric': 'sheets.googleapis.com/write_requests'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:11,112 - ERROR - Failed to mark CTS28.2026.MAR.01769 as left
+2026-03-13 12:09:11,112 - INFO - Marking CTS88.2026.FEV.00471 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:11,280 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_limit_value': '60', 'quota_location': 'global', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_unit': '1/min/{project}/{user}', 'quota_metric': 'sheets.googleapis.com/write_requests'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:11,283 - ERROR - Failed to mark CTS88.2026.FEV.00471 as left
+2026-03-13 12:09:11,284 - INFO - Marking CTS99.2026.FEV.01827 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:11,447 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_limit_value': '60', 'quota_location': 'global', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_unit': '1/min/{project}/{user}', 'quota_metric': 'sheets.googleapis.com/write_requests'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:11,447 - ERROR - Failed to mark CTS99.2026.FEV.01827 as left
+2026-03-13 12:09:11,447 - INFO - Marking CTP30.2026.FEV.00676 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-03-13 12:09:11,596 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_limit_value': '60', 'quota_location': 'global', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_unit': '1/min/{project}/{user}', 'quota_metric': 'sheets.googleapis.com/write_requests'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-03-13 12:09:11,612 - ERROR - Failed to mark CTP30.2026.FEV.00676 as left
+2026-03-13 12:09:11,612 - INFO - ================================================================================
+2026-03-13 12:09:11,612 - INFO - PROCESSAMENTO CONCLUÍDO!
+2026-03-13 12:09:11,612 - INFO - ================================================================================
+2026-03-13 12:09:11,612 - INFO - Total de solicitações processadas: 16
+2026-03-13 12:09:11,612 - INFO - Solicitações novas inseridas: 7
+2026-03-13 12:09:11,612 - INFO - Solicitações atualizadas: 9
+2026-03-13 12:09:11,612 - INFO - Solicitações com erro: 0
+2026-03-13 12:09:11,612 - INFO - Solicitações que saíram da SEGECON: 30
+2026-03-13 12:09:11,612 - INFO - Páginas de listagem processadas: 2
+2026-03-13 12:09:11,612 - INFO - Processos únicos no ecompras: 16
+2026-03-13 12:09:11,612 - INFO - ================================================================================
+2026-03-13 12:09:11,612 - INFO - 
+2026-03-13 12:09:11,612 - INFO - ================================================================================
+2026-03-13 12:09:11,612 - INFO - RELATÓRIO DETALHADO DE ERROS
+2026-03-13 12:09:11,612 - INFO - ================================================================================
+2026-03-13 12:09:11,612 - ERROR -   1. Página 2, Índice 6 (ID: p1_cph1_SCs_GdSCs_GdSCs_Lkb_Sc_6)
+2026-03-13 12:09:11,612 - ERROR -      Nº SC: Desconhecido
+2026-03-13 12:09:11,612 - ERROR -      Motivo: NOT_FOUND - Element not found on page
+2026-03-13 12:09:11,617 - INFO - ================================================================================
+2026-03-13 12:09:11,617 - INFO - 
+2026-03-13 12:09:11,617 - INFO - ================================================================================
+2026-03-13 12:09:11,617 - INFO - LISTA DE NOVAS SOLICITAÇÕES INSERIDAS
+2026-03-13 12:09:11,617 - INFO - ================================================================================
+2026-03-13 12:09:11,618 - INFO -   1. Página 1, Índice 0 - Nº SC: CTS12.2026.MAR.00076
+2026-03-13 12:09:11,618 - INFO -   2. Página 1, Índice 1 - Nº SC: CTS28.2026.MAR.01813
+2026-03-13 12:09:11,618 - INFO -   3. Página 1, Índice 2 - Nº SC: CTS03.2026.MAR.00439
+2026-03-13 12:09:11,618 - INFO -   4. Página 1, Índice 3 - Nº SC: CTS04.2026.MAR.03373
+2026-03-13 12:09:11,618 - INFO -   5. Página 1, Índice 4 - Nº SC: CTS23.2026.MAR.00259
+2026-03-13 12:09:11,619 - INFO -   6. Página 1, Índice 9 - Nº SC: CTS14.2026.JAN.00109
+2026-03-13 12:09:11,620 - INFO -   7. Página 2, Índice 5 - Nº SC: CTS08.2025.FEV.01152
+2026-03-13 12:09:11,620 - INFO - ================================================================================
+2026-03-13 12:09:11,620 - INFO - 
+2026-03-13 12:09:11,620 - INFO - ================================================================================
+2026-03-13 12:09:11,620 - INFO - LISTA DE SOLICITAÇÕES ATUALIZADAS
+2026-03-13 12:09:11,620 - INFO - ================================================================================
+2026-03-13 12:09:11,621 - INFO -   1. Página 1, Índice 5 - Nº SC: CTP01.2026.MAR.03471
+2026-03-13 12:09:11,621 - INFO -   2. Página 1, Índice 6 - Nº SC: CTP01.2026.FEV.03445
+2026-03-13 12:09:11,621 - INFO -   3. Página 1, Índice 7 - Nº SC: CTS29.2026.FEV.02744
+2026-03-13 12:09:11,621 - INFO -   4. Página 1, Índice 8 - Nº SC: CTS03.2026.FEV.00339
+2026-03-13 12:09:11,622 - INFO -   5. Página 2, Índice 0 - Nº SC: CTS03.2026.JAN.00319
+2026-03-13 12:09:11,622 - INFO -   6. Página 2, Índice 1 - Nº SC: CTS03.2026.JAN.00313
+2026-03-13 12:09:11,622 - INFO -   7. Página 2, Índice 2 - Nº SC: CTS03.2026.JAN.00311
+2026-03-13 12:09:11,622 - INFO -   8. Página 2, Índice 3 - Nº SC: CTS03.2026.JAN.00287
+2026-03-13 12:09:11,622 - INFO -   9. Página 2, Índice 4 - Nº SC: CTS08.2025.DEZ.01956
+2026-03-13 12:09:11,622 - INFO - ================================================================================
+2026-03-13 12:09:11,622 - INFO - 
+2026-03-13 12:09:11,622 - INFO - ================================================================================
+2026-03-13 12:09:11,622 - INFO - LISTA DE SOLICITAÇÕES QUE SAÍRAM DA SEGECON
+2026-03-13 12:09:11,622 - INFO - ================================================================================
+2026-03-13 12:09:11,622 - INFO -   1. Nº SC: CTS12.2026.FEV.00067
+2026-03-13 12:09:11,622 - INFO -   2. Nº SC: CTS29.2026.JAN.02643
+2026-03-13 12:09:11,622 - INFO -   3. Nº SC: CTS28.2026.FEV.01705
+2026-03-13 12:09:11,622 - INFO -   4. Nº SC: CTP03.2026.MAR.00413
+2026-03-13 12:09:11,622 - INFO -   5. Nº SC: CTS08.2026.JAN.01963
+2026-03-13 12:09:11,622 - INFO -   6. Nº SC: CTS30.2026.JAN.00627
+2026-03-13 12:09:11,622 - INFO -   7. Nº SC: CTP04.2026.FEV.03289
+2026-03-13 12:09:11,622 - INFO -   8. Nº SC: CTS12.2026.FEV.00052
+2026-03-13 12:09:11,622 - INFO -   9. Nº SC: CTS29.2026.FEV.02807
+2026-03-13 12:09:11,622 - INFO -   10. Nº SC: CTS03.2025.DEZ.00231
+2026-03-13 12:09:11,622 - INFO -   11. Nº SC: CTS29.2026.FEV.02726
+2026-03-13 12:09:11,622 - INFO -   12. Nº SC: CTS28.2026.FEV.01676
+2026-03-13 12:09:11,622 - INFO -   13. Nº SC: CTS03.2026.JAN.00314
+2026-03-13 12:09:11,622 - INFO -   14. Nº SC: CTP04.2026.MAR.03376
+2026-03-13 12:09:11,622 - INFO -   15. Nº SC: CTP28.2026.FEV.01647
+2026-03-13 12:09:11,622 - INFO -   16. Nº SC: CTS03.2026.JAN.00332
+2026-03-13 12:09:11,622 - INFO -   17. Nº SC: CTS88.2026.FEV.00530
+2026-03-13 12:09:11,622 - INFO -   18. Nº SC: CTP28.2026.FEV.01674
+2026-03-13 12:09:11,622 - INFO -   19. Nº SC: CTP28.2026.FEV.01677
+2026-03-13 12:09:11,622 - INFO -   20. Nº SC: CTS28.2026.MAR.01790
+2026-03-13 12:09:11,622 - INFO -   21. Nº SC: CTS03.2026.JAN.00318
+2026-03-13 12:09:11,622 - INFO -   22. Nº SC: CTS03.2026.JAN.00320
+2026-03-13 12:09:11,622 - INFO -   23. Nº SC: CTS29.2026.MAR.02812
+2026-03-13 12:09:11,622 - INFO -   24. Nº SC: CTP04.2026.FEV.03300
+2026-03-13 12:09:11,622 - INFO -   25. Nº SC: CTS03.2026.JAN.00284
+2026-03-13 12:09:11,622 - INFO -   26. Nº SC: CTS12.2026.FEV.00053
+2026-03-13 12:09:11,628 - INFO -   27. Nº SC: CTS29.2026.FEV.02736
+2026-03-13 12:09:11,628 - INFO -   28. Nº SC: CTS03.2026.FEV.00359
+2026-03-13 12:09:11,628 - INFO -   29. Nº SC: CTS03.2026.FEV.00362
+2026-03-13 12:09:11,628 - INFO -   30. Nº SC: CTS59.2026.MAR.00366
+2026-03-13 12:09:11,628 - INFO - ================================================================================
+2026-03-13 12:09:13,046 - INFO - Mensagem enviada ao Telegram com sucesso (chat_id=6760564985)
+2026-03-13 12:09:14,665 - INFO - Mensagem enviada ao Telegram com sucesso (chat_id=1356469598)
+2026-03-13 12:09:16,314 - INFO - Mensagem enviada ao Telegram com sucesso (chat_id=8587977306)
+2026-03-13 12:09:16,530 - INFO - Closing browser in 30 seconds (for verification)...
+2026-03-13 12:09:49,857 - INFO - Browser closed

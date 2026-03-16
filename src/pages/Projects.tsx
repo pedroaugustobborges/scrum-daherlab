@@ -22,6 +22,16 @@ import {
   OutlinedInput,
   Collapse,
   Paper,
+  ToggleButton,
+  ToggleButtonGroup,
+  Pagination,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  alpha,
 } from "@mui/material";
 import {
   Add,
@@ -37,6 +47,9 @@ import {
   ExpandMore,
   ExpandLess,
   Groups,
+  ViewModule,
+  ViewList,
+  ChevronRight,
 } from "@mui/icons-material";
 import Navbar from "@/components/Navbar";
 import { ProjectCreationWizard } from "@/components/project";
@@ -105,6 +118,11 @@ export default function Projects() {
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
   const [filters, setFilters] = useState<Filters>(initialFilters);
   const [filtersExpanded, setFiltersExpanded] = useState(false);
+  const [viewMode, setViewMode] = useState<"card" | "list">("card");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const ITEMS_PER_PAGE_CARD = 9;
+  const ITEMS_PER_PAGE_LIST = 10;
 
   useEffect(() => {
     fetchData();
@@ -232,11 +250,41 @@ export default function Projects() {
 
   const clearFilters = () => {
     setFilters(initialFilters);
+    setCurrentPage(1);
   };
 
   const handleFilterChange = (field: keyof Filters, value: any) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
+    setCurrentPage(1);
   };
+
+  const handleViewModeChange = (
+    _event: React.MouseEvent<HTMLElement>,
+    newMode: "card" | "list" | null
+  ) => {
+    if (newMode !== null) {
+      setViewMode(newMode);
+      setCurrentPage(1);
+    }
+  };
+
+  const handlePageChange = (
+    _event: React.ChangeEvent<unknown>,
+    page: number
+  ) => {
+    setCurrentPage(page);
+  };
+
+  const itemsPerPage =
+    viewMode === "card" ? ITEMS_PER_PAGE_CARD : ITEMS_PER_PAGE_LIST;
+
+  const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
+
+  const paginatedProjects = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredProjects.slice(startIndex, endIndex);
+  }, [filteredProjects, currentPage, itemsPerPage]);
 
   const handleOpenEditModal = (project: Project) => {
     setSelectedProject(project);
@@ -699,6 +747,63 @@ export default function Projects() {
           </Collapse>
         </Paper>
 
+        {/* View Toggle and Results Info */}
+        {!loading && filteredProjects.length > 0 && (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 3,
+            }}
+          >
+            <Typography variant="body2" color="text.secondary" fontWeight={500}>
+              Mostrando {paginatedProjects.length} de {filteredProjects.length}{" "}
+              projeto{filteredProjects.length !== 1 ? "s" : ""}
+              {totalPages > 1 && ` (Página ${currentPage} de ${totalPages})`}
+            </Typography>
+            <ToggleButtonGroup
+              value={viewMode}
+              exclusive
+              onChange={handleViewModeChange}
+              aria-label="modo de visualização"
+              size="small"
+              sx={{
+                "& .MuiToggleButton-root": {
+                  border: "2px solid rgba(99, 102, 241, 0.2)",
+                  borderRadius: 2,
+                  px: 2,
+                  py: 0.75,
+                  "&.Mui-selected": {
+                    bgcolor: "rgba(99, 102, 241, 0.1)",
+                    borderColor: "#6366f1",
+                    color: "#6366f1",
+                    "&:hover": {
+                      bgcolor: "rgba(99, 102, 241, 0.15)",
+                    },
+                  },
+                  "&:hover": {
+                    bgcolor: "rgba(99, 102, 241, 0.05)",
+                  },
+                },
+              }}
+            >
+              <ToggleButton value="card" aria-label="visualização em cards">
+                <Tooltip title="Visualização em Cards">
+                  <ViewModule sx={{ mr: 1 }} />
+                </Tooltip>
+                Cards
+              </ToggleButton>
+              <ToggleButton value="list" aria-label="visualização em lista">
+                <Tooltip title="Visualização em Lista">
+                  <ViewList sx={{ mr: 1 }} />
+                </Tooltip>
+                Lista
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+        )}
+
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
             <CircularProgress size={60} />
@@ -785,188 +890,506 @@ export default function Projects() {
             </Button>
           </Box>
         ) : (
-          <Grid container spacing={3}>
-            {filteredProjects.map((project) => (
-              <Grid item xs={12} md={6} lg={4} key={project.id}>
-                <Card
-                  elevation={0}
-                  onClick={() => handleOpenProject(project)}
-                  sx={{
-                    height: "100%",
-                    background:
-                      "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
-                    border: "2px solid rgba(99, 102, 241, 0.1)",
-                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                    cursor: "pointer",
-                    "&:hover": {
-                      transform: "translateY(-8px)",
-                      boxShadow:
-                        "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-                      border: "2px solid rgba(99, 102, 241, 0.3)",
-                    },
-                  }}
-                >
-                  <CardContent sx={{ p: 3 }}>
-                    <Box
+          <>
+            {/* Card View */}
+            {viewMode === "card" && (
+              <Grid container spacing={3}>
+                {paginatedProjects.map((project) => (
+                  <Grid item xs={12} md={6} lg={4} key={project.id}>
+                    <Card
+                      elevation={0}
+                      onClick={() => handleOpenProject(project)}
                       sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "start",
-                        mb: 2,
+                        height: "100%",
+                        background:
+                          "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
+                        border: "2px solid rgba(99, 102, 241, 0.1)",
+                        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                        cursor: "pointer",
+                        "&:hover": {
+                          transform: "translateY(-8px)",
+                          boxShadow:
+                            "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+                          border: "2px solid rgba(99, 102, 241, 0.3)",
+                        },
                       }}
                     >
-                      <Box
+                      <CardContent sx={{ p: 3 }}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "start",
+                            mb: 2,
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              width: 48,
+                              height: 48,
+                              borderRadius: 2,
+                              background:
+                                "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              boxShadow: "0 8px 16px rgba(99, 102, 241, 0.3)",
+                            }}
+                          >
+                            <Assignment sx={{ color: "white", fontSize: 24 }} />
+                          </Box>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              gap: 1,
+                              alignItems: "center",
+                            }}
+                          >
+                            <Chip
+                              label={
+                                statusConfig[project.status]?.label ||
+                                project.status
+                              }
+                              color={
+                                statusConfig[project.status]?.color || "default"
+                              }
+                              size="small"
+                              sx={{ fontWeight: 600 }}
+                            />
+                            <Tooltip title="Editar Projeto">
+                              <IconButton
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenEditModal(project);
+                                }}
+                                sx={{
+                                  bgcolor: "rgba(99, 102, 241, 0.1)",
+                                  "&:hover": {
+                                    bgcolor: "rgba(99, 102, 241, 0.2)",
+                                  },
+                                }}
+                              >
+                                <Edit sx={{ color: "#6366f1" }} />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Excluir Projeto">
+                              <IconButton
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteProject(project);
+                                }}
+                                sx={{
+                                  bgcolor: "rgba(239, 68, 68, 0.1)",
+                                  "&:hover": {
+                                    bgcolor: "rgba(239, 68, 68, 0.2)",
+                                  },
+                                }}
+                              >
+                                <Delete sx={{ color: "#ef4444" }} />
+                              </IconButton>
+                            </Tooltip>
+                          </Box>
+                        </Box>
+
+                        <Typography
+                          variant="h5"
+                          fontWeight={700}
+                          gutterBottom
+                          sx={{ mb: 1 }}
+                        >
+                          {project.name}
+                        </Typography>
+
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{
+                            mb: 3,
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                            minHeight: 40,
+                          }}
+                        >
+                          {project.description || "Sem descrição"}
+                        </Typography>
+
+                        <Box
+                          sx={{
+                            display: "flex",
+                            gap: 2,
+                            pt: 2,
+                            borderTop: "1px solid",
+                            borderColor: "rgba(0, 0, 0, 0.05)",
+                          }}
+                        >
+                          <Box sx={{ flex: 1 }}>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 0.5,
+                                mb: 0.5,
+                              }}
+                            >
+                              <CalendarToday
+                                sx={{ fontSize: 14, color: "text.secondary" }}
+                              />
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                fontWeight={600}
+                              >
+                                Início
+                              </Typography>
+                            </Box>
+                            <Typography variant="body2" fontWeight={600}>
+                              {formatDate(project.start_date)}
+                            </Typography>
+                          </Box>
+
+                          <Box sx={{ flex: 1 }}>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 0.5,
+                                mb: 0.5,
+                              }}
+                            >
+                              <CalendarToday
+                                sx={{ fontSize: 14, color: "text.secondary" }}
+                              />
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                fontWeight={600}
+                              >
+                                Término
+                              </Typography>
+                            </Box>
+                            <Typography variant="body2" fontWeight={600}>
+                              {formatDate(project.end_date)}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+            )}
+
+            {/* List View */}
+            {viewMode === "list" && (
+              <TableContainer
+                component={Paper}
+                elevation={0}
+                sx={{
+                  border: "2px solid rgba(99, 102, 241, 0.1)",
+                  borderRadius: 3,
+                  overflow: "hidden",
+                }}
+              >
+                <Table>
+                  <TableHead>
+                    <TableRow
+                      sx={{
+                        background:
+                          "linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)",
+                      }}
+                    >
+                      <TableCell
                         sx={{
-                          width: 48,
-                          height: 48,
-                          borderRadius: 2,
-                          background:
-                            "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          boxShadow: "0 8px 16px rgba(99, 102, 241, 0.3)",
+                          fontWeight: 700,
+                          color: "#6366f1",
+                          fontSize: "0.875rem",
+                          py: 2,
                         }}
                       >
-                        <Assignment sx={{ color: "white", fontSize: 24 }} />
-                      </Box>
-                      <Box
-                        sx={{ display: "flex", gap: 1, alignItems: "center" }}
+                        Projeto
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          fontWeight: 700,
+                          color: "#6366f1",
+                          fontSize: "0.875rem",
+                          py: 2,
+                        }}
                       >
-                        <Chip
-                          label={
-                            statusConfig[project.status]?.label ||
-                            project.status
-                          }
-                          color={
-                            statusConfig[project.status]?.color || "default"
-                          }
-                          size="small"
-                          sx={{ fontWeight: 600 }}
-                        />
-                        <Tooltip title="Editar Projeto">
-                          <IconButton
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleOpenEditModal(project);
-                            }}
+                        Status
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          fontWeight: 700,
+                          color: "#6366f1",
+                          fontSize: "0.875rem",
+                          py: 2,
+                          display: { xs: "none", md: "table-cell" },
+                        }}
+                      >
+                        Data de Início
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          fontWeight: 700,
+                          color: "#6366f1",
+                          fontSize: "0.875rem",
+                          py: 2,
+                          display: { xs: "none", md: "table-cell" },
+                        }}
+                      >
+                        Data de Término
+                      </TableCell>
+                      <TableCell
+                        align="right"
+                        sx={{
+                          fontWeight: 700,
+                          color: "#6366f1",
+                          fontSize: "0.875rem",
+                          py: 2,
+                        }}
+                      >
+                        Ações
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {paginatedProjects.map((project, index) => (
+                      <TableRow
+                        key={project.id}
+                        onClick={() => handleOpenProject(project)}
+                        sx={{
+                          cursor: "pointer",
+                          bgcolor:
+                            index % 2 === 0
+                              ? "transparent"
+                              : "rgba(99, 102, 241, 0.02)",
+                          transition: "all 0.2s ease",
+                          "&:hover": {
+                            bgcolor: alpha("#6366f1", 0.08),
+                            "& .row-arrow": {
+                              opacity: 1,
+                              transform: "translateX(0)",
+                            },
+                          },
+                          "&:last-child td": {
+                            borderBottom: 0,
+                          },
+                        }}
+                      >
+                        <TableCell sx={{ py: 2.5 }}>
+                          <Box
                             sx={{
-                              bgcolor: "rgba(99, 102, 241, 0.1)",
-                              "&:hover": {
-                                bgcolor: "rgba(99, 102, 241, 0.2)",
-                              },
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 2,
                             }}
                           >
-                            <Edit sx={{ color: "#6366f1" }} />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Excluir Projeto">
-                          <IconButton
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteProject(project);
-                            }}
-                            sx={{
-                              bgcolor: "rgba(239, 68, 68, 0.1)",
-                              "&:hover": {
-                                bgcolor: "rgba(239, 68, 68, 0.2)",
-                              },
-                            }}
-                          >
-                            <Delete sx={{ color: "#ef4444" }} />
-                          </IconButton>
-                        </Tooltip>
-                      </Box>
-                    </Box>
-
-                    <Typography
-                      variant="h5"
-                      fontWeight={700}
-                      gutterBottom
-                      sx={{ mb: 1 }}
-                    >
-                      {project.name}
-                    </Typography>
-
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{
-                        mb: 3,
-                        display: "-webkit-box",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical",
-                        overflow: "hidden",
-                        minHeight: 40,
-                      }}
-                    >
-                      {project.description || "Sem descrição"}
-                    </Typography>
-
-                    <Box
-                      sx={{
-                        display: "flex",
-                        gap: 2,
-                        pt: 2,
-                        borderTop: "1px solid",
-                        borderColor: "rgba(0, 0, 0, 0.05)",
-                      }}
-                    >
-                      <Box sx={{ flex: 1 }}>
-                        <Box
+                            <Box
+                              sx={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: 2,
+                                background:
+                                  "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                boxShadow:
+                                  "0 4px 8px rgba(99, 102, 241, 0.25)",
+                                flexShrink: 0,
+                              }}
+                            >
+                              <Assignment
+                                sx={{ color: "white", fontSize: 20 }}
+                              />
+                            </Box>
+                            <Box sx={{ minWidth: 0 }}>
+                              <Typography
+                                variant="body1"
+                                fontWeight={600}
+                                sx={{
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {project.name}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                sx={{
+                                  display: "-webkit-box",
+                                  WebkitLineClamp: 1,
+                                  WebkitBoxOrient: "vertical",
+                                  overflow: "hidden",
+                                }}
+                              >
+                                {project.description || "Sem descrição"}
+                              </Typography>
+                            </Box>
+                            <ChevronRight
+                              className="row-arrow"
+                              sx={{
+                                color: "#6366f1",
+                                opacity: 0,
+                                transform: "translateX(-8px)",
+                                transition: "all 0.2s ease",
+                                ml: "auto",
+                                display: { xs: "none", sm: "block" },
+                              }}
+                            />
+                          </Box>
+                        </TableCell>
+                        <TableCell sx={{ py: 2.5 }}>
+                          <Chip
+                            label={
+                              statusConfig[project.status]?.label ||
+                              project.status
+                            }
+                            color={
+                              statusConfig[project.status]?.color || "default"
+                            }
+                            size="small"
+                            sx={{ fontWeight: 600 }}
+                          />
+                        </TableCell>
+                        <TableCell
                           sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 0.5,
-                            mb: 0.5,
+                            py: 2.5,
+                            display: { xs: "none", md: "table-cell" },
                           }}
                         >
-                          <CalendarToday
-                            sx={{ fontSize: 14, color: "text.secondary" }}
-                          />
-                          <Typography
-                            variant="caption"
-                            color="text.secondary"
-                            fontWeight={600}
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 0.5,
+                            }}
                           >
-                            Início
-                          </Typography>
-                        </Box>
-                        <Typography variant="body2" fontWeight={600}>
-                          {formatDate(project.start_date)}
-                        </Typography>
-                      </Box>
-
-                      <Box sx={{ flex: 1 }}>
-                        <Box
+                            <CalendarToday
+                              sx={{ fontSize: 16, color: "text.secondary" }}
+                            />
+                            <Typography variant="body2" fontWeight={500}>
+                              {formatDate(project.start_date)}
+                            </Typography>
+                          </Box>
+                        </TableCell>
+                        <TableCell
                           sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 0.5,
-                            mb: 0.5,
+                            py: 2.5,
+                            display: { xs: "none", md: "table-cell" },
                           }}
                         >
-                          <CalendarToday
-                            sx={{ fontSize: 14, color: "text.secondary" }}
-                          />
-                          <Typography
-                            variant="caption"
-                            color="text.secondary"
-                            fontWeight={600}
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 0.5,
+                            }}
                           >
-                            Término
-                          </Typography>
-                        </Box>
-                        <Typography variant="body2" fontWeight={600}>
-                          {formatDate(project.end_date)}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
+                            <CalendarToday
+                              sx={{ fontSize: 16, color: "text.secondary" }}
+                            />
+                            <Typography variant="body2" fontWeight={500}>
+                              {formatDate(project.end_date)}
+                            </Typography>
+                          </Box>
+                        </TableCell>
+                        <TableCell align="right" sx={{ py: 2.5 }}>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              gap: 1,
+                              justifyContent: "flex-end",
+                            }}
+                          >
+                            <Tooltip title="Editar Projeto">
+                              <IconButton
+                                size="small"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenEditModal(project);
+                                }}
+                                sx={{
+                                  bgcolor: "rgba(99, 102, 241, 0.1)",
+                                  "&:hover": {
+                                    bgcolor: "rgba(99, 102, 241, 0.2)",
+                                  },
+                                }}
+                              >
+                                <Edit
+                                  sx={{ color: "#6366f1", fontSize: 18 }}
+                                />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Excluir Projeto">
+                              <IconButton
+                                size="small"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteProject(project);
+                                }}
+                                sx={{
+                                  bgcolor: "rgba(239, 68, 68, 0.1)",
+                                  "&:hover": {
+                                    bgcolor: "rgba(239, 68, 68, 0.2)",
+                                  },
+                                }}
+                              >
+                                <Delete
+                                  sx={{ color: "#ef4444", fontSize: 18 }}
+                                />
+                              </IconButton>
+                            </Tooltip>
+                          </Box>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  mt: 4,
+                }}
+              >
+                <Pagination
+                  count={totalPages}
+                  page={currentPage}
+                  onChange={handlePageChange}
+                  color="primary"
+                  size="large"
+                  showFirstButton
+                  showLastButton
+                  sx={{
+                    "& .MuiPaginationItem-root": {
+                      fontWeight: 600,
+                      borderRadius: 2,
+                      "&.Mui-selected": {
+                        background:
+                          "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+                        color: "white",
+                        "&:hover": {
+                          background:
+                            "linear-gradient(135deg, #5558e3 0%, #7c4fe0 100%)",
+                        },
+                      },
+                    },
+                  }}
+                />
+              </Box>
+            )}
+          </>
         )}
 
         <Fab

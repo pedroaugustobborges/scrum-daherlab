@@ -38,7 +38,6 @@ import {
   ViewList,
   EmojiEvents,
   Visibility,
-  AutoAwesome,
   Refresh,
   LightbulbOutlined,
   PictureAsPdf,
@@ -54,6 +53,7 @@ import BurndownChart from './BurndownChart'
 import VelocityChart from './VelocityChart'
 import RetrospectiveBoard from './RetrospectiveBoard'
 import ReviewMeetingForm from './ReviewMeetingForm'
+import AdaModal from './AdaModal'
 import { supabase } from '@/lib/supabase'
 
 interface SprintDetailsModalProps {
@@ -122,6 +122,7 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
   const [aiTip, setAiTip] = useState<string>('')
   const [aiTipLoading, setAiTipLoading] = useState(false)
   const [aiTipError, setAiTipError] = useState(false)
+  const [adaModalOpen, setAdaModalOpen] = useState(false)
   const [sprintDetails, setSprintDetails] = useState<{
     goal?: string
     status?: string
@@ -931,7 +932,7 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
       doc.setTextColor(...secondaryColor)
       doc.setFontSize(12)
       doc.setFont('helvetica', 'bold')
-      doc.text('Dica da IA', margin + 10, yPosition + 8)
+      doc.text('Dica da Ada', margin + 10, yPosition + 8)
       yPosition += 16
 
       // Content box - texto justificado
@@ -1361,20 +1362,37 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
                     {/* Header */}
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Box
-                          sx={{
-                            width: 40,
-                            height: 40,
-                            borderRadius: 2,
-                            background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)',
-                          }}
-                        >
-                          <AutoAwesome sx={{ color: 'white', fontSize: 22 }} />
-                        </Box>
+                        <Tooltip title="Conheça a Ada">
+                          <Box
+                            onClick={() => setAdaModalOpen(true)}
+                            sx={{
+                              width: 44,
+                              height: 44,
+                              borderRadius: '50%',
+                              overflow: 'hidden',
+                              boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)',
+                              border: '2px solid',
+                              borderColor: 'rgba(139, 92, 246, 0.3)',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease',
+                              '&:hover': {
+                                transform: 'scale(1.1)',
+                                boxShadow: '0 6px 16px rgba(139, 92, 246, 0.4)',
+                                borderColor: 'rgba(139, 92, 246, 0.5)',
+                              },
+                            }}
+                          >
+                            <img
+                              src="/ADA.png"
+                              alt="Ada"
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover',
+                              }}
+                            />
+                          </Box>
+                        </Tooltip>
                         <Box>
                           <Typography
                             variant="subtitle1"
@@ -1386,7 +1404,7 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
                               WebkitTextFillColor: 'transparent',
                             }}
                           >
-                            Dicas da IA
+                            Dicas da Ada
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
                             Insights personalizados para o seu sprint
@@ -1544,9 +1562,40 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
                   }}
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-                    <AutoAwesome sx={{ color: '#6b7280', fontSize: 22 }} />
+                    <Tooltip title="Conheça a Ada">
+                      <Box
+                        onClick={() => setAdaModalOpen(true)}
+                        sx={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: '50%',
+                          overflow: 'hidden',
+                          border: '2px solid',
+                          borderColor: 'rgba(107, 114, 128, 0.3)',
+                          filter: 'grayscale(50%)',
+                          opacity: 0.8,
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          '&:hover': {
+                            filter: 'grayscale(0%)',
+                            opacity: 1,
+                            transform: 'scale(1.1)',
+                          },
+                        }}
+                      >
+                        <img
+                          src="/ADA.png"
+                          alt="Ada"
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                          }}
+                        />
+                      </Box>
+                    </Tooltip>
                     <Typography variant="subtitle2" fontWeight={700} color="text.secondary">
-                      Dica da IA (Sprint Concluída)
+                      Dica da Ada (Sprint Concluída)
                     </Typography>
                   </Box>
                   <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
@@ -1863,6 +1912,11 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
         }}
         onSuccess={fetchUserStories}
         taskId={selectedStoryId}
+      />
+
+      <AdaModal
+        open={adaModalOpen}
+        onClose={() => setAdaModalOpen(false)}
       />
     </>
   )

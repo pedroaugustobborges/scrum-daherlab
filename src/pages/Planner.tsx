@@ -24,8 +24,6 @@ import {
   Search,
   Person,
   Assignment,
-  Flag,
-  Functions,
   DragIndicator,
   MoreVert,
   OpenInNew,
@@ -150,22 +148,22 @@ function PlannerCard({
       ref={setNodeRef}
       style={style}
       sx={{
-        mb: 2,
-        p: 2,
-        borderRadius: 3,
+        mb: 1.5,
+        p: 1.5,
+        borderRadius: 2,
         bgcolor: 'white',
         border: '2px solid rgba(99, 102, 241, 0.1)',
         cursor: isStakeholder ? 'default' : isDragging ? 'grabbing' : 'grab',
         transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
         '&:hover': {
           border: '2px solid rgba(99, 102, 241, 0.3)',
-          boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
           transform: isDragging ? 'none' : 'translateY(-2px)',
         },
       }}
     >
       {/* Header with drag handle and project badge */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1.5 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
         <Box
           {...(isStakeholder ? {} : { ...attributes, ...listeners })}
           sx={{
@@ -177,51 +175,26 @@ function PlannerCard({
             '&:active': { cursor: isStakeholder ? 'default' : 'grabbing' },
           }}
         >
-          {!isStakeholder && <DragIndicator sx={{ fontSize: 18 }} />}
-          <Assignment sx={{ fontSize: 18, color: '#6366f1' }} />
+          {!isStakeholder && <DragIndicator sx={{ fontSize: 16 }} />}
+          <Assignment sx={{ fontSize: 16, color: '#6366f1' }} />
         </Box>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {/* Project Badge */}
-          {task.project && (
-            <Tooltip title={`Projeto: ${task.project.name}`}>
-              <Chip
-                label={task.project.name}
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onNavigateToProject(task.project!.id)
-                }}
-                sx={{
-                  height: 22,
-                  fontSize: '0.65rem',
-                  fontWeight: 600,
-                  bgcolor: alpha('#6366f1', 0.1),
-                  color: '#6366f1',
-                  cursor: 'pointer',
-                  '&:hover': {
-                    bgcolor: alpha('#6366f1', 0.2),
-                  },
-                }}
-              />
-            </Tooltip>
-          )}
-
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
           {!isStakeholder && (
             <Tooltip title="Ações">
               <IconButton
                 size="small"
                 onClick={handleMenuClick}
                 sx={{
-                  width: 24,
-                  height: 24,
+                  width: 20,
+                  height: 20,
                   bgcolor: 'rgba(99, 102, 241, 0.1)',
                   '&:hover': {
                     bgcolor: 'rgba(99, 102, 241, 0.2)',
                   },
                 }}
               >
-                <MoreVert sx={{ fontSize: 14, color: '#6366f1' }} />
+                <MoreVert sx={{ fontSize: 12, color: '#6366f1' }} />
               </IconButton>
             </Tooltip>
           )}
@@ -265,55 +238,88 @@ function PlannerCard({
 
       {/* Card Content */}
       <Box onClick={() => onClick(task.id)} sx={{ cursor: 'pointer' }}>
+        {/* Project Badge - moved here for better layout */}
+        {task.project && (
+          <Tooltip title={`Projeto: ${task.project.name}`}>
+            <Chip
+              label={task.project.name}
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation()
+                onNavigateToProject(task.project!.id)
+              }}
+              sx={{
+                height: 18,
+                fontSize: '0.6rem',
+                fontWeight: 600,
+                bgcolor: alpha('#6366f1', 0.1),
+                color: '#6366f1',
+                cursor: 'pointer',
+                mb: 1,
+                maxWidth: '100%',
+                '& .MuiChip-label': {
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                },
+                '&:hover': {
+                  bgcolor: alpha('#6366f1', 0.2),
+                },
+              }}
+            />
+          </Tooltip>
+        )}
+
         {/* Title */}
         <Typography
-          variant="body2"
+          variant="caption"
           fontWeight={600}
           sx={{
-            mb: 1.5,
+            mb: 1,
             display: '-webkit-box',
-            WebkitLineClamp: 3,
+            WebkitLineClamp: 4,
             WebkitBoxOrient: 'vertical',
             overflow: 'hidden',
             lineHeight: 1.4,
+            fontSize: '0.75rem',
           }}
         >
           {task.title}
         </Typography>
 
-        {/* Metadata */}
-        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 1.5 }}>
-          {task.priority && (
-            <Chip
-              label={priorityConfig[task.priority]?.label || task.priority}
-              size="small"
-              icon={<Flag sx={{ fontSize: 12 }} />}
-              sx={{
-                height: 20,
-                fontSize: '0.65rem',
-                bgcolor: `${priorityConfig[task.priority]?.color}20`,
-                color: priorityConfig[task.priority]?.color,
-                fontWeight: 600,
-                '& .MuiChip-icon': { fontSize: 12 },
-              }}
-            />
-          )}
+        {/* Metadata - vertical layout for compact width */}
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mb: 1 }}>
+          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+            {task.priority && (
+              <Chip
+                label={priorityConfig[task.priority]?.label || task.priority}
+                size="small"
+                sx={{
+                  height: 18,
+                  fontSize: '0.6rem',
+                  bgcolor: `${priorityConfig[task.priority]?.color}20`,
+                  color: priorityConfig[task.priority]?.color,
+                  fontWeight: 600,
+                  '& .MuiChip-label': { px: 0.75 },
+                }}
+              />
+            )}
 
-          {task.story_points > 0 && (
-            <Chip
-              label={`${task.story_points} pts`}
-              size="small"
-              icon={<Functions sx={{ fontSize: 12 }} />}
-              sx={{
-                height: 20,
-                fontSize: '0.65rem',
-                bgcolor: 'rgba(99, 102, 241, 0.1)',
-                color: '#6366f1',
-                fontWeight: 600,
-                '& .MuiChip-icon': { fontSize: 12 },
-              }}
-            />
-          )}
+            {task.story_points > 0 && (
+              <Chip
+                label={`${task.story_points}pts`}
+                size="small"
+                sx={{
+                  height: 18,
+                  fontSize: '0.6rem',
+                  bgcolor: 'rgba(99, 102, 241, 0.1)',
+                  color: '#6366f1',
+                  fontWeight: 600,
+                  '& .MuiChip-label': { px: 0.75 },
+                }}
+              />
+            )}
+          </Box>
 
           {effectiveDeadline && (
             <Tooltip title={`${task.due_date ? 'Prazo' : 'Término'}: ${(() => {
@@ -326,14 +332,16 @@ function PlannerCard({
                   return new Date(y, m - 1, d).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
                 })()}
                 size="small"
-                icon={<CalendarMonth sx={{ fontSize: 12 }} />}
+                icon={<CalendarMonth sx={{ fontSize: 10 }} />}
                 sx={{
-                  height: 20,
-                  fontSize: '0.65rem',
+                  height: 18,
+                  fontSize: '0.6rem',
                   bgcolor: isDeadlinePassed ? 'rgba(239, 68, 68, 0.1)' : 'rgba(245, 158, 11, 0.1)',
                   color: isDeadlinePassed ? '#ef4444' : '#f59e0b',
                   fontWeight: 600,
-                  '& .MuiChip-icon': { fontSize: 12 },
+                  width: 'fit-content',
+                  '& .MuiChip-icon': { fontSize: 10, ml: 0.5 },
+                  '& .MuiChip-label': { px: 0.5 },
                 }}
               />
             </Tooltip>
@@ -342,12 +350,12 @@ function PlannerCard({
 
         {/* Subtasks Progress */}
         {task.subtasks && task.subtasks.length > 0 && (
-          <Box sx={{ mb: 1.5 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-              <Typography variant="caption" color="text.secondary" fontWeight={600}>
-                {task.subtasks.filter((st) => st.status === 'done').length}/{task.subtasks.length} subtarefas
+          <Box sx={{ mb: 1 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.25 }}>
+              <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary', fontWeight: 600 }}>
+                {task.subtasks.filter((st) => st.status === 'done').length}/{task.subtasks.length}
               </Typography>
-              <Typography variant="caption" fontWeight={700} sx={{ color: '#6366f1' }}>
+              <Typography sx={{ fontSize: '0.6rem', fontWeight: 700, color: '#6366f1' }}>
                 {progress}%
               </Typography>
             </Box>
@@ -355,7 +363,7 @@ function PlannerCard({
               variant="determinate"
               value={progress}
               sx={{
-                height: 4,
+                height: 3,
                 borderRadius: 10,
                 backgroundColor: 'rgba(99, 102, 241, 0.1)',
                 '& .MuiLinearProgress-bar': {
@@ -369,20 +377,20 @@ function PlannerCard({
 
         {/* Assignee */}
         {task.profiles?.full_name && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
             <Avatar
               sx={{
-                width: 24,
-                height: 24,
+                width: 18,
+                height: 18,
                 bgcolor: '#6366f1',
-                fontSize: '0.75rem',
+                fontSize: '0.6rem',
                 fontWeight: 700,
               }}
             >
               {task.profiles.full_name.charAt(0)}
             </Avatar>
-            <Typography variant="caption" fontWeight={600} color="text.secondary">
-              {task.profiles.full_name}
+            <Typography sx={{ fontSize: '0.6rem', fontWeight: 600, color: 'text.secondary' }} noWrap>
+              {task.profiles.full_name.split(' ')[0]}
             </Typography>
           </Box>
         )}
@@ -909,9 +917,10 @@ export default function Planner() {
                 xs: '1fr',
                 sm: 'repeat(2, 1fr)',
                 md: 'repeat(3, 1fr)',
-                lg: 'repeat(5, 1fr)',
+                lg: 'repeat(5, minmax(0, 1fr))',
               },
-              gap: 2,
+              gap: 1.5,
+              width: '100%',
             }}
           >
             {columns.map((column) => {
@@ -928,19 +937,29 @@ export default function Planner() {
                   <Paper
                     elevation={0}
                     sx={{
-                      p: 2,
-                      borderRadius: 3,
+                      p: 1.5,
+                      borderRadius: 2,
                       bgcolor: column.bgColor,
                       border: `2px solid ${column.color}30`,
                       minHeight: 500,
                       display: 'flex',
                       flexDirection: 'column',
+                      overflow: 'hidden',
                     }}
                   >
                     {/* Column Header */}
-                    <Box sx={{ mb: 2 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-                        <Typography variant="subtitle2" fontWeight={700} sx={{ color: column.color }}>
+                    <Box sx={{ mb: 1.5 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
+                        <Typography
+                          sx={{
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
+                            color: column.color,
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                          }}
+                        >
                           {column.label}
                         </Typography>
                         <Chip
@@ -950,14 +969,16 @@ export default function Planner() {
                             bgcolor: 'white',
                             color: column.color,
                             fontWeight: 700,
-                            fontSize: '0.75rem',
-                            height: 24,
+                            fontSize: '0.65rem',
+                            height: 20,
+                            minWidth: 20,
+                            '& .MuiChip-label': { px: 0.75 },
                           }}
                         />
                       </Box>
                       {stats.points > 0 && (
-                        <Typography variant="caption" color="text.secondary" fontWeight={600}>
-                          {stats.points} pontos
+                        <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary', fontWeight: 600 }}>
+                          {stats.points} pts
                         </Typography>
                       )}
                     </Box>
@@ -968,19 +989,19 @@ export default function Planner() {
                         <Box
                           sx={{
                             textAlign: 'center',
-                            py: 6,
-                            px: 2,
+                            py: 4,
+                            px: 1,
                             borderRadius: 2,
                             border: `2px dashed ${column.color}40`,
                             bgcolor: 'rgba(255,255,255,0.5)',
-                            minHeight: 200,
+                            minHeight: 150,
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                           }}
                         >
-                          <Typography variant="caption" color="text.secondary">
-                            Arraste tarefas aqui
+                          <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary' }}>
+                            Arraste aqui
                           </Typography>
                         </Box>
                       ) : (
@@ -1009,16 +1030,26 @@ export default function Planner() {
             {activeTask ? (
               <Box
                 sx={{
-                  p: 2,
-                  borderRadius: 3,
+                  p: 1.5,
+                  borderRadius: 2,
                   bgcolor: 'white',
                   border: '2px solid rgba(99, 102, 241, 0.3)',
                   boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
                   cursor: 'grabbing',
                   transform: 'rotate(-2deg)',
+                  maxWidth: 180,
                 }}
               >
-                <Typography variant="body2" fontWeight={600}>
+                <Typography
+                  sx={{
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                  }}
+                >
                   {activeTask.title}
                 </Typography>
                 {activeTask.project && (
@@ -1026,11 +1057,16 @@ export default function Planner() {
                     label={activeTask.project.name}
                     size="small"
                     sx={{
-                      mt: 1,
-                      height: 20,
-                      fontSize: '0.65rem',
+                      mt: 0.5,
+                      height: 18,
+                      fontSize: '0.6rem',
                       bgcolor: alpha('#6366f1', 0.1),
                       color: '#6366f1',
+                      maxWidth: '100%',
+                      '& .MuiChip-label': {
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      },
                     }}
                   />
                 )}

@@ -102,6 +102,16 @@ const initialFilters: Filters = {
   teams: [],
 };
 
+const VIEW_MODE_STORAGE_KEY = "projects-view-mode";
+
+const getStoredViewMode = (): "card" | "list" => {
+  const stored = localStorage.getItem(VIEW_MODE_STORAGE_KEY);
+  if (stored === "card" || stored === "list") {
+    return stored;
+  }
+  return "card";
+};
+
 export default function Projects() {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
@@ -118,7 +128,7 @@ export default function Projects() {
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
   const [filters, setFilters] = useState<Filters>(initialFilters);
   const [filtersExpanded, setFiltersExpanded] = useState(false);
-  const [viewMode, setViewMode] = useState<"card" | "list">("card");
+  const [viewMode, setViewMode] = useState<"card" | "list">(getStoredViewMode);
   const [currentPage, setCurrentPage] = useState(1);
 
   const ITEMS_PER_PAGE_CARD = 9;
@@ -265,6 +275,7 @@ export default function Projects() {
     if (newMode !== null) {
       setViewMode(newMode);
       setCurrentPage(1);
+      localStorage.setItem(VIEW_MODE_STORAGE_KEY, newMode);
     }
   };
 

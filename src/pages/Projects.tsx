@@ -41,6 +41,7 @@ import {
 import Navbar from "@/components/Navbar";
 import { ProjectCreationWizard } from "@/components/project";
 import EditProjectModal from "@/components/EditProjectModal";
+import DeleteProjectModal from "@/components/DeleteProjectModal";
 import { supabase } from "@/lib/supabase";
 import { exportProjectsToPDF } from "@/utils/exportProjectsToPDF";
 import toast from "react-hot-toast";
@@ -99,7 +100,9 @@ export default function Projects() {
   const [exportLoading, setExportLoading] = useState(false);
   const [createWizardOpen, setCreateWizardOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
   const [filters, setFilters] = useState<Filters>(initialFilters);
   const [filtersExpanded, setFiltersExpanded] = useState(false);
 
@@ -249,22 +252,29 @@ export default function Projects() {
     navigate(`/projects/${project.id}`);
   };
 
-  const handleDeleteProject = async (project: Project) => {
-    const confirmed = window.confirm(
-      `Tem certeza que deseja excluir o projeto "${project.name}"?\n\nEsta ação não pode ser desfeita.`
-    );
+  const handleDeleteProject = (project: Project) => {
+    setProjectToDelete(project);
+    setDeleteModalOpen(true);
+  };
 
-    if (!confirmed) return;
+  const handleCloseDeleteModal = () => {
+    setDeleteModalOpen(false);
+    setProjectToDelete(null);
+  };
+
+  const confirmDeleteProject = async () => {
+    if (!projectToDelete) return;
 
     try {
       const { error } = await supabase
         .from("projects")
         .delete()
-        .eq("id", project.id);
+        .eq("id", projectToDelete.id);
 
       if (error) throw error;
 
       toast.success("Projeto excluído com sucesso!");
+      handleCloseDeleteModal();
       await fetchProjects();
     } catch (error) {
       console.error("Error deleting project:", error);
@@ -992,6 +1002,13 @@ export default function Projects() {
           project={selectedProject}
         />
       )}
+
+      <DeleteProjectModal
+        open={deleteModalOpen}
+        onClose={handleCloseDeleteModal}
+        onConfirm={confirmDeleteProject}
+        project={projectToDelete}
+      />
     </Box>
   );
 }

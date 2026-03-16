@@ -43,6 +43,7 @@ import toast from 'react-hot-toast'
 import { useProjectContext } from './ProjectDetail'
 import { useUpdateProjectConfig, useCreateProjectConfig } from '@/hooks/useProjectConfig'
 import { supabase } from '@/lib/supabase'
+import DeleteProjectModal from '@/components/DeleteProjectModal'
 import type { ProjectConfiguration, GanttZoomLevel, Methodology } from '@/types/hybrid'
 
 interface ModuleOption {
@@ -378,12 +379,12 @@ export default function ProjectSettings() {
       if (error) throw error
 
       toast.success('Projeto excluído')
+      setDeleteDialogOpen(false)
       navigate('/projects')
     } catch (error) {
       console.error('Error deleting project:', error)
       toast.error('Erro ao excluir projeto')
     }
-    setDeleteDialogOpen(false)
   }
 
   const renderModulesByCategory = (category: 'agile' | 'predictive' | 'shared') => {
@@ -822,22 +823,13 @@ export default function ProjectSettings() {
         </DialogActions>
       </Dialog>
 
-      {/* Delete Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-        <DialogTitle>Excluir Projeto</DialogTitle>
-        <DialogContent>
-          <Alert severity="error" sx={{ mt: 1 }}>
-            <strong>Atenção!</strong> Esta ação é irreversível. Todas as tarefas, sprints e dados
-            do projeto "{project?.name}" serão permanentemente excluídos.
-          </Alert>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>Cancelar</Button>
-          <Button onClick={handleDelete} color="error" variant="contained">
-            Excluir Permanentemente
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {/* Delete Modal */}
+      <DeleteProjectModal
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        onConfirm={handleDelete}
+        project={project}
+      />
     </Box>
   )
 }

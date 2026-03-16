@@ -81,6 +81,7 @@ interface WeeklyData {
 }
 
 const ACTIVITIES_PER_PAGE = 4;
+const TEAM_WORKLOAD_PER_PAGE = 4;
 
 // Widget component mapping
 const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType | null> = {
@@ -111,6 +112,7 @@ export default function Dashboard() {
   const [customizeModalOpen, setCustomizeModalOpen] = useState(false);
   const [weeklyData, setWeeklyData] = useState<WeeklyData[]>([]);
   const [teamWorkload, setTeamWorkload] = useState<TeamMember[]>([]);
+  const [teamWorkloadPage, setTeamWorkloadPage] = useState(1);
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
   const [memberDetailOpen, setMemberDetailOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<{
@@ -127,6 +129,21 @@ export default function Dashboard() {
   const paginatedActivities = recentActivities.slice(
     activitiesStartIndex,
     activitiesStartIndex + ACTIVITIES_PER_PAGE,
+  );
+
+  // Sort team workload by tasks_count (descending) and paginate
+  const sortedTeamWorkload = useMemo(() => {
+    return [...teamWorkload].sort((a, b) => b.tasks_count - a.tasks_count);
+  }, [teamWorkload]);
+
+  const totalTeamWorkloadPages = Math.ceil(
+    sortedTeamWorkload.length / TEAM_WORKLOAD_PER_PAGE,
+  );
+  const teamWorkloadStartIndex =
+    (teamWorkloadPage - 1) * TEAM_WORKLOAD_PER_PAGE;
+  const paginatedTeamWorkload = sortedTeamWorkload.slice(
+    teamWorkloadStartIndex,
+    teamWorkloadStartIndex + TEAM_WORKLOAD_PER_PAGE,
   );
 
   // Get visible widgets sorted by order
@@ -546,11 +563,11 @@ export default function Dashboard() {
               >
                 <CircularProgress />
               </Box>
-            ) : teamWorkload.length > 0 ? (
+            ) : sortedTeamWorkload.length > 0 ? (
               <Box
                 sx={{ display: "flex", flexDirection: "column", gap: 2 }}
               >
-                {teamWorkload.slice(0, 5).map((member) => {
+                {paginatedTeamWorkload.map((member) => {
                   const progress =
                     member.tasks_count > 0
                       ? Math.round(
@@ -661,6 +678,78 @@ export default function Dashboard() {
                     </Box>
                   );
                 })}
+
+                {/* Pagination Controls */}
+                {totalTeamWorkloadPages > 1 && (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 1,
+                      mt: 2,
+                      pt: 2,
+                      borderTop: "1px solid",
+                      borderColor: "rgba(124, 58, 237, 0.1)",
+                    }}
+                  >
+                    <IconButton
+                      size="small"
+                      onClick={() =>
+                        setTeamWorkloadPage((prev) => Math.max(1, prev - 1))
+                      }
+                      disabled={teamWorkloadPage === 1}
+                      sx={{
+                        bgcolor: "rgba(124, 58, 237, 0.1)",
+                        "&:hover": { bgcolor: "rgba(124, 58, 237, 0.2)" },
+                        "&.Mui-disabled": {
+                          bgcolor: "rgba(124, 58, 237, 0.05)",
+                        },
+                      }}
+                    >
+                      <KeyboardArrowLeft
+                        sx={{
+                          color:
+                            teamWorkloadPage === 1
+                              ? "text.disabled"
+                              : "#7c3aed",
+                        }}
+                      />
+                    </IconButton>
+                    <Typography
+                      variant="caption"
+                      fontWeight={600}
+                      sx={{ color: "#7c3aed", minWidth: 60, textAlign: "center" }}
+                    >
+                      {teamWorkloadPage} / {totalTeamWorkloadPages}
+                    </Typography>
+                    <IconButton
+                      size="small"
+                      onClick={() =>
+                        setTeamWorkloadPage((prev) =>
+                          Math.min(totalTeamWorkloadPages, prev + 1)
+                        )
+                      }
+                      disabled={teamWorkloadPage === totalTeamWorkloadPages}
+                      sx={{
+                        bgcolor: "rgba(124, 58, 237, 0.1)",
+                        "&:hover": { bgcolor: "rgba(124, 58, 237, 0.2)" },
+                        "&.Mui-disabled": {
+                          bgcolor: "rgba(124, 58, 237, 0.05)",
+                        },
+                      }}
+                    >
+                      <KeyboardArrowRight
+                        sx={{
+                          color:
+                            teamWorkloadPage === totalTeamWorkloadPages
+                              ? "text.disabled"
+                              : "#7c3aed",
+                        }}
+                      />
+                    </IconButton>
+                  </Box>
+                )}
               </Box>
             ) : (
               <Box sx={{ textAlign: "center", py: 4 }}>

@@ -18,7 +18,7 @@ import {
   Timeline,
   EmojiObjects,
 } from "@mui/icons-material";
-import React from "react";
+import React, { useRef } from "react";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -35,6 +35,20 @@ interface AdaModalProps {
 }
 
 export default function AdaModal({ open, onClose }: AdaModalProps) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const handleVideoEnded = () => {
+    if (videoRef.current) {
+      // Pauses for 2000 milliseconds (2 seconds) before restarting
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.currentTime = 0;
+          videoRef.current.play().catch(console.error);
+        }
+      }, 2000);
+    }
+  };
+
   const adaFeatures = [
     {
       icon: <TipsAndUpdates />,
@@ -149,9 +163,13 @@ export default function AdaModal({ open, onClose }: AdaModalProps) {
             mb: 2,
           }}
         >
-          <img
-            src="/ADA.png"
-            alt="Ada Lovelace"
+          <video
+            ref={videoRef}
+            src="/ADA.mp4"
+            autoPlay
+            muted
+            playsInline
+            onEnded={handleVideoEnded}
             style={{
               width: "100%",
               height: "100%",

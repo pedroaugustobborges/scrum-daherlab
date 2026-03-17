@@ -368,23 +368,25 @@ export default function ProjectSettings() {
   }
 
   const handleDelete = async () => {
-    if (!project?.id) return
+    if (!project?.id) {
+      toast.error('Projeto não encontrado')
+      throw new Error('Project not found')
+    }
 
-    try {
-      const { error } = await supabase
-        .from('projects')
-        .delete()
-        .eq('id', project.id)
+    const { error } = await supabase
+      .from('projects')
+      .delete()
+      .eq('id', project.id)
 
-      if (error) throw error
-
-      toast.success('Projeto excluído')
-      setDeleteDialogOpen(false)
-      navigate('/projects')
-    } catch (error) {
+    if (error) {
       console.error('Error deleting project:', error)
       toast.error('Erro ao excluir projeto')
+      throw error
     }
+
+    toast.success('Projeto excluído')
+    setDeleteDialogOpen(false)
+    navigate('/projects')
   }
 
   const renderModulesByCategory = (category: 'agile' | 'predictive' | 'shared') => {

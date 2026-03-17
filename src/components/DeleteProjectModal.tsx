@@ -101,6 +101,11 @@ export default function DeleteProjectModal({
     setDeleting(true);
     try {
       await onConfirm();
+      // onConfirm will handle navigation and closing the modal on success
+    } catch (error) {
+      // Error is already handled in onConfirm with toast
+      // Just reset the deleting state so user can try again
+      console.error('Delete failed:', error);
     } finally {
       setDeleting(false);
     }

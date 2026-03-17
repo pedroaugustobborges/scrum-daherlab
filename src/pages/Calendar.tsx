@@ -767,6 +767,7 @@ export default function Calendar() {
                     borderRight: index < 6 ? '1px solid rgba(99, 102, 241, 0.1)' : 'none',
                     bgcolor: isToday(date) ? 'rgba(99, 102, 241, 0.03)' : 'transparent',
                     minHeight: 400,
+                    overflow: 'hidden',
                   }}
                 >
                   {dayEvents.map((event) => {
@@ -820,6 +821,8 @@ export default function Calendar() {
                               : `3px solid ${config.color}`,
                             cursor: event.type === 'task' || event.type === 'deadline' ? 'pointer' : 'default',
                             transition: 'all 0.2s',
+                            width: '100%',
+                            boxSizing: 'border-box',
                             '&:hover': {
                               bgcolor: `${event.color}25`,
                               transform: 'translateX(2px)',

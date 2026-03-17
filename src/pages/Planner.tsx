@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import {
   Box,
   Container,
@@ -19,6 +19,13 @@ import {
   MenuItem,
   ListItemIcon,
   ListItemText,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Pagination,
 } from '@mui/material'
 import {
   Search,
@@ -29,6 +36,9 @@ import {
   OpenInNew,
   CalendarMonth,
   ViewKanban,
+  ViewList,
+  ChevronRight,
+  Flag,
 } from '@mui/icons-material'
 import {
   DndContext,
@@ -87,6 +97,17 @@ const priorityConfig: Record<string, { label: string; color: string }> = {
   medium: { label: 'Média', color: '#f59e0b' },
   high: { label: 'Alta', color: '#ef4444' },
   urgent: { label: 'Urgente', color: '#dc2626' },
+}
+
+const VIEW_MODE_STORAGE_KEY = 'planner-view-mode'
+const ITEMS_PER_PAGE = 10
+
+const getStoredViewMode = (): 'kanban' | 'list' => {
+  const stored = localStorage.getItem(VIEW_MODE_STORAGE_KEY)
+  if (stored === 'kanban' || stored === 'list') {
+    return stored
+  }
+  return 'kanban'
 }
 
 // Planner Card Component with project indicator
@@ -438,6 +459,8 @@ export default function Planner() {
   const [selectedTaskId, setSelectedTaskId] = useState<string>('')
   const [activeId, setActiveId] = useState<string | null>(null)
   const [stakeholderProjectIds, setStakeholderProjectIds] = useState<Set<string>>(new Set())
+  const [viewMode, setViewMode] = useState<'kanban' | 'list'>(getStoredViewMode)
+  const [currentPage, setCurrentPage] = useState(1)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -605,6 +628,30 @@ export default function Planner() {
     }
 
     setFilteredTasks(filtered)
+    setCurrentPage(1) // Reset to first page when filters change
+  }
+
+  // View mode handler
+  const handleViewModeChange = (
+    _event: React.MouseEvent<HTMLElement>,
+    newMode: 'kanban' | 'list' | null
+  ) => {
+    if (newMode !== null) {
+      setViewMode(newMode)
+      setCurrentPage(1)
+      localStorage.setItem(VIEW_MODE_STORAGE_KEY, newMode)
+    }
+  }
+
+  // Pagination logic for list view
+  const totalPages = Math.ceil(filteredTasks.length / ITEMS_PER_PAGE)
+  const paginatedTasks = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+    return filteredTasks.slice(startIndex, startIndex + ITEMS_PER_PAGE)
+  }, [filteredTasks, currentPage])
+
+  const handlePageChange = (_event: React.ChangeEvent<unknown>, page: number) => {
+    setCurrentPage(page)
   }
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -888,7 +935,7 @@ export default function Planner() {
           />
 
           {/* Stats */}
-          <Box sx={{ ml: 'auto', display: 'flex', gap: 2 }}>
+          <Box sx={{ ml: 'auto', display: 'flex', gap: 2, alignItems: 'center' }}>
             <Chip
               label={`${filteredTasks.length} tarefas`}
               variant="outlined"
@@ -899,10 +946,50 @@ export default function Planner() {
               variant="outlined"
               sx={{ fontWeight: 600, color: '#6366f1', borderColor: '#6366f1' }}
             />
+
+            {/* View Mode Toggle */}
+            <ToggleButtonGroup
+              value={viewMode}
+              exclusive
+              onChange={handleViewModeChange}
+              aria-label="modo de visualização"
+              size="small"
+              sx={{
+                '& .MuiToggleButton-root': {
+                  border: '2px solid rgba(99, 102, 241, 0.2)',
+                  borderRadius: 2,
+                  px: 1.5,
+                  py: 0.5,
+                  '&.Mui-selected': {
+                    bgcolor: 'rgba(99, 102, 241, 0.1)',
+                    borderColor: '#6366f1',
+                    color: '#6366f1',
+                    '&:hover': {
+                      bgcolor: 'rgba(99, 102, 241, 0.15)',
+                    },
+                  },
+                  '&:hover': {
+                    bgcolor: 'rgba(99, 102, 241, 0.05)',
+                  },
+                },
+              }}
+            >
+              <ToggleButton value="kanban" aria-label="visualização kanban">
+                <Tooltip title="Kanban">
+                  <ViewKanban sx={{ fontSize: 20 }} />
+                </Tooltip>
+              </ToggleButton>
+              <ToggleButton value="list" aria-label="visualização em lista">
+                <Tooltip title="Lista">
+                  <ViewList sx={{ fontSize: 20 }} />
+                </Tooltip>
+              </ToggleButton>
+            </ToggleButtonGroup>
           </Box>
         </Paper>
 
-        {/* Kanban Board */}
+        {/* Kanban View */}
+        {viewMode === 'kanban' && (
         <DndContext
           sensors={sensors}
           collisionDetection={rectIntersection}
@@ -1074,6 +1161,364 @@ export default function Planner() {
             ) : null}
           </DragOverlay>
         </DndContext>
+        )}
+
+        {/* List View */}
+        {viewMode === 'list' && (
+          <>
+            <TableContainer
+              component={Paper}
+              elevation={0}
+              sx={{
+                border: '2px solid rgba(99, 102, 241, 0.1)',
+                borderRadius: 3,
+                overflow: 'hidden',
+              }}
+            >
+              <Table>
+                <TableHead>
+                  <TableRow
+                    sx={{
+                      background:
+                        'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)',
+                    }}
+                  >
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        color: '#6366f1',
+                        fontSize: '0.875rem',
+                        py: 2,
+                      }}
+                    >
+                      Tarefa
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        color: '#6366f1',
+                        fontSize: '0.875rem',
+                        py: 2,
+                      }}
+                    >
+                      Status
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        color: '#6366f1',
+                        fontSize: '0.875rem',
+                        py: 2,
+                        display: { xs: 'none', md: 'table-cell' },
+                      }}
+                    >
+                      Prioridade
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        color: '#6366f1',
+                        fontSize: '0.875rem',
+                        py: 2,
+                        display: { xs: 'none', md: 'table-cell' },
+                      }}
+                    >
+                      Projeto
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        color: '#6366f1',
+                        fontSize: '0.875rem',
+                        py: 2,
+                        display: { xs: 'none', lg: 'table-cell' },
+                      }}
+                    >
+                      Responsável
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        color: '#6366f1',
+                        fontSize: '0.875rem',
+                        py: 2,
+                        display: { xs: 'none', lg: 'table-cell' },
+                      }}
+                    >
+                      Pontos
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {paginatedTasks.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} sx={{ textAlign: 'center', py: 8 }}>
+                        <Assignment
+                          sx={{ fontSize: 60, color: '#6366f1', opacity: 0.3, mb: 2 }}
+                        />
+                        <Typography variant="h6" fontWeight={600} gutterBottom>
+                          Nenhuma tarefa encontrada
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Tente ajustar os filtros
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    paginatedTasks.map((task, index) => {
+                      const statusColumn = columns.find((c) => c.id === task.status)
+
+                      return (
+                        <TableRow
+                          key={task.id}
+                          onClick={() => {
+                            setSelectedTaskId(task.id)
+                            setStoryDetailsOpen(true)
+                          }}
+                          sx={{
+                            cursor: 'pointer',
+                            bgcolor:
+                              index % 2 === 0
+                                ? 'transparent'
+                                : 'rgba(99, 102, 241, 0.02)',
+                            transition: 'all 0.2s ease',
+                            '&:hover': {
+                              bgcolor: alpha('#6366f1', 0.08),
+                              '& .row-arrow': {
+                                opacity: 1,
+                                transform: 'translateX(0)',
+                              },
+                            },
+                            '&:last-child td': {
+                              borderBottom: 0,
+                            },
+                          }}
+                        >
+                          <TableCell sx={{ py: 2 }}>
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 2,
+                              }}
+                            >
+                              <Box
+                                sx={{
+                                  width: 36,
+                                  height: 36,
+                                  borderRadius: 2,
+                                  background:
+                                    'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  boxShadow: '0 4px 8px rgba(99, 102, 241, 0.25)',
+                                  flexShrink: 0,
+                                }}
+                              >
+                                <Assignment sx={{ color: 'white', fontSize: 18 }} />
+                              </Box>
+                              <Box sx={{ minWidth: 0, flex: 1 }}>
+                                <Typography
+                                  variant="body2"
+                                  fontWeight={600}
+                                  sx={{
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                  }}
+                                >
+                                  {task.title}
+                                </Typography>
+                                {task.description && (
+                                  <Typography
+                                    variant="caption"
+                                    color="text.secondary"
+                                    sx={{
+                                      display: '-webkit-box',
+                                      WebkitLineClamp: 1,
+                                      WebkitBoxOrient: 'vertical',
+                                      overflow: 'hidden',
+                                    }}
+                                  >
+                                    {task.description}
+                                  </Typography>
+                                )}
+                              </Box>
+                              <ChevronRight
+                                className="row-arrow"
+                                sx={{
+                                  color: '#6366f1',
+                                  opacity: 0,
+                                  transform: 'translateX(-8px)',
+                                  transition: 'all 0.2s ease',
+                                  display: { xs: 'none', sm: 'block' },
+                                }}
+                              />
+                            </Box>
+                          </TableCell>
+                          <TableCell sx={{ py: 2 }}>
+                            <Chip
+                              label={statusColumn?.label || task.status}
+                              size="small"
+                              sx={{
+                                fontWeight: 600,
+                                fontSize: '0.7rem',
+                                bgcolor: `${statusColumn?.color}20`,
+                                color: statusColumn?.color,
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell
+                            sx={{
+                              py: 2,
+                              display: { xs: 'none', md: 'table-cell' },
+                            }}
+                          >
+                            {task.priority && (
+                              <Chip
+                                label={priorityConfig[task.priority]?.label || task.priority}
+                                size="small"
+                                icon={<Flag sx={{ fontSize: 12 }} />}
+                                sx={{
+                                  fontWeight: 600,
+                                  fontSize: '0.7rem',
+                                  bgcolor: `${priorityConfig[task.priority]?.color}20`,
+                                  color: priorityConfig[task.priority]?.color,
+                                  '& .MuiChip-icon': {
+                                    color: priorityConfig[task.priority]?.color,
+                                  },
+                                }}
+                              />
+                            )}
+                          </TableCell>
+                          <TableCell
+                            sx={{
+                              py: 2,
+                              display: { xs: 'none', md: 'table-cell' },
+                            }}
+                          >
+                            {task.project && (
+                              <Chip
+                                label={task.project.name}
+                                size="small"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  navigate(`/projects/${task.project!.id}/kanban`)
+                                }}
+                                sx={{
+                                  fontWeight: 600,
+                                  fontSize: '0.7rem',
+                                  bgcolor: alpha('#6366f1', 0.1),
+                                  color: '#6366f1',
+                                  cursor: 'pointer',
+                                  '&:hover': {
+                                    bgcolor: alpha('#6366f1', 0.2),
+                                  },
+                                }}
+                              />
+                            )}
+                          </TableCell>
+                          <TableCell
+                            sx={{
+                              py: 2,
+                              display: { xs: 'none', lg: 'table-cell' },
+                            }}
+                          >
+                            {task.profiles?.full_name && (
+                              <Box
+                                sx={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 1,
+                                }}
+                              >
+                                <Avatar
+                                  sx={{
+                                    width: 24,
+                                    height: 24,
+                                    bgcolor: '#6366f1',
+                                    fontSize: '0.7rem',
+                                    fontWeight: 700,
+                                  }}
+                                >
+                                  {task.profiles.full_name.charAt(0)}
+                                </Avatar>
+                                <Typography
+                                  variant="caption"
+                                  fontWeight={600}
+                                  color="text.secondary"
+                                  noWrap
+                                >
+                                  {task.profiles.full_name.split(' ')[0]}
+                                </Typography>
+                              </Box>
+                            )}
+                          </TableCell>
+                          <TableCell
+                            sx={{
+                              py: 2,
+                              display: { xs: 'none', lg: 'table-cell' },
+                            }}
+                          >
+                            {task.story_points > 0 && (
+                              <Chip
+                                label={`${task.story_points} pts`}
+                                size="small"
+                                sx={{
+                                  fontWeight: 600,
+                                  fontSize: '0.7rem',
+                                  bgcolor: 'rgba(99, 102, 241, 0.1)',
+                                  color: '#6366f1',
+                                }}
+                              />
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  mt: 3,
+                }}
+              >
+                <Pagination
+                  count={totalPages}
+                  page={currentPage}
+                  onChange={handlePageChange}
+                  color="primary"
+                  size="large"
+                  showFirstButton
+                  showLastButton
+                  sx={{
+                    '& .MuiPaginationItem-root': {
+                      fontWeight: 600,
+                      borderRadius: 2,
+                      '&.Mui-selected': {
+                        background:
+                          'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                        color: 'white',
+                        '&:hover': {
+                          background:
+                            'linear-gradient(135deg, #5558e3 0%, #7c4fe0 100%)',
+                        },
+                      },
+                    },
+                  }}
+                />
+              </Box>
+            )}
+          </>
+        )}
       </Container>
 
       {/* Story Details Modal */}

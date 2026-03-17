@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Box,
   Container,
@@ -26,6 +26,7 @@ import {
   TableHead,
   TableRow,
   Paper,
+  Pagination,
 } from "@mui/material";
 import {
   Add,
@@ -48,6 +49,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import toast from "react-hot-toast";
 
+const ITEMS_PER_PAGE = 10;
+
 interface User {
   id: string;
   email: string;
@@ -62,6 +65,7 @@ export default function AdminPanel() {
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [resetPasswordDialogOpen, setResetPasswordDialogOpen] = useState(false);
@@ -253,6 +257,19 @@ export default function AdminPanel() {
       u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       u.full_name?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
+
+  // Reset page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  // Paginated users
+  const paginatedUsers = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredUsers.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredUsers, currentPage]);
+
+  const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
 
   // Redirect non-admins
   if (!isAdmin && !loading) {
@@ -493,7 +510,7 @@ export default function AdminPanel() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredUsers.length === 0 ? (
+                {paginatedUsers.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} align="center" sx={{ py: 8 }}>
                       <Typography variant="body1" color="text.secondary">
@@ -502,7 +519,7 @@ export default function AdminPanel() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredUsers.map((u) => (
+                  paginatedUsers.map((u) => (
                     <TableRow
                       key={u.id}
                       sx={{
@@ -665,6 +682,41 @@ export default function AdminPanel() {
               </TableBody>
             </Table>
           </TableContainer>
+        )}
+
+        {/* Pagination */}
+        {!loading && totalPages > 1 && (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              mt: 3,
+              gap: 2,
+            }}
+          >
+            <Typography variant="body2" color="text.secondary">
+              Mostrando {paginatedUsers.length} de {filteredUsers.length} usuários
+            </Typography>
+            <Pagination
+              count={totalPages}
+              page={currentPage}
+              onChange={(_, page) => setCurrentPage(page)}
+              color="primary"
+              shape="rounded"
+              showFirstButton
+              showLastButton
+              sx={{
+                "& .MuiPaginationItem-root": {
+                  fontWeight: 600,
+                },
+                "& .Mui-selected": {
+                  bgcolor: "#6366f1 !important",
+                  color: "white",
+                },
+              }}
+            />
+          </Box>
         )}
       </Container>
 

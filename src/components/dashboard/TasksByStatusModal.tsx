@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, forwardRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,13 +12,8 @@ import {
   Pagination,
   useTheme,
 } from "@mui/material";
-import {
-  Close,
-  FolderOutlined,
-  PersonOutline,
-} from "@mui/icons-material";
+import { Close, FolderOutlined, PersonOutline } from "@mui/icons-material";
 import { TransitionProps } from "@mui/material/transitions";
-import { forwardRef } from "react";
 import { supabase } from "@/lib/supabase";
 
 const Transition = forwardRef(function Transition(
@@ -184,15 +179,16 @@ export default function TasksByStatusModal({
       PaperProps={{
         sx: {
           borderRadius: "24px",
-          background:
-            "linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(250,251,252,0.95) 100%)",
+          background: isDarkMode
+            ? "linear-gradient(180deg, #1e293b 0%, #0f172a 100%)"
+            : "linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(250,251,252,0.95) 100%)",
           border: "1px solid",
-          borderColor: `${statusColor}30`,
-          boxShadow: `
-            0 0 0 1px rgba(0,0,0,0.03),
-            0 25px 50px ${statusColor}20,
-            0 8px 24px rgba(0,0,0,0.08)
-          `,
+          borderColor: isDarkMode
+            ? "rgba(255,255,255,0.1)"
+            : `${statusColor}30`,
+          boxShadow: isDarkMode
+            ? "0 25px 50px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.4)"
+            : `0 0 0 1px rgba(0,0,0,0.03), 0 25px 50px ${statusColor}20, 0 8px 24px rgba(0,0,0,0.08)`,
           overflow: "hidden",
           maxHeight: "85vh",
         },
@@ -296,7 +292,9 @@ export default function TasksByStatusModal({
                     borderRadius: "16px",
                     bgcolor: isDarkMode ? "#1e293b" : "white",
                     border: "1px solid",
-                    borderColor: isDarkMode ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)",
+                    borderColor: isDarkMode
+                      ? "rgba(255,255,255,0.06)"
+                      : "rgba(0,0,0,0.06)",
                     boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
                     transition: "all 0.2s ease",
                     "&:hover": {
@@ -464,8 +462,12 @@ export default function TasksByStatusModal({
                   py: 2,
                   px: 3,
                   borderTop: "1px solid",
-                  borderColor: "rgba(0,0,0,0.06)",
-                  bgcolor: "rgba(0,0,0,0.02)",
+                  borderColor: isDarkMode
+                    ? "rgba(255,255,255,0.06)"
+                    : "rgba(0,0,0,0.06)",
+                  bgcolor: isDarkMode
+                    ? "rgba(255,255,255,0.02)"
+                    : "rgba(0,0,0,0.02)",
                 }}
               >
                 <Pagination

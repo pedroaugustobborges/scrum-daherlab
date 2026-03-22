@@ -11,6 +11,7 @@ import {
   Alert,
   Slide,
   IconButton,
+  useTheme,
 } from "@mui/material";
 import { TransitionProps } from "@mui/material/transitions";
 import {
@@ -56,6 +57,8 @@ export default function DeleteProjectModal({
   onConfirm,
   project,
 }: DeleteProjectModalProps) {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
   const [taskCount, setTaskCount] = useState<TaskCount>({
     tasks: 0,
     loading: true,
@@ -130,9 +133,13 @@ export default function DeleteProjectModal({
       PaperProps={{
         sx: {
           borderRadius: 4,
-          background: "linear-gradient(135deg, #ffffff 0%, #fef2f2 100%)",
+          background: isDarkMode
+            ? "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)"
+            : "linear-gradient(135deg, #ffffff 0%, #fef2f2 100%)",
           border: "2px solid rgba(239, 68, 68, 0.2)",
-          boxShadow: "0 25px 50px -12px rgba(239, 68, 68, 0.25)",
+          boxShadow: isDarkMode
+            ? "0 25px 50px -12px rgba(0, 0, 0, 0.5)"
+            : "0 25px 50px -12px rgba(239, 68, 68, 0.25)",
           overflow: "visible",
         },
       }}

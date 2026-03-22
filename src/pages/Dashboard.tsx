@@ -969,6 +969,8 @@ export default function Dashboard() {
                           boxShadow: isDarkMode ? "0 4px 12px rgba(0,0,0,0.4)" : "0 4px 12px rgba(0,0,0,0.1)",
                           color: isDarkMode ? "#f1f5f9" : "#1e293b",
                         }}
+                        labelStyle={{ color: isDarkMode ? "#f1f5f9" : "#1e293b" }}
+                        itemStyle={{ color: isDarkMode ? "#f1f5f9" : "#1e293b" }}
                       />
                     </PieChart>
                   </ResponsiveContainer>

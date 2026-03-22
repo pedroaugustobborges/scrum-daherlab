@@ -20,6 +20,7 @@ import {
   Fade,
   Tabs,
   Tab,
+  useTheme,
 } from '@mui/material'
 import {
   People,
@@ -86,6 +87,8 @@ export default function EditTeamModal({
   teamId,
   teamName,
 }: EditTeamModalProps) {
+  const theme = useTheme()
+  const isDarkMode = theme.palette.mode === 'dark'
   const [tabValue, setTabValue] = useState(0)
   const [loading, setLoading] = useState(false)
   const [loadingData, setLoadingData] = useState(true)
@@ -467,7 +470,7 @@ export default function EditTeamModal({
                         variant="h6"
                         sx={{
                           fontWeight: 700,
-                          color: '#1f2937',
+                          color: isDarkMode ? '#e2e8f0' : '#1f2937',
                           mb: 2,
                           fontSize: '1.25rem',
                         }}

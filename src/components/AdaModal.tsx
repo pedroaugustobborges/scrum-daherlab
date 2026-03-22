@@ -8,6 +8,7 @@ import {
   Chip,
   Divider,
   alpha,
+  useTheme,
 } from "@mui/material";
 import { TransitionProps } from "@mui/material/transitions";
 import {
@@ -35,6 +36,8 @@ interface AdaModalProps {
 }
 
 export default function AdaModal({ open, onClose }: AdaModalProps) {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const handleVideoEnded = () => {
@@ -86,9 +89,13 @@ export default function AdaModal({ open, onClose }: AdaModalProps) {
       PaperProps={{
         sx: {
           borderRadius: 4,
-          background: "linear-gradient(135deg, #ffffff 0%, #faf5ff 100%)",
+          background: isDarkMode
+            ? "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)"
+            : "linear-gradient(135deg, #ffffff 0%, #faf5ff 100%)",
           border: "2px solid rgba(139, 92, 246, 0.2)",
-          boxShadow: "0 25px 50px -12px rgba(139, 92, 246, 0.25)",
+          boxShadow: isDarkMode
+            ? "0 25px 50px -12px rgba(0, 0, 0, 0.5)"
+            : "0 25px 50px -12px rgba(139, 92, 246, 0.25)",
           overflow: "hidden",
         },
       }}

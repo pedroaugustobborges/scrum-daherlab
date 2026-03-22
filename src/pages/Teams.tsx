@@ -21,6 +21,7 @@ import {
   Select,
   MenuItem,
   OutlinedInput,
+  useTheme,
 } from '@mui/material'
 import {
   Add,
@@ -76,6 +77,8 @@ const initialFilters: Filters = {
 }
 
 export default function Teams() {
+  const theme = useTheme()
+  const isDarkMode = theme.palette.mode === 'dark'
   const [teams, setTeams] = useState<Team[]>([])
   const [loading, setLoading] = useState(true)
   const [createModalOpen, setCreateModalOpen] = useState(false)
@@ -656,13 +659,17 @@ export default function Teams() {
                   onClick={() => handleOpenProjectsModal(team)}
                   sx={{
                     height: '100%',
-                    background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+                    background: isDarkMode
+                      ? 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)'
+                      : 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
                     border: '2px solid rgba(99, 102, 241, 0.1)',
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     cursor: 'pointer',
                     '&:hover': {
                       transform: 'translateY(-8px)',
-                      boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                      boxShadow: isDarkMode
+                        ? '0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2)'
+                        : '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
                       border: '2px solid rgba(99, 102, 241, 0.3)',
                     },
                   }}

@@ -15,6 +15,7 @@ import {
   InputAdornment,
   Button,
   CircularProgress,
+  useTheme,
 } from '@mui/material'
 import {
   ChevronLeft,
@@ -82,6 +83,8 @@ const eventTypeConfig: Record<string, { icon: typeof Assignment; color: string; 
 }
 
 export default function Calendar() {
+  const theme = useTheme()
+  const isDarkMode = theme.palette.mode === 'dark'
   const { user } = useAuth()
 
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -520,7 +523,7 @@ export default function Calendar() {
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: isDarkMode ? 'background.default' : '#f8fafc' }}>
       <Navbar />
 
       <Box sx={{ p: { xs: 2, md: 4 }, maxWidth: 1600, mx: 'auto' }}>
@@ -543,7 +546,7 @@ export default function Calendar() {
                 <CalendarMonth sx={{ color: 'white', fontSize: 24 }} />
               </Box>
               <Box>
-                <Typography variant="h4" fontWeight={800} color="#1f2937">
+                <Typography variant="h4" fontWeight={800} color={isDarkMode ? 'text.primary' : '#1f2937'}>
                   Calendário
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
@@ -731,7 +734,7 @@ export default function Calendar() {
                   variant="h6"
                   fontWeight={700}
                   sx={{
-                    color: isToday(date) ? 'white' : '#1f2937',
+                    color: isToday(date) ? 'white' : isDarkMode ? '#e2e8f0' : '#1f2937',
                     bgcolor: isToday(date) ? '#6366f1' : 'transparent',
                     borderRadius: '50%',
                     width: 36,
@@ -880,7 +883,7 @@ export default function Calendar() {
                               overflow: 'hidden',
                               fontSize: '0.7rem',
                               lineHeight: 1.3,
-                              color: '#1f2937',
+                              color: isDarkMode ? '#e2e8f0' : '#1f2937',
                             }}
                           >
                             {event.title}
@@ -899,7 +902,7 @@ export default function Calendar() {
                               </Avatar>
                               <Typography
                                 variant="caption"
-                                sx={{ fontSize: '0.6rem', color: '#6b7280' }}
+                                sx={{ fontSize: '0.6rem', color: isDarkMode ? '#94a3b8' : '#6b7280' }}
                               >
                                 {event.assignee.split(' ')[0]}
                               </Typography>

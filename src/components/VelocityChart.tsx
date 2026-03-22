@@ -139,7 +139,9 @@ export default function VelocityChart({ teamId, currentSprintId }: VelocityChart
         sx={{
           p: 3,
           borderRadius: 3,
-          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+          background: isDarkMode
+            ? 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)'
+            : 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
           border: '2px solid rgba(99, 102, 241, 0.1)',
           display: 'flex',
           justifyContent: 'center',
@@ -159,7 +161,9 @@ export default function VelocityChart({ teamId, currentSprintId }: VelocityChart
         sx={{
           p: 3,
           borderRadius: 3,
-          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+          background: isDarkMode
+            ? 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)'
+            : 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
           border: '2px solid rgba(99, 102, 241, 0.1)',
           textAlign: 'center',
         }}
@@ -181,7 +185,9 @@ export default function VelocityChart({ teamId, currentSprintId }: VelocityChart
       sx={{
         p: 3,
         borderRadius: 3,
-        background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+        background: isDarkMode
+          ? 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)'
+          : 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
         border: '2px solid rgba(99, 102, 241, 0.1)',
       }}
     >

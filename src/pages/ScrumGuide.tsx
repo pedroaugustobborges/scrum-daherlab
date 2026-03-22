@@ -275,7 +275,9 @@ export default function ScrumGuide() {
             sx={{
               p: 5,
               borderRadius: 4,
-              background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
+              background: isDarkMode
+                ? "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)"
+                : "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
               border: "2px solid rgba(99, 102, 241, 0.1)",
             }}
           >
@@ -362,13 +364,16 @@ export default function ScrumGuide() {
                   elevation={0}
                   sx={{
                     height: "100%",
-                    background:
-                      "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
+                    background: isDarkMode
+                      ? "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)"
+                      : "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
                     border: "2px solid rgba(99, 102, 241, 0.1)",
                     transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                     "&:hover": {
                       transform: "translateY(-8px)",
-                      boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
+                      boxShadow: isDarkMode
+                        ? "0 20px 25px -5px rgba(0, 0, 0, 0.3)"
+                        : "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
                       border: `2px solid ${value.color}40`,
                     },
                   }}

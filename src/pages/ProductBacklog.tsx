@@ -25,6 +25,7 @@ import {
   List,
   ListItem,
   Divider,
+  useTheme,
 } from '@mui/material'
 import {
   Add,
@@ -265,6 +266,8 @@ function DraggableBacklogItem({ item, onMenuClick }: DraggableBacklogItemProps) 
 }
 
 export default function ProductBacklog() {
+  const theme = useTheme()
+  const isDarkMode = theme.palette.mode === 'dark'
   const [loading, setLoading] = useState(true)
   const [backlogItems, setBacklogItems] = useState<BacklogItem[]>([])
   const [filteredItems, setFilteredItems] = useState<BacklogItem[]>([])
@@ -621,7 +624,9 @@ export default function ProductBacklog() {
           sx={{
             p: 3,
             mb: 3,
-            background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+            background: isDarkMode
+              ? 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)'
+              : 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
             border: '2px solid rgba(99, 102, 241, 0.1)',
           }}
         >

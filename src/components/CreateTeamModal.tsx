@@ -18,6 +18,7 @@ import {
   Divider,
   Collapse,
   Fade,
+  useTheme,
 } from "@mui/material";
 import {
   People,
@@ -63,6 +64,8 @@ export default function CreateTeamModal({
   onClose,
   onSuccess,
 }: CreateTeamModalProps) {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [loadingProfiles, setLoadingProfiles] = useState(false);
@@ -413,7 +416,7 @@ export default function CreateTeamModal({
                     variant="h6"
                     sx={{
                       fontWeight: 700,
-                      color: "#1f2937",
+                      color: isDarkMode ? "#e2e8f0" : "#1f2937",
                       mb: 2,
                       fontSize: "1.25rem",
                     }}

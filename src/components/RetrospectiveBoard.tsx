@@ -10,6 +10,7 @@ import {
   CircularProgress,
   Tooltip,
   Stack,
+  useTheme,
 } from '@mui/material'
 import {
   Add,
@@ -85,6 +86,8 @@ const moodIcons = [
 ]
 
 export default function RetrospectiveBoard({ sprintId, sprintName }: RetrospectiveBoardProps) {
+  const theme = useTheme()
+  const isDarkMode = theme.palette.mode === 'dark'
   const [loading, setLoading] = useState(true)
   const [retrospective, setRetrospective] = useState<Retrospective | null>(null)
   const [items, setItems] = useState<RetroItem[]>([])
@@ -363,7 +366,7 @@ export default function RetrospectiveBoard({ sprintId, sprintName }: Retrospecti
                   label={`${columnItems.length} ${columnItems.length === 1 ? 'item' : 'itens'}`}
                   size="small"
                   sx={{
-                    bgcolor: 'white',
+                    bgcolor: isDarkMode ? '#1e293b' : 'white',
                     color: column.color,
                     fontWeight: 600,
                   }}
@@ -391,7 +394,7 @@ export default function RetrospectiveBoard({ sprintId, sprintName }: Retrospecti
                     ),
                   }}
                   sx={{
-                    bgcolor: 'white',
+                    bgcolor: isDarkMode ? '#1e293b' : 'white',
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                     },
@@ -407,8 +410,8 @@ export default function RetrospectiveBoard({ sprintId, sprintName }: Retrospecti
                     elevation={0}
                     sx={{
                       p: 2,
-                      bgcolor: 'white',
-                      border: '1px solid rgba(0, 0, 0, 0.08)',
+                      bgcolor: isDarkMode ? '#1e293b' : 'white',
+                      border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.08)',
                       borderRadius: 2,
                       '&:hover': {
                         boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',

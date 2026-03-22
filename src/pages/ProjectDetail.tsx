@@ -12,6 +12,7 @@ import {
   Breadcrumbs,
   Link,
   alpha,
+  useTheme,
 } from '@mui/material'
 import {
   ArrowBack,
@@ -66,6 +67,8 @@ export default function ProjectDetail() {
   const { projectId } = useParams<{ projectId: string }>()
   const navigate = useNavigate()
   const location = useLocation()
+  const theme = useTheme()
+  const isDarkMode = theme.palette.mode === 'dark'
   const [project, setProject] = useState<Project | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -183,7 +186,7 @@ export default function ProjectDetail() {
       {/* Header */}
       <Box
         sx={{
-          bgcolor: 'white',
+          bgcolor: isDarkMode ? '#1e293b' : 'white',
           borderBottom: '1px solid',
           borderColor: 'divider',
           position: 'sticky',

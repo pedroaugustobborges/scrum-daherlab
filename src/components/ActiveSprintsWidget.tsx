@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Box, Typography, CircularProgress, Chip, LinearProgress, IconButton } from '@mui/material'
+import { Box, Typography, CircularProgress, Chip, LinearProgress, IconButton, useTheme } from '@mui/material'
 import { SpaceDashboard, CalendarToday, KeyboardArrowUp, KeyboardArrowDown } from '@mui/icons-material'
 import { supabase } from '@/lib/supabase'
 import SprintDetailsModal from './SprintDetailsModal'
@@ -19,6 +19,8 @@ interface ActiveSprint {
 const ITEMS_PER_PAGE = 2
 
 export default function ActiveSprintsWidget() {
+  const theme = useTheme()
+  const isDarkMode = theme.palette.mode === 'dark'
   const [loading, setLoading] = useState(true)
   const [activeSprints, setActiveSprints] = useState<ActiveSprint[]>([])
   const [totalCount, setTotalCount] = useState(0)
@@ -204,7 +206,7 @@ export default function ActiveSprintsWidget() {
                 sx={{
                   p: 2,
                   borderRadius: 2,
-                  bgcolor: 'white',
+                  bgcolor: isDarkMode ? '#1e293b' : 'white',
                   border: '1px solid rgba(8, 145, 178, 0.15)',
                   transition: 'all 0.2s ease',
                   cursor: 'pointer',

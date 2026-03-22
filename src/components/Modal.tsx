@@ -1,5 +1,5 @@
 import React from 'react'
-import { Dialog, DialogTitle, DialogContent, IconButton, Box, Slide } from '@mui/material'
+import { Dialog, DialogTitle, DialogContent, IconButton, Box, Slide, useTheme } from '@mui/material'
 import { Close } from '@mui/icons-material'
 import { TransitionProps } from '@mui/material/transitions'
 
@@ -21,6 +21,9 @@ interface ModalProps {
 }
 
 export default function Modal({ open, onClose, title, children, maxWidth = 'sm' }: ModalProps) {
+  const theme = useTheme()
+  const isDarkMode = theme.palette.mode === 'dark'
+
   return (
     <Dialog
       open={open}
@@ -31,16 +34,22 @@ export default function Modal({ open, onClose, title, children, maxWidth = 'sm' 
       PaperProps={{
         sx: {
           borderRadius: 4,
-          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-          border: '2px solid rgba(99, 102, 241, 0.1)',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          background: isDarkMode
+            ? 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)'
+            : 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+          border: isDarkMode
+            ? '2px solid rgba(99, 102, 241, 0.2)'
+            : '2px solid rgba(99, 102, 241, 0.1)',
+          boxShadow: isDarkMode
+            ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+            : '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
           overflow: 'visible',
         },
       }}
       sx={{
         '& .MuiBackdrop-root': {
           backdropFilter: 'blur(8px)',
-          backgroundColor: 'rgba(0, 0, 0, 0.4)',
+          backgroundColor: isDarkMode ? 'rgba(0, 0, 0, 0.6)' : 'rgba(0, 0, 0, 0.4)',
         },
       }}
     >

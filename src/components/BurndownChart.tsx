@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Box, Typography, Paper, Chip } from '@mui/material'
+import { Box, Typography, Paper, Chip, useTheme } from '@mui/material'
 import {
   LineChart,
   Line,
@@ -26,6 +26,8 @@ interface BurndownChartProps {
 }
 
 export default function BurndownChart({ sprint, stories }: BurndownChartProps) {
+  const theme = useTheme()
+  const isDarkMode = theme.palette.mode === 'dark'
   const chartData = useMemo(() => {
     const startDate = new Date(sprint.start_date)
     const endDate = new Date(sprint.end_date)
@@ -84,7 +86,7 @@ export default function BurndownChart({ sprint, stories }: BurndownChartProps) {
           elevation={3}
           sx={{
             p: 2,
-            bgcolor: 'white',
+            bgcolor: isDarkMode ? '#1e293b' : 'white',
             border: '2px solid rgba(99, 102, 241, 0.2)',
           }}
         >

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Box, Typography, Chip, LinearProgress, Avatar, IconButton, Tooltip, Menu, MenuItem, ListItemIcon, ListItemText, Divider } from '@mui/material'
+import { Box, Typography, Chip, LinearProgress, Avatar, IconButton, Tooltip, Menu, MenuItem, ListItemIcon, ListItemText, Divider, useTheme } from '@mui/material'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Flag, Functions, Delete, DragIndicator, Assignment, MoreVert, ContentCopy, Inventory, CalendarMonth, AccountTree } from '@mui/icons-material'
@@ -33,6 +33,8 @@ const priorityConfig: Record<string, { label: string; color: string }> = {
 }
 
 export default function KanbanCard({ story, onDelete, onClick, onReplicate, onSendToBacklog, predecessorInfo, isStakeholder = false }: KanbanCardProps) {
+  const theme = useTheme()
+  const isDarkMode = theme.palette.mode === 'dark'
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const menuOpen = Boolean(anchorEl)
 
@@ -87,13 +89,17 @@ export default function KanbanCard({ story, onDelete, onClick, onReplicate, onSe
         mb: 2,
         p: 2,
         borderRadius: 3,
-        bgcolor: 'white',
-        border: '2px solid rgba(99, 102, 241, 0.1)',
+        bgcolor: isDarkMode ? '#1e293b' : 'white',
+        border: isDarkMode
+          ? '2px solid rgba(99, 102, 241, 0.2)'
+          : '2px solid rgba(99, 102, 241, 0.1)',
         cursor: isStakeholder ? 'default' : isDragging ? 'grabbing' : 'grab',
         transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
         '&:hover': {
           border: '2px solid rgba(99, 102, 241, 0.3)',
-          boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
+          boxShadow: isDarkMode
+            ? '0 8px 16px rgba(0, 0, 0, 0.3)'
+            : '0 8px 16px rgba(0, 0, 0, 0.1)',
           transform: isDragging ? 'none' : 'translateY(-2px)',
         },
       }}

@@ -8,6 +8,7 @@ import {
   CardContent,
   Chip,
   Paper,
+  useTheme,
 } from "@mui/material";
 import {
   AutoAwesome,
@@ -71,6 +72,8 @@ const scrumBenefits = [
 ];
 
 export default function ScrumGuide() {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
       <Navbar />
@@ -241,7 +244,7 @@ export default function ScrumGuide() {
               sx={{
                 p: 3,
                 borderRadius: 3,
-                bgcolor: "white",
+                bgcolor: isDarkMode ? "#1e293b" : "white",
                 border: "2px solid rgba(16, 185, 129, 0.2)",
               }}
             >
@@ -533,7 +536,7 @@ export default function ScrumGuide() {
                   sx={{
                     p: 3,
                     borderRadius: 3,
-                    bgcolor: "white",
+                    bgcolor: isDarkMode ? "#1e293b" : "white",
                     height: "100%",
                     border: "2px solid rgba(99, 102, 241, 0.1)",
                   }}
@@ -554,7 +557,7 @@ export default function ScrumGuide() {
                   sx={{
                     p: 3,
                     borderRadius: 3,
-                    bgcolor: "white",
+                    bgcolor: isDarkMode ? "#1e293b" : "white",
                     height: "100%",
                     border: "2px solid rgba(99, 102, 241, 0.1)",
                   }}
@@ -575,7 +578,7 @@ export default function ScrumGuide() {
                   sx={{
                     p: 3,
                     borderRadius: 3,
-                    bgcolor: "white",
+                    bgcolor: isDarkMode ? "#1e293b" : "white",
                     height: "100%",
                     border: "2px solid rgba(99, 102, 241, 0.1)",
                   }}
@@ -600,7 +603,7 @@ export default function ScrumGuide() {
                 flexWrap: "wrap",
                 p: 3,
                 borderRadius: 3,
-                bgcolor: "white",
+                bgcolor: isDarkMode ? "#1e293b" : "white",
               }}
             >
               {fibonacciSequence.map((num, index) => (

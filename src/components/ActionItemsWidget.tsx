@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Box, Typography, CircularProgress, Chip, Stack, IconButton } from '@mui/material'
+import { Box, Typography, CircularProgress, Chip, Stack, IconButton, useTheme } from '@mui/material'
 import { CheckCircle, Person, TrendingUp, KeyboardArrowUp, KeyboardArrowDown } from '@mui/icons-material'
 import { supabase } from '@/lib/supabase'
 import { IOSWidget } from './ui'
@@ -16,6 +16,8 @@ interface ActionItem {
 const ITEMS_PER_PAGE = 2
 
 export default function ActionItemsWidget() {
+  const theme = useTheme()
+  const isDarkMode = theme.palette.mode === 'dark'
   const [loading, setLoading] = useState(true)
   const [actionItems, setActionItems] = useState<ActionItem[]>([])
   const [totalCount, setTotalCount] = useState(0)
@@ -177,7 +179,7 @@ export default function ActionItemsWidget() {
                   sx={{
                     p: 2,
                     borderRadius: 2,
-                    bgcolor: 'white',
+                    bgcolor: isDarkMode ? '#1e293b' : 'white',
                     border: '1px solid rgba(5, 150, 105, 0.15)',
                   }}
                 >

@@ -23,6 +23,7 @@ import {
   Tab,
   alpha,
   Skeleton,
+  useTheme,
 } from '@mui/material'
 import {
   Add,
@@ -112,6 +113,8 @@ const priorityConfig: Record<string, { label: string; color: string }> = {
 }
 
 export default function SprintDetailsModal({ open, onClose, sprint }: SprintDetailsModalProps) {
+  const theme = useTheme()
+  const isDarkMode = theme.palette.mode === 'dark'
   const [loading, setLoading] = useState(true)
   const [stories, setStories] = useState<UserStory[]>([])
   const [createStoryOpen, setCreateStoryOpen] = useState(false)
@@ -1445,7 +1448,7 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
                       sx={{
                         p: 2.5,
                         borderRadius: 3,
-                        bgcolor: 'white',
+                        bgcolor: isDarkMode ? '#1e293b' : 'white',
                         border: '1px solid',
                         borderColor: alpha('#8b5cf6', 0.15),
                         position: 'relative',

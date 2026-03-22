@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Box, Typography, Paper, Chip, CircularProgress } from '@mui/material'
+import { Box, Typography, Paper, Chip, CircularProgress, useTheme } from '@mui/material'
 import {
   BarChart,
   Bar,
@@ -30,6 +30,8 @@ interface SprintVelocity {
 }
 
 export default function VelocityChart({ teamId, currentSprintId }: VelocityChartProps) {
+  const theme = useTheme()
+  const isDarkMode = theme.palette.mode === 'dark'
   const [loading, setLoading] = useState(true)
   const [velocityData, setVelocityData] = useState<SprintVelocity[]>([])
 
@@ -108,7 +110,7 @@ export default function VelocityChart({ teamId, currentSprintId }: VelocityChart
           elevation={3}
           sx={{
             p: 2,
-            bgcolor: 'white',
+            bgcolor: isDarkMode ? '#1e293b' : 'white',
             border: '2px solid rgba(99, 102, 241, 0.2)',
           }}
         >

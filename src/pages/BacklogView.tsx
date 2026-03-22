@@ -22,6 +22,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  useTheme,
 } from '@mui/material'
 import {
   Add,
@@ -250,6 +251,8 @@ function SortableBacklogCard({
 }
 
 export default function BacklogView() {
+  const theme = useTheme()
+  const isDarkMode = theme.palette.mode === 'dark'
   const { project } = useProjectContext()
   const { isStakeholder } = useUserRole(project?.id)
   const [loading, setLoading] = useState(true)
@@ -591,7 +594,7 @@ export default function BacklogView() {
                 sx={{
                   p: 2,
                   borderRadius: 3,
-                  bgcolor: 'white',
+                  bgcolor: isDarkMode ? '#1e293b' : 'white',
                   border: '2px solid rgba(99, 102, 241, 0.3)',
                   transform: 'rotate(-2deg)',
                 }}

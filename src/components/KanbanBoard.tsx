@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Box, Typography, Paper, Chip, Dialog, DialogTitle, DialogContent, DialogActions, Button, List, ListItem, ListItemText, Divider } from '@mui/material'
+import { Box, Typography, Paper, Chip, Dialog, DialogTitle, DialogContent, DialogActions, Button, List, ListItem, ListItemText, Divider, useTheme } from '@mui/material'
 import {
   DndContext,
   DragEndEvent,
@@ -86,6 +86,8 @@ function DroppableColumn({ id, children }: { id: string; children: React.ReactNo
 }
 
 export default function KanbanBoard({ stories, onRefresh, onDeleteStory, currentSprintId, isStakeholder = false }: KanbanBoardProps) {
+  const theme = useTheme()
+  const isDarkMode = theme.palette.mode === 'dark'
   const [activeId, setActiveId] = useState<string | null>(null)
   const [storiesByStatus, setStoriesByStatus] = useState<Record<string, UserStory[]>>({})
   const [storyDetailsOpen, setStoryDetailsOpen] = useState(false)
@@ -582,7 +584,7 @@ export default function KanbanBoard({ stories, onRefresh, onDeleteStory, current
                       label={stats.count}
                       size="small"
                       sx={{
-                        bgcolor: 'white',
+                        bgcolor: isDarkMode ? '#1e293b' : 'white',
                         color: column.color,
                         fontWeight: 700,
                         fontSize: '0.75rem',
@@ -608,7 +610,7 @@ export default function KanbanBoard({ stories, onRefresh, onDeleteStory, current
                         px: 2,
                         borderRadius: 2,
                         border: `2px dashed ${column.color}40`,
-                        bgcolor: 'rgba(255,255,255,0.5)',
+                        bgcolor: isDarkMode ? 'rgba(30, 41, 59, 0.5)' : 'rgba(255,255,255,0.5)',
                         minHeight: 200,
                         display: 'flex',
                         alignItems: 'center',
@@ -650,9 +652,9 @@ export default function KanbanBoard({ stories, onRefresh, onDeleteStory, current
             sx={{
               p: 2,
               borderRadius: 3,
-              bgcolor: 'white',
+              bgcolor: isDarkMode ? '#1e293b' : 'white',
               border: '2px solid rgba(99, 102, 241, 0.3)',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
+              boxShadow: isDarkMode ? '0 20px 25px -5px rgba(0, 0, 0, 0.5)' : '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
               cursor: 'grabbing',
               transform: 'rotate(-2deg)',
             }}

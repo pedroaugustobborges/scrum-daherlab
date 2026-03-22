@@ -31,6 +31,7 @@ import {
   YAxis,
   CartesianGrid,
 } from "recharts";
+import { useTheme as useMUITheme } from "@mui/material/styles";
 import Navbar from "@/components/Navbar";
 import ActiveProjectsWidget from "@/components/ActiveProjectsWidget";
 import ActiveSprintsWidget from "@/components/ActiveSprintsWidget";
@@ -104,6 +105,8 @@ const LARGE_WIDGETS: WidgetType[] = [
 export default function Dashboard() {
   const { user } = useAuth();
   const { dashboardConfig } = useDashboardConfig();
+  const muiTheme = useMUITheme();
+  const isDarkMode = muiTheme.palette.mode === "dark";
   const [loading, setLoading] = useState(true);
   const [taskStats, setTaskStats] = useState<TaskStats | null>(null);
   const [projectStats, setProjectStats] = useState<ProjectStats | null>(null);
@@ -454,26 +457,27 @@ export default function Dashboard() {
                   <LineChart data={weeklyData}>
                     <CartesianGrid
                       strokeDasharray="3 3"
-                      stroke="rgba(0,0,0,0.06)"
+                      stroke={isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}
                     />
                     <XAxis
                       dataKey="day"
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fill: "#6b7280", fontSize: 12 }}
+                      tick={{ fill: isDarkMode ? "#94a3b8" : "#6b7280", fontSize: 12 }}
                     />
                     <YAxis
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fill: "#6b7280", fontSize: 12 }}
+                      tick={{ fill: isDarkMode ? "#94a3b8" : "#6b7280", fontSize: 12 }}
                     />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: "#ffffff",
-                        border: "1px solid rgba(0,0,0,0.08)",
+                        backgroundColor: isDarkMode ? "#1e293b" : "#ffffff",
+                        border: isDarkMode ? "1px solid rgba(255,255,255,0.1)" : "1px solid rgba(0,0,0,0.08)",
                         borderRadius: 12,
-                        boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
+                        boxShadow: isDarkMode ? "0 10px 25px rgba(0, 0, 0, 0.4)" : "0 10px 25px rgba(0, 0, 0, 0.1)",
                         padding: "12px 16px",
+                        color: isDarkMode ? "#f1f5f9" : "#1e293b",
                       }}
                       formatter={(value, name) => [
                         value,
@@ -484,7 +488,7 @@ export default function Dashboard() {
                       formatter={(value) => (
                         <span
                           style={{
-                            color: "#4b5563",
+                            color: isDarkMode ? "#94a3b8" : "#4b5563",
                             fontSize: 13,
                             fontWeight: 500,
                           }}
@@ -958,11 +962,12 @@ export default function Dashboard() {
                       <Tooltip
                         formatter={(value, name) => [`${value} tarefas`, name]}
                         contentStyle={{
-                          backgroundColor: "#ffffff",
-                          border: "1px solid rgba(0,0,0,0.08)",
+                          backgroundColor: isDarkMode ? "#1e293b" : "#ffffff",
+                          border: isDarkMode ? "1px solid rgba(255,255,255,0.1)" : "1px solid rgba(0,0,0,0.08)",
                           borderRadius: 12,
                           padding: "10px 14px",
-                          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                          boxShadow: isDarkMode ? "0 4px 12px rgba(0,0,0,0.4)" : "0 4px 12px rgba(0,0,0,0.1)",
+                          color: isDarkMode ? "#f1f5f9" : "#1e293b",
                         }}
                       />
                     </PieChart>
@@ -980,7 +985,7 @@ export default function Dashboard() {
                     <Typography
                       variant="h4"
                       fontWeight={800}
-                      sx={{ color: "#6366f1" }}
+                      sx={{ color: isDarkMode ? "#818cf8" : "#6366f1" }}
                     >
                       {taskStats.total}
                     </Typography>

@@ -10,6 +10,7 @@ import {
   Avatar,
   Chip,
   Pagination,
+  useTheme,
 } from "@mui/material";
 import {
   Close,
@@ -60,6 +61,8 @@ export default function TasksByStatusModal({
   statusLabel,
   statusColor,
 }: TasksByStatusModalProps) {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
   const [loading, setLoading] = useState(true);
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -291,9 +294,9 @@ export default function TasksByStatusModal({
                     mx: 1,
                     mb: 1.5,
                     borderRadius: "16px",
-                    bgcolor: "white",
+                    bgcolor: isDarkMode ? "#1e293b" : "white",
                     border: "1px solid",
-                    borderColor: "rgba(0,0,0,0.06)",
+                    borderColor: isDarkMode ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)",
                     boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
                     transition: "all 0.2s ease",
                     "&:hover": {

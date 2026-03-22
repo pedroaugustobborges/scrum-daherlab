@@ -1,5 +1,5 @@
 import { forwardRef, ReactNode } from 'react'
-import { Paper, PaperProps, Box, SxProps, Theme } from '@mui/material'
+import { Paper, PaperProps, Box, SxProps, Theme, useTheme as useMUITheme } from '@mui/material'
 
 export interface IOSWidgetProps extends Omit<PaperProps, 'ref'> {
   children: ReactNode
@@ -32,6 +32,7 @@ export interface IOSWidgetProps extends Omit<PaperProps, 'ref'> {
  * - Silver shine gradient border
  * - Glassmorphism backdrop blur
  * - Smooth hover transitions
+ * - Dark mode support
  */
 const IOSWidget = forwardRef<HTMLDivElement, IOSWidgetProps>(
   (
@@ -46,32 +47,54 @@ const IOSWidget = forwardRef<HTMLDivElement, IOSWidgetProps>(
     },
     ref
   ) => {
+    const muiTheme = useMUITheme()
+    const isDarkMode = muiTheme.palette.mode === 'dark'
+
     const baseStyles: SxProps<Theme> = {
       position: 'relative',
       p: padding,
       height: '100%',
-      background: 'linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(250,251,252,0.95) 100%)',
+      background: isDarkMode
+        ? 'linear-gradient(180deg, rgba(30,41,59,0.98) 0%, rgba(15,23,42,0.95) 100%)'
+        : 'linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(250,251,252,0.95) 100%)',
       borderRadius: '24px',
-      border: '1px solid rgba(255,255,255,0.8)',
-      boxShadow: `
-        0 0 0 1px rgba(0,0,0,0.03),
-        0 8px 32px rgba(0,0,0,0.06),
-        0 2px 8px rgba(0,0,0,0.04),
-        inset 0 1px 0 rgba(255,255,255,1),
-        inset 0 -1px 0 rgba(0,0,0,0.02)
-      `,
+      border: isDarkMode
+        ? '1px solid rgba(255,255,255,0.08)'
+        : '1px solid rgba(255,255,255,0.8)',
+      boxShadow: isDarkMode
+        ? `
+          0 0 0 1px rgba(255,255,255,0.03),
+          0 8px 32px rgba(0,0,0,0.4),
+          0 2px 8px rgba(0,0,0,0.3),
+          inset 0 1px 0 rgba(255,255,255,0.05),
+          inset 0 -1px 0 rgba(0,0,0,0.2)
+        `
+        : `
+          0 0 0 1px rgba(0,0,0,0.03),
+          0 8px 32px rgba(0,0,0,0.06),
+          0 2px 8px rgba(0,0,0,0.04),
+          inset 0 1px 0 rgba(255,255,255,1),
+          inset 0 -1px 0 rgba(0,0,0,0.02)
+        `,
       backdropFilter: 'blur(20px)',
       overflow: 'hidden',
       transition: 'all 0.35s cubic-bezier(0.25, 0.1, 0.25, 1)',
       ...(interactive && {
         '&:hover': {
           transform: 'translateY(-3px) scale(1.005)',
-          boxShadow: `
-            0 0 0 1px rgba(0,0,0,0.04),
-            0 20px 48px rgba(0,0,0,0.10),
-            0 8px 24px rgba(0,0,0,0.06),
-            inset 0 1px 0 rgba(255,255,255,1)
-          `,
+          boxShadow: isDarkMode
+            ? `
+              0 0 0 1px rgba(255,255,255,0.05),
+              0 20px 48px rgba(0,0,0,0.5),
+              0 8px 24px rgba(0,0,0,0.4),
+              inset 0 1px 0 rgba(255,255,255,0.08)
+            `
+            : `
+              0 0 0 1px rgba(0,0,0,0.04),
+              0 20px 48px rgba(0,0,0,0.10),
+              0 8px 24px rgba(0,0,0,0.06),
+              inset 0 1px 0 rgba(255,255,255,1)
+            `,
         },
       }),
     }
@@ -85,12 +108,19 @@ const IOSWidget = forwardRef<HTMLDivElement, IOSWidgetProps>(
             inset: 0,
             borderRadius: '24px',
             padding: '1px',
-            background: `linear-gradient(
-              180deg,
-              rgba(255, 255, 255, 0.95) 0%,
-              rgba(220, 220, 230, 0.4) 50%,
-              rgba(200, 200, 210, 0.2) 100%
-            )`,
+            background: isDarkMode
+              ? `linear-gradient(
+                  180deg,
+                  rgba(255, 255, 255, 0.12) 0%,
+                  rgba(148, 163, 184, 0.08) 50%,
+                  rgba(100, 116, 139, 0.05) 100%
+                )`
+              : `linear-gradient(
+                  180deg,
+                  rgba(255, 255, 255, 0.95) 0%,
+                  rgba(220, 220, 230, 0.4) 50%,
+                  rgba(200, 200, 210, 0.2) 100%
+                )`,
             WebkitMask:
               'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
             WebkitMaskComposite: 'xor',
@@ -112,7 +142,7 @@ const IOSWidget = forwardRef<HTMLDivElement, IOSWidgetProps>(
             transform: 'translateX(-50%)',
             width: '60%',
             height: '2px',
-            background: `linear-gradient(90deg, transparent, ${accentColor}40, transparent)`,
+            background: `linear-gradient(90deg, transparent, ${accentColor}${isDarkMode ? '60' : '40'}, transparent)`,
             borderRadius: '0 0 4px 4px',
             pointerEvents: 'none',
           },

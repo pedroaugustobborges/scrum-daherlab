@@ -10,6 +10,7 @@ import {
   IconButton,
   Fade,
   CircularProgress,
+  useTheme,
 } from '@mui/material'
 import {
   Close,
@@ -76,6 +77,8 @@ export default function ProjectCreationWizard({
   onSuccess,
 }: ProjectCreationWizardProps) {
   const { user } = useAuth()
+  const theme = useTheme()
+  const isDarkMode = theme.palette.mode === 'dark'
   const createConfig = useCreateProjectConfig()
   const [activeStep, setActiveStep] = useState(0)
   const [wizardData, setWizardData] = useState<WizardData>(initialWizardData)
@@ -373,7 +376,7 @@ export default function ProjectCreationWizard({
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              bgcolor: 'grey.50',
+              bgcolor: isDarkMode ? 'rgba(15, 23, 42, 0.8)' : 'grey.50',
             }}
           >
             <Button

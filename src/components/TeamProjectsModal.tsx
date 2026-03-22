@@ -9,6 +9,7 @@ import {
   Card,
   CardContent,
   Avatar,
+  useTheme,
 } from '@mui/material'
 import {
   Assignment,
@@ -60,6 +61,8 @@ export default function TeamProjectsModal({
   onClose,
   team,
 }: TeamProjectsModalProps) {
+  const theme = useTheme()
+  const isDarkMode = theme.palette.mode === 'dark'
   const [loading, setLoading] = useState(true)
   const [projects, setProjects] = useState<Project[]>([])
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
@@ -234,7 +237,7 @@ export default function TeamProjectsModal({
                     }
                     label={member.full_name}
                     sx={{
-                      bgcolor: 'white',
+                      bgcolor: isDarkMode ? '#1e293b' : 'white',
                       border: '1px solid rgba(99, 102, 241, 0.2)',
                       fontWeight: 500,
                     }}

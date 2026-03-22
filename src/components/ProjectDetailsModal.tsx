@@ -17,6 +17,7 @@ import {
   IconButton,
   Fade,
   Backdrop,
+  useTheme,
 } from "@mui/material";
 import {
   CalendarToday,
@@ -317,6 +318,8 @@ export default function ProjectDetailsModal({
   onClose,
   project,
 }: ProjectDetailsModalProps) {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState(0);
   const [sprintDetailsOpen, setSprintDetailsOpen] = useState(false);
@@ -733,7 +736,7 @@ export default function ProjectDetailsModal({
                     sx={{
                       p: 2,
                       borderRadius: 2,
-                      bgcolor: "white",
+                      bgcolor: isDarkMode ? "#1e293b" : "white",
                       border: "1px solid rgba(99, 102, 241, 0.2)",
                     }}
                   >

@@ -39,6 +39,7 @@ import {
   ExpandLess,
   ExpandMore,
 } from "@mui/icons-material";
+import { useTheme as useMUITheme } from "@mui/material/styles";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 
@@ -51,6 +52,8 @@ export default function Navbar() {
   const [mobileProjectsOpen, setMobileProjectsOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const { user, signOut, isAdmin } = useAuth();
+  const muiTheme = useMUITheme();
+  const isDarkMode = muiTheme.palette.mode === "dark";
 
   // Fetch avatar from profiles table
   useEffect(() => {
@@ -299,8 +302,12 @@ export default function Navbar() {
                 mt: 1.5,
                 borderRadius: 3,
                 minWidth: 200,
-                boxShadow: "0 10px 40px rgba(0,0,0,0.15)",
-                border: "1px solid rgba(99, 102, 241, 0.1)",
+                boxShadow: isDarkMode
+                  ? "0 10px 40px rgba(0,0,0,0.5)"
+                  : "0 10px 40px rgba(0,0,0,0.15)",
+                border: isDarkMode
+                  ? "1px solid rgba(99, 102, 241, 0.2)"
+                  : "1px solid rgba(99, 102, 241, 0.1)",
                 overflow: "visible",
                 "&:before": {
                   content: '""',
@@ -312,8 +319,12 @@ export default function Navbar() {
                   height: 12,
                   bgcolor: "background.paper",
                   transform: "translateY(-50%) rotate(45deg)",
-                  borderLeft: "1px solid rgba(99, 102, 241, 0.1)",
-                  borderTop: "1px solid rgba(99, 102, 241, 0.1)",
+                  borderLeft: isDarkMode
+                    ? "1px solid rgba(99, 102, 241, 0.2)"
+                    : "1px solid rgba(99, 102, 241, 0.1)",
+                  borderTop: isDarkMode
+                    ? "1px solid rgba(99, 102, 241, 0.2)"
+                    : "1px solid rgba(99, 102, 241, 0.1)",
                 },
               },
             }}
@@ -335,20 +346,28 @@ export default function Navbar() {
                   my: index === 0 ? 1 : 0.5,
                   mb: index === projectsMenuItems.length - 1 ? 1 : 0.5,
                   backgroundColor: isActive(item.path)
-                    ? alpha("#6366f1", 0.1)
+                    ? alpha("#6366f1", isDarkMode ? 0.2 : 0.1)
                     : "transparent",
-                  color: isActive(item.path) ? "#6366f1" : "inherit",
+                  color: isActive(item.path)
+                    ? isDarkMode
+                      ? "#818cf8"
+                      : "#6366f1"
+                    : "inherit",
                   fontWeight: isActive(item.path) ? 600 : 500,
                   transition: "all 0.2s",
                   "&:hover": {
-                    backgroundColor: alpha("#6366f1", 0.08),
+                    backgroundColor: alpha("#6366f1", isDarkMode ? 0.15 : 0.08),
                     transform: "translateX(4px)",
                   },
                 }}
               >
                 <ListItemIcon
                   sx={{
-                    color: isActive(item.path) ? "#6366f1" : "inherit",
+                    color: isActive(item.path)
+                      ? isDarkMode
+                        ? "#818cf8"
+                        : "#6366f1"
+                      : "inherit",
                     minWidth: 36,
                   }}
                 >

@@ -11,6 +11,7 @@ import {
   Grid,
   LinearProgress,
   Chip,
+  useTheme,
 } from "@mui/material";
 import {
   Close,
@@ -64,6 +65,8 @@ export default function TeamMemberDetailModal({
   memberName,
   memberAvatar,
 }: TeamMemberDetailModalProps) {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<MemberStats | null>(null);
 
@@ -322,9 +325,9 @@ export default function TeamMemberDetailModal({
                   sx={{
                     p: 2,
                     borderRadius: "16px",
-                    bgcolor: "white",
+                    bgcolor: isDarkMode ? "#1e293b" : "white",
                     border: "1px solid",
-                    borderColor: "rgba(0,0,0,0.06)",
+                    borderColor: isDarkMode ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)",
                     boxShadow: "0 4px 12px rgba(0,0,0,0.04)",
                     textAlign: "center",
                     transition: "all 0.2s ease",

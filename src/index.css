@@ -29,6 +29,18 @@
   -moz-osx-font-smoothing: grayscale;
 
   scroll-behavior: smooth;
+
+  /* Light mode CSS variables */
+  --scrollbar-track: #f1f5f9;
+  --scrollbar-thumb: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  --scrollbar-thumb-hover: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+}
+
+/* Dark mode CSS variables */
+[data-theme="dark"] {
+  --scrollbar-track: #1e293b;
+  --scrollbar-thumb: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  --scrollbar-thumb-hover: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
 }
 
 * {
@@ -40,12 +52,14 @@ body {
   min-width: 320px;
   min-height: 100vh;
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #root {
   min-height: 100vh;
 }
 
+/* Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -108,6 +122,15 @@ body {
   }
 }
 
+@keyframes themeTransition {
+  0% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 .fade-in {
   animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
@@ -124,22 +147,113 @@ body {
   animation: scaleIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
+/* Light mode scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: var(--scrollbar-track);
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  background: var(--scrollbar-thumb);
   border-radius: 10px;
   transition: background 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* Dark mode scrollbar specific styles */
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
   background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  border: 2px solid #0f172a;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+}
+
+/* Firefox scrollbar support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #6366f1 #f1f5f9;
+}
+
+[data-theme="dark"] * {
+  scrollbar-color: #4f46e5 #0f172a;
+}
+
+/* Selection color */
+::selection {
+  background-color: rgba(99, 102, 241, 0.3);
+  color: inherit;
+}
+
+[data-theme="dark"] ::selection {
+  background-color: rgba(129, 140, 248, 0.4);
+}
+
+/* Focus outline for accessibility */
+:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+[data-theme="dark"] :focus-visible {
+  outline-color: #818cf8;
+}
+
+/* Smooth theme transition for all elements */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+  transition-duration: 0.2s;
+  transition-timing-function: ease-out;
+}
+
+/* Disable transitions during theme switch to prevent flicker */
+.theme-switching *,
+.theme-switching *::before,
+.theme-switching *::after {
+  transition-duration: 0s !important;
+}
+
+/* Additional dark mode adjustments for common elements */
+[data-theme="dark"] img {
+  filter: brightness(0.95);
+}
+
+[data-theme="dark"] img[src*="logo"] {
+  filter: brightness(1);
+}
+
+/* Toast notifications dark mode support */
+[data-theme="dark"] [role="status"] {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+
+/* MUI Tooltip dark mode */
+[data-theme="dark"] .MuiTooltip-tooltip {
+  background-color: #334155;
+  color: #f1f5f9;
+}
+
+/* Placeholder text color */
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: #64748b;
+}
+
+/* Disabled state adjustments */
+[data-theme="dark"] .Mui-disabled {
+  opacity: 0.5;
 }

@@ -26,6 +26,7 @@ import {
   TableHead,
   TableRow,
   Pagination,
+  useTheme,
 } from '@mui/material'
 import {
   Search,
@@ -122,6 +123,8 @@ function PlannerCard({
   onNavigateToProject: (projectId: string) => void
   isStakeholder?: boolean
 }) {
+  const theme = useTheme()
+  const isDarkMode = theme.palette.mode === 'dark'
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const menuOpen = Boolean(anchorEl)
 
@@ -172,13 +175,17 @@ function PlannerCard({
         mb: 1.5,
         p: 1.5,
         borderRadius: 2,
-        bgcolor: 'white',
-        border: '2px solid rgba(99, 102, 241, 0.1)',
+        bgcolor: isDarkMode ? '#1e293b' : 'white',
+        border: isDarkMode
+          ? '2px solid rgba(99, 102, 241, 0.2)'
+          : '2px solid rgba(99, 102, 241, 0.1)',
         cursor: isStakeholder ? 'default' : isDragging ? 'grabbing' : 'grab',
         transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
         '&:hover': {
           border: '2px solid rgba(99, 102, 241, 0.3)',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+          boxShadow: isDarkMode
+            ? '0 4px 12px rgba(0, 0, 0, 0.3)'
+            : '0 4px 12px rgba(0, 0, 0, 0.1)',
           transform: isDragging ? 'none' : 'translateY(-2px)',
         },
       }}
@@ -1053,7 +1060,8 @@ export default function Planner() {
                           label={stats.count}
                           size="small"
                           sx={{
-                            bgcolor: 'white',
+                            bgcolor: (theme) =>
+                              theme.palette.mode === 'dark' ? '#1e293b' : 'white',
                             color: column.color,
                             fontWeight: 700,
                             fontSize: '0.65rem',
@@ -1080,7 +1088,10 @@ export default function Planner() {
                             px: 1,
                             borderRadius: 2,
                             border: `2px dashed ${column.color}40`,
-                            bgcolor: 'rgba(255,255,255,0.5)',
+                            bgcolor: (theme) =>
+                              theme.palette.mode === 'dark'
+                                ? 'rgba(30, 41, 59, 0.5)'
+                                : 'rgba(255,255,255,0.5)',
                             minHeight: 150,
                             display: 'flex',
                             alignItems: 'center',
@@ -1119,9 +1130,13 @@ export default function Planner() {
                 sx={{
                   p: 1.5,
                   borderRadius: 2,
-                  bgcolor: 'white',
+                  bgcolor: (theme) =>
+                    theme.palette.mode === 'dark' ? '#1e293b' : 'white',
                   border: '2px solid rgba(99, 102, 241, 0.3)',
-                  boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
+                  boxShadow: (theme) =>
+                    theme.palette.mode === 'dark'
+                      ? '0 20px 25px -5px rgba(0, 0, 0, 0.5)'
+                      : '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
                   cursor: 'grabbing',
                   transform: 'rotate(-2deg)',
                   maxWidth: 180,

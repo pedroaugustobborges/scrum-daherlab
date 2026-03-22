@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Box, Typography, CircularProgress, Chip, LinearProgress, IconButton } from '@mui/material'
+import { Box, Typography, CircularProgress, Chip, LinearProgress, IconButton, useTheme } from '@mui/material'
 import { Assignment, CalendarToday, KeyboardArrowUp, KeyboardArrowDown } from '@mui/icons-material'
 import { supabase } from '@/lib/supabase'
 import ProjectDetailsModal from './ProjectDetailsModal'
@@ -19,6 +19,8 @@ interface ActiveProject {
 const ITEMS_PER_PAGE = 2
 
 export default function ActiveProjectsWidget() {
+  const theme = useTheme()
+  const isDarkMode = theme.palette.mode === 'dark'
   const [loading, setLoading] = useState(true)
   const [activeProjects, setActiveProjects] = useState<ActiveProject[]>([])
   const [totalCount, setTotalCount] = useState(0)
@@ -220,7 +222,7 @@ export default function ActiveProjectsWidget() {
                   sx={{
                     p: 2,
                     borderRadius: 2,
-                    bgcolor: 'white',
+                    bgcolor: isDarkMode ? '#1e293b' : 'white',
                     border: '1px solid rgba(30, 64, 175, 0.15)',
                     transition: 'all 0.2s ease',
                     cursor: 'pointer',

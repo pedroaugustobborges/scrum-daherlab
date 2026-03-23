@@ -255,30 +255,44 @@ export default function Dashboard() {
         setWeeklyData(weekData);
       }
 
-      // Fetch team workload with profile photos
-      const { data: profiles, error: profilesError } = await supabase
-        .from("profiles")
-        .select("id, full_name, avatar_url")
-        .limit(6);
+      // Fetch team workload - get all users who have tasks assigned
+      if (tasks && tasks.length > 0) {
+        // Get unique user IDs from tasks that have an assigned_to value
+        const assignedUserIds = [...new Set(
+          tasks
+            .map((t) => t.assigned_to)
+            .filter((id): id is string => id !== null && id !== undefined)
+        )];
 
-      if (!profilesError && profiles && tasks) {
-        const workloadData: TeamMember[] = profiles
-          .map((profile) => {
-            const memberTasks = tasks.filter(
-              (t) => t.assigned_to === profile.id,
-            );
-            return {
-              id: profile.id,
-              full_name: profile.full_name,
-              avatar_url: profile.avatar_url,
-              tasks_count: memberTasks.length,
-              completed_count: memberTasks.filter((t) => t.status === "done")
-                .length,
-            };
-          })
-          .filter((m) => m.tasks_count > 0);
+        if (assignedUserIds.length > 0) {
+          // Fetch profiles only for users who have tasks assigned
+          const { data: profiles, error: profilesError } = await supabase
+            .from("profiles")
+            .select("id, full_name, avatar_url")
+            .in("id", assignedUserIds);
 
-        setTeamWorkload(workloadData);
+          if (!profilesError && profiles) {
+            const workloadData: TeamMember[] = profiles.map((profile) => {
+              const memberTasks = tasks.filter(
+                (t) => t.assigned_to === profile.id,
+              );
+              return {
+                id: profile.id,
+                full_name: profile.full_name,
+                avatar_url: profile.avatar_url,
+                tasks_count: memberTasks.length,
+                completed_count: memberTasks.filter((t) => t.status === "done")
+                  .length,
+              };
+            });
+
+            setTeamWorkload(workloadData);
+          }
+        } else {
+          setTeamWorkload([]);
+        }
+      } else {
+        setTeamWorkload([]);
       }
 
       // Fetch recent activities

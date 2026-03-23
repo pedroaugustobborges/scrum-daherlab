@@ -81,7 +81,7 @@ interface ProductivityData {
   created: number;
 }
 
-type ProductivityPeriod = "week" | "month" | "quarter" | "semester" | "year" | "triennium";
+type ProductivityPeriod = "week" | "month" | "quarter" | "semester" | "year" | "triennium" | "quinquennium";
 
 const PRODUCTIVITY_PERIODS: { key: ProductivityPeriod; label: string; shortLabel: string }[] = [
   { key: "week", label: "Semana", shortLabel: "7D" },
@@ -90,6 +90,7 @@ const PRODUCTIVITY_PERIODS: { key: ProductivityPeriod; label: string; shortLabel
   { key: "semester", label: "Semestre", shortLabel: "6M" },
   { key: "year", label: "Ano", shortLabel: "1A" },
   { key: "triennium", label: "Triênio", shortLabel: "3A" },
+  { key: "quinquennium", label: "Quinquênio", shortLabel: "5A" },
 ];
 
 const ACTIVITIES_PER_PAGE = 4;
@@ -447,6 +448,24 @@ export default function Dashboard() {
             });
           }
           break;
+
+        case "quinquennium":
+          // Last 5 years, grouped by semester
+          startDate = new Date(now);
+          startDate.setFullYear(startDate.getFullYear() - 5);
+          for (let i = 9; i >= 0; i--) {
+            const semesterDate = new Date(now);
+            semesterDate.setMonth(semesterDate.getMonth() - i * 6);
+            const semesterStart = new Date(semesterDate.getFullYear(), Math.floor(semesterDate.getMonth() / 6) * 6, 1);
+            const semesterEnd = new Date(semesterDate.getFullYear(), Math.floor(semesterDate.getMonth() / 6) * 6 + 6, 0, 23, 59, 59, 999);
+            const semesterNum = Math.floor(semesterStart.getMonth() / 6) + 1;
+            intervals.push({
+              start: semesterStart,
+              end: semesterEnd,
+              label: `S${semesterNum}/${semesterStart.getFullYear().toString().slice(-2)}`,
+            });
+          }
+          break;
       }
 
       // Fetch tasks for the entire period
@@ -642,10 +661,10 @@ export default function Dashboard() {
                       axisLine={false}
                       tickLine={false}
                       tick={{ fill: isDarkMode ? "#94a3b8" : "#6b7280", fontSize: 11 }}
-                      interval={productivityPeriod === "year" || productivityPeriod === "triennium" ? 1 : 0}
-                      angle={productivityPeriod === "quarter" || productivityPeriod === "triennium" ? -45 : 0}
-                      textAnchor={productivityPeriod === "quarter" || productivityPeriod === "triennium" ? "end" : "middle"}
-                      height={productivityPeriod === "quarter" || productivityPeriod === "triennium" ? 50 : 30}
+                      interval={productivityPeriod === "year" || productivityPeriod === "triennium" || productivityPeriod === "quinquennium" ? 1 : 0}
+                      angle={productivityPeriod === "quarter" || productivityPeriod === "triennium" || productivityPeriod === "quinquennium" ? -45 : 0}
+                      textAnchor={productivityPeriod === "quarter" || productivityPeriod === "triennium" || productivityPeriod === "quinquennium" ? "end" : "middle"}
+                      height={productivityPeriod === "quarter" || productivityPeriod === "triennium" || productivityPeriod === "quinquennium" ? 50 : 30}
                     />
                     <YAxis
                       axisLine={false}
@@ -686,7 +705,7 @@ export default function Dashboard() {
                       dataKey="completed"
                       stroke="#10b981"
                       strokeWidth={2.5}
-                      dot={{ fill: "#10b981", strokeWidth: 0, r: productivityPeriod === "triennium" || productivityPeriod === "year" ? 3 : 4 }}
+                      dot={{ fill: "#10b981", strokeWidth: 0, r: productivityPeriod === "triennium" || productivityPeriod === "year" || productivityPeriod === "quinquennium" ? 3 : 4 }}
                       activeDot={{ r: 6, stroke: "#fff", strokeWidth: 2 }}
                     />
                     <Line
@@ -694,7 +713,7 @@ export default function Dashboard() {
                       dataKey="created"
                       stroke="#6366f1"
                       strokeWidth={2.5}
-                      dot={{ fill: "#6366f1", strokeWidth: 0, r: productivityPeriod === "triennium" || productivityPeriod === "year" ? 3 : 4 }}
+                      dot={{ fill: "#6366f1", strokeWidth: 0, r: productivityPeriod === "triennium" || productivityPeriod === "year" || productivityPeriod === "quinquennium" ? 3 : 4 }}
                       activeDot={{ r: 6, stroke: "#fff", strokeWidth: 2 }}
                     />
                   </LineChart>

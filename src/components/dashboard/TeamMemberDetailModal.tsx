@@ -198,14 +198,22 @@ export default function TeamMemberDetailModal({
       PaperProps={{
         sx: {
           borderRadius: "24px",
-          background:
-            "linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(250,251,252,0.95) 100%)",
-          border: "1px solid rgba(124, 58, 237, 0.15)",
-          boxShadow: `
-            0 0 0 1px rgba(0,0,0,0.03),
-            0 25px 50px rgba(124, 58, 237, 0.15),
-            0 8px 24px rgba(0,0,0,0.08)
-          `,
+          background: isDarkMode
+            ? "linear-gradient(180deg, #1e293b 0%, #0f172a 100%)"
+            : "linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(250,251,252,0.95) 100%)",
+          border: "1px solid",
+          borderColor: isDarkMode ? "rgba(124, 58, 237, 0.3)" : "rgba(124, 58, 237, 0.15)",
+          boxShadow: isDarkMode
+            ? `
+              0 0 0 1px rgba(255,255,255,0.05),
+              0 25px 50px rgba(0, 0, 0, 0.5),
+              0 8px 24px rgba(0,0,0,0.3)
+            `
+            : `
+              0 0 0 1px rgba(0,0,0,0.03),
+              0 25px 50px rgba(124, 58, 237, 0.15),
+              0 8px 24px rgba(0,0,0,0.08)
+            `,
           overflow: "hidden",
         },
       }}
@@ -388,7 +396,11 @@ export default function TeamMemberDetailModal({
 
         {/* Tasks by Status */}
         <Box sx={{ px: 3, pt: 3, pb: 4 }}>
-          <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2 }}>
+          <Typography
+            variant="subtitle1"
+            fontWeight={700}
+            sx={{ mb: 2, color: isDarkMode ? "white" : "text.primary" }}
+          >
             Atividades por Status
           </Typography>
 
@@ -416,12 +428,12 @@ export default function TeamMemberDetailModal({
                       gap: 2,
                       p: 1.5,
                       borderRadius: "12px",
-                      bgcolor: `${item.color}08`,
+                      bgcolor: isDarkMode ? `${item.color}20` : `${item.color}08`,
                       border: "1px solid",
-                      borderColor: `${item.color}15`,
+                      borderColor: isDarkMode ? `${item.color}40` : `${item.color}15`,
                       transition: "all 0.2s ease",
                       "&:hover": {
-                        bgcolor: `${item.color}12`,
+                        bgcolor: isDarkMode ? `${item.color}30` : `${item.color}12`,
                       },
                     }}
                   >
@@ -430,7 +442,7 @@ export default function TeamMemberDetailModal({
                         width: 32,
                         height: 32,
                         borderRadius: "8px",
-                        bgcolor: `${item.color}15`,
+                        bgcolor: isDarkMode ? `${item.color}30` : `${item.color}15`,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -448,7 +460,11 @@ export default function TeamMemberDetailModal({
                           mb: 0.5,
                         }}
                       >
-                        <Typography variant="body2" fontWeight={600}>
+                        <Typography
+                          variant="body2"
+                          fontWeight={600}
+                          sx={{ color: isDarkMode ? "white" : "text.primary" }}
+                        >
                           {item.label}
                         </Typography>
                         <Typography
@@ -465,7 +481,7 @@ export default function TeamMemberDetailModal({
                         sx={{
                           height: 6,
                           borderRadius: 3,
-                          bgcolor: `${item.color}15`,
+                          bgcolor: isDarkMode ? `${item.color}30` : `${item.color}15`,
                           "& .MuiLinearProgress-bar": {
                             borderRadius: 3,
                             bgcolor: item.color,

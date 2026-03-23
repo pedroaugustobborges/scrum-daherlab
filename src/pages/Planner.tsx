@@ -85,6 +85,11 @@ interface Project {
   name: string
 }
 
+interface TeamMember {
+  id: string
+  full_name: string
+}
+
 const columns = [
   { id: 'todo', label: 'A Fazer', color: '#6b7280', bgColor: 'rgba(107, 114, 128, 0.08)' },
   { id: 'in-progress', label: 'Em Progresso', color: '#f59e0b', bgColor: 'rgba(245, 158, 11, 0.08)' },
@@ -461,7 +466,9 @@ export default function Planner() {
   const [filter, setFilter] = useState<'all' | 'assigned'>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedProject, setSelectedProject] = useState<string>('all')
+  const [selectedAssignee, setSelectedAssignee] = useState<string>('all')
   const [projects, setProjects] = useState<Project[]>([])
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
   const [storyDetailsOpen, setStoryDetailsOpen] = useState(false)
   const [selectedTaskId, setSelectedTaskId] = useState<string>('')
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -539,7 +546,7 @@ export default function Planner() {
 
   useEffect(() => {
     applyFilters()
-  }, [tasks, filter, searchQuery, selectedProject, user])
+  }, [tasks, filter, searchQuery, selectedProject, selectedAssignee, user])
 
   useEffect(() => {
     // Group filtered tasks by status
@@ -598,6 +605,18 @@ export default function Planner() {
       )
       setProjects(uniqueProjects)
 
+      // Get unique team members from tasks
+      const uniqueMembers = new Map<string, TeamMember>()
+      ;(tasksData || []).forEach((task: any) => {
+        if (task.assigned_to && task.profiles?.full_name) {
+          uniqueMembers.set(task.assigned_to, {
+            id: task.assigned_to,
+            full_name: task.profiles.full_name,
+          })
+        }
+      })
+      setTeamMembers(Array.from(uniqueMembers.values()).sort((a, b) => a.full_name.localeCompare(b.full_name)))
+
       // Check which projects the user is a stakeholder in
       const projectIds = uniqueProjects.map((p) => p.id)
       const stakeholderSet = await fetchStakeholderProjects(projectIds)
@@ -613,9 +632,14 @@ export default function Planner() {
   const applyFilters = () => {
     let filtered = [...tasks]
 
-    // Filter by assignment
+    // Filter by assignment (my tasks)
     if (filter === 'assigned' && user) {
       filtered = filtered.filter((task) => task.assigned_to === user.id)
+    }
+
+    // Filter by specific assignee
+    if (selectedAssignee !== 'all') {
+      filtered = filtered.filter((task) => task.assigned_to === selectedAssignee)
     }
 
     // Filter by project
@@ -921,6 +945,25 @@ export default function Planner() {
             {projects.map((project) => (
               <option key={project.id} value={project.id}>
                 {project.name}
+              </option>
+            ))}
+          </TextField>
+
+          {/* Assignee Filter */}
+          <TextField
+            select
+            size="small"
+            value={selectedAssignee}
+            onChange={(e) => setSelectedAssignee(e.target.value)}
+            sx={{ minWidth: 180 }}
+            SelectProps={{ native: true }}
+            label="Responsável"
+            InputLabelProps={{ shrink: true }}
+          >
+            <option value="all">Todos</option>
+            {teamMembers.map((member) => (
+              <option key={member.id} value={member.id}>
+                {member.full_name}
               </option>
             ))}
           </TextField>

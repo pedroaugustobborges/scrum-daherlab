@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import {
   Box,
   Typography,
@@ -24,6 +24,10 @@ import {
   alpha,
   Skeleton,
   useTheme,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material'
 import {
   Add,
@@ -42,6 +46,7 @@ import {
   Refresh,
   LightbulbOutlined,
   PictureAsPdf,
+  People,
 } from '@mui/icons-material'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
@@ -97,6 +102,11 @@ interface Subtask {
   assigned_to_profile?: { full_name: string }
 }
 
+interface TeamMember {
+  id: string
+  full_name: string
+}
+
 const statusConfig: Record<string, { label: string; color: string }> = {
   todo: { label: 'A Fazer', color: '#6b7280' },
   'in-progress': { label: 'Em Progresso', color: '#f59e0b' },
@@ -126,6 +136,8 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
   const [aiTipLoading, setAiTipLoading] = useState(false)
   const [aiTipError, setAiTipError] = useState(false)
   const [adaModalOpen, setAdaModalOpen] = useState(false)
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
+  const [selectedAssignee, setSelectedAssignee] = useState<string>('all')
   const [sprintDetails, setSprintDetails] = useState<{
     goal?: string
     status?: string
@@ -1046,6 +1058,18 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
       )
 
       setStories(storiesWithSubtasks)
+
+      // Extract team members from stories
+      const uniqueMembers = new Map<string, TeamMember>()
+      storiesWithSubtasks.forEach((story: any) => {
+        if (story.assigned_to && story.assigned_to_profile?.full_name) {
+          uniqueMembers.set(story.assigned_to, {
+            id: story.assigned_to,
+            full_name: story.assigned_to_profile.full_name,
+          })
+        }
+      })
+      setTeamMembers(Array.from(uniqueMembers.values()).sort((a, b) => a.full_name.localeCompare(b.full_name)))
     } catch (error) {
       console.error('Error fetching user stories:', error)
       toast.error('Erro ao carregar histórias de usuário')
@@ -1053,6 +1077,12 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
       setLoading(false)
     }
   }
+
+  // Filter stories by assignee
+  const filteredStories = useMemo(() => {
+    if (selectedAssignee === 'all') return stories
+    return stories.filter((story) => story.assigned_to === selectedAssignee)
+  }, [stories, selectedAssignee])
 
   const handleDeleteStory = async (storyId: string, storyTitle: string) => {
     const confirmed = window.confirm(
@@ -1118,11 +1148,11 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
   }
 
   const getTotalPoints = () => {
-    return stories.reduce((sum, story) => sum + (story.story_points || 0), 0)
+    return filteredStories.reduce((sum, story) => sum + (story.story_points || 0), 0)
   }
 
   const getCompletedPoints = () => {
-    return stories
+    return filteredStories
       .filter((story) => story.status === 'done')
       .reduce((sum, story) => sum + (story.story_points || 0), 0)
   }
@@ -1167,7 +1197,30 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
                 Resumo do Sprint
               </Typography>
 
-              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+                {/* Assignee Filter */}
+                <FormControl size="small" sx={{ minWidth: 160 }}>
+                  <InputLabel>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <People sx={{ fontSize: 18 }} />
+                      Responsável
+                    </Box>
+                  </InputLabel>
+                  <Select
+                    value={selectedAssignee}
+                    label="Responsável"
+                    onChange={(e) => setSelectedAssignee(e.target.value)}
+                  >
+                    <MenuItem value="all">Todos</MenuItem>
+                    {teamMembers.length > 0 && <Divider />}
+                    {teamMembers.map((member) => (
+                      <MenuItem key={member.id} value={member.id}>
+                        {member.full_name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
                 <ToggleButtonGroup
                   value={viewMode}
                   exclusive
@@ -1243,7 +1296,7 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
                   Total de Histórias
                 </Typography>
                 <Typography variant="h5" fontWeight={800} sx={{ color: '#6366f1' }}>
-                  {stories.length}
+                  {filteredStories.length}
                 </Typography>
               </Box>
               <Box>
@@ -1251,7 +1304,7 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
                   Concluídas
                 </Typography>
                 <Typography variant="h5" fontWeight={800} sx={{ color: '#10b981' }}>
-                  {stories.filter((s) => s.status === 'done').length}
+                  {filteredStories.filter((s) => s.status === 'done').length}
                 </Typography>
               </Box>
               <Box>
@@ -1303,7 +1356,7 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
               <CircularProgress size={60} />
             </Box>
-          ) : stories.length === 0 ? (
+          ) : filteredStories.length === 0 ? (
             <Box
               sx={{
                 textAlign: 'center',
@@ -1316,24 +1369,28 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
             >
               <Assignment sx={{ fontSize: 80, color: '#6366f1', opacity: 0.3, mb: 2 }} />
               <Typography variant="h6" fontWeight={700} gutterBottom>
-                Nenhuma história criada ainda
+                {selectedAssignee !== 'all' ? 'Nenhuma história encontrada' : 'Nenhuma história criada ainda'}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                Crie sua primeira história de usuário para este sprint
+                {selectedAssignee !== 'all'
+                  ? 'Nenhuma história atribuída a este responsável'
+                  : 'Crie sua primeira história de usuário para este sprint'}
               </Typography>
-              <Button
-                variant="contained"
-                startIcon={<Add />}
-                onClick={() => setCreateStoryOpen(true)}
-                sx={{ px: 4, py: 1.5 }}
-              >
-                Criar Primeira História
-              </Button>
+              {selectedAssignee === 'all' && (
+                <Button
+                  variant="contained"
+                  startIcon={<Add />}
+                  onClick={() => setCreateStoryOpen(true)}
+                  sx={{ px: 4, py: 1.5 }}
+                >
+                  Criar Primeira História
+                </Button>
+              )}
             </Box>
           ) : viewMode === 'kanban' ? (
             <>
               <KanbanBoard
-                stories={stories}
+                stories={filteredStories}
                 onRefresh={fetchUserStories}
                 onDeleteStory={handleDeleteStory}
                 currentSprintId={sprint.id}
@@ -1609,7 +1666,7 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
             </>
           ) : (
             <Stack spacing={2}>
-              {stories.map((story) => (
+              {filteredStories.map((story) => (
                 <Accordion
                   key={story.id}
                   elevation={0}

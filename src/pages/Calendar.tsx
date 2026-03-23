@@ -32,6 +32,7 @@ import {
   PlayArrow,
   Stop,
   Sync,
+  People,
 } from '@mui/icons-material'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
@@ -92,6 +93,7 @@ export default function Calendar() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedStoryId, setSelectedStoryId] = useState<string | null>(null)
   const [showMyTasks, setShowMyTasks] = useState(false)
+  const [selectedAssignee, setSelectedAssignee] = useState<string>('all')
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [isSyncing, setIsSyncing] = useState(false)
 
@@ -211,6 +213,31 @@ export default function Calendar() {
 
       if (error) throw error
       return data
+    },
+  })
+
+  // Fetch team members who have tasks with dates
+  const { data: teamMembers = [] } = useQuery({
+    queryKey: ['calendar-team-members'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('assigned_to, assigned_to_profile:profiles!assigned_to(id, full_name)')
+        .not('assigned_to', 'is', null)
+        .or('start_date.not.is.null,end_date.not.is.null,due_date.not.is.null')
+
+      if (error) throw error
+
+      const uniqueMembers = new Map<string, { id: string; full_name: string }>()
+      data?.forEach((task: any) => {
+        const profile = Array.isArray(task.assigned_to_profile)
+          ? task.assigned_to_profile[0]
+          : task.assigned_to_profile
+        if (profile?.id && profile?.full_name) {
+          uniqueMembers.set(profile.id, { id: profile.id, full_name: profile.full_name })
+        }
+      })
+      return Array.from(uniqueMembers.values()).sort((a, b) => a.full_name.localeCompare(b.full_name))
     },
   })
 
@@ -459,18 +486,26 @@ export default function Calendar() {
   // Filter events
   const filteredEvents = useMemo(() => {
     return events.filter((event) => {
-      // External events bypass project filter
+      // External events bypass project and assignee filters
       if (event.type !== 'external') {
         if (selectedProject !== 'all' && event.projectId !== selectedProject) return false
+
+        // Filter by selected assignee
+        if (selectedAssignee !== 'all' && (event.type === 'task' || event.type === 'deadline')) {
+          const taskId = event.id.replace(/-start$/, '').replace(/-end$/, '').replace(/^deadline-/, '')
+          const task = tasks.find((t: any) => t.id === taskId)
+          if (!task || task.assigned_to !== selectedAssignee) return false
+        }
       }
       if (searchTerm && !event.title.toLowerCase().includes(searchTerm.toLowerCase())) return false
       if (showMyTasks && event.type === 'task') {
-        const task = tasks.find((t: any) => t.id === event.id)
+        const taskId = event.id.replace(/-start$/, '').replace(/-end$/, '')
+        const task = tasks.find((t: any) => t.id === taskId)
         if (!task || task.assigned_to !== user?.id) return false
       }
       return true
     })
-  }, [events, selectedProject, searchTerm, showMyTasks, tasks, user?.id])
+  }, [events, selectedProject, selectedAssignee, searchTerm, showMyTasks, tasks, user?.id])
 
   // Get events for a specific date (exact match only)
   const getEventsForDate = (date: Date) => {
@@ -632,6 +667,27 @@ export default function Calendar() {
                 variant={showMyTasks ? 'filled' : 'outlined'}
                 sx={{ fontWeight: 600 }}
               />
+
+              <FormControl size="small" sx={{ minWidth: 180 }}>
+                <InputLabel>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <People sx={{ fontSize: 18 }} />
+                    Responsável
+                  </Box>
+                </InputLabel>
+                <Select
+                  value={selectedAssignee}
+                  onChange={(e) => setSelectedAssignee(e.target.value)}
+                  label="Responsável"
+                >
+                  <MenuItem value="all">Todos</MenuItem>
+                  {teamMembers.map((member: any) => (
+                    <MenuItem key={member.id} value={member.id}>
+                      {member.full_name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
 
               <FormControl size="small" sx={{ minWidth: 180 }}>
                 <InputLabel>Projeto</InputLabel>

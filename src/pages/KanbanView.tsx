@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   Box,
   Typography,
@@ -37,6 +37,7 @@ import {
   Timer,
   ExpandMore,
   FilterList,
+  People,
 } from '@mui/icons-material'
 import toast from 'react-hot-toast'
 import { useProjectContext } from './ProjectDetail'
@@ -80,6 +81,11 @@ interface Sprint {
   status: string
 }
 
+interface TeamMember {
+  id: string
+  full_name: string
+}
+
 const statusConfig: Record<string, { label: string; color: string }> = {
   todo: { label: 'A Fazer', color: '#6b7280' },
   'in-progress': { label: 'Em Progresso', color: '#f59e0b' },
@@ -106,6 +112,8 @@ export default function KanbanView() {
   const [createStoryOpen, setCreateStoryOpen] = useState(false)
   const [createSubtaskOpen, setCreateSubtaskOpen] = useState(false)
   const [selectedStoryId, setSelectedStoryId] = useState<string>('')
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
+  const [selectedAssignee, setSelectedAssignee] = useState<string>('all')
 
   useEffect(() => {
     if (project?.id) {
@@ -125,6 +133,26 @@ export default function KanbanView() {
 
       if (sprintsError) throw sprintsError
       setSprints(sprintsData || [])
+
+      // Fetch team members who have tasks in this project
+      const { data: tasksWithAssignees } = await supabase
+        .from('tasks')
+        .select('assigned_to, assigned_to_profile:profiles!assigned_to(id, full_name)')
+        .eq('project_id', project.id)
+        .not('assigned_to', 'is', null)
+
+      if (tasksWithAssignees) {
+        const uniqueMembers = new Map<string, TeamMember>()
+        tasksWithAssignees.forEach((task: any) => {
+          const profile = Array.isArray(task.assigned_to_profile)
+            ? task.assigned_to_profile[0]
+            : task.assigned_to_profile
+          if (profile?.id && profile?.full_name) {
+            uniqueMembers.set(profile.id, { id: profile.id, full_name: profile.full_name })
+          }
+        })
+        setTeamMembers(Array.from(uniqueMembers.values()).sort((a, b) => a.full_name.localeCompare(b.full_name)))
+      }
 
       await fetchStories()
     } catch (error) {
@@ -260,12 +288,18 @@ export default function KanbanView() {
     return Math.round((completed / story.subtasks.length) * 100)
   }
 
+  // Filter stories by assignee
+  const filteredStories = useMemo(() => {
+    if (selectedAssignee === 'all') return stories
+    return stories.filter((story) => story.assigned_to === selectedAssignee)
+  }, [stories, selectedAssignee])
+
   const getTotalPoints = () => {
-    return stories.reduce((sum, story) => sum + (story.story_points || 0), 0)
+    return filteredStories.reduce((sum, story) => sum + (story.story_points || 0), 0)
   }
 
   const getCompletedPoints = () => {
-    return stories
+    return filteredStories
       .filter((story) => story.status === 'done')
       .reduce((sum, story) => sum + (story.story_points || 0), 0)
   }
@@ -327,6 +361,29 @@ export default function KanbanView() {
               </Select>
             </FormControl>
 
+            {/* Assignee Filter */}
+            <FormControl size="small" sx={{ minWidth: 180 }}>
+              <InputLabel>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <People sx={{ fontSize: 18 }} />
+                  Responsável
+                </Box>
+              </InputLabel>
+              <Select
+                value={selectedAssignee}
+                label="Responsável"
+                onChange={(e) => setSelectedAssignee(e.target.value)}
+              >
+                <MenuItem value="all">Todos</MenuItem>
+                {teamMembers.length > 0 && <Divider />}
+                {teamMembers.map((member) => (
+                  <MenuItem key={member.id} value={member.id}>
+                    {member.full_name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
             <ToggleButtonGroup
               value={viewMode}
               exclusive
@@ -383,7 +440,7 @@ export default function KanbanView() {
               Total de Histórias
             </Typography>
             <Typography variant="h5" fontWeight={800} sx={{ color: '#6366f1' }}>
-              {stories.length}
+              {filteredStories.length}
             </Typography>
           </Box>
           <Box>
@@ -391,7 +448,7 @@ export default function KanbanView() {
               Concluídas
             </Typography>
             <Typography variant="h5" fontWeight={800} sx={{ color: '#10b981' }}>
-              {stories.filter((s) => s.status === 'done').length}
+              {filteredStories.filter((s) => s.status === 'done').length}
             </Typography>
           </Box>
           <Box>
@@ -414,7 +471,7 @@ export default function KanbanView() {
       </Box>
 
       {/* Content */}
-      {stories.length === 0 ? (
+      {filteredStories.length === 0 ? (
         <Box
           sx={{
             textAlign: 'center',
@@ -430,13 +487,15 @@ export default function KanbanView() {
             Nenhuma história encontrada
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            {selectedSprintId === 'all'
+            {selectedAssignee !== 'all'
+              ? 'Nenhuma história encontrada para este responsável'
+              : selectedSprintId === 'all'
               ? 'Crie sua primeira história para este projeto'
               : selectedSprintId === 'backlog'
               ? 'O backlog está vazio'
               : 'Este sprint não tem histórias'}
           </Typography>
-          {!isStakeholder && (
+          {!isStakeholder && selectedAssignee === 'all' && (
             <Button
               variant="contained"
               startIcon={<Add />}
@@ -449,7 +508,7 @@ export default function KanbanView() {
         </Box>
       ) : viewMode === 'kanban' ? (
         <KanbanBoard
-          stories={stories}
+          stories={filteredStories}
           onRefresh={fetchStories}
           onDeleteStory={handleDeleteStory}
           currentSprintId={selectedSprintId !== 'all' && selectedSprintId !== 'backlog' ? selectedSprintId : undefined}
@@ -457,7 +516,7 @@ export default function KanbanView() {
         />
       ) : (
         <Stack spacing={2}>
-          {stories.map((story) => (
+          {filteredStories.map((story) => (
             <Accordion
               key={story.id}
               elevation={0}

@@ -75,11 +75,22 @@ interface TeamMember {
   completed_count: number;
 }
 
-interface WeeklyData {
-  day: string;
+interface ProductivityData {
+  label: string;
   completed: number;
   created: number;
 }
+
+type ProductivityPeriod = "week" | "month" | "quarter" | "semester" | "year" | "triennium";
+
+const PRODUCTIVITY_PERIODS: { key: ProductivityPeriod; label: string; shortLabel: string }[] = [
+  { key: "week", label: "Semana", shortLabel: "7D" },
+  { key: "month", label: "Mês", shortLabel: "1M" },
+  { key: "quarter", label: "Trimestre", shortLabel: "3M" },
+  { key: "semester", label: "Semestre", shortLabel: "6M" },
+  { key: "year", label: "Ano", shortLabel: "1A" },
+  { key: "triennium", label: "Triênio", shortLabel: "3A" },
+];
 
 const ACTIVITIES_PER_PAGE = 4;
 const TEAM_WORKLOAD_PER_PAGE = 4;
@@ -113,7 +124,9 @@ export default function Dashboard() {
   const [recentActivities, setRecentActivities] = useState<Activity[]>([]);
   const [activitiesPage, setActivitiesPage] = useState(1);
   const [customizeModalOpen, setCustomizeModalOpen] = useState(false);
-  const [weeklyData, setWeeklyData] = useState<WeeklyData[]>([]);
+  const [productivityData, setProductivityData] = useState<ProductivityData[]>([]);
+  const [productivityPeriod, setProductivityPeriod] = useState<ProductivityPeriod>("week");
+  const [productivityLoading, setProductivityLoading] = useState(false);
   const [teamWorkload, setTeamWorkload] = useState<TeamMember[]>([]);
   const [teamWorkloadPage, setTeamWorkloadPage] = useState(1);
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
@@ -213,47 +226,6 @@ export default function Dashboard() {
       };
 
       setProjectStats(pStats);
-
-      // Fetch weekly productivity data (last 7 days)
-      const now = new Date();
-      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-
-      const { data: weeklyTasks, error: weeklyError } = await supabase
-        .from("tasks")
-        .select("status, created_at, updated_at")
-        .gte("created_at", weekAgo.toISOString());
-
-      if (!weeklyError && weeklyTasks) {
-        const dayNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-        const weekData: WeeklyData[] = [];
-
-        for (let i = 6; i >= 0; i--) {
-          const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-          const dayStart = new Date(date.setHours(0, 0, 0, 0));
-          const dayEnd = new Date(date.setHours(23, 59, 59, 999));
-
-          const created = weeklyTasks.filter((t) => {
-            const createdAt = new Date(t.created_at);
-            return createdAt >= dayStart && createdAt <= dayEnd;
-          }).length;
-
-          const completed = weeklyTasks.filter((t) => {
-            if (t.status !== "done") return false;
-            const updatedAt = new Date(t.updated_at);
-            return updatedAt >= dayStart && updatedAt <= dayEnd;
-          }).length;
-
-          weekData.push({
-            day: dayNames[
-              new Date(now.getTime() - i * 24 * 60 * 60 * 1000).getDay()
-            ],
-            created,
-            completed,
-          });
-        }
-
-        setWeeklyData(weekData);
-      }
 
       // Fetch team workload - get all users who have tasks assigned
       if (tasks && tasks.length > 0) {
@@ -368,6 +340,152 @@ export default function Dashboard() {
     }
   };
 
+  // Fetch productivity data based on selected period
+  const fetchProductivityData = async (period: ProductivityPeriod) => {
+    setProductivityLoading(true);
+    try {
+      const now = new Date();
+      let startDate: Date;
+      let intervals: { start: Date; end: Date; label: string }[] = [];
+
+      const dayNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+      const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+
+      switch (period) {
+        case "week":
+          // Last 7 days
+          startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          for (let i = 6; i >= 0; i--) {
+            const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+            const dayStart = new Date(date);
+            dayStart.setHours(0, 0, 0, 0);
+            const dayEnd = new Date(date);
+            dayEnd.setHours(23, 59, 59, 999);
+            intervals.push({
+              start: dayStart,
+              end: dayEnd,
+              label: dayNames[date.getDay()],
+            });
+          }
+          break;
+
+        case "month":
+          // Last 30 days, grouped by week
+          startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          for (let i = 4; i >= 0; i--) {
+            const weekEnd = new Date(now.getTime() - i * 7 * 24 * 60 * 60 * 1000);
+            const weekStart = new Date(weekEnd.getTime() - 7 * 24 * 60 * 60 * 1000);
+            weekStart.setHours(0, 0, 0, 0);
+            weekEnd.setHours(23, 59, 59, 999);
+            const weekLabel = `${weekStart.getDate()}/${weekStart.getMonth() + 1}`;
+            intervals.push({ start: weekStart, end: weekEnd, label: weekLabel });
+          }
+          break;
+
+        case "quarter":
+          // Last 3 months, grouped by week
+          startDate = new Date(now);
+          startDate.setMonth(startDate.getMonth() - 3);
+          for (let i = 11; i >= 0; i--) {
+            const weekEnd = new Date(now.getTime() - i * 7 * 24 * 60 * 60 * 1000);
+            const weekStart = new Date(weekEnd.getTime() - 7 * 24 * 60 * 60 * 1000);
+            weekStart.setHours(0, 0, 0, 0);
+            weekEnd.setHours(23, 59, 59, 999);
+            const weekLabel = `${weekStart.getDate()}/${weekStart.getMonth() + 1}`;
+            intervals.push({ start: weekStart, end: weekEnd, label: weekLabel });
+          }
+          break;
+
+        case "semester":
+          // Last 6 months, grouped by month
+          startDate = new Date(now);
+          startDate.setMonth(startDate.getMonth() - 6);
+          for (let i = 5; i >= 0; i--) {
+            const monthDate = new Date(now);
+            monthDate.setMonth(monthDate.getMonth() - i);
+            const monthStart = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
+            const monthEnd = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0, 23, 59, 59, 999);
+            intervals.push({
+              start: monthStart,
+              end: monthEnd,
+              label: monthNames[monthDate.getMonth()],
+            });
+          }
+          break;
+
+        case "year":
+          // Last 12 months, grouped by month
+          startDate = new Date(now);
+          startDate.setFullYear(startDate.getFullYear() - 1);
+          for (let i = 11; i >= 0; i--) {
+            const monthDate = new Date(now);
+            monthDate.setMonth(monthDate.getMonth() - i);
+            const monthStart = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
+            const monthEnd = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0, 23, 59, 59, 999);
+            intervals.push({
+              start: monthStart,
+              end: monthEnd,
+              label: monthNames[monthDate.getMonth()],
+            });
+          }
+          break;
+
+        case "triennium":
+          // Last 3 years, grouped by quarter
+          startDate = new Date(now);
+          startDate.setFullYear(startDate.getFullYear() - 3);
+          for (let i = 11; i >= 0; i--) {
+            const quarterDate = new Date(now);
+            quarterDate.setMonth(quarterDate.getMonth() - i * 3);
+            const quarterStart = new Date(quarterDate.getFullYear(), Math.floor(quarterDate.getMonth() / 3) * 3, 1);
+            const quarterEnd = new Date(quarterDate.getFullYear(), Math.floor(quarterDate.getMonth() / 3) * 3 + 3, 0, 23, 59, 59, 999);
+            const quarterNum = Math.floor(quarterStart.getMonth() / 3) + 1;
+            intervals.push({
+              start: quarterStart,
+              end: quarterEnd,
+              label: `T${quarterNum}/${quarterStart.getFullYear().toString().slice(-2)}`,
+            });
+          }
+          break;
+      }
+
+      // Fetch tasks for the entire period
+      const { data: tasks, error } = await supabase
+        .from("tasks")
+        .select("status, created_at, updated_at")
+        .gte("created_at", startDate.toISOString());
+
+      if (error) throw error;
+
+      // Process tasks into intervals
+      const data: ProductivityData[] = intervals.map((interval) => {
+        const created = tasks?.filter((t) => {
+          const createdAt = new Date(t.created_at);
+          return createdAt >= interval.start && createdAt <= interval.end;
+        }).length || 0;
+
+        const completed = tasks?.filter((t) => {
+          if (t.status !== "done") return false;
+          const updatedAt = new Date(t.updated_at);
+          return updatedAt >= interval.start && updatedAt <= interval.end;
+        }).length || 0;
+
+        return { label: interval.label, created, completed };
+      });
+
+      setProductivityData(data);
+    } catch (error) {
+      console.error("Error fetching productivity data:", error);
+    } finally {
+      setProductivityLoading(false);
+    }
+  };
+
+  // Fetch productivity data when period changes
+  useEffect(() => {
+    fetchProductivityData(productivityPeriod);
+  }, [productivityPeriod]);
+
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -432,7 +550,8 @@ export default function Dashboard() {
 
     // Inline widgets
     switch (type) {
-      case "productivityTrend":
+      case "productivityTrend": {
+        const currentPeriodConfig = PRODUCTIVITY_PERIODS.find(p => p.key === productivityPeriod);
         return (
           <IOSWidget accentColor="#10b981">
             <Box
@@ -441,43 +560,92 @@ export default function Dashboard() {
                 alignItems: "center",
                 justifyContent: "space-between",
                 mb: 2,
+                flexWrap: "wrap",
+                gap: 1,
               }}
             >
-              <Typography variant="h6" fontWeight={700}>
-                Produtividade Semanal
-              </Typography>
-              <Chip
-                icon={<TrendingUp sx={{ fontSize: 16 }} />}
-                label="Últimos 7 dias"
-                size="small"
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Typography variant="h6" fontWeight={700}>
+                  Produtividade
+                </Typography>
+                <Chip
+                  icon={<TrendingUp sx={{ fontSize: 14 }} />}
+                  label={currentPeriodConfig?.label || "Semana"}
+                  size="small"
+                  sx={{
+                    bgcolor: "rgba(16, 185, 129, 0.1)",
+                    color: "#059669",
+                    fontWeight: 600,
+                    fontSize: "0.7rem",
+                    height: 24,
+                    "& .MuiChip-icon": { color: "#059669" },
+                    "& .MuiChip-label": { px: 1 },
+                  }}
+                />
+              </Box>
+              <Box
                 sx={{
-                  bgcolor: "rgba(16, 185, 129, 0.1)",
-                  color: "#059669",
-                  fontWeight: 600,
-                  "& .MuiChip-icon": { color: "#059669" },
+                  display: "flex",
+                  gap: 0.5,
+                  bgcolor: isDarkMode ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
+                  borderRadius: 2,
+                  p: 0.5,
                 }}
-              />
+              >
+                {PRODUCTIVITY_PERIODS.map((period) => (
+                  <Box
+                    key={period.key}
+                    onClick={() => setProductivityPeriod(period.key)}
+                    sx={{
+                      px: 1.5,
+                      py: 0.5,
+                      borderRadius: 1.5,
+                      cursor: "pointer",
+                      transition: "all 0.2s ease",
+                      bgcolor: productivityPeriod === period.key
+                        ? "#10b981"
+                        : "transparent",
+                      color: productivityPeriod === period.key
+                        ? "white"
+                        : isDarkMode ? "#94a3b8" : "#6b7280",
+                      fontWeight: productivityPeriod === period.key ? 600 : 500,
+                      fontSize: "0.7rem",
+                      "&:hover": {
+                        bgcolor: productivityPeriod === period.key
+                          ? "#10b981"
+                          : isDarkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
+                      },
+                    }}
+                  >
+                    {period.shortLabel}
+                  </Box>
+                ))}
+              </Box>
             </Box>
 
-            {loading ? (
+            {productivityLoading || loading ? (
               <Box
                 sx={{ display: "flex", justifyContent: "center", py: 6 }}
               >
-                <CircularProgress />
+                <CircularProgress size={32} sx={{ color: "#10b981" }} />
               </Box>
             ) : (
               <Box sx={{ height: 250 }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={weeklyData}>
+                  <LineChart data={productivityData}>
                     <CartesianGrid
                       strokeDasharray="3 3"
                       stroke={isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}
                     />
                     <XAxis
-                      dataKey="day"
+                      dataKey="label"
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fill: isDarkMode ? "#94a3b8" : "#6b7280", fontSize: 12 }}
+                      tick={{ fill: isDarkMode ? "#94a3b8" : "#6b7280", fontSize: 11 }}
+                      interval={productivityPeriod === "year" || productivityPeriod === "triennium" ? 1 : 0}
+                      angle={productivityPeriod === "quarter" || productivityPeriod === "triennium" ? -45 : 0}
+                      textAnchor={productivityPeriod === "quarter" || productivityPeriod === "triennium" ? "end" : "middle"}
+                      height={productivityPeriod === "quarter" || productivityPeriod === "triennium" ? 50 : 30}
                     />
                     <YAxis
                       axisLine={false}
@@ -518,7 +686,7 @@ export default function Dashboard() {
                       dataKey="completed"
                       stroke="#10b981"
                       strokeWidth={2.5}
-                      dot={{ fill: "#10b981", strokeWidth: 0, r: 4 }}
+                      dot={{ fill: "#10b981", strokeWidth: 0, r: productivityPeriod === "triennium" || productivityPeriod === "year" ? 3 : 4 }}
                       activeDot={{ r: 6, stroke: "#fff", strokeWidth: 2 }}
                     />
                     <Line
@@ -526,7 +694,7 @@ export default function Dashboard() {
                       dataKey="created"
                       stroke="#6366f1"
                       strokeWidth={2.5}
-                      dot={{ fill: "#6366f1", strokeWidth: 0, r: 4 }}
+                      dot={{ fill: "#6366f1", strokeWidth: 0, r: productivityPeriod === "triennium" || productivityPeriod === "year" ? 3 : 4 }}
                       activeDot={{ r: 6, stroke: "#fff", strokeWidth: 2 }}
                     />
                   </LineChart>
@@ -535,6 +703,7 @@ export default function Dashboard() {
             )}
           </IOSWidget>
         );
+      }
 
       case "teamWorkload":
         return (

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import {
   TextField,
   Button,
@@ -7,9 +7,6 @@ import {
   Stack,
   InputAdornment,
   CircularProgress,
-  Typography,
-  Chip,
-  alpha,
 } from "@mui/material";
 import {
   SpaceDashboard,
@@ -18,7 +15,6 @@ import {
   Assignment,
   Flag,
   Speed,
-  AutoAwesome,
 } from "@mui/icons-material";
 import toast from "react-hot-toast";
 import Modal from "./Modal";
@@ -93,12 +89,6 @@ export default function CreateSprintModal({
     projectId: formData.project_id || undefined,
     enabled: open && !!(formData.team_id || formData.project_id),
   });
-
-  // Generate sprint name preview
-  const sprintNamePreview = useMemo(() => {
-    if (isLoadingCount) return "Carregando...";
-    return generateFullSprintName(sprintCount, formData.user_title);
-  }, [sprintCount, formData.user_title, isLoadingCount]);
 
   useEffect(() => {
     if (open) {
@@ -281,84 +271,33 @@ export default function CreateSprintModal({
                   actionItems={retroInsights?.actionItems || []}
                   improvementPoints={retroInsights?.improvementPoints || []}
                   pendingActions={retroInsights?.pendingActions || []}
+                  sprintCount={sprintCount}
+                  isLoadingCount={isLoadingCount}
                 />
               )}
 
-              {/* Sprint Name Section */}
-              <Box>
-                <TextField
-                  fullWidth
-                  label="Tema do Sprint (opcional)"
-                  value={formData.user_title}
-                  onChange={(e) => handleChange("user_title", e.target.value)}
-                  placeholder="Ex: Autenticação, Dashboard, MVP"
-                  helperText="O nome do sprint será gerado automaticamente com um prefixo sequencial"
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SpaceDashboard sx={{ color: "#6366f1" }} />
-                      </InputAdornment>
-                    ),
-                  }}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      fontSize: "1.1rem",
-                      fontWeight: 500,
-                    },
-                  }}
-                />
-
-                {/* Sprint Name Preview */}
-                {(formData.team_id || formData.project_id) && (
-                  <Box
-                    sx={{
-                      mt: 1.5,
-                      p: 2,
-                      borderRadius: 2,
-                      bgcolor: alpha("#6366f1", 0.05),
-                      border: `1px solid ${alpha("#6366f1", 0.15)}`,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1.5,
-                    }}
-                  >
-                    <AutoAwesome sx={{ color: "#6366f1", fontSize: 18 }} />
-                    <Box>
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        sx={{ display: "block", mb: 0.25 }}
-                      >
-                        Nome do Sprint
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        fontWeight={600}
-                        sx={{ color: "#6366f1" }}
-                      >
-                        {isLoadingCount ? (
-                          <CircularProgress size={14} sx={{ mr: 1 }} />
-                        ) : (
-                          sprintNamePreview
-                        )}
-                      </Typography>
-                    </Box>
-                    {sprintCount === 0 && !isLoadingCount && (
-                      <Chip
-                        label="Primeiro Sprint"
-                        size="small"
-                        sx={{
-                          ml: "auto",
-                          bgcolor: alpha("#10b981", 0.1),
-                          color: "#10b981",
-                          fontWeight: 600,
-                          fontSize: "0.7rem",
-                        }}
-                      />
-                    )}
-                  </Box>
-                )}
-              </Box>
+              {/* Sprint Theme Input */}
+              <TextField
+                fullWidth
+                label="Tema do Sprint (opcional)"
+                value={formData.user_title}
+                onChange={(e) => handleChange("user_title", e.target.value)}
+                placeholder="Ex: Autenticação, Dashboard, MVP"
+                helperText="O tema será adicionado ao nome do sprint (ex: Sprint 1 - Autenticação)"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SpaceDashboard sx={{ color: "#6366f1" }} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    fontSize: "1.1rem",
+                    fontWeight: 500,
+                  },
+                }}
+              />
 
               <TextField
                 fullWidth

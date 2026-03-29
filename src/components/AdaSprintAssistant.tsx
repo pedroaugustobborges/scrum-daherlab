@@ -37,6 +37,8 @@ interface AdaSprintAssistantProps {
   actionItems: RetrospectiveItem[];
   improvementPoints: RetrospectiveItem[];
   pendingActions: RetrospectiveItem[];
+  sprintCount?: number;
+  isLoadingCount?: boolean;
 }
 
 /**
@@ -50,70 +52,80 @@ function generateAdaMessage(
   improvementPoints: RetrospectiveItem[],
   pendingActions: RetrospectiveItem[],
 ): string {
-  if (!hasData) {
-    return `Este parece ser um novo começo para o time. Estabelecer rituais de retrospectiva ajudará a construir uma cultura de melhoria contínua. Estarei aqui para apoiar a jornada de vocês.`;
-  }
-
-  const topImprovements = improvementPoints.slice(0, 3);
-  const topPendingActions = pendingActions.slice(0, 2);
-
   const parts: string[] = [];
 
-  // Opening based on mood
-  if (moodRating >= 4) {
+  if (!hasData) {
     parts.push(
-      `O time encerrou a ${sprintName} com energia positiva. Ótimo sinal para manter o ritmo neste novo ciclo.`,
-    );
-  } else if (moodRating === 3) {
-    parts.push(
-      `Analisando a ${sprintName}, identifiquei oportunidades de evolução que podem elevar a performance do time.`,
-    );
-  } else if (moodRating > 0) {
-    parts.push(
-      `A ${sprintName} trouxe alguns desafios. Este novo sprint é uma oportunidade de aplicar os aprendizados.`,
+      `Este parece ser um novo começo para o time. Estabelecer rituais de retrospectiva ajudará a construir uma cultura de melhoria contínua.`,
     );
   } else {
-    parts.push(
-      `Analisando os dados da ${sprintName}, encontrei insights relevantes.`,
-    );
-  }
+    const topImprovements = improvementPoints.slice(0, 3);
+    const topPendingActions = pendingActions.slice(0, 2);
 
-  // Key improvements identified
-  if (topImprovements.length > 0) {
-    const improvementTexts = topImprovements.map((item) => item.content);
-    if (improvementTexts.length === 1) {
+    // Opening based on mood
+    if (moodRating >= 4) {
       parts.push(
-        `O time identificou como ponto de melhoria: "${improvementTexts[0]}".`,
+        `O time encerrou a ${sprintName} com energia positiva. Ótimo sinal para manter o ritmo neste novo ciclo.`,
+      );
+    } else if (moodRating === 3) {
+      parts.push(
+        `Analisando a ${sprintName}, identifiquei oportunidades de evolução que podem elevar a performance do time.`,
+      );
+    } else if (moodRating > 0) {
+      parts.push(
+        `A ${sprintName} trouxe alguns desafios. Este novo sprint é uma oportunidade de aplicar os aprendizados.`,
       );
     } else {
       parts.push(
-        `Os principais pontos de melhoria identificados foram: ${improvementTexts
-          .slice(0, 2)
-          .map((t) => `"${t}"`)
-          .join(" e ")}.`,
+        `Analisando os dados da ${sprintName}, encontrei insights relevantes.`,
+      );
+    }
+
+    // Key improvements identified
+    if (topImprovements.length > 0) {
+      const improvementTexts = topImprovements.map((item) => item.content);
+      if (improvementTexts.length === 1) {
+        parts.push(
+          `O time identificou como ponto de melhoria: "${improvementTexts[0]}".`,
+        );
+      } else {
+        parts.push(
+          `Os principais pontos de melhoria identificados foram: ${improvementTexts
+            .slice(0, 2)
+            .map((t) => `"${t}"`)
+            .join(" e ")}.`,
+        );
+      }
+    }
+
+    // Pending actions reminder
+    if (topPendingActions.length > 0) {
+      const actionTexts = topPendingActions.map((item) => {
+        if (item.assigned_to_profile?.full_name) {
+          return `"${item.content}" (${item.assigned_to_profile.full_name})`;
+        }
+        return `"${item.content}"`;
+      });
+      parts.push(
+        `${topPendingActions.length > 1 ? "Existem ações" : "Há uma ação"} pendente${topPendingActions.length > 1 ? "s" : ""} da retrospectiva anterior: ${actionTexts.join(", ")}.`,
       );
     }
   }
 
-  // Pending actions reminder
-  if (topPendingActions.length > 0) {
-    const actionTexts = topPendingActions.map((item) => {
-      if (item.assigned_to_profile?.full_name) {
-        return `"${item.content}" (${item.assigned_to_profile.full_name})`;
-      }
-      return `"${item.content}"`;
-    });
-    parts.push(
-      `${topPendingActions.length > 1 ? "Existem ações" : "Há uma ação"} pendente${topPendingActions.length > 1 ? "s" : ""} da retrospectiva anterior: ${actionTexts.join(", ")}.`,
-    );
+  return parts.join(" ");
+}
+
+/**
+ * Generates the sprint counting message from Ada
+ */
+function generateSprintCountingMessage(sprintCount?: number): string {
+  if (sprintCount === undefined) return "";
+
+  if (sprintCount === 0) {
+    return `Essa será a Sprint de Kick Off do projeto, o primeiro passo da jornada. Estou contando com você, por isso mesmo pode contar comigo 😉`;
   }
 
-  // Closing encouragement
-  parts.push(
-    `Estarei por aqui para te ajudar a alcançar os objetivos do seu projeto.`,
-  );
-
-  return parts.join(" ");
+  return `Essa será a Sprint ${sprintCount + 1}, estou contando para você, por isso mesmo pode contar comigo 😉`;
 }
 
 export default function AdaSprintAssistant({
@@ -124,6 +136,8 @@ export default function AdaSprintAssistant({
   actionItems,
   improvementPoints,
   pendingActions,
+  sprintCount,
+  isLoadingCount = false,
 }: AdaSprintAssistantProps) {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
@@ -139,14 +153,12 @@ export default function AdaSprintAssistant({
       improvementPoints,
       pendingActions,
     );
-  }, [
-    loading,
-    hasData,
-    sprintName,
-    moodRating,
-    improvementPoints,
-    pendingActions,
-  ]);
+  }, [loading, hasData, sprintName, moodRating, improvementPoints, pendingActions]);
+
+  const sprintCountingMessage = useMemo(() => {
+    if (loading || isLoadingCount) return "";
+    return generateSprintCountingMessage(sprintCount);
+  }, [loading, isLoadingCount, sprintCount]);
 
   if (loading) {
     return (
@@ -308,16 +320,32 @@ export default function AdaSprintAssistant({
                   flexShrink: 0,
                 }}
               />
-              <Typography
-                variant="body2"
-                sx={{
-                  color: "text.primary",
-                  lineHeight: 1.7,
-                  fontStyle: "normal",
-                }}
-              >
-                {adaMessage}
-              </Typography>
+              <Box>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "text.primary",
+                    lineHeight: 1.7,
+                    fontStyle: "normal",
+                  }}
+                >
+                  {adaMessage}
+                </Typography>
+                {sprintCountingMessage && (
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "text.primary",
+                      lineHeight: 1.7,
+                      fontStyle: "normal",
+                      mt: 1.5,
+                      fontWeight: 500,
+                    }}
+                  >
+                    {sprintCountingMessage}
+                  </Typography>
+                )}
+              </Box>
             </Box>
           </Box>
 

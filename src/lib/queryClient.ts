@@ -119,6 +119,16 @@ export const queryKeys = {
     list: (filters?: Record<string, unknown>) => [...queryKeys.sprints.lists(), filters] as const,
     detail: (id: string) => [...queryKeys.sprints.all, 'detail', id] as const,
     tasks: (sprintId: string) => [...queryKeys.sprints.all, 'tasks', sprintId] as const,
+    count: (teamId?: string, projectId?: string) =>
+      [...queryKeys.sprints.all, 'count', { teamId, projectId }] as const,
+  },
+
+  // Retrospectives
+  retrospectives: {
+    all: ['retrospectives'] as const,
+    detail: (sprintId: string) => [...queryKeys.retrospectives.all, 'detail', sprintId] as const,
+    insights: (teamId?: string, projectId?: string) =>
+      [...queryKeys.retrospectives.all, 'insights', { teamId, projectId }] as const,
   },
 
   // Profiles / Users

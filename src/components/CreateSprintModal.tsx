@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   TextField,
   Button,
@@ -7,6 +7,9 @@ import {
   Stack,
   InputAdornment,
   CircularProgress,
+  Typography,
+  Chip,
+  alpha,
 } from "@mui/material";
 import {
   SpaceDashboard,
@@ -15,11 +18,18 @@ import {
   Assignment,
   Flag,
   Speed,
+  AutoAwesome,
 } from "@mui/icons-material";
 import toast from "react-hot-toast";
 import Modal from "./Modal";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
+import AdaSprintAssistant from "./AdaSprintAssistant";
+import {
+  useSprintRetrospectiveInsights,
+  useSprintCount,
+  generateFullSprintName,
+} from "@/hooks/useSprintRetrospectiveInsights";
 
 interface CreateSprintModalProps {
   open: boolean;
@@ -57,7 +67,7 @@ export default function CreateSprintModal({
   const [projects, setProjects] = useState<Project[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [formData, setFormData] = useState({
-    name: "",
+    user_title: "",
     goal: "",
     start_date: "",
     end_date: "",
@@ -66,6 +76,29 @@ export default function CreateSprintModal({
     project_id: "",
     velocity: 0,
   });
+
+  // Fetch retrospective insights for Ada
+  const {
+    data: retroInsights,
+    isLoading: isLoadingInsights,
+  } = useSprintRetrospectiveInsights({
+    teamId: formData.team_id || undefined,
+    projectId: formData.project_id || undefined,
+    enabled: open && !!(formData.team_id || formData.project_id),
+  });
+
+  // Fetch sprint count for naming
+  const { data: sprintCount = 0, isLoading: isLoadingCount } = useSprintCount({
+    teamId: formData.team_id || undefined,
+    projectId: formData.project_id || undefined,
+    enabled: open && !!(formData.team_id || formData.project_id),
+  });
+
+  // Generate sprint name preview
+  const sprintNamePreview = useMemo(() => {
+    if (isLoadingCount) return "Carregando...";
+    return generateFullSprintName(sprintCount, formData.user_title);
+  }, [sprintCount, formData.user_title, isLoadingCount]);
 
   useEffect(() => {
     if (open) {
@@ -113,11 +146,6 @@ export default function CreateSprintModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.name.trim()) {
-      toast.error("Por favor, informe o nome do sprint");
-      return;
-    }
-
     if (!formData.team_id) {
       toast.error("Por favor, selecione um time");
       return;
@@ -131,9 +159,12 @@ export default function CreateSprintModal({
     setLoading(true);
 
     try {
+      // Generate the full sprint name with automatic prefix
+      const fullSprintName = generateFullSprintName(sprintCount, formData.user_title);
+
       const { error } = await supabase.from("sprints").insert([
         {
-          name: formData.name,
+          name: fullSprintName,
           goal: formData.goal,
           start_date: formData.start_date,
           end_date: formData.end_date,
@@ -149,7 +180,7 @@ export default function CreateSprintModal({
 
       toast.success("Sprint criado com sucesso!");
       setFormData({
-        name: "",
+        user_title: "",
         goal: "",
         start_date: "",
         end_date: "",
@@ -183,48 +214,7 @@ export default function CreateSprintModal({
             </Box>
           ) : (
             <>
-              <TextField
-                fullWidth
-                label="Nome do Sprint"
-                value={formData.name}
-                onChange={(e) => handleChange("name", e.target.value)}
-                required
-                placeholder="Ex: Sprint 24 - Q1 2025"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SpaceDashboard sx={{ color: "#6366f1" }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    fontSize: "1.1rem",
-                    fontWeight: 500,
-                  },
-                }}
-              />
-
-              <TextField
-                fullWidth
-                label="Objetivo do Sprint"
-                value={formData.goal}
-                onChange={(e) => handleChange("goal", e.target.value)}
-                multiline
-                rows={3}
-                placeholder="Qual é a meta principal deste sprint?"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment
-                      position="start"
-                      sx={{ alignSelf: "flex-start", mt: 2 }}
-                    >
-                      <Flag sx={{ color: "#6366f1" }} />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-
+              {/* Team and Project Selection - First Step */}
               <Box
                 sx={{
                   display: "grid",
@@ -280,6 +270,115 @@ export default function CreateSprintModal({
                   ))}
                 </TextField>
               </Box>
+
+              {/* Ada Sprint Assistant - Appears after team/project selection */}
+              {(formData.team_id || formData.project_id) && (
+                <AdaSprintAssistant
+                  loading={isLoadingInsights}
+                  hasData={retroInsights?.hasData || false}
+                  sprintName={retroInsights?.sprintName || ""}
+                  moodRating={retroInsights?.moodRating || 0}
+                  actionItems={retroInsights?.actionItems || []}
+                  improvementPoints={retroInsights?.improvementPoints || []}
+                  pendingActions={retroInsights?.pendingActions || []}
+                />
+              )}
+
+              {/* Sprint Name Section */}
+              <Box>
+                <TextField
+                  fullWidth
+                  label="Tema do Sprint (opcional)"
+                  value={formData.user_title}
+                  onChange={(e) => handleChange("user_title", e.target.value)}
+                  placeholder="Ex: Autenticação, Dashboard, MVP"
+                  helperText="O nome do sprint será gerado automaticamente com um prefixo sequencial"
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SpaceDashboard sx={{ color: "#6366f1" }} />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      fontSize: "1.1rem",
+                      fontWeight: 500,
+                    },
+                  }}
+                />
+
+                {/* Sprint Name Preview */}
+                {(formData.team_id || formData.project_id) && (
+                  <Box
+                    sx={{
+                      mt: 1.5,
+                      p: 2,
+                      borderRadius: 2,
+                      bgcolor: alpha("#6366f1", 0.05),
+                      border: `1px solid ${alpha("#6366f1", 0.15)}`,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1.5,
+                    }}
+                  >
+                    <AutoAwesome sx={{ color: "#6366f1", fontSize: 18 }} />
+                    <Box>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ display: "block", mb: 0.25 }}
+                      >
+                        Nome do Sprint
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        fontWeight={600}
+                        sx={{ color: "#6366f1" }}
+                      >
+                        {isLoadingCount ? (
+                          <CircularProgress size={14} sx={{ mr: 1 }} />
+                        ) : (
+                          sprintNamePreview
+                        )}
+                      </Typography>
+                    </Box>
+                    {sprintCount === 0 && !isLoadingCount && (
+                      <Chip
+                        label="Primeiro Sprint"
+                        size="small"
+                        sx={{
+                          ml: "auto",
+                          bgcolor: alpha("#10b981", 0.1),
+                          color: "#10b981",
+                          fontWeight: 600,
+                          fontSize: "0.7rem",
+                        }}
+                      />
+                    )}
+                  </Box>
+                )}
+              </Box>
+
+              <TextField
+                fullWidth
+                label="Objetivo do Sprint"
+                value={formData.goal}
+                onChange={(e) => handleChange("goal", e.target.value)}
+                multiline
+                rows={3}
+                placeholder="Qual é a meta principal deste sprint?"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment
+                      position="start"
+                      sx={{ alignSelf: "flex-start", mt: 2 }}
+                    >
+                      <Flag sx={{ color: "#6366f1" }} />
+                    </InputAdornment>
+                  ),
+                }}
+              />
 
               <Box
                 sx={{

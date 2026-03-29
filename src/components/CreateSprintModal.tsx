@@ -100,6 +100,13 @@ export default function CreateSprintModal({
     }
   }, [open, defaultProjectId]);
 
+  // Auto-fill team when project changes
+  useEffect(() => {
+    if (formData.project_id) {
+      fetchDefaultTeamForProject(formData.project_id);
+    }
+  }, [formData.project_id]);
+
   const fetchTeamsAndProjects = async () => {
     setLoadingData(true);
     try {
@@ -115,6 +122,40 @@ export default function CreateSprintModal({
       toast.error("Erro ao carregar dados");
     } finally {
       setLoadingData(false);
+    }
+  };
+
+  const fetchDefaultTeamForProject = async (projectId: string) => {
+    try {
+      // First, try to get the team from the most recent sprint for this project
+      const { data: lastSprint } = await supabase
+        .from("sprints")
+        .select("team_id")
+        .eq("project_id", projectId)
+        .order("end_date", { ascending: false })
+        .limit(1)
+        .single();
+
+      if (lastSprint?.team_id) {
+        // Use the team from the previous sprint
+        setFormData((prev) => ({ ...prev, team_id: lastSprint.team_id }));
+        return;
+      }
+
+      // If no previous sprint, get teams from project_teams (for kick off sprint)
+      const { data: projectTeams } = await supabase
+        .from("project_teams")
+        .select("team_id")
+        .eq("project_id", projectId)
+        .limit(1);
+
+      if (projectTeams && projectTeams.length > 0) {
+        // Use the first team associated with the project
+        setFormData((prev) => ({ ...prev, team_id: projectTeams[0].team_id }));
+      }
+    } catch (error) {
+      // Silently fail - user can still manually select a team
+      console.error("Error fetching default team:", error);
     }
   };
 

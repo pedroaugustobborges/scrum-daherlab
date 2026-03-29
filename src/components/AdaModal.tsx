@@ -295,10 +295,10 @@ export default function AdaModal({ open, onClose }: AdaModalProps) {
             sx={{ lineHeight: 1.8 }}
           >
             Escolhemos homenagear Ada Lovelace porque ela representa a essência
-            da <strong>inovar é cuidar do futuro</strong>. Assim como Ada viu o
-            potencial das máquinas além do óbvio, nossa assistente Ada foi
-            pensada para enxergar além dos dados brutos do seu projeto,
-            oferecendo insights que ajudam você a tomar melhores decisões e
+            do daher.lab: <strong>inovar é cuidar do futuro</strong>. Assim como
+            Lovelace viu o potencial das máquinas além do óbvio, a nossa Ada foi
+            pensada para enxergar além dos dados brutos do seu projeto e
+            oferecer insights que ajudem você a tomar melhores decisões e
             alcançar seus objetivos.
           </Typography>
         </Box>

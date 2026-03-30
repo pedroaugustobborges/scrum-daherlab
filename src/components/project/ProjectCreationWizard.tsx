@@ -133,7 +133,7 @@ export default function ProjectCreationWizard({
   const isStepValid = (step: number): boolean => {
     switch (step) {
       case 0:
-        return wizardData.name.trim().length > 0
+        return wizardData.name.trim().length > 0 && wizardData.selectedTeams.length > 0
       case 1:
         return !!wizardData.methodology
       case 2:

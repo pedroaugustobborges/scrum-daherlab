@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import {
   Box,
   Paper,
@@ -19,6 +19,8 @@ import {
   alpha,
   Tooltip,
   CircularProgress,
+  Avatar,
+  useTheme,
 } from '@mui/material'
 import {
   ChevronRight,
@@ -27,7 +29,9 @@ import {
   Delete,
   Flag,
   RadioButtonUnchecked,
+  PersonOutline,
 } from '@mui/icons-material'
+import { supabase } from '@/lib/supabase'
 import {
   useTaskHierarchy,
   buildTaskTree,
@@ -43,6 +47,12 @@ import GridToolbar from './GridToolbar'
 
 interface ProjectGridViewProps {
   projectId: string
+}
+
+interface TeamMember {
+  id: string
+  full_name: string
+  avatar_url: string | null
 }
 
 const statusOptions: { value: TaskStatus; label: string; color: string }[] = [
@@ -61,6 +71,8 @@ const priorityOptions: { value: TaskPriority; label: string; color: string }[] =
 ]
 
 export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
+  const theme = useTheme()
+  const isDarkMode = theme.palette.mode === 'dark'
   const { data: tasks = [], isLoading } = useTaskHierarchy(projectId)
   const createTask = useCreateTask()
   const updateTask = useUpdateTask()
@@ -72,6 +84,63 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [editingCell, setEditingCell] = useState<{ id: string; field: string } | null>(null)
   const [editValue, setEditValue] = useState<string>('')
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
+
+  // Fetch team members for this project
+  useEffect(() => {
+    const fetchTeamMembers = async () => {
+      try {
+        // Get teams associated with this project
+        const { data: projectTeams, error: teamsError } = await supabase
+          .from('project_teams')
+          .select('team_id')
+          .eq('project_id', projectId)
+
+        if (teamsError) throw teamsError
+
+        if (!projectTeams || projectTeams.length === 0) {
+          setTeamMembers([])
+          return
+        }
+
+        const teamIds = projectTeams.map((pt) => pt.team_id)
+
+        // Get all members of these teams
+        const { data: members, error: membersError } = await supabase
+          .from('team_members')
+          .select(`
+            user_id,
+            profiles:profiles!team_members_user_id_fkey(id, full_name, avatar_url)
+          `)
+          .in('team_id', teamIds)
+
+        if (membersError) throw membersError
+
+        // Deduplicate members (a user might be in multiple teams)
+        const uniqueMembers = new Map<string, TeamMember>()
+        members?.forEach((m) => {
+          const profile = m.profiles as unknown as TeamMember
+          if (profile && !uniqueMembers.has(profile.id)) {
+            uniqueMembers.set(profile.id, {
+              id: profile.id,
+              full_name: profile.full_name,
+              avatar_url: profile.avatar_url,
+            })
+          }
+        })
+
+        setTeamMembers(Array.from(uniqueMembers.values()).sort((a, b) =>
+          a.full_name.localeCompare(b.full_name)
+        ))
+      } catch (error) {
+        console.error('Error fetching team members:', error)
+      }
+    }
+
+    if (projectId) {
+      fetchTeamMembers()
+    }
+  }, [projectId])
 
   // Build tree and flatten for display
   const taskTree = useMemo(() => buildTaskTree(tasks), [tasks])
@@ -503,6 +572,77 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
           </Typography>
         )
 
+      case 'assigned_to':
+        const assignedProfile = task.assigned_to_profile
+        return (
+          <Select
+            size="small"
+            value={task.assigned_to || ''}
+            onChange={(e) =>
+              updateTask.mutate({
+                id: task.id,
+                projectId,
+                updates: { assigned_to: e.target.value || null },
+              })
+            }
+            displayEmpty
+            sx={{
+              minWidth: 150,
+              '& .MuiSelect-select': { py: 0.5 },
+            }}
+            renderValue={(selected) => {
+              if (!selected) {
+                return (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary' }}>
+                    <PersonOutline sx={{ fontSize: 18 }} />
+                    <Typography variant="body2" color="text.secondary">
+                      Não atribuído
+                    </Typography>
+                  </Box>
+                )
+              }
+              const member = teamMembers.find((m) => m.id === selected) || assignedProfile
+              return (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Avatar
+                    src={member?.avatar_url || undefined}
+                    sx={{ width: 24, height: 24, fontSize: 12 }}
+                  >
+                    {member?.full_name?.charAt(0)?.toUpperCase() || '?'}
+                  </Avatar>
+                  <Typography variant="body2" noWrap>
+                    {member?.full_name || 'Usuário'}
+                  </Typography>
+                </Box>
+              )
+            }}
+          >
+            <MenuItem value="">
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <PersonOutline sx={{ fontSize: 20, color: 'text.secondary' }} />
+                <Typography variant="body2" color="text.secondary">
+                  Não atribuído
+                </Typography>
+              </Box>
+            </MenuItem>
+            {teamMembers.map((member) => (
+              <MenuItem key={member.id} value={member.id}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Avatar
+                    src={member.avatar_url || undefined}
+                    sx={{ width: 24, height: 24, fontSize: 12 }}
+                  >
+                    {member.full_name?.charAt(0)?.toUpperCase() || '?'}
+                  </Avatar>
+                  <Typography variant="body2">
+                    {member.full_name}
+                  </Typography>
+                </Box>
+              </MenuItem>
+            ))}
+          </Select>
+        )
+
       default:
         return null
     }
@@ -548,28 +688,35 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
         <Table stickyHeader size="small">
           <TableHead>
             <TableRow>
-              <TableCell padding="checkbox" sx={{ bgcolor: 'grey.50' }}>
+              <TableCell
+                padding="checkbox"
+                sx={{
+                  bgcolor: isDarkMode ? 'rgba(30, 41, 59, 0.95)' : 'grey.50',
+                  borderBottom: isDarkMode ? '1px solid rgba(255, 255, 255, 0.1)' : undefined,
+                }}
+              >
                 <Checkbox
                   indeterminate={selectedIds.size > 0 && selectedIds.size < visibleTasks.length}
                   checked={visibleTasks.length > 0 && selectedIds.size === visibleTasks.length}
                   onChange={selectAll}
                 />
               </TableCell>
-              <TableCell sx={{ bgcolor: 'grey.50', minWidth: 60, fontWeight: 600 }}>WBS</TableCell>
-              <TableCell sx={{ bgcolor: 'grey.50', minWidth: 300, fontWeight: 600 }}>Nome da Tarefa</TableCell>
-              <TableCell sx={{ bgcolor: 'grey.50', minWidth: 120, fontWeight: 600 }}>Início</TableCell>
-              <TableCell sx={{ bgcolor: 'grey.50', minWidth: 120, fontWeight: 600 }}>Término</TableCell>
-              <TableCell sx={{ bgcolor: 'grey.50', minWidth: 80, fontWeight: 600 }}>Duração</TableCell>
-              <TableCell sx={{ bgcolor: 'grey.50', minWidth: 140, fontWeight: 600 }}>% Concluído</TableCell>
-              <TableCell sx={{ bgcolor: 'grey.50', minWidth: 130, fontWeight: 600 }}>Status</TableCell>
-              <TableCell sx={{ bgcolor: 'grey.50', minWidth: 110, fontWeight: 600 }}>Prioridade</TableCell>
-              <TableCell sx={{ bgcolor: 'grey.50', minWidth: 60, fontWeight: 600 }}>Ações</TableCell>
+              <TableCell sx={{ bgcolor: isDarkMode ? 'rgba(30, 41, 59, 0.95)' : 'grey.50', minWidth: 60, fontWeight: 600, borderBottom: isDarkMode ? '1px solid rgba(255, 255, 255, 0.1)' : undefined }}>WBS</TableCell>
+              <TableCell sx={{ bgcolor: isDarkMode ? 'rgba(30, 41, 59, 0.95)' : 'grey.50', minWidth: 300, fontWeight: 600, borderBottom: isDarkMode ? '1px solid rgba(255, 255, 255, 0.1)' : undefined }}>Nome da Tarefa</TableCell>
+              <TableCell sx={{ bgcolor: isDarkMode ? 'rgba(30, 41, 59, 0.95)' : 'grey.50', minWidth: 150, fontWeight: 600, borderBottom: isDarkMode ? '1px solid rgba(255, 255, 255, 0.1)' : undefined }}>Responsável</TableCell>
+              <TableCell sx={{ bgcolor: isDarkMode ? 'rgba(30, 41, 59, 0.95)' : 'grey.50', minWidth: 120, fontWeight: 600, borderBottom: isDarkMode ? '1px solid rgba(255, 255, 255, 0.1)' : undefined }}>Início</TableCell>
+              <TableCell sx={{ bgcolor: isDarkMode ? 'rgba(30, 41, 59, 0.95)' : 'grey.50', minWidth: 120, fontWeight: 600, borderBottom: isDarkMode ? '1px solid rgba(255, 255, 255, 0.1)' : undefined }}>Término</TableCell>
+              <TableCell sx={{ bgcolor: isDarkMode ? 'rgba(30, 41, 59, 0.95)' : 'grey.50', minWidth: 80, fontWeight: 600, borderBottom: isDarkMode ? '1px solid rgba(255, 255, 255, 0.1)' : undefined }}>Duração</TableCell>
+              <TableCell sx={{ bgcolor: isDarkMode ? 'rgba(30, 41, 59, 0.95)' : 'grey.50', minWidth: 140, fontWeight: 600, borderBottom: isDarkMode ? '1px solid rgba(255, 255, 255, 0.1)' : undefined }}>% Concluído</TableCell>
+              <TableCell sx={{ bgcolor: isDarkMode ? 'rgba(30, 41, 59, 0.95)' : 'grey.50', minWidth: 130, fontWeight: 600, borderBottom: isDarkMode ? '1px solid rgba(255, 255, 255, 0.1)' : undefined }}>Status</TableCell>
+              <TableCell sx={{ bgcolor: isDarkMode ? 'rgba(30, 41, 59, 0.95)' : 'grey.50', minWidth: 110, fontWeight: 600, borderBottom: isDarkMode ? '1px solid rgba(255, 255, 255, 0.1)' : undefined }}>Prioridade</TableCell>
+              <TableCell sx={{ bgcolor: isDarkMode ? 'rgba(30, 41, 59, 0.95)' : 'grey.50', minWidth: 60, fontWeight: 600, borderBottom: isDarkMode ? '1px solid rgba(255, 255, 255, 0.1)' : undefined }}>Ações</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {visibleTasks.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={10} align="center" sx={{ py: 8 }}>
+                <TableCell colSpan={11} align="center" sx={{ py: 8 }}>
                   <Box sx={{ textAlign: 'center' }}>
                     <RadioButtonUnchecked sx={{ fontSize: 48, color: 'text.disabled', mb: 2 }} />
                     <Typography variant="h6" color="text.secondary" gutterBottom>
@@ -592,7 +739,7 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
                     '&:hover': {
                       bgcolor: task.is_summary
                         ? 'rgba(99, 102, 241, 0.08)'
-                        : 'rgba(0, 0, 0, 0.04)',
+                        : isDarkMode ? 'rgba(255, 255, 255, 0.04)' : 'rgba(0, 0, 0, 0.04)',
                     },
                   }}
                 >
@@ -604,6 +751,7 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
                   </TableCell>
                   <TableCell>{renderCell(task, 'wbs_code')}</TableCell>
                   <TableCell>{renderCell(task, 'title')}</TableCell>
+                  <TableCell>{renderCell(task, 'assigned_to')}</TableCell>
                   <TableCell>{renderCell(task, 'start_date')}</TableCell>
                   <TableCell>{renderCell(task, 'end_date')}</TableCell>
                   <TableCell>{renderCell(task, 'planned_duration')}</TableCell>

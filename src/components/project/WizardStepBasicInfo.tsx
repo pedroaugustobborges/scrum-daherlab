@@ -188,18 +188,18 @@ export default function WizardStepBasicInfo({
             Times Responsáveis
           </Typography>
           <Chip
-            label="Opcional"
+            label="Obrigatório"
             size="small"
             sx={{
               height: 20,
               fontSize: '0.65rem',
-              bgcolor: 'rgba(107, 114, 128, 0.1)',
-              color: '#6b7280',
+              bgcolor: 'rgba(239, 68, 68, 0.1)',
+              color: '#ef4444',
             }}
           />
         </Box>
-        <FormControl fullWidth>
-          <InputLabel id="teams-select-label">Selecione os times</InputLabel>
+        <FormControl fullWidth error={data.selectedTeams.length === 0}>
+          <InputLabel id="teams-select-label">Selecione os times *</InputLabel>
           <Select
             labelId="teams-select-label"
             multiple
@@ -207,7 +207,7 @@ export default function WizardStepBasicInfo({
             onChange={(e) =>
               onChange({ selectedTeams: e.target.value as string[] })
             }
-            input={<OutlinedInput label="Selecione os times" />}
+            input={<OutlinedInput label="Selecione os times *" />}
             disabled={teamsLoading}
             renderValue={(selected) => (
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
@@ -256,6 +256,15 @@ export default function WizardStepBasicInfo({
             )}
           </Select>
         </FormControl>
+        <Typography
+          variant="caption"
+          color={data.selectedTeams.length === 0 ? 'error' : 'text.secondary'}
+          sx={{ display: 'block', mt: 1 }}
+        >
+          {data.selectedTeams.length === 0
+            ? 'É necessário selecionar pelo menos um time para criar o projeto.'
+            : 'Somente membros destes times terão acesso ao projeto.'}
+        </Typography>
       </Box>
 
       {/* Dates */}

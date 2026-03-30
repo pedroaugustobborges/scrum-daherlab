@@ -264,6 +264,11 @@ export default function CreateProjectModal({
       return;
     }
 
+    if (selectedTeams.length === 0) {
+      toast.error("Por favor, selecione pelo menos um time para o projeto");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -708,22 +713,32 @@ export default function CreateProjectModal({
               <Typography variant="body2" fontWeight={600} color="text.secondary">
                 Times Responsáveis
               </Typography>
+              <Chip
+                label="Obrigatório"
+                size="small"
+                sx={{
+                  height: 20,
+                  fontSize: "0.65rem",
+                  bgcolor: "rgba(239, 68, 68, 0.1)",
+                  color: "#ef4444",
+                }}
+              />
             </Box>
-            <FormControl fullWidth>
+            <FormControl fullWidth error={selectedTeams.length === 0}>
               <InputLabel
                 id="teams-select-label"
                 sx={{
-                  "&.Mui-focused": { color: "#6366f1" },
+                  "&.Mui-focused": { color: selectedTeams.length === 0 ? "#ef4444" : "#6366f1" },
                 }}
               >
-                Selecione os times
+                Selecione os times *
               </InputLabel>
               <Select
                 labelId="teams-select-label"
                 multiple
                 value={selectedTeams}
                 onChange={(e) => setSelectedTeams(e.target.value as string[])}
-                input={<OutlinedInput label="Selecione os times" />}
+                input={<OutlinedInput label="Selecione os times *" />}
                 disabled={teamsLoading}
                 renderValue={(selected) => (
                   <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
@@ -804,11 +819,12 @@ export default function CreateProjectModal({
             </FormControl>
             <Typography
               variant="caption"
-              color="text.secondary"
+              color={selectedTeams.length === 0 ? "error" : "text.secondary"}
               sx={{ display: "block", mt: 1 }}
             >
-              Selecione os times que serão responsáveis por este projeto.
-              Somente membros destes times terão acesso ao projeto.
+              {selectedTeams.length === 0
+                ? "É necessário selecionar pelo menos um time para criar o projeto."
+                : "Somente membros destes times terão acesso ao projeto."}
             </Typography>
           </Box>
 

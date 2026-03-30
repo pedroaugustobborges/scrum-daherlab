@@ -278,7 +278,7 @@ export default function Login() {
               paddingBottom: "10px",
             }}
           >
-            agir ágil
+            Daher Plan
           </Typography>
 
           <Typography
@@ -315,171 +315,171 @@ export default function Login() {
           )}
 
           <form onSubmit={handleSignIn}>
-              <TextField
-                fullWidth
-                label="Email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                margin="normal"
-                autoComplete="email"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <EmailOutlined sx={{ color: "rgba(6, 182, 212, 0.6)" }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  mb: 3,
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: 3,
-                    backgroundColor: "rgba(255, 255, 255, 0.7)",
-                    backdropFilter: "blur(12px)",
-                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                    "& fieldset": {
-                      borderColor: "rgba(6, 182, 212, 0.25)",
-                      borderWidth: "1.5px",
-                      transition: "all 0.3s ease",
-                    },
-                    "&:hover fieldset": {
-                      borderColor: "rgba(6, 182, 212, 0.5)",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#06b6d4",
-                      borderWidth: "2px",
-                    },
-                    "&.Mui-focused": {
-                      backgroundColor: "rgba(255, 255, 255, 0.9)",
-                      boxShadow: "0 0 0 4px rgba(6, 182, 212, 0.15)",
-                    },
-                  },
-                  "& .MuiInputLabel-root": {
-                    color: "rgba(71, 85, 105, 0.7)",
-                    "&.Mui-focused": {
-                      color: "#06b6d4",
-                    },
-                  },
-                  "& .MuiInputBase-input": {
-                    color: "rgba(15, 23, 42, 0.95)",
-                    padding: "16px 14px",
-                  },
-                }}
-              />
-              <TextField
-                fullWidth
-                label="Senha"
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                margin="normal"
-                autoComplete="current-password"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <LockOutlined sx={{ color: "rgba(6, 182, 212, 0.6)" }} />
-                    </InputAdornment>
-                  ),
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => setShowPassword(!showPassword)}
-                        edge="end"
-                        sx={{
-                          color: "rgba(6, 182, 212, 0.6)",
-                          transition: "all 0.2s ease",
-                          "&:hover": {
-                            color: "#06b6d4",
-                            backgroundColor: "rgba(6, 182, 212, 0.1)",
-                          },
-                        }}
-                      >
-                        {showPassword ? (
-                          <VisibilityOffOutlined />
-                        ) : (
-                          <VisibilityOutlined />
-                        )}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  mb: 3,
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: 3,
-                    backgroundColor: "rgba(255, 255, 255, 0.7)",
-                    backdropFilter: "blur(12px)",
-                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                    "& fieldset": {
-                      borderColor: "rgba(6, 182, 212, 0.25)",
-                      borderWidth: "1.5px",
-                      transition: "all 0.3s ease",
-                    },
-                    "&:hover fieldset": {
-                      borderColor: "rgba(6, 182, 212, 0.5)",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#06b6d4",
-                      borderWidth: "2px",
-                    },
-                    "&.Mui-focused": {
-                      backgroundColor: "rgba(255, 255, 255, 0.9)",
-                      boxShadow: "0 0 0 4px rgba(6, 182, 212, 0.15)",
-                    },
-                  },
-                  "& .MuiInputLabel-root": {
-                    color: "rgba(71, 85, 105, 0.7)",
-                    "&.Mui-focused": {
-                      color: "#06b6d4",
-                    },
-                  },
-                  "& .MuiInputBase-input": {
-                    color: "rgba(15, 23, 42, 0.95)",
-                    padding: "16px 14px",
-                  },
-                }}
-              />
-              <Button
-                fullWidth
-                variant="contained"
-                type="submit"
-                disabled={loading}
-                sx={{
-                  mt: 2,
-                  mb: 2,
-                  py: 2,
-                  fontSize: "1rem",
-                  fontWeight: 600,
+            <TextField
+              fullWidth
+              label="Email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              margin="normal"
+              autoComplete="email"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <EmailOutlined sx={{ color: "rgba(6, 182, 212, 0.6)" }} />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                mb: 3,
+                "& .MuiOutlinedInput-root": {
                   borderRadius: 3,
-                  textTransform: "none",
-                  letterSpacing: "0.5px",
-                  background:
-                    "linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #6366f1 100%)",
-                  boxShadow:
-                    "0 8px 24px rgba(6, 182, 212, 0.4), 0 4px 12px rgba(99, 102, 241, 0.3)",
-                  color: "#ffffff",
+                  backgroundColor: "rgba(255, 255, 255, 0.7)",
+                  backdropFilter: "blur(12px)",
                   transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                  "&:hover": {
-                    background:
-                      "linear-gradient(135deg, #0891b2 0%, #2563eb 50%, #4f46e5 100%)",
-                    boxShadow:
-                      "0 12px 32px rgba(6, 182, 212, 0.5), 0 6px 16px rgba(99, 102, 241, 0.4)",
-                    transform: "translateY(-2px)",
+                  "& fieldset": {
+                    borderColor: "rgba(6, 182, 212, 0.25)",
+                    borderWidth: "1.5px",
+                    transition: "all 0.3s ease",
                   },
-                  "&:active": {
-                    transform: "translateY(0)",
+                  "&:hover fieldset": {
+                    borderColor: "rgba(6, 182, 212, 0.5)",
                   },
-                  "&.Mui-disabled": {
-                    background: "rgba(99, 102, 241, 0.2)",
-                    color: "rgba(71, 85, 105, 0.4)",
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#06b6d4",
+                    borderWidth: "2px",
                   },
-                }}
-              >
-                {loading ? "Entrando..." : "Entrar"}
-              </Button>
-            </form>
+                  "&.Mui-focused": {
+                    backgroundColor: "rgba(255, 255, 255, 0.9)",
+                    boxShadow: "0 0 0 4px rgba(6, 182, 212, 0.15)",
+                  },
+                },
+                "& .MuiInputLabel-root": {
+                  color: "rgba(71, 85, 105, 0.7)",
+                  "&.Mui-focused": {
+                    color: "#06b6d4",
+                  },
+                },
+                "& .MuiInputBase-input": {
+                  color: "rgba(15, 23, 42, 0.95)",
+                  padding: "16px 14px",
+                },
+              }}
+            />
+            <TextField
+              fullWidth
+              label="Senha"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              margin="normal"
+              autoComplete="current-password"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockOutlined sx={{ color: "rgba(6, 182, 212, 0.6)" }} />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                      sx={{
+                        color: "rgba(6, 182, 212, 0.6)",
+                        transition: "all 0.2s ease",
+                        "&:hover": {
+                          color: "#06b6d4",
+                          backgroundColor: "rgba(6, 182, 212, 0.1)",
+                        },
+                      }}
+                    >
+                      {showPassword ? (
+                        <VisibilityOffOutlined />
+                      ) : (
+                        <VisibilityOutlined />
+                      )}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                mb: 3,
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 3,
+                  backgroundColor: "rgba(255, 255, 255, 0.7)",
+                  backdropFilter: "blur(12px)",
+                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                  "& fieldset": {
+                    borderColor: "rgba(6, 182, 212, 0.25)",
+                    borderWidth: "1.5px",
+                    transition: "all 0.3s ease",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "rgba(6, 182, 212, 0.5)",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#06b6d4",
+                    borderWidth: "2px",
+                  },
+                  "&.Mui-focused": {
+                    backgroundColor: "rgba(255, 255, 255, 0.9)",
+                    boxShadow: "0 0 0 4px rgba(6, 182, 212, 0.15)",
+                  },
+                },
+                "& .MuiInputLabel-root": {
+                  color: "rgba(71, 85, 105, 0.7)",
+                  "&.Mui-focused": {
+                    color: "#06b6d4",
+                  },
+                },
+                "& .MuiInputBase-input": {
+                  color: "rgba(15, 23, 42, 0.95)",
+                  padding: "16px 14px",
+                },
+              }}
+            />
+            <Button
+              fullWidth
+              variant="contained"
+              type="submit"
+              disabled={loading}
+              sx={{
+                mt: 2,
+                mb: 2,
+                py: 2,
+                fontSize: "1rem",
+                fontWeight: 600,
+                borderRadius: 3,
+                textTransform: "none",
+                letterSpacing: "0.5px",
+                background:
+                  "linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #6366f1 100%)",
+                boxShadow:
+                  "0 8px 24px rgba(6, 182, 212, 0.4), 0 4px 12px rgba(99, 102, 241, 0.3)",
+                color: "#ffffff",
+                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                "&:hover": {
+                  background:
+                    "linear-gradient(135deg, #0891b2 0%, #2563eb 50%, #4f46e5 100%)",
+                  boxShadow:
+                    "0 12px 32px rgba(6, 182, 212, 0.5), 0 6px 16px rgba(99, 102, 241, 0.4)",
+                  transform: "translateY(-2px)",
+                },
+                "&:active": {
+                  transform: "translateY(0)",
+                },
+                "&.Mui-disabled": {
+                  background: "rgba(99, 102, 241, 0.2)",
+                  color: "rgba(71, 85, 105, 0.4)",
+                },
+              }}
+            >
+              {loading ? "Entrando..." : "Entrar"}
+            </Button>
+          </form>
         </CardContent>
       </Card>
     </Box>

@@ -88,7 +88,7 @@ export default function Navbar() {
           if (payload.new?.avatar_url !== undefined) {
             setAvatarUrl(payload.new.avatar_url);
           }
-        }
+        },
       )
       .subscribe();
 
@@ -142,7 +142,7 @@ export default function Navbar() {
     { label: "Planner", path: "/planner", icon: <ViewKanban /> },
     { label: "Calendário", path: "/calendar", icon: <CalendarMonth /> },
     { label: "Times", path: "/teams", icon: <People /> },
-    { label: "Daher Lab", path: "/scrum-guide", icon: <MenuBook /> },
+    { label: "daher.lab", path: "/scrum-guide", icon: <MenuBook /> },
   ];
 
   // Add admin menu item if user is admin
@@ -217,7 +217,7 @@ export default function Navbar() {
               display: { xs: "none", sm: "block" },
             }}
           >
-            agir ágil
+            Daher Plan
           </Typography>
         </Box>
 

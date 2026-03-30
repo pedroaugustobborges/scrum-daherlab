@@ -9,8 +9,9 @@ import {
   Typography,
   Chip,
   Stack,
+  Avatar,
 } from "@mui/material";
-import { Save, Functions } from "@mui/icons-material";
+import { Save, Functions, PersonOutline } from "@mui/icons-material";
 import toast from "react-hot-toast";
 import Modal from "./Modal";
 import { supabase } from "@/lib/supabase";
@@ -39,6 +40,7 @@ interface Project {
 interface TeamMember {
   id: string;
   full_name: string;
+  avatar_url: string | null;
 }
 
 const fibonacciOptions = [1, 2, 3, 5, 8, 13, 21, 34, 55, 89];
@@ -65,7 +67,6 @@ export default function CreateBacklogItemModal({
   useEffect(() => {
     if (open) {
       fetchProjects();
-      fetchTeamMembers();
       if (item) {
         setFormData({
           title: item.title || "",
@@ -82,6 +83,15 @@ export default function CreateBacklogItemModal({
     }
   }, [open, item]);
 
+  // Fetch team members when project changes
+  useEffect(() => {
+    if (formData.project_id) {
+      fetchTeamMembers(formData.project_id);
+    } else {
+      setTeamMembers([]);
+    }
+  }, [formData.project_id]);
+
   const fetchProjects = async () => {
     try {
       const { data, error } = await supabase
@@ -97,15 +107,52 @@ export default function CreateBacklogItemModal({
     }
   };
 
-  const fetchTeamMembers = async () => {
+  const fetchTeamMembers = async (projectId: string) => {
     try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id, full_name")
-        .order("full_name");
+      // Get teams associated with this project
+      const { data: projectTeams, error: teamsError } = await supabase
+        .from("project_teams")
+        .select("team_id")
+        .eq("project_id", projectId);
 
-      if (error) throw error;
-      setTeamMembers(data || []);
+      if (teamsError) throw teamsError;
+
+      if (!projectTeams || projectTeams.length === 0) {
+        setTeamMembers([]);
+        return;
+      }
+
+      const teamIds = projectTeams.map((pt) => pt.team_id);
+
+      // Get all members of these teams
+      const { data: members, error: membersError } = await supabase
+        .from("team_members")
+        .select(`
+          user_id,
+          profiles:profiles!team_members_user_id_fkey(id, full_name, avatar_url)
+        `)
+        .in("team_id", teamIds);
+
+      if (membersError) throw membersError;
+
+      // Deduplicate members (a user might be in multiple teams)
+      const uniqueMembers = new Map<string, TeamMember>();
+      members?.forEach((m) => {
+        const profile = m.profiles as unknown as TeamMember;
+        if (profile && !uniqueMembers.has(profile.id)) {
+          uniqueMembers.set(profile.id, {
+            id: profile.id,
+            full_name: profile.full_name,
+            avatar_url: profile.avatar_url,
+          });
+        }
+      });
+
+      setTeamMembers(
+        Array.from(uniqueMembers.values()).sort((a, b) =>
+          a.full_name.localeCompare(b.full_name)
+        )
+      );
     } catch (error) {
       console.error("Error fetching team members:", error);
     }
@@ -229,7 +276,7 @@ export default function CreateBacklogItemModal({
                 required
                 value={formData.project_id}
                 onChange={(e) =>
-                  setFormData({ ...formData, project_id: e.target.value })
+                  setFormData({ ...formData, project_id: e.target.value, assigned_to: "" })
                 }
               >
                 <MenuItem value="">
@@ -287,13 +334,36 @@ export default function CreateBacklogItemModal({
                 onChange={(e) =>
                   setFormData({ ...formData, assigned_to: e.target.value })
                 }
+                disabled={!formData.project_id}
+                helperText={
+                  !formData.project_id
+                    ? "Selecione um projeto primeiro"
+                    : teamMembers.length === 0
+                    ? "Nenhum membro no projeto"
+                    : undefined
+                }
               >
                 <MenuItem value="">
-                  <em>Não atribuído</em>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <PersonOutline sx={{ fontSize: 24, color: "text.secondary" }} />
+                    <Typography variant="body2" color="text.secondary">
+                      Não atribuído
+                    </Typography>
+                  </Box>
                 </MenuItem>
                 {teamMembers.map((member) => (
                   <MenuItem key={member.id} value={member.id}>
-                    {member.full_name}
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Avatar
+                        src={member.avatar_url || undefined}
+                        sx={{ width: 24, height: 24, fontSize: 12 }}
+                      >
+                        {member.full_name?.charAt(0)?.toUpperCase() || "?"}
+                      </Avatar>
+                      <Typography variant="body2">
+                        {member.full_name}
+                      </Typography>
+                    </Box>
                   </MenuItem>
                 ))}
               </TextField>

@@ -10,6 +10,7 @@ import {
   Chip,
   Autocomplete,
   Typography,
+  Avatar,
 } from "@mui/material";
 import {
   Assignment,
@@ -21,6 +22,7 @@ import {
   Functions,
   CalendarMonth,
   AccountTree,
+  PersonOutline,
 } from "@mui/icons-material";
 import toast from "react-hot-toast";
 import Modal from "./Modal";
@@ -37,7 +39,7 @@ interface CreateUserStoryModalProps {
 interface Profile {
   id: string;
   full_name: string;
-  email?: string;
+  avatar_url: string | null;
 }
 
 interface AvailableTask {
@@ -104,18 +106,61 @@ export default function CreateUserStoryModal({
   }, [open, projectId]);
 
   const fetchProfiles = async () => {
+    if (!projectId) {
+      setProfiles([]);
+      return;
+    }
+
     setLoadingProfiles(true);
     try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id, full_name")
-        .order("full_name");
+      // Get teams associated with this project
+      const { data: projectTeams, error: teamsError } = await supabase
+        .from("project_teams")
+        .select("team_id")
+        .eq("project_id", projectId);
 
-      if (error) throw error;
-      setProfiles(data || []);
+      if (teamsError) throw teamsError;
+
+      if (!projectTeams || projectTeams.length === 0) {
+        setProfiles([]);
+        setLoadingProfiles(false);
+        return;
+      }
+
+      const teamIds = projectTeams.map((pt) => pt.team_id);
+
+      // Get all members of these teams
+      const { data: members, error: membersError } = await supabase
+        .from("team_members")
+        .select(`
+          user_id,
+          profiles:profiles!team_members_user_id_fkey(id, full_name, avatar_url)
+        `)
+        .in("team_id", teamIds);
+
+      if (membersError) throw membersError;
+
+      // Deduplicate members (a user might be in multiple teams)
+      const uniqueMembers = new Map<string, Profile>();
+      members?.forEach((m) => {
+        const profile = m.profiles as unknown as Profile;
+        if (profile && !uniqueMembers.has(profile.id)) {
+          uniqueMembers.set(profile.id, {
+            id: profile.id,
+            full_name: profile.full_name,
+            avatar_url: profile.avatar_url,
+          });
+        }
+      });
+
+      setProfiles(
+        Array.from(uniqueMembers.values()).sort((a, b) =>
+          a.full_name.localeCompare(b.full_name)
+        )
+      );
     } catch (error) {
       console.error("Error fetching profiles:", error);
-      toast.error("Erro ao carregar usuários");
+      toast.error("Erro ao carregar membros do projeto");
     } finally {
       setLoadingProfiles(false);
     }
@@ -370,6 +415,11 @@ export default function CreateUserStoryModal({
               value={formData.assigned_to}
               onChange={(e) => handleChange("assigned_to", e.target.value)}
               disabled={loadingProfiles}
+              helperText={
+                profiles.length === 0 && !loadingProfiles
+                  ? "Nenhum membro associado ao projeto"
+                  : undefined
+              }
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -378,10 +428,27 @@ export default function CreateUserStoryModal({
                 ),
               }}
             >
-              <MenuItem value="">Não atribuído</MenuItem>
+              <MenuItem value="">
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <PersonOutline sx={{ fontSize: 24, color: "text.secondary" }} />
+                  <Typography variant="body2" color="text.secondary">
+                    Não atribuído
+                  </Typography>
+                </Box>
+              </MenuItem>
               {profiles.map((profile) => (
                 <MenuItem key={profile.id} value={profile.id}>
-                  {profile.full_name || "Sem nome"}
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Avatar
+                      src={profile.avatar_url || undefined}
+                      sx={{ width: 24, height: 24, fontSize: 12 }}
+                    >
+                      {profile.full_name?.charAt(0)?.toUpperCase() || "?"}
+                    </Avatar>
+                    <Typography variant="body2">
+                      {profile.full_name || "Sem nome"}
+                    </Typography>
+                  </Box>
                 </MenuItem>
               ))}
             </TextField>

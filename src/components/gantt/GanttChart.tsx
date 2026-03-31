@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from 'react'
+import { useState, useMemo, useRef, useEffect } from 'react'
 import {
   Box,
   Paper,
@@ -8,6 +8,7 @@ import {
   Chip,
   CircularProgress,
   useTheme,
+  Button,
 } from '@mui/material'
 import {
   ZoomIn,
@@ -16,8 +17,13 @@ import {
   ChevronRight,
   ExpandMore,
   Flag,
+  FileDownload,
 } from '@mui/icons-material'
 import { useTaskHierarchy, buildTaskTree, flattenTaskTree } from '@/hooks/useTaskHierarchy'
+import { useDependencies } from '@/hooks/useDependencies'
+import { exportGanttToXLSX } from '@/utils/exportGanttToXLSX'
+import { supabase } from '@/lib/supabase'
+import toast from 'react-hot-toast'
 import {
   generateTimelineUnits,
   dateToX,
@@ -46,15 +52,91 @@ const zoomLabels: Record<GanttZoomLevel, string> = {
   year: 'Ano',
 }
 
+interface TeamMember {
+  id: string
+  full_name: string
+  avatar_url: string | null
+}
+
 export default function GanttChart({ projectId }: GanttChartProps) {
   const theme = useTheme()
   const isDarkMode = theme.palette.mode === 'dark'
   const { data: tasks = [], isLoading } = useTaskHierarchy(projectId)
+  const { data: dependencies = [] } = useDependencies(projectId)
   const [zoom, setZoom] = useState<GanttZoomLevel>('week')
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [isExporting, setIsExporting] = useState(false)
+  const [projectName, setProjectName] = useState('')
+  const [projectManager, setProjectManager] = useState('')
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
   const chartRef = useRef<HTMLDivElement>(null)
   const timelineRef = useRef<HTMLDivElement>(null)
+
+  // Fetch project info and team members
+  useEffect(() => {
+    const fetchProjectData = async () => {
+      if (!projectId) return
+
+      try {
+        // Fetch project info
+        const { data: projectData } = await supabase
+          .from('projects')
+          .select('name, created_by')
+          .eq('id', projectId)
+          .single()
+
+        if (projectData) {
+          setProjectName(projectData.name)
+
+          // Fetch project manager name
+          if (projectData.created_by) {
+            const { data: managerData } = await supabase
+              .from('profiles')
+              .select('full_name')
+              .eq('id', projectData.created_by)
+              .single()
+            if (managerData) {
+              setProjectManager(managerData.full_name)
+            }
+          }
+        }
+
+        // Fetch team members
+        const { data: projectTeams } = await supabase
+          .from('project_teams')
+          .select('team_id')
+          .eq('project_id', projectId)
+
+        if (projectTeams && projectTeams.length > 0) {
+          const teamIds = projectTeams.map((pt) => pt.team_id)
+
+          const { data: members } = await supabase
+            .from('team_members')
+            .select(`
+              user_id,
+              profiles:profiles!team_members_user_id_fkey(id, full_name, avatar_url)
+            `)
+            .in('team_id', teamIds)
+
+          if (members) {
+            const uniqueMembers = new Map<string, TeamMember>()
+            members.forEach((m) => {
+              const profile = m.profiles as unknown as TeamMember
+              if (profile && !uniqueMembers.has(profile.id)) {
+                uniqueMembers.set(profile.id, profile)
+              }
+            })
+            setTeamMembers(Array.from(uniqueMembers.values()))
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching project data:', error)
+      }
+    }
+
+    fetchProjectData()
+  }, [projectId])
 
   // Build tree and flatten
   const taskTree = useMemo(() => buildTaskTree(tasks), [tasks])
@@ -103,6 +185,39 @@ export default function GanttChart({ projectId }: GanttChartProps) {
       const today = new Date()
       const x = dateToX(today, dateRange.start, zoom)
       chartRef.current.scrollLeft = Math.max(0, x - 200)
+    }
+  }
+
+  const handleExport = async () => {
+    if (isExporting || tasks.length === 0) return
+
+    setIsExporting(true)
+    const loadingToast = toast.loading('Gerando cronograma...')
+
+    try {
+      // Build team members map
+      const teamMembersMap = new Map<string, string>()
+      teamMembers.forEach(member => {
+        teamMembersMap.set(member.id, member.full_name)
+      })
+
+      // Export to XLSX
+      exportGanttToXLSX({
+        projectName: projectName || 'Projeto',
+        projectManager: projectManager,
+        tasks,
+        dependencies,
+        teamMembers: teamMembersMap,
+      })
+
+      toast.dismiss(loadingToast)
+      toast.success('Cronograma exportado com sucesso!')
+    } catch (error) {
+      console.error('Error exporting Gantt:', error)
+      toast.dismiss(loadingToast)
+      toast.error('Erro ao exportar cronograma')
+    } finally {
+      setIsExporting(false)
     }
   }
 
@@ -177,6 +292,29 @@ export default function GanttChart({ projectId }: GanttChartProps) {
           <IconButton size="small" onClick={scrollToToday}>
             <Today />
           </IconButton>
+        </Tooltip>
+
+        <Tooltip title="Exportar cronograma para Excel">
+          <span>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={isExporting ? <CircularProgress size={16} /> : <FileDownload />}
+              onClick={handleExport}
+              disabled={isExporting || tasks.length === 0}
+              sx={{
+                ml: 1,
+                borderColor: 'rgba(16, 185, 129, 0.3)',
+                color: '#10b981',
+                '&:hover': {
+                  borderColor: '#10b981',
+                  bgcolor: 'rgba(16, 185, 129, 0.05)',
+                },
+              }}
+            >
+              {isExporting ? 'Exportando...' : 'Exportar'}
+            </Button>
+          </span>
         </Tooltip>
       </Box>
 

@@ -5,7 +5,6 @@ import {
   Tooltip,
   Divider,
   Chip,
-  CircularProgress,
 } from '@mui/material'
 import {
   Add,
@@ -15,7 +14,6 @@ import {
   UnfoldMore,
   UnfoldLess,
   Refresh,
-  FileDownload,
 } from '@mui/icons-material'
 
 interface GridToolbarProps {
@@ -30,8 +28,6 @@ interface GridToolbarProps {
   onExpandAll?: () => void
   onCollapseAll?: () => void
   onRefresh?: () => void
-  onExport?: () => void
-  isExporting?: boolean
 }
 
 export default function GridToolbar({
@@ -46,8 +42,6 @@ export default function GridToolbar({
   onExpandAll,
   onCollapseAll,
   onRefresh,
-  onExport,
-  isExporting,
 }: GridToolbarProps) {
   return (
     <Box
@@ -170,31 +164,6 @@ export default function GridToolbar({
             },
           }}
         />
-      )}
-
-      {/* Export */}
-      {onExport && (
-        <Tooltip title="Exportar para Excel">
-          <span>
-            <Button
-              variant="outlined"
-              size="small"
-              startIcon={isExporting ? <CircularProgress size={16} /> : <FileDownload />}
-              onClick={onExport}
-              disabled={isExporting}
-              sx={{
-                borderColor: 'rgba(16, 185, 129, 0.3)',
-                color: '#10b981',
-                '&:hover': {
-                  borderColor: '#10b981',
-                  bgcolor: 'rgba(16, 185, 129, 0.05)',
-                },
-              }}
-            >
-              {isExporting ? 'Exportando...' : 'Exportar'}
-            </Button>
-          </span>
-        </Tooltip>
       )}
 
       {/* Refresh */}

@@ -42,8 +42,11 @@ import {
   useIndentTask,
   useOutdentTask,
 } from '@/hooks/useTaskHierarchy'
+import { useDependencies } from '@/hooks/useDependencies'
 import type { HierarchicalTask, TaskStatus, TaskPriority } from '@/types/hybrid'
+import { exportGridToXLSX } from '@/utils/exportGridToXLSX'
 import GridToolbar from './GridToolbar'
+import toast from 'react-hot-toast'
 
 interface ProjectGridViewProps {
   projectId: string
@@ -74,6 +77,7 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
   const theme = useTheme()
   const isDarkMode = theme.palette.mode === 'dark'
   const { data: tasks = [], isLoading } = useTaskHierarchy(projectId)
+  const { data: dependencies = [] } = useDependencies(projectId)
   const createTask = useCreateTask()
   const updateTask = useUpdateTask()
   const deleteTask = useDeleteTask()
@@ -85,6 +89,21 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
   const [editingCell, setEditingCell] = useState<{ id: string; field: string } | null>(null)
   const [editValue, setEditValue] = useState<string>('')
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
+  const [projectName, setProjectName] = useState<string>('')
+  const [isExporting, setIsExporting] = useState(false)
+
+  // Fetch project name
+  useEffect(() => {
+    const fetchProjectName = async () => {
+      const { data } = await supabase
+        .from('projects')
+        .select('name')
+        .eq('id', projectId)
+        .single()
+      if (data) setProjectName(data.name)
+    }
+    if (projectId) fetchProjectName()
+  }, [projectId])
 
   // Fetch team members for this project
   useEffect(() => {
@@ -329,6 +348,38 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
           // Error handled in hook
         }
       }
+    }
+  }
+
+  const handleExport = async () => {
+    if (isExporting || tasks.length === 0) return
+
+    setIsExporting(true)
+    const loadingToast = toast.loading('Preparando exportação...')
+
+    try {
+      // Build team members map
+      const teamMembersMap = new Map<string, string>()
+      teamMembers.forEach(member => {
+        teamMembersMap.set(member.id, member.full_name)
+      })
+
+      // Export to XLSX
+      exportGridToXLSX({
+        projectName: projectName || 'Projeto',
+        tasks,
+        dependencies,
+        teamMembers: teamMembersMap,
+      })
+
+      toast.dismiss(loadingToast)
+      toast.success('Cronograma exportado com sucesso!')
+    } catch (error) {
+      console.error('Error exporting to XLSX:', error)
+      toast.dismiss(loadingToast)
+      toast.error('Erro ao exportar cronograma')
+    } finally {
+      setIsExporting(false)
     }
   }
 
@@ -673,6 +724,8 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
           const task = tasks.find((t) => t.id === id)
           return task?.parent_task_id != null
         })}
+        onExport={handleExport}
+        isExporting={isExporting}
       />
 
       <TableContainer

@@ -7,6 +7,7 @@ import {
   Tooltip,
   Chip,
   CircularProgress,
+  useTheme,
 } from '@mui/material'
 import {
   ZoomIn,
@@ -46,6 +47,8 @@ const zoomLabels: Record<GanttZoomLevel, string> = {
 }
 
 export default function GanttChart({ projectId }: GanttChartProps) {
+  const theme = useTheme()
+  const isDarkMode = theme.palette.mode === 'dark'
   const { data: tasks = [], isLoading } = useTaskHierarchy(projectId)
   const [zoom, setZoom] = useState<GanttZoomLevel>('week')
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
@@ -203,9 +206,9 @@ export default function GanttChart({ projectId }: GanttChartProps) {
           <Box
             sx={{
               height: 50,
-              bgcolor: 'grey.100',
+              bgcolor: isDarkMode ? 'rgba(30, 41, 59, 0.95)' : 'grey.100',
               borderBottom: '1px solid',
-              borderColor: 'divider',
+              borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'divider',
               display: 'flex',
               alignItems: 'center',
               px: 2,
@@ -233,9 +236,9 @@ export default function GanttChart({ projectId }: GanttChartProps) {
                     ? 'rgba(99, 102, 241, 0.1)'
                     : index % 2 === 0
                     ? 'transparent'
-                    : 'rgba(0, 0, 0, 0.02)',
+                    : isDarkMode ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.02)',
                   borderBottom: '1px solid',
-                  borderColor: 'divider',
+                  borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.06)' : 'divider',
                   '&:hover': {
                     bgcolor: 'rgba(99, 102, 241, 0.05)',
                   },
@@ -289,12 +292,12 @@ export default function GanttChart({ projectId }: GanttChartProps) {
             sx={{
               height: 50,
               overflow: 'hidden',
-              bgcolor: 'grey.100',
+              bgcolor: isDarkMode ? 'rgba(30, 41, 59, 0.95)' : 'grey.100',
               borderBottom: '1px solid',
-              borderColor: 'divider',
+              borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'divider',
             }}
           >
-            <GanttTimeline units={timelineUnits} />
+            <GanttTimeline units={timelineUnits} isDarkMode={isDarkMode} />
           </Box>
 
           {/* Chart Body */}
@@ -328,9 +331,9 @@ export default function GanttChart({ projectId }: GanttChartProps) {
                     left: 0,
                     right: 0,
                     height: ROW_HEIGHT,
-                    bgcolor: index % 2 === 0 ? 'transparent' : 'rgba(0, 0, 0, 0.02)',
+                    bgcolor: index % 2 === 0 ? 'transparent' : isDarkMode ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.02)',
                     borderBottom: '1px solid',
-                    borderColor: 'rgba(0, 0, 0, 0.06)',
+                    borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.06)',
                   }}
                 />
               ))}
@@ -349,7 +352,7 @@ export default function GanttChart({ projectId }: GanttChartProps) {
                         left: x,
                         width: unit.width,
                         height: '100%',
-                        bgcolor: 'rgba(0, 0, 0, 0.03)',
+                        bgcolor: isDarkMode ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.03)',
                       }}
                     />
                   )
@@ -410,7 +413,17 @@ export default function GanttChart({ projectId }: GanttChartProps) {
       </Paper>
 
       {/* Legend */}
-      <Box sx={{ display: 'flex', gap: 3, mt: 2, px: 1 }}>
+      <Paper
+        sx={{
+          display: 'flex',
+          gap: 3,
+          mt: 2,
+          px: 2,
+          py: 1.5,
+          flexWrap: 'wrap',
+          borderRadius: 2,
+        }}
+      >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Box sx={{ width: 16, height: 8, bgcolor: '#6366f1', borderRadius: 1 }} />
           <Typography variant="caption" color="text.secondary">Tarefa</Typography>
@@ -438,7 +451,7 @@ export default function GanttChart({ projectId }: GanttChartProps) {
           <Box sx={{ width: 2, height: 16, bgcolor: '#ef4444' }} />
           <Typography variant="caption" color="text.secondary">Hoje</Typography>
         </Box>
-      </Box>
+      </Paper>
     </Box>
   )
 }

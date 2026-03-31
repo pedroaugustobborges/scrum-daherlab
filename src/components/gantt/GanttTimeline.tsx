@@ -10,9 +10,10 @@ interface TimelineUnit {
 
 interface GanttTimelineProps {
   units: TimelineUnit[]
+  isDarkMode?: boolean
 }
 
-export default function GanttTimeline({ units }: GanttTimelineProps) {
+export default function GanttTimeline({ units, isDarkMode }: GanttTimelineProps) {
   return (
     <Box
       sx={{
@@ -30,11 +31,11 @@ export default function GanttTimeline({ units }: GanttTimelineProps) {
             display: 'flex',
             flexDirection: 'column',
             borderRight: '1px solid',
-            borderColor: 'divider',
+            borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'divider',
             bgcolor: unit.isToday
               ? 'rgba(239, 68, 68, 0.1)'
               : unit.isWeekend
-              ? 'rgba(0, 0, 0, 0.03)'
+              ? isDarkMode ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.03)'
               : 'transparent',
           }}
         >

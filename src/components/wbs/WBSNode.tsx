@@ -1,4 +1,4 @@
-import { Box, Typography, Chip, LinearProgress, alpha, Tooltip } from '@mui/material'
+import { Box, Typography, Chip, LinearProgress, alpha, Tooltip, useTheme } from '@mui/material'
 import { Flag, CheckCircle, Schedule, Warning, AccountTree } from '@mui/icons-material'
 import type { WBSNode as WBSNodeType, TaskStatus } from '@/types/hybrid'
 
@@ -27,6 +27,8 @@ const statusIcons: Record<TaskStatus, React.ReactNode> = {
 }
 
 export default function WBSNode({ node, isSelected, onClick, predecessorCount = 0, successorCount = 0 }: WBSNodeProps) {
+  const theme = useTheme()
+  const isDarkMode = theme.palette.mode === 'dark'
   const status = node.attributes?.status || 'todo'
   const statusColor = statusColors[status] || '#6b7280'
   const hasChildren = node.children && node.children.length > 0
@@ -53,13 +55,17 @@ export default function WBSNode({ node, isSelected, onClick, predecessorCount = 
           ? '0 4px 12px rgba(99, 102, 241, 0.25)'
           : isCritical
           ? '0 4px 12px rgba(239, 68, 68, 0.2)'
+          : isDarkMode
+          ? '0 2px 8px rgba(0, 0, 0, 0.3)'
           : '0 2px 8px rgba(0, 0, 0, 0.08)',
         overflow: 'hidden',
         cursor: 'pointer',
         transition: 'all 0.2s',
         '&:hover': {
           transform: 'translateY(-2px)',
-          boxShadow: '0 6px 16px rgba(0, 0, 0, 0.12)',
+          boxShadow: isDarkMode
+            ? '0 6px 16px rgba(0, 0, 0, 0.4)'
+            : '0 6px 16px rgba(0, 0, 0, 0.12)',
         },
       }}
     >
@@ -187,8 +193,8 @@ export default function WBSNode({ node, isSelected, onClick, predecessorCount = 
                   sx={{
                     height: 18,
                     fontSize: '0.55rem',
-                    bgcolor: alpha('#6366f1', 0.1),
-                    color: '#6366f1',
+                    bgcolor: alpha('#6366f1', isDarkMode ? 0.2 : 0.1),
+                    color: isDarkMode ? '#818cf8' : '#6366f1',
                     '& .MuiChip-icon': { fontSize: 12 },
                   }}
                 />
@@ -203,8 +209,8 @@ export default function WBSNode({ node, isSelected, onClick, predecessorCount = 
                   sx={{
                     height: 18,
                     fontSize: '0.55rem',
-                    bgcolor: alpha('#10b981', 0.1),
-                    color: '#10b981',
+                    bgcolor: alpha('#10b981', isDarkMode ? 0.2 : 0.1),
+                    color: isDarkMode ? '#34d399' : '#10b981',
                     '& .MuiChip-icon': { fontSize: 12 },
                   }}
                 />

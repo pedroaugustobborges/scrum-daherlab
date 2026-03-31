@@ -8,6 +8,7 @@ import {
   Slider,
   Chip,
   CircularProgress,
+  useTheme,
 } from '@mui/material'
 import {
   ZoomIn,
@@ -18,10 +19,13 @@ import {
   FullscreenExit,
 } from '@mui/icons-material'
 import { useTaskHierarchy } from '@/hooks/useTaskHierarchy'
-import { useWBSData } from '@/hooks/useWBSData'
+import { useWBSData, SprintInfo } from '@/hooks/useWBSData'
+import { useProjectConfig } from '@/hooks/useProjectConfig'
 import type { WBSNode as WBSNodeType } from '@/types/hybrid'
 import WBSNode from './WBSNode'
 import { supabase } from '@/lib/supabase'
+import html2canvas from 'html2canvas'
+import toast from 'react-hot-toast'
 
 interface WBSDiagramProps {
   projectId: string
@@ -36,8 +40,13 @@ interface DependencyCounts {
 }
 
 export default function WBSDiagram({ projectId }: WBSDiagramProps) {
+  const theme = useTheme()
   const { data: tasks = [], isLoading } = useTaskHierarchy(projectId)
-  const { wbsTree, totalNodes, maxDepth } = useWBSData(tasks)
+  const { data: projectConfig } = useProjectConfig(projectId)
+  const [sprints, setSprints] = useState<SprintInfo[]>([])
+  const [projectName, setProjectName] = useState<string>('')
+  const [isExporting, setIsExporting] = useState(false)
+  const { wbsTree, totalNodes, maxDepth } = useWBSData(tasks, sprints, projectConfig, projectName)
 
   const [zoom, setZoom] = useState(1)
   const [pan, setPan] = useState({ x: 0, y: 0 })
@@ -48,6 +57,42 @@ export default function WBSDiagram({ projectId }: WBSDiagramProps) {
   const [dependencyCounts, setDependencyCounts] = useState<DependencyCounts>({})
 
   const containerRef = useRef<HTMLDivElement>(null)
+  const diagramRef = useRef<HTMLDivElement>(null)
+
+  // Fetch project name and sprints
+  useEffect(() => {
+    const fetchProjectData = async () => {
+      if (!projectId) return
+
+      try {
+        // Fetch project name
+        const { data: projectData } = await supabase
+          .from('projects')
+          .select('name')
+          .eq('id', projectId)
+          .single()
+
+        if (projectData) {
+          setProjectName(projectData.name)
+        }
+
+        // Fetch sprints for this project
+        const { data: sprintsData } = await supabase
+          .from('sprints')
+          .select('id, name, status, start_date, end_date')
+          .eq('project_id', projectId)
+          .order('start_date', { ascending: true })
+
+        if (sprintsData) {
+          setSprints(sprintsData)
+        }
+      } catch (error) {
+        console.error('Error fetching project data:', error)
+      }
+    }
+
+    fetchProjectData()
+  }, [projectId])
 
   // Fetch dependency counts for all tasks
   useEffect(() => {
@@ -141,8 +186,50 @@ export default function WBSDiagram({ projectId }: WBSDiagramProps) {
   }
 
   const handleExport = async () => {
-    // TODO: Implement export to PNG/PDF
-    console.log('Export WBS')
+    if (!diagramRef.current || isExporting) return
+
+    setIsExporting(true)
+    const loadingToast = toast.loading('Exportando WBS...')
+
+    try {
+      // Store current transform values
+      const currentZoom = zoom
+      const currentPan = { ...pan }
+
+      // Reset zoom and pan for export
+      setZoom(1)
+      setPan({ x: 0, y: 0 })
+
+      // Wait for DOM to update
+      await new Promise(resolve => setTimeout(resolve, 100))
+
+      const canvas = await html2canvas(diagramRef.current, {
+        backgroundColor: theme.palette.mode === 'dark' ? '#1e1e1e' : '#ffffff',
+        scale: 2, // Higher resolution
+        logging: false,
+        useCORS: true,
+        allowTaint: true,
+      })
+
+      // Restore zoom and pan
+      setZoom(currentZoom)
+      setPan(currentPan)
+
+      // Download the image
+      const link = document.createElement('a')
+      link.download = `WBS_${projectName || 'Projeto'}_${new Date().toISOString().split('T')[0]}.png`
+      link.href = canvas.toDataURL('image/png')
+      link.click()
+
+      toast.dismiss(loadingToast)
+      toast.success('WBS exportado com sucesso!')
+    } catch (error) {
+      console.error('Error exporting WBS:', error)
+      toast.dismiss(loadingToast)
+      toast.error('Erro ao exportar WBS')
+    } finally {
+      setIsExporting(false)
+    }
   }
 
   // Render WBS tree recursively
@@ -246,7 +333,7 @@ export default function WBSDiagram({ projectId }: WBSDiagramProps) {
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
-        bgcolor: 'grey.50',
+        bgcolor: theme.palette.mode === 'dark' ? 'background.default' : 'grey.50',
       }}
     >
       {/* Toolbar */}
@@ -330,6 +417,7 @@ export default function WBSDiagram({ projectId }: WBSDiagramProps) {
           borderRadius: 2,
           cursor: isDragging ? 'grabbing' : 'grab',
           position: 'relative',
+          bgcolor: theme.palette.mode === 'dark' ? 'background.paper' : 'background.paper',
         }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -338,6 +426,7 @@ export default function WBSDiagram({ projectId }: WBSDiagramProps) {
         onWheel={handleWheel}
       >
         <Box
+          ref={diagramRef}
           sx={{
             position: 'absolute',
             top: '50%',
@@ -346,6 +435,7 @@ export default function WBSDiagram({ projectId }: WBSDiagramProps) {
             transformOrigin: 'center center',
             transition: isDragging ? 'none' : 'transform 0.1s ease-out',
             p: 4,
+            bgcolor: theme.palette.mode === 'dark' ? 'background.paper' : 'background.paper',
           }}
         >
           {renderTree(wbsTree)}
@@ -353,7 +443,17 @@ export default function WBSDiagram({ projectId }: WBSDiagramProps) {
       </Paper>
 
       {/* Legend */}
-      <Box sx={{ display: 'flex', gap: 3, mt: 2, px: 1, flexWrap: 'wrap' }}>
+      <Paper
+        sx={{
+          display: 'flex',
+          gap: 3,
+          mt: 2,
+          px: 2,
+          py: 1.5,
+          flexWrap: 'wrap',
+          borderRadius: 2,
+        }}
+      >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Box
             sx={{
@@ -398,8 +498,10 @@ export default function WBSDiagram({ projectId }: WBSDiagramProps) {
             sx={{
               height: 16,
               fontSize: '0.6rem',
-              bgcolor: 'rgba(99, 102, 241, 0.1)',
-              color: '#6366f1',
+              bgcolor: theme.palette.mode === 'dark'
+                ? 'rgba(99, 102, 241, 0.2)'
+                : 'rgba(99, 102, 241, 0.1)',
+              color: theme.palette.mode === 'dark' ? '#818cf8' : '#6366f1',
             }}
           />
           <Typography variant="caption" color="text.secondary">Predecessoras</Typography>
@@ -411,13 +513,15 @@ export default function WBSDiagram({ projectId }: WBSDiagramProps) {
             sx={{
               height: 16,
               fontSize: '0.6rem',
-              bgcolor: 'rgba(16, 185, 129, 0.1)',
-              color: '#10b981',
+              bgcolor: theme.palette.mode === 'dark'
+                ? 'rgba(16, 185, 129, 0.2)'
+                : 'rgba(16, 185, 129, 0.1)',
+              color: theme.palette.mode === 'dark' ? '#34d399' : '#10b981',
             }}
           />
           <Typography variant="caption" color="text.secondary">Sucessoras</Typography>
         </Box>
-      </Box>
+      </Paper>
     </Box>
   )
 }

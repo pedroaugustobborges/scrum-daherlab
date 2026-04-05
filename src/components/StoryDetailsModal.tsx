@@ -645,7 +645,7 @@ export default function StoryDetailsModal({
               <Tab
                 icon={<Visibility />}
                 iconPosition="start"
-                label="DetalhesS"
+                label="Detalhes"
               />
               <Tab
                 icon={<CheckCircle />}
@@ -935,6 +935,255 @@ export default function StoryDetailsModal({
                         }{" "}
                         de {story.subtasks.length} concluídas
                       </Typography>
+                    </Box>
+                  )}
+
+                  {/* Dependencies Preview */}
+                  {(predecessors.length > 0 || successors.length > 0) && (
+                    <Box>
+                      <Typography
+                        variant="subtitle2"
+                        fontWeight={700}
+                        color="text.secondary"
+                        gutterBottom
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        <AccountTree sx={{ fontSize: 18 }} />
+                        Dependências
+                      </Typography>
+
+                      {/* Predecessors */}
+                      {predecessors.length > 0 && (
+                        <Box sx={{ mb: predecessors.length > 0 && successors.length > 0 ? 2 : 0 }}>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ display: "block", mb: 1 }}
+                          >
+                            Predecessoras ({predecessors.length})
+                          </Typography>
+                          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                            {predecessors.map((dep) => (
+                              <Chip
+                                key={dep.id}
+                                label={dep.predecessor?.title || "Tarefa não encontrada"}
+                                size="small"
+                                icon={
+                                  <Box
+                                    sx={{
+                                      width: 8,
+                                      height: 8,
+                                      borderRadius: "50%",
+                                      bgcolor:
+                                        dep.predecessor?.status === "done"
+                                          ? "#10b981"
+                                          : dep.predecessor?.status === "in-progress"
+                                            ? "#f59e0b"
+                                            : "#6b7280",
+                                      ml: 1,
+                                    }}
+                                  />
+                                }
+                                sx={{
+                                  bgcolor:
+                                    dep.predecessor?.status === "done"
+                                      ? "rgba(16, 185, 129, 0.1)"
+                                      : dep.predecessor?.status === "in-progress"
+                                        ? "rgba(245, 158, 11, 0.1)"
+                                        : "rgba(107, 114, 128, 0.1)",
+                                  color:
+                                    dep.predecessor?.status === "done"
+                                      ? "#10b981"
+                                      : dep.predecessor?.status === "in-progress"
+                                        ? "#f59e0b"
+                                        : "#6b7280",
+                                  fontWeight: 500,
+                                  fontSize: "0.75rem",
+                                  maxWidth: 200,
+                                  "& .MuiChip-label": {
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "nowrap",
+                                  },
+                                }}
+                              />
+                            ))}
+                          </Box>
+                        </Box>
+                      )}
+
+                      {/* Successors */}
+                      {successors.length > 0 && (
+                        <Box>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ display: "block", mb: 1 }}
+                          >
+                            Sucessoras ({successors.length})
+                          </Typography>
+                          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                            {successors.map((dep) => (
+                              <Chip
+                                key={dep.id}
+                                label={dep.successor?.title || "Tarefa não encontrada"}
+                                size="small"
+                                icon={
+                                  <Box
+                                    sx={{
+                                      width: 8,
+                                      height: 8,
+                                      borderRadius: "50%",
+                                      bgcolor:
+                                        dep.successor?.status === "done"
+                                          ? "#10b981"
+                                          : dep.successor?.status === "in-progress"
+                                            ? "#f59e0b"
+                                            : "#6b7280",
+                                      ml: 1,
+                                    }}
+                                  />
+                                }
+                                sx={{
+                                  bgcolor:
+                                    dep.successor?.status === "done"
+                                      ? "rgba(16, 185, 129, 0.1)"
+                                      : dep.successor?.status === "in-progress"
+                                        ? "rgba(245, 158, 11, 0.1)"
+                                        : "rgba(107, 114, 128, 0.1)",
+                                  color:
+                                    dep.successor?.status === "done"
+                                      ? "#10b981"
+                                      : dep.successor?.status === "in-progress"
+                                        ? "#f59e0b"
+                                        : "#6b7280",
+                                  fontWeight: 500,
+                                  fontSize: "0.75rem",
+                                  maxWidth: 200,
+                                  "& .MuiChip-label": {
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "nowrap",
+                                  },
+                                }}
+                              />
+                            ))}
+                          </Box>
+                        </Box>
+                      )}
+                    </Box>
+                  )}
+
+                  {/* Comments Preview */}
+                  {comments.length > 0 && (
+                    <Box>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          mb: 1.5,
+                        }}
+                      >
+                        <Typography
+                          variant="subtitle2"
+                          fontWeight={700}
+                          color="text.secondary"
+                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                        >
+                          <ChatBubbleOutline sx={{ fontSize: 18 }} />
+                          Comentários Recentes
+                        </Typography>
+                        <Button
+                          size="small"
+                          onClick={() => setActiveTab(2)}
+                          sx={{
+                            color: "#6366f1",
+                            fontWeight: 600,
+                            fontSize: "0.75rem",
+                            textTransform: "none",
+                            "&:hover": {
+                              bgcolor: "rgba(99, 102, 241, 0.1)",
+                            },
+                          }}
+                        >
+                          Ver todos ({comments.length})
+                        </Button>
+                      </Box>
+                      <Stack spacing={1.5}>
+                        {comments.slice(-3).map((comment) => (
+                          <Paper
+                            key={comment.id}
+                            elevation={0}
+                            sx={{
+                              p: 1.5,
+                              bgcolor: "rgba(0, 0, 0, 0.02)",
+                              borderRadius: 2,
+                              border: "1px solid rgba(0, 0, 0, 0.06)",
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "flex-start",
+                                gap: 1.5,
+                              }}
+                            >
+                              <Avatar
+                                src={comment.author?.avatar_url || undefined}
+                                sx={{
+                                  width: 28,
+                                  height: 28,
+                                  bgcolor: "#8b5cf6",
+                                  fontSize: "0.7rem",
+                                  fontWeight: 600,
+                                }}
+                              >
+                                {getInitials(comment.author?.full_name)}
+                              </Avatar>
+                              <Box sx={{ flex: 1, minWidth: 0 }}>
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 1,
+                                    mb: 0.25,
+                                  }}
+                                >
+                                  <Typography
+                                    variant="caption"
+                                    fontWeight={600}
+                                    color="text.primary"
+                                  >
+                                    {comment.author?.full_name || "Usuário"}
+                                  </Typography>
+                                  <Typography
+                                    variant="caption"
+                                    color="text.disabled"
+                                  >
+                                    {formatCommentDate(comment.created_at)}
+                                  </Typography>
+                                </Box>
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                  sx={{
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    display: "-webkit-box",
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: "vertical",
+                                    lineHeight: 1.4,
+                                    fontSize: "0.8rem",
+                                  }}
+                                >
+                                  {comment.content}
+                                </Typography>
+                              </Box>
+                            </Box>
+                          </Paper>
+                        ))}
+                      </Stack>
                     </Box>
                   )}
                 </>

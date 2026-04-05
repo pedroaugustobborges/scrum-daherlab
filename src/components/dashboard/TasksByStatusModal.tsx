@@ -11,8 +11,9 @@ import {
   Chip,
   Pagination,
   useTheme,
+  Paper,
 } from "@mui/material";
-import { Close, FolderOutlined, PersonOutline } from "@mui/icons-material";
+import { Close, FolderOutlined, PersonOutline, Block } from "@mui/icons-material";
 import { TransitionProps } from "@mui/material/transitions";
 import { supabase } from "@/lib/supabase";
 
@@ -44,6 +45,11 @@ interface TaskItem {
     id: string;
     full_name: string;
     avatar_url: string | null;
+  } | null;
+  blocked_reason?: {
+    content: string;
+    author_name: string;
+    created_at: string;
   } | null;
 }
 
@@ -103,7 +109,8 @@ export default function TasksByStatusModal({
           description,
           created_at,
           project_id,
-          assigned_to
+          assigned_to,
+          blocked_comment_id
         `,
         )
         .eq("status", status)
@@ -130,6 +137,40 @@ export default function TasksByStatusModal({
         .select("id, full_name, avatar_url")
         .in("id", assigneeIds.length > 0 ? assigneeIds : ["none"]);
 
+      // Fetch blocking comments if status is "blocked"
+      let blockingComments: Record<string, { content: string; author_name: string; created_at: string }> = {};
+      if (status === "blocked") {
+        const blockedCommentIds = tasksData
+          ?.map((t) => t.blocked_comment_id)
+          .filter(Boolean) as string[];
+
+        if (blockedCommentIds && blockedCommentIds.length > 0) {
+          const { data: commentsData } = await supabase
+            .from("comments")
+            .select(`
+              id,
+              content,
+              created_at,
+              author:profiles!user_id(full_name)
+            `)
+            .in("id", blockedCommentIds);
+
+          if (commentsData) {
+            commentsData.forEach((comment) => {
+              const authorData = comment.author as { full_name: string } | { full_name: string }[] | null;
+              const authorName = Array.isArray(authorData)
+                ? authorData[0]?.full_name
+                : authorData?.full_name;
+              blockingComments[comment.id] = {
+                content: comment.content,
+                author_name: authorName || "Usuário",
+                created_at: comment.created_at,
+              };
+            });
+          }
+        }
+      }
+
       // Map data
       const mappedTasks: TaskItem[] =
         tasksData?.map((task) => ({
@@ -139,6 +180,9 @@ export default function TasksByStatusModal({
           created_at: task.created_at,
           project: projects?.find((p) => p.id === task.project_id) || null,
           assignee: profiles?.find((p) => p.id === task.assigned_to) || null,
+          blocked_reason: task.blocked_comment_id
+            ? blockingComments[task.blocked_comment_id] || null
+            : null,
         })) || [];
 
       setTasks(mappedTasks);
@@ -448,6 +492,73 @@ export default function TasksByStatusModal({
                       </Box>
                     )}
                   </Box>
+
+                  {/* Blocking Reason (for blocked tasks) */}
+                  {task.blocked_reason && (
+                    <Paper
+                      elevation={0}
+                      sx={{
+                        mt: 2,
+                        p: 1.5,
+                        borderRadius: 2,
+                        bgcolor: "rgba(239, 68, 68, 0.08)",
+                        border: "1px solid rgba(239, 68, 68, 0.2)",
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "flex-start",
+                          gap: 1.5,
+                        }}
+                      >
+                        <Block
+                          sx={{
+                            fontSize: 18,
+                            color: "#ef4444",
+                            mt: 0.25,
+                          }}
+                        />
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1,
+                              mb: 0.5,
+                            }}
+                          >
+                            <Typography
+                              variant="caption"
+                              fontWeight={600}
+                              sx={{ color: "#ef4444" }}
+                            >
+                              Motivo do Bloqueio
+                            </Typography>
+                            <Typography
+                              variant="caption"
+                              color="text.disabled"
+                            >
+                              por {task.blocked_reason.author_name}
+                            </Typography>
+                          </Box>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: "text.secondary",
+                              lineHeight: 1.5,
+                              whiteSpace: "pre-wrap",
+                            }}
+                          >
+                            {task.blocked_reason.content.replace(
+                              /^🚫 \*\*Motivo do Bloqueio:\*\* /,
+                              ""
+                            )}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Paper>
+                  )}
                 </Box>
               ))}
             </Box>

@@ -49,6 +49,7 @@ import {
 import toast from "react-hot-toast";
 import Modal from "./Modal";
 import CreateSubtaskModal from "./CreateSubtaskModal";
+import BlockReasonModal from "./BlockReasonModal";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import confetti from "canvas-confetti";
@@ -169,6 +170,9 @@ export default function StoryDetailsModal({
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingCommentContent, setEditingCommentContent] = useState("");
   const commentsEndRef = useRef<HTMLDivElement>(null);
+
+  // Block reason modal state
+  const [blockReasonModalOpen, setBlockReasonModalOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -448,6 +452,16 @@ export default function StoryDetailsModal({
       return;
     }
 
+    // Check if changing to blocked status and wasn't already blocked
+    if (formData.status === "blocked" && story?.status !== "blocked") {
+      setBlockReasonModalOpen(true);
+      return;
+    }
+
+    await performSave();
+  };
+
+  const performSave = async (blockReason?: string) => {
     setSaving(true);
 
     try {
@@ -467,9 +481,42 @@ export default function StoryDetailsModal({
         if (planned_duration < 1) planned_duration = 1;
       }
 
-      const { error } = await supabase
-        .from("tasks")
-        .update({
+      // If blocking, first add the blocking comment
+      if (blockReason && user) {
+        const { data: commentData, error: commentError } = await supabase
+          .from("comments")
+          .insert({
+            task_id: storyId,
+            user_id: user.id,
+            content: `🚫 **Motivo do Bloqueio:** ${blockReason}`,
+          })
+          .select()
+          .single();
+
+        if (commentError) throw commentError;
+
+        // Update task with the blocking comment reference
+        const { error } = await supabase
+          .from("tasks")
+          .update({
+            title: formData.title,
+            description: formData.description,
+            status: formData.status,
+            priority: formData.priority,
+            story_points: formData.story_points,
+            assigned_to: formData.assigned_to || null,
+            due_date: formData.due_date || null,
+            start_date: formData.start_date || null,
+            end_date: formData.end_date || null,
+            planned_duration: planned_duration,
+            blocked_comment_id: commentData.id,
+          })
+          .eq("id", storyId);
+
+        if (error) throw error;
+      } else {
+        // Normal save without blocking
+        const updateData: Record<string, unknown> = {
           title: formData.title,
           description: formData.description,
           status: formData.status,
@@ -480,20 +527,43 @@ export default function StoryDetailsModal({
           start_date: formData.start_date || null,
           end_date: formData.end_date || null,
           planned_duration: planned_duration,
-        })
-        .eq("id", storyId);
+        };
 
-      if (error) throw error;
+        // Clear blocked_comment_id if unblocking
+        if (story?.status === "blocked" && formData.status !== "blocked") {
+          updateData.blocked_comment_id = null;
+        }
+
+        const { error } = await supabase
+          .from("tasks")
+          .update(updateData)
+          .eq("id", storyId);
+
+        if (error) throw error;
+      }
 
       toast.success("História atualizada com sucesso!");
       setEditMode(false);
       await fetchStory();
+      await fetchComments();
       onSuccess();
     } catch (error) {
       console.error("Error updating story:", error);
       toast.error("Erro ao atualizar história");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleBlockConfirm = async (reason: string) => {
+    await performSave(reason);
+  };
+
+  const handleBlockCancel = () => {
+    setBlockReasonModalOpen(false);
+    // Reset status back to original if user cancels
+    if (story) {
+      setFormData((prev) => ({ ...prev, status: story.status }));
     }
   };
 
@@ -2477,6 +2547,13 @@ export default function StoryDetailsModal({
         }}
         taskId={storyId}
         subtask={editingSubtask}
+      />
+
+      <BlockReasonModal
+        open={blockReasonModalOpen}
+        onClose={handleBlockCancel}
+        onConfirm={handleBlockConfirm}
+        storyTitle={story?.title}
       />
     </>
   );

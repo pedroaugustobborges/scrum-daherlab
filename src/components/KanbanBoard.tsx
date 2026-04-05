@@ -15,8 +15,10 @@ import {
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import KanbanCard from './KanbanCard'
 import StoryDetailsModal from './StoryDetailsModal'
+import BlockReasonModal from './BlockReasonModal'
 import toast from 'react-hot-toast'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/contexts/AuthContext'
 import confetti from 'canvas-confetti'
 
 interface Sprint {
@@ -87,6 +89,7 @@ function DroppableColumn({ id, children }: { id: string; children: React.ReactNo
 
 export default function KanbanBoard({ stories, onRefresh, onDeleteStory, currentSprintId, isStakeholder = false }: KanbanBoardProps) {
   const theme = useTheme()
+  const { user } = useAuth()
   const isDarkMode = theme.palette.mode === 'dark'
   const [activeId, setActiveId] = useState<string | null>(null)
   const [storiesByStatus, setStoriesByStatus] = useState<Record<string, UserStory[]>>({})
@@ -96,6 +99,10 @@ export default function KanbanBoard({ stories, onRefresh, onDeleteStory, current
   const [sprints, setSprints] = useState<Sprint[]>([])
   const [storyToReplicate, setStoryToReplicate] = useState<string | null>(null)
   const [storyDependencies, setStoryDependencies] = useState<Record<string, TaskDependency[]>>({})
+
+  // Block reason modal state
+  const [blockReasonModalOpen, setBlockReasonModalOpen] = useState(false)
+  const [pendingBlockStory, setPendingBlockStory] = useState<{ id: string; title: string } | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -467,26 +474,30 @@ export default function KanbanBoard({ stories, onRefresh, onDeleteStory, current
       }
     }
 
-    // Check if blocking a story that has successors
+    // Check if blocking a story - require reason
     if (newStatus === 'blocked' && story.status !== 'blocked') {
-      // Check if this story has successors
-      const successorCheck = Object.entries(storyDependencies).some(
-        ([, deps]) => deps.some((d) => d.predecessor_id === storyId)
-      )
-      if (successorCheck) {
-        toast('⚠️ Atenção: esta história possui dependentes que também serão afetados', {
-          duration: 4000,
-          style: {
-            background: '#fef3c7',
-            color: '#92400e',
-          },
-        })
-      }
+      // Store the pending block action and show modal
+      setPendingBlockStory({ id: storyId, title: story.title })
+      setBlockReasonModalOpen(true)
+      // Reset to original state while waiting for user input
+      const grouped = columns.reduce((acc, col) => {
+        acc[col.id] = stories.filter((s) => s.status === col.id)
+        return acc
+      }, {} as Record<string, UserStory[]>)
+      setStoriesByStatus(grouped)
+      return
     }
 
     try {
       // Update status in database
-      const { error } = await supabase.from('tasks').update({ status: newStatus }).eq('id', storyId)
+      const updateData: Record<string, unknown> = { status: newStatus }
+
+      // Clear blocked_comment_id if unblocking
+      if (story.status === 'blocked' && newStatus !== 'blocked') {
+        updateData.blocked_comment_id = null
+      }
+
+      const { error } = await supabase.from('tasks').update(updateData).eq('id', storyId)
 
       if (error) throw error
 
@@ -517,6 +528,64 @@ export default function KanbanBoard({ stories, onRefresh, onDeleteStory, current
       }, {} as Record<string, UserStory[]>)
       setStoriesByStatus(grouped)
     }
+  }
+
+  // Handle block confirmation with reason
+  const handleBlockConfirm = async (reason: string) => {
+    if (!pendingBlockStory || !user) return
+
+    try {
+      // First, create the blocking comment
+      const { data: commentData, error: commentError } = await supabase
+        .from('comments')
+        .insert({
+          task_id: pendingBlockStory.id,
+          user_id: user.id,
+          content: `🚫 **Motivo do Bloqueio:** ${reason}`,
+        })
+        .select()
+        .single()
+
+      if (commentError) throw commentError
+
+      // Update task with blocked status and the blocking comment reference
+      const { error } = await supabase
+        .from('tasks')
+        .update({
+          status: 'blocked',
+          blocked_comment_id: commentData.id,
+        })
+        .eq('id', pendingBlockStory.id)
+
+      if (error) throw error
+
+      // Check if this story has successors and warn
+      const successorCheck = Object.entries(storyDependencies).some(
+        ([, deps]) => deps.some((d) => d.predecessor_id === pendingBlockStory.id)
+      )
+      if (successorCheck) {
+        toast('⚠️ Atenção: esta história possui dependentes que também serão afetados', {
+          duration: 4000,
+          style: {
+            background: '#fef3c7',
+            color: '#92400e',
+          },
+        })
+      }
+
+      toast.success('História bloqueada')
+      setBlockReasonModalOpen(false)
+      setPendingBlockStory(null)
+      onRefresh()
+    } catch (error) {
+      console.error('Error blocking story:', error)
+      toast.error('Erro ao bloquear história')
+    }
+  }
+
+  const handleBlockCancel = () => {
+    setBlockReasonModalOpen(false)
+    setPendingBlockStory(null)
   }
 
   const getColumnStats = (columnId: string) => {
@@ -741,6 +810,14 @@ export default function KanbanBoard({ stories, onRefresh, onDeleteStory, current
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Block Reason Modal */}
+      <BlockReasonModal
+        open={blockReasonModalOpen}
+        onClose={handleBlockCancel}
+        onConfirm={handleBlockConfirm}
+        storyTitle={pendingBlockStory?.title}
+      />
     </DndContext>
   )
 }

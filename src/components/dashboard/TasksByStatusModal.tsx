@@ -100,7 +100,19 @@ export default function TasksByStatusModal({
       setTotalCount(count || 0);
 
       // Fetch tasks with project and assignee info
-      const { data: tasksData, error: tasksError } = await supabase
+      // Try to fetch with blocked_comment_id first, fallback if column doesn't exist
+      let tasksData: Array<{
+        id: string;
+        title: string;
+        description: string | null;
+        created_at: string;
+        project_id: string;
+        assigned_to: string | null;
+        blocked_comment_id?: string | null;
+      }> | null = null;
+
+      // First try with blocked_comment_id (if migration has been applied)
+      const { data: tasksWithBlockedId, error: tasksWithBlockedIdError } = await supabase
         .from("tasks")
         .select(
           `
@@ -117,7 +129,31 @@ export default function TasksByStatusModal({
         .order("created_at", { ascending: false })
         .range(from, to);
 
-      if (tasksError) throw tasksError;
+      // If the column doesn't exist, fetch without it
+      if (tasksWithBlockedIdError && tasksWithBlockedIdError.code === "42703") {
+        const { data: tasksBasic, error: tasksBasicError } = await supabase
+          .from("tasks")
+          .select(
+            `
+            id,
+            title,
+            description,
+            created_at,
+            project_id,
+            assigned_to
+          `,
+          )
+          .eq("status", status)
+          .order("created_at", { ascending: false })
+          .range(from, to);
+
+        if (tasksBasicError) throw tasksBasicError;
+        tasksData = tasksBasic;
+      } else if (tasksWithBlockedIdError) {
+        throw tasksWithBlockedIdError;
+      } else {
+        tasksData = tasksWithBlockedId;
+      }
 
       // Fetch project names
       const projectIds = [

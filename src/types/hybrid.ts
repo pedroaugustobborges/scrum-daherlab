@@ -148,6 +148,9 @@ export interface HierarchicalTask extends BaseTask {
   estimated_hours: number | null;
   actual_hours: number | null;
 
+  // Blocking
+  blocked_comment_id: string | null;
+
   // Populated relations (optional)
   children?: HierarchicalTask[];
   dependencies?: TaskDependency[];

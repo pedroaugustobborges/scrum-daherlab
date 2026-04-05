@@ -32,6 +32,7 @@ import {
   PersonOutline,
 } from '@mui/icons-material'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/contexts/AuthContext'
 import {
   useTaskHierarchy,
   buildTaskTree,
@@ -44,6 +45,8 @@ import {
 } from '@/hooks/useTaskHierarchy'
 import type { HierarchicalTask, TaskStatus, TaskPriority } from '@/types/hybrid'
 import GridToolbar from './GridToolbar'
+import BlockReasonModal from '../BlockReasonModal'
+import toast from 'react-hot-toast'
 
 interface ProjectGridViewProps {
   projectId: string
@@ -72,12 +75,17 @@ const priorityOptions: { value: TaskPriority; label: string; color: string }[] =
 
 export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
   const theme = useTheme()
+  const { user } = useAuth()
   const isDarkMode = theme.palette.mode === 'dark'
   const { data: tasks = [], isLoading } = useTaskHierarchy(projectId)
   const createTask = useCreateTask()
   const updateTask = useUpdateTask()
   const deleteTask = useDeleteTask()
   const indentTask = useIndentTask()
+
+  // Block reason modal state
+  const [blockReasonModalOpen, setBlockReasonModalOpen] = useState(false)
+  const [pendingBlockTask, setPendingBlockTask] = useState<{ id: string; title: string } | null>(null)
   const outdentTask = useOutdentTask()
 
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
@@ -332,6 +340,70 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
     }
   }
 
+  // Handle status change with block reason modal
+  const handleStatusChange = (task: HierarchicalTask, newStatus: TaskStatus) => {
+    // If changing to blocked from a different status, show the modal
+    if (newStatus === 'blocked' && task.status !== 'blocked') {
+      setPendingBlockTask({ id: task.id, title: task.title })
+      setBlockReasonModalOpen(true)
+      return
+    }
+
+    // For unblocking, clear the blocked_comment_id
+    const updates: Record<string, unknown> = { status: newStatus }
+    if (task.status === 'blocked' && newStatus !== 'blocked') {
+      updates.blocked_comment_id = null
+    }
+
+    updateTask.mutate({
+      id: task.id,
+      projectId,
+      updates,
+    })
+  }
+
+  // Handle block confirmation with reason
+  const handleBlockConfirm = async (reason: string) => {
+    if (!pendingBlockTask || !user) return
+
+    try {
+      // First, create the blocking comment
+      const { data: commentData, error: commentError } = await supabase
+        .from('comments')
+        .insert({
+          task_id: pendingBlockTask.id,
+          user_id: user.id,
+          content: `🚫 **Motivo do Bloqueio:** ${reason}`,
+        })
+        .select()
+        .single()
+
+      if (commentError) throw commentError
+
+      // Update task with blocked status and the blocking comment reference
+      await updateTask.mutateAsync({
+        id: pendingBlockTask.id,
+        projectId,
+        updates: {
+          status: 'blocked' as TaskStatus,
+          blocked_comment_id: commentData.id,
+        },
+      })
+
+      toast.success('Tarefa bloqueada')
+      setBlockReasonModalOpen(false)
+      setPendingBlockTask(null)
+    } catch (error) {
+      console.error('Error blocking task:', error)
+      toast.error('Erro ao bloquear tarefa')
+    }
+  }
+
+  const handleBlockCancel = () => {
+    setBlockReasonModalOpen(false)
+    setPendingBlockTask(null)
+  }
+
   const renderCell = (task: HierarchicalTask & { _depth: number; _hasChildren: boolean }, field: string) => {
     const isEditing = editingCell?.id === task.id && editingCell?.field === field
 
@@ -394,13 +466,7 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
           <Select
             size="small"
             value={task.status}
-            onChange={(e) =>
-              updateTask.mutate({
-                id: task.id,
-                projectId,
-                updates: { status: e.target.value as TaskStatus },
-              })
-            }
+            onChange={(e) => handleStatusChange(task, e.target.value as TaskStatus)}
             sx={{
               minWidth: 120,
               '& .MuiSelect-select': { py: 0.5 },
@@ -789,6 +855,14 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* Block Reason Modal */}
+      <BlockReasonModal
+        open={blockReasonModalOpen}
+        onClose={handleBlockCancel}
+        onConfirm={handleBlockConfirm}
+        storyTitle={pendingBlockTask?.title}
+      />
     </Box>
   )
 }

@@ -18,6 +18,9 @@ import {
   TrendingUp,
   CheckCircle,
   Delete,
+  Edit,
+  Check,
+  Close,
   EmojiEvents,
   Person,
   SentimentVeryDissatisfied,
@@ -93,6 +96,8 @@ export default function RetrospectiveBoard({ sprintId, sprintName }: Retrospecti
   const [items, setItems] = useState<RetroItem[]>([])
   const [newItemContent, setNewItemContent] = useState<Record<string, string>>({})
   const [currentUser, setCurrentUser] = useState<string>('')
+  const [editingItemId, setEditingItemId] = useState<string | null>(null)
+  const [editingContent, setEditingContent] = useState<string>('')
 
   useEffect(() => {
     fetchRetrospective()
@@ -207,6 +212,41 @@ export default function RetrospectiveBoard({ sprintId, sprintName }: Retrospecti
     } catch (error) {
       console.error('Error deleting item:', error)
       toast.error('Erro ao remover item')
+    }
+  }
+
+  const handleStartEdit = (item: RetroItem) => {
+    setEditingItemId(item.id)
+    setEditingContent(item.content)
+  }
+
+  const handleCancelEdit = () => {
+    setEditingItemId(null)
+    setEditingContent('')
+  }
+
+  const handleSaveEdit = async (itemId: string) => {
+    const content = editingContent.trim()
+    if (!content) {
+      toast.error('O conteúdo não pode estar vazio')
+      return
+    }
+
+    try {
+      const { error } = await supabase
+        .from('retrospective_items')
+        .update({ content })
+        .eq('id', itemId)
+
+      if (error) throw error
+
+      toast.success('Item atualizado!')
+      setEditingItemId(null)
+      setEditingContent('')
+      await fetchRetrospective()
+    } catch (error) {
+      console.error('Error updating item:', error)
+      toast.error('Erro ao atualizar item')
     }
   }
 
@@ -411,55 +451,147 @@ export default function RetrospectiveBoard({ sprintId, sprintName }: Retrospecti
                     sx={{
                       p: 2,
                       bgcolor: isDarkMode ? '#1e293b' : 'white',
-                      border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.08)',
+                      border: editingItemId === item.id
+                        ? `2px solid ${column.color}`
+                        : isDarkMode ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.08)',
                       borderRadius: 2,
+                      transition: 'all 0.2s ease',
                       '&:hover': {
                         boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
                       },
                     }}
                   >
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
-                      <Typography variant="body2" sx={{ flex: 1, pr: 1 }}>
-                        {item.content}
-                      </Typography>
-                      {item.created_by === currentUser && (
-                        <IconButton size="small" onClick={() => handleDeleteItem(item.id)}>
-                          <Delete sx={{ fontSize: 16, color: '#ef4444' }} />
-                        </IconButton>
-                      )}
-                    </Box>
-
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <Tooltip title="Votar neste item">
-                        <Button
+                    {editingItemId === item.id ? (
+                      /* Edit Mode */
+                      <Box>
+                        <TextField
+                          fullWidth
+                          multiline
+                          minRows={2}
+                          maxRows={4}
                           size="small"
-                          startIcon={<ThumbUp sx={{ fontSize: 14 }} />}
-                          onClick={() => handleVote(item.id, item.votes)}
-                          sx={{
-                            minWidth: 'auto',
-                            px: 1,
-                            fontSize: '0.75rem',
-                            color: column.color,
+                          value={editingContent}
+                          onChange={(e) => setEditingContent(e.target.value)}
+                          autoFocus
+                          onKeyDown={(e) => {
+                            if (e.key === 'Escape') {
+                              handleCancelEdit()
+                            } else if (e.key === 'Enter' && e.ctrlKey) {
+                              handleSaveEdit(item.id)
+                            }
                           }}
-                        >
-                          {item.votes}
-                        </Button>
-                      </Tooltip>
-
-                      {(item.assigned_to_profile?.full_name || item.created_by_profile?.full_name) && (
-                        <Chip
-                          label={item.assigned_to_profile?.full_name || item.created_by_profile?.full_name}
-                          size="small"
-                          icon={<Person sx={{ fontSize: 12 }} />}
                           sx={{
-                            height: 20,
-                            fontSize: '0.65rem',
-                            bgcolor: `${column.color}15`,
-                            color: column.color,
+                            mb: 1.5,
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 1.5,
+                              fontSize: '0.875rem',
+                            },
                           }}
+                          placeholder="Digite o conteúdo..."
                         />
-                      )}
-                    </Box>
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                          <Tooltip title="Cancelar (Esc)">
+                            <IconButton
+                              size="small"
+                              onClick={handleCancelEdit}
+                              sx={{
+                                bgcolor: 'rgba(107, 114, 128, 0.1)',
+                                '&:hover': { bgcolor: 'rgba(107, 114, 128, 0.2)' },
+                              }}
+                            >
+                              <Close sx={{ fontSize: 18, color: '#6b7280' }} />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Salvar (Ctrl+Enter)">
+                            <IconButton
+                              size="small"
+                              onClick={() => handleSaveEdit(item.id)}
+                              sx={{
+                                bgcolor: `${column.color}20`,
+                                '&:hover': { bgcolor: `${column.color}30` },
+                              }}
+                            >
+                              <Check sx={{ fontSize: 18, color: column.color }} />
+                            </IconButton>
+                          </Tooltip>
+                        </Box>
+                      </Box>
+                    ) : (
+                      /* View Mode */
+                      <>
+                        <Typography variant="body2" sx={{ mb: 1.5, whiteSpace: 'pre-wrap' }}>
+                          {item.content}
+                        </Typography>
+
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          {/* Left side: Vote and Edit/Delete actions */}
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Tooltip title="Votar">
+                              <Button
+                                size="small"
+                                startIcon={<ThumbUp sx={{ fontSize: 14 }} />}
+                                onClick={() => handleVote(item.id, item.votes)}
+                                sx={{
+                                  minWidth: 'auto',
+                                  px: 1,
+                                  fontSize: '0.75rem',
+                                  color: column.color,
+                                  '&:hover': {
+                                    bgcolor: `${column.color}15`,
+                                  },
+                                }}
+                              >
+                                {item.votes}
+                              </Button>
+                            </Tooltip>
+
+                            {item.created_by === currentUser && (
+                              <>
+                                <Tooltip title="Editar">
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => handleStartEdit(item)}
+                                    sx={{
+                                      p: 0.5,
+                                      '&:hover': { bgcolor: `${column.color}15` },
+                                    }}
+                                  >
+                                    <Edit sx={{ fontSize: 16, color: column.color }} />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Excluir">
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => handleDeleteItem(item.id)}
+                                    sx={{
+                                      p: 0.5,
+                                      '&:hover': { bgcolor: 'rgba(239, 68, 68, 0.15)' },
+                                    }}
+                                  >
+                                    <Delete sx={{ fontSize: 16, color: '#ef4444' }} />
+                                  </IconButton>
+                                </Tooltip>
+                              </>
+                            )}
+                          </Box>
+
+                          {/* Right side: Author */}
+                          {(item.assigned_to_profile?.full_name || item.created_by_profile?.full_name) && (
+                            <Chip
+                              label={item.assigned_to_profile?.full_name || item.created_by_profile?.full_name}
+                              size="small"
+                              icon={<Person sx={{ fontSize: 12 }} />}
+                              sx={{
+                                height: 20,
+                                fontSize: '0.65rem',
+                                bgcolor: `${column.color}15`,
+                                color: column.color,
+                              }}
+                            />
+                          )}
+                        </Box>
+                      </>
+                    )}
                   </Paper>
                 ))}
               </Stack>

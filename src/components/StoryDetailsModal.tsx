@@ -2540,13 +2540,19 @@ export default function StoryDetailsModal({
           setEditingSubtask(null);
         }}
         onSuccess={async () => {
-          setCreateSubtaskOpen(false);
-          setEditingSubtask(null);
+          // Refresh story data to show the new subtask
           await fetchStory();
-          onSuccess();
+
+          // Only close and notify parent if editing (not creating new subtasks)
+          if (editingSubtask) {
+            setCreateSubtaskOpen(false);
+            setEditingSubtask(null);
+            onSuccess();
+          }
         }}
         taskId={storyId}
         subtask={editingSubtask}
+        keepOpenOnSuccess={!editingSubtask}
       />
 
       <BlockReasonModal

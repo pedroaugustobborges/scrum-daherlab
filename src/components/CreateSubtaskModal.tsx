@@ -35,6 +35,7 @@ interface CreateSubtaskModalProps {
   onSuccess: () => void;
   taskId: string;
   subtask?: Subtask | null;
+  keepOpenOnSuccess?: boolean;
 }
 
 interface Profile {
@@ -55,6 +56,7 @@ export default function CreateSubtaskModal({
   onSuccess,
   taskId,
   subtask,
+  keepOpenOnSuccess = false,
 }: CreateSubtaskModalProps) {
   const [loading, setLoading] = useState(false);
   const [loadingProfiles, setLoadingProfiles] = useState(false);
@@ -167,7 +169,19 @@ export default function CreateSubtaskModal({
       }
 
       onSuccess();
-      onClose();
+
+      // If keepOpenOnSuccess is true and we're creating (not editing), reset the form
+      if (keepOpenOnSuccess && !isEditMode) {
+        setFormData({
+          title: "",
+          description: "",
+          status: "todo",
+          assigned_to: "",
+          estimated_hours: "",
+        });
+      } else {
+        onClose();
+      }
     } catch (error) {
       console.error("Error saving subtask:", error);
       toast.error(

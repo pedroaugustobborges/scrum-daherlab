@@ -1972,6 +1972,7 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
         }}
         onSuccess={fetchUserStories}
         taskId={selectedStoryId}
+        keepOpenOnSuccess
       />
 
       <AdaModal

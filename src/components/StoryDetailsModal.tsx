@@ -666,7 +666,6 @@ export default function StoryDetailsModal({
 
       toast.success("Subtarefa excluída com sucesso!");
       await fetchStory();
-      onSuccess();
     } catch (error) {
       console.error("Error deleting subtask:", error);
       toast.error("Erro ao excluir subtarefa");

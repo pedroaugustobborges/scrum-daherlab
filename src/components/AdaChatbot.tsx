@@ -687,7 +687,7 @@ export default function AdaChatbot({
               background:
                 "linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #ec4899 100%)",
               p: 2,
-              pt: 3.5,
+              pt: 4.5,
               display: "flex",
               alignItems: "center",
               gap: 1.5,

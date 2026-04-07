@@ -31,6 +31,7 @@ import {
 } from "@mui/icons-material";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
+import AdaModal from "./AdaModal";
 
 // Ada API endpoint
 // - Production (Vercel): uses /api/ada-chat serverless function to avoid CORS
@@ -81,6 +82,7 @@ export default function AdaChatbot({
   // State
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
+  const [isAdaModalOpen, setIsAdaModalOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -684,28 +686,39 @@ export default function AdaChatbot({
               background:
                 "linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #ec4899 100%)",
               p: 2,
+              pt: 2.5,
               display: "flex",
               alignItems: "center",
               gap: 1.5,
             }}
           >
-            <Box
-              sx={{
-                width: 48,
-                height: 48,
-                borderRadius: "50%",
-                overflow: "hidden",
-                border: "3px solid rgba(255, 255, 255, 0.5)",
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
-                flexShrink: 0,
-              }}
-            >
-              <img
-                src="/ADA.png"
-                alt="Ada"
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
-            </Box>
+            <Tooltip title="Conheça a Ada">
+              <Box
+                onClick={() => setIsAdaModalOpen(true)}
+                sx={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: "50%",
+                  overflow: "hidden",
+                  border: "3px solid rgba(255, 255, 255, 0.5)",
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+                  flexShrink: 0,
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    transform: "scale(1.08)",
+                    boxShadow: "0 6px 16px rgba(0, 0, 0, 0.3)",
+                    borderColor: "rgba(255, 255, 255, 0.8)",
+                  },
+                }}
+              >
+                <img
+                  src="/ADA.png"
+                  alt="Ada"
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              </Box>
+            </Tooltip>
 
             <Box sx={{ flex: 1 }}>
               <Typography
@@ -1092,6 +1105,9 @@ export default function AdaChatbot({
           </Collapse>
         </Paper>
       </Zoom>
+
+      {/* Ada Info Modal */}
+      <AdaModal open={isAdaModalOpen} onClose={() => setIsAdaModalOpen(false)} />
     </>
   );
 }

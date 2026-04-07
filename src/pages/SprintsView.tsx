@@ -362,6 +362,23 @@ export default function SprintsView() {
                             fontWeight: 600,
                           }}
                         />
+                        <IconButton
+                          size="small"
+                          onClick={(e) => handleOpenEditSprint(e, sprint)}
+                          sx={{
+                            color: 'text.secondary',
+                            opacity: 0.5,
+                            p: 0.5,
+                            transition: 'all 0.2s',
+                            '&:hover': {
+                              opacity: 1,
+                              color: '#6366f1',
+                              bgcolor: 'rgba(99, 102, 241, 0.1)',
+                            },
+                          }}
+                        >
+                          <Edit sx={{ fontSize: 16 }} />
+                        </IconButton>
                       </Box>
 
                       {sprint.goal && (
@@ -396,31 +413,13 @@ export default function SprintsView() {
                       </Box>
                     </Box>
 
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                      <IconButton
-                        size="small"
-                        onClick={(e) => handleOpenEditSprint(e, sprint)}
-                        sx={{
-                          color: 'text.secondary',
-                          opacity: 0.6,
-                          transition: 'all 0.2s',
-                          '&:hover': {
-                            opacity: 1,
-                            color: '#6366f1',
-                            bgcolor: 'rgba(99, 102, 241, 0.1)',
-                          },
-                        }}
-                      >
-                        <Edit sx={{ fontSize: 18 }} />
-                      </IconButton>
-                      <Box sx={{ textAlign: 'right', minWidth: 100 }}>
-                        <Typography variant="h4" fontWeight={800} sx={{ color: statusInfo.color }}>
-                          {progress}%
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {stats.completedPoints}/{stats.totalPoints} pts
-                        </Typography>
-                      </Box>
+                    <Box sx={{ textAlign: 'right', minWidth: 100 }}>
+                      <Typography variant="h4" fontWeight={800} sx={{ color: statusInfo.color }}>
+                        {progress}%
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {stats.completedPoints}/{stats.totalPoints} pts
+                      </Typography>
                     </Box>
                   </Box>
 

@@ -10,17 +10,20 @@ import {
   Stack,
   LinearProgress,
   Grid,
+  IconButton,
 } from '@mui/material'
 import {
   Add,
   SpaceDashboard,
   CalendarToday,
   TrendingUp,
+  Edit,
 } from '@mui/icons-material'
 import toast from 'react-hot-toast'
 import { useProjectContext } from './ProjectDetail'
 import SprintDetailsModal from '@/components/SprintDetailsModal'
 import CreateSprintModal from '@/components/CreateSprintModal'
+import EditSprintModal from '@/components/EditSprintModal'
 import BurndownChart from '@/components/BurndownChart'
 import VelocityChart from '@/components/VelocityChart'
 import { supabase } from '@/lib/supabase'
@@ -58,6 +61,8 @@ export default function SprintsView() {
   const [selectedSprint, setSelectedSprint] = useState<Sprint | null>(null)
   const [sprintDetailsOpen, setSprintDetailsOpen] = useState(false)
   const [createSprintOpen, setCreateSprintOpen] = useState(false)
+  const [editSprintOpen, setEditSprintOpen] = useState(false)
+  const [sprintToEdit, setSprintToEdit] = useState<Sprint | null>(null)
   const [activeSprint, setActiveSprint] = useState<Sprint | null>(null)
   const [activeSprintStories, setActiveSprintStories] = useState<any[]>([])
 
@@ -131,6 +136,17 @@ export default function SprintsView() {
     setSprintDetailsOpen(false)
     setSelectedSprint(null)
     fetchSprints() // Refresh data after closing modal
+  }
+
+  const handleOpenEditSprint = (e: React.MouseEvent, sprint: Sprint) => {
+    e.stopPropagation() // Prevent opening SprintDetailsModal
+    setSprintToEdit(sprint)
+    setEditSprintOpen(true)
+  }
+
+  const handleCloseEditSprint = () => {
+    setEditSprintOpen(false)
+    setSprintToEdit(null)
   }
 
   const calculateProgress = (sprintId: string) => {
@@ -380,13 +396,31 @@ export default function SprintsView() {
                       </Box>
                     </Box>
 
-                    <Box sx={{ textAlign: 'right', minWidth: 100 }}>
-                      <Typography variant="h4" fontWeight={800} sx={{ color: statusInfo.color }}>
-                        {progress}%
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {stats.completedPoints}/{stats.totalPoints} pts
-                      </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                      <IconButton
+                        size="small"
+                        onClick={(e) => handleOpenEditSprint(e, sprint)}
+                        sx={{
+                          color: 'text.secondary',
+                          opacity: 0.6,
+                          transition: 'all 0.2s',
+                          '&:hover': {
+                            opacity: 1,
+                            color: '#6366f1',
+                            bgcolor: 'rgba(99, 102, 241, 0.1)',
+                          },
+                        }}
+                      >
+                        <Edit sx={{ fontSize: 18 }} />
+                      </IconButton>
+                      <Box sx={{ textAlign: 'right', minWidth: 100 }}>
+                        <Typography variant="h4" fontWeight={800} sx={{ color: statusInfo.color }}>
+                          {progress}%
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {stats.completedPoints}/{stats.totalPoints} pts
+                        </Typography>
+                      </Box>
                     </Box>
                   </Box>
 
@@ -436,6 +470,29 @@ export default function SprintsView() {
         }}
         defaultProjectId={project.id}
       />
+
+      {/* Edit Sprint Modal */}
+      {sprintToEdit && (
+        <EditSprintModal
+          open={editSprintOpen}
+          onClose={handleCloseEditSprint}
+          onSuccess={() => {
+            handleCloseEditSprint()
+            fetchSprints()
+          }}
+          sprint={{
+            id: sprintToEdit.id,
+            name: sprintToEdit.name,
+            goal: sprintToEdit.goal || '',
+            start_date: sprintToEdit.start_date,
+            end_date: sprintToEdit.end_date,
+            status: sprintToEdit.status,
+            team_id: sprintToEdit.team_id,
+            project_id: project.id,
+            velocity: sprintToEdit.velocity,
+          }}
+        />
+      )}
     </Box>
   )
 }

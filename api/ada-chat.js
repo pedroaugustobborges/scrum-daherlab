@@ -1,13 +1,17 @@
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || 'https://pedroaugustobborges.app.n8n.cloud/webhook/ada-chat';
 
-  // Handle CORS preflight
+  // Handle CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
+  }
+
+  if (req.method === 'GET') {
+    return res.status(200).json({ status: 'ok', message: 'Ada API is running. Use POST to send messages.' });
   }
 
   if (req.method !== 'POST') {
@@ -41,4 +45,4 @@ export default async function handler(req, res) {
       message: 'Erro ao conectar com o assistente. Por favor, tente novamente.',
     });
   }
-}
+};

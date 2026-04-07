@@ -37,7 +37,8 @@ import AdaModal from "./AdaModal";
 // - Production (Vercel): uses /api/ada-chat serverless function to avoid CORS
 // - Development: uses n8n URL directly (n8n allows localhost CORS)
 const ADA_API_URL = import.meta.env.DEV
-  ? (import.meta.env.VITE_ADA_WEBHOOK_URL || "https://pedroaugustobborges.app.n8n.cloud/webhook/ada-assistant")
+  ? import.meta.env.VITE_ADA_WEBHOOK_URL ||
+    "https://pedroaugustobborges.app.n8n.cloud/webhook/ada-assistant"
   : "/api/ada-chat";
 
 interface Message {
@@ -368,7 +369,7 @@ export default function AdaChatbot({
             voice.name.toLowerCase().includes("vitoria") ||
             voice.name.toLowerCase().includes("maria") ||
             voice.name.includes("Google português do Brasil") ||
-            voice.name.includes("Microsoft Francisca"))
+            voice.name.includes("Microsoft Francisca")),
       );
 
       // Fallback: any Portuguese voice that's not explicitly male
@@ -377,7 +378,7 @@ export default function AdaChatbot({
           voice.lang.includes("pt") &&
           !voice.name.toLowerCase().includes("male") &&
           !voice.name.toLowerCase().includes("daniel") &&
-          !voice.name.toLowerCase().includes("ricardo")
+          !voice.name.toLowerCase().includes("ricardo"),
       );
 
       if (femaleVoice) {
@@ -686,7 +687,7 @@ export default function AdaChatbot({
               background:
                 "linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #ec4899 100%)",
               p: 2,
-              pt: 2.5,
+              pt: 3.5,
               display: "flex",
               alignItems: "center",
               gap: 1.5,
@@ -1107,7 +1108,10 @@ export default function AdaChatbot({
       </Zoom>
 
       {/* Ada Info Modal */}
-      <AdaModal open={isAdaModalOpen} onClose={() => setIsAdaModalOpen(false)} />
+      <AdaModal
+        open={isAdaModalOpen}
+        onClose={() => setIsAdaModalOpen(false)}
+      />
     </>
   );
 }

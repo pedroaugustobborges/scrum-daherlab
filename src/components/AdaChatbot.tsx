@@ -32,10 +32,8 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 
-// n8n webhook URL - update this with your n8n instance URL
-const N8N_WEBHOOK_URL =
-  import.meta.env.VITE_ADA_WEBHOOK_URL ||
-  "http://localhost:5678/webhook/ada-assistant";
+// Ada API endpoint - uses Vercel serverless function in production to avoid CORS
+const ADA_API_URL = "/api/ada-chat";
 
 interface Message {
   id: string;
@@ -502,7 +500,7 @@ export default function AdaChatbot({
         },
       };
 
-      const response = await fetch(N8N_WEBHOOK_URL, {
+      const response = await fetch(ADA_API_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

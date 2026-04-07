@@ -1,5 +1,5 @@
 export default async function handler(req, res) {
-  const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || 'https://pedroaugustobborges.app.n8n.cloud/webhook/ada-chat';
+  const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || 'https://pedroaugustobborges.app.n8n.cloud/webhook/ada-assistant';
 
   // Handle CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -28,6 +28,16 @@ export default async function handler(req, res) {
     });
 
     const text = await response.text();
+
+    // Check for n8n errors
+    if (text.includes('not registered') || text.includes('not found') || response.status === 404) {
+      console.error('n8n webhook error:', text);
+      return res.status(200).json({
+        success: false,
+        type: 'error',
+        message: 'O assistente está temporariamente indisponível. Por favor, tente novamente mais tarde.'
+      });
+    }
 
     let jsonData;
     try {

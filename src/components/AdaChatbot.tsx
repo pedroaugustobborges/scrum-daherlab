@@ -36,7 +36,7 @@ import { supabase } from "@/lib/supabase";
 // - Production (Vercel): uses /api/ada-chat serverless function to avoid CORS
 // - Development: uses n8n URL directly (n8n allows localhost CORS)
 const ADA_API_URL = import.meta.env.DEV
-  ? (import.meta.env.VITE_ADA_WEBHOOK_URL || "https://pedroaugustobborges.app.n8n.cloud/webhook/ada-chat")
+  ? (import.meta.env.VITE_ADA_WEBHOOK_URL || "https://pedroaugustobborges.app.n8n.cloud/webhook/ada-assistant")
   : "/api/ada-chat";
 
 interface Message {

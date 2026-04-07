@@ -29,6 +29,7 @@ import {
 } from '@mui/icons-material'
 import toast from 'react-hot-toast'
 import Navbar from '@/components/Navbar'
+import AdaChatbot from '@/components/AdaChatbot'
 import { supabase } from '@/lib/supabase'
 import { useProjectConfig, getEnabledModules } from '@/hooks/useProjectConfig'
 import type { ProjectConfiguration } from '@/types/hybrid'
@@ -340,6 +341,9 @@ export default function ProjectDetail() {
       <Container maxWidth="xl" sx={{ mt: 3, mb: 4 }}>
         <Outlet context={{ project, config, refreshProject: fetchProject }} />
       </Container>
+
+      {/* Ada AI Chatbot */}
+      <AdaChatbot projectId={projectId!} projectName={project.name} />
     </Box>
   )
 }

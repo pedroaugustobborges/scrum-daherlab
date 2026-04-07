@@ -1,4 +1,10 @@
 node_modules/
 .env
+.env.local
+.env.*.local
 .DS_Store
 dist/
+
+# Ada AI Assistant - Sensitive files (contains API keys)
+src/ada/AdaBrain.txt
+src/ada/gmail.json

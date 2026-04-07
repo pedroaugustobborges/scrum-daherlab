@@ -1,0 +1,450 @@
+{
+  "name": "Ada AI Assistant - Daher Plan",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ada-assistant",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook - Ada Chat",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "ada-assistant-webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract and validate data from webhook\nconst body = $input.first().json.body || $input.first().json;\nconst { message, projectId, projectName, userId, userEmail, userName, teamMembers, projectData } = body;\n\nif (!message || !projectId) {\n  return {\n    error: true,\n    errorMessage: 'Mensagem ou ID do projeto não fornecidos'\n  };\n}\n\n// Format team members for context\nconst formattedTeamMembers = (teamMembers || []).map(m => ({\n  id: m.id,\n  name: m.name || m.full_name,\n  email: m.email || '',\n  role: m.role\n}));\n\nconst teamMembersContext = formattedTeamMembers.length > 0\n  ? formattedTeamMembers.map(m => `- ${m.name}${m.email ? ` (${m.email})` : ''} - ${m.role}`).join('\\n')\n  : 'Nenhum membro de equipe associado a este projeto.';\n\n// Format project stats\nconst stats = projectData?.stats || {};\nconst projectStatsContext = `\nEstatísticas do Projeto:\n- Total de tarefas: ${stats.total || 0}\n- A fazer (todo): ${stats.todo || 0}\n- Em progresso: ${stats.inProgress || 0}\n- Em revisão: ${stats.review || 0}\n- Concluídas: ${stats.done || 0}\n- Bloqueadas: ${stats.blocked || 0}\n- Pontos totais: ${stats.totalPoints || 0}\n- Pontos concluídos: ${stats.completedPoints || 0}\n- Percentual de conclusão: ${stats.completionPercentage || 0}%\n`;\n\n// Format workload\nconst workload = stats.workload || {};\nconst workloadContext = Object.keys(workload).length > 0\n  ? Object.entries(workload)\n      .sort((a, b) => b[1].points - a[1].points)\n      .map(([name, data]) => `- ${name}: ${data.tasks} tarefas (${data.points} pontos)`)\n      .join('\\n')\n  : 'Nenhuma tarefa atribuída no momento.';\n\n// Format tasks lists\nconst todoTasks = (projectData?.todoTasks || []).slice(0, 10);\nconst inProgressTasks = projectData?.inProgressTasks || [];\nconst blockedTasks = projectData?.blockedTasks || [];\n\nconst todoContext = todoTasks.length > 0\n  ? todoTasks.map(t => `- ${t.title}${t.assigned_to_name ? ` (${t.assigned_to_name})` : ''}`).join('\\n')\n  : 'Nenhuma tarefa a fazer.';\n\nconst inProgressContext = inProgressTasks.length > 0\n  ? inProgressTasks.map(t => `- ${t.title}${t.assigned_to_name ? ` (${t.assigned_to_name})` : ''}`).join('\\n')\n  : 'Nenhuma tarefa em progresso.';\n\nconst blockedContext = blockedTasks.length > 0\n  ? blockedTasks.map(t => `- ${t.title}${t.assigned_to_name ? ` (${t.assigned_to_name})` : ''}`).join('\\n')\n  : 'Nenhuma tarefa bloqueada.';\n\nreturn {\n  message: message.trim(),\n  projectId,\n  projectName: projectName || 'Projeto',\n  userId,\n  userEmail: userEmail || '',\n  userName: userName || 'Usuário',\n  teamMembers: formattedTeamMembers,\n  teamMembersContext,\n  projectStatsContext,\n  workloadContext,\n  todoContext,\n  inProgressContext,\n  blockedContext,\n  hasProjectData: !!projectData,\n  timestamp: new Date().toISOString()\n};"
+      },
+      "id": "parse-input",
+      "name": "Parse Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.error }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-error",
+      "name": "Has Error?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "messages": {
+          "values": [
+            {
+              "content": "Você é a Ada, uma assistente de IA amigável e profissional para o aplicativo de gerenciamento de projetos Daher Plan. Você foi nomeada em homenagem a Ada Lovelace, a primeira programadora da história.\n\nVocê ajuda os usuários com:\n1. Responder perguntas sobre o projeto (tarefas, sprints, carga de trabalho da equipe, progresso)\n2. Enviar e-mails para membros da equipe quando solicitado\n3. Fornecer insights sobre a saúde do projeto e recomendações\n\nREGRAS IMPORTANTES:\n- SEMPRE responda em Português do Brasil\n- Seja concisa mas prestativa\n- Quando solicitado a enviar e-mails, extraia: destinatário(s), assunto e conteúdo da mensagem\n- Se um nome for ambíguo (várias pessoas com o mesmo nome), peça esclarecimento\n- Seja sempre solidária e profissional\n- Use acentos corretamente em português\n\nQuando detectar um COMANDO DE EMAIL (frases como 'envie', 'mande', 'diga para', 'avise', 'comunique', 'fale para'), responda com um JSON neste formato:\n```json\n{\n  \"type\": \"email\",\n  \"recipients\": [\"email1@example.com\"],\n  \"recipientNames\": [\"Nome1\"],\n  \"subject\": \"Assunto do email\",\n  \"body\": \"Corpo do email\",\n  \"needsClarification\": false,\n  \"clarificationQuestion\": \"\"\n}\n```\n\nSe precisar de esclarecimento (ex: destinatário ambíguo, email não encontrado), defina needsClarification como true e forneça a pergunta.\n\nPara PERGUNTAS sobre o projeto (qualquer outra coisa que não seja envio de email), responda diretamente em texto natural, usando os dados do projeto fornecidos. NÃO use formato JSON para perguntas.\n\nIMPORTANTE: Os membros da equipe do projeto do usuário são fornecidos no contexto. Envie e-mails APENAS para membros válidos da equipe que tenham email cadastrado.",
+              "role": "system"
+            },
+            {
+              "content": "=Projeto: {{ $json.projectName }}\nUsuário: {{ $json.userName }} ({{ $json.userEmail }})\n\n--- MEMBROS DA EQUIPE ---\n{{ $json.teamMembersContext }}\n\n--- ESTATÍSTICAS DO PROJETO ---\n{{ $json.projectStatsContext }}\n\n--- CARGA DE TRABALHO POR MEMBRO ---\n{{ $json.workloadContext }}\n\n--- TAREFAS A FAZER ---\n{{ $json.todoContext }}\n\n--- TAREFAS EM PROGRESSO ---\n{{ $json.inProgressContext }}\n\n--- TAREFAS BLOQUEADAS ---\n{{ $json.blockedContext }}\n\n--- MENSAGEM DO USUÁRIO ---\n{{ $json.message }}",
+              "role": "user"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.7,
+          "maxTokens": 1500
+        }
+      },
+      "id": "openai-process",
+      "name": "OpenAI - Process Request",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.4,
+      "position": [900, 400],
+      "credentials": {
+        "openAiApi": {
+          "id": "openai-credentials",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse OpenAI response\nconst response = $input.first().json.message?.content || $input.first().json.text || '';\nconst originalData = $('Parse Input').first().json;\n\nlet result;\n\n// Check if response contains JSON (email command)\nconst jsonMatch = response.match(/```json\\s*([\\s\\S]*?)\\s*```/) || response.match(/\\{[\\s\\S]*\"type\"\\s*:\\s*\"email\"[\\s\\S]*\\}/);\n\nif (jsonMatch) {\n  try {\n    const jsonStr = jsonMatch[1] || jsonMatch[0];\n    const parsed = JSON.parse(jsonStr);\n    \n    if (parsed.type === 'email') {\n      result = {\n        type: 'email',\n        recipients: parsed.recipients || [],\n        recipientNames: parsed.recipientNames || parsed.recipients || [],\n        subject: parsed.subject || 'Mensagem do Daher Plan',\n        body: parsed.body || '',\n        needsClarification: parsed.needsClarification || false,\n        clarificationQuestion: parsed.clarificationQuestion || '',\n        ...originalData\n      };\n    } else {\n      result = {\n        type: 'answer',\n        message: response.replace(/```json[\\s\\S]*?```/g, '').trim(),\n        ...originalData\n      };\n    }\n  } catch (e) {\n    result = {\n      type: 'answer',\n      message: response,\n      ...originalData\n    };\n  }\n} else {\n  // Plain text response (question/answer)\n  result = {\n    type: 'answer',\n    message: response,\n    ...originalData\n  };\n}\n\nreturn result;"
+      },
+      "id": "parse-response",
+      "name": "Parse Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.type }}",
+              "rightValue": "email",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "is-email",
+      "name": "Is Email Command?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1340, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.needsClarification }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "needs-clarification",
+      "name": "Needs Clarification?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1560, 300]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.recipients.join(', ') }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.body }}\n\n--\nEnviado via Ada - Assistente Daher Plan\nSolicitado por: {{ $json.userName }}",
+        "options": {
+          "ccEmail": "={{ $json.userEmail }}"
+        }
+      },
+      "id": "send-email",
+      "name": "Send Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1780, 200],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gmail-credentials",
+          "name": "Gmail OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Email sent successfully\nconst data = $('Parse Response').first().json;\n\nreturn {\n  success: true,\n  type: 'email_sent',\n  message: `✅ E-mail enviado com sucesso para: ${(data.recipientNames || data.recipients || []).join(', ')}.\\n\\nUma cópia foi enviada para você em ${data.userEmail}.`,\n  timestamp: new Date().toISOString()\n};"
+      },
+      "id": "email-success",
+      "name": "Email Success",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2000, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Return clarification question\nconst data = $input.first().json;\n\nreturn {\n  success: true,\n  type: 'clarification',\n  message: data.clarificationQuestion || 'Poderia me dar mais detalhes sobre para quem você gostaria de enviar o e-mail?',\n  timestamp: new Date().toISOString()\n};"
+      },
+      "id": "clarification",
+      "name": "Return Clarification",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1780, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Return answer response\nconst data = $input.first().json;\n\nreturn {\n  success: true,\n  type: 'answer',\n  message: data.message || 'Desculpe, não consegui processar sua pergunta.',\n  timestamp: new Date().toISOString()\n};"
+      },
+      "id": "return-answer",
+      "name": "Return Answer",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 600]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Return error response\nconst data = $input.first().json;\n\nreturn {\n  success: false,\n  type: 'error',\n  message: data.errorMessage || 'Ocorreu um erro ao processar sua solicitação.',\n  timestamp: new Date().toISOString()\n};"
+      },
+      "id": "return-error",
+      "name": "Return Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 200]
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch",
+        "output": "all"
+      },
+      "id": "merge",
+      "name": "Merge Responses",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [2220, 400]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [2440, 400]
+    }
+  ],
+  "connections": {
+    "Webhook - Ada Chat": {
+      "main": [
+        [
+          {
+            "node": "Parse Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Input": {
+      "main": [
+        [
+          {
+            "node": "Has Error?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Error?": {
+      "main": [
+        [
+          {
+            "node": "Return Error",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "OpenAI - Process Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Return Error": {
+      "main": [
+        [
+          {
+            "node": "Merge Responses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI - Process Request": {
+      "main": [
+        [
+          {
+            "node": "Parse Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Response": {
+      "main": [
+        [
+          {
+            "node": "Is Email Command?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Email Command?": {
+      "main": [
+        [
+          {
+            "node": "Needs Clarification?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Return Answer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs Clarification?": {
+      "main": [
+        [
+          {
+            "node": "Return Clarification",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email": {
+      "main": [
+        [
+          {
+            "node": "Email Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Success": {
+      "main": [
+        [
+          {
+            "node": "Merge Responses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Return Clarification": {
+      "main": [
+        [
+          {
+            "node": "Merge Responses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Return Answer": {
+      "main": [
+        [
+          {
+            "node": "Merge Responses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Responses": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "daher-plan-ada"
+  },
+  "pinData": {},
+  "versionId": "3.0.0",
+  "triggerCount": 0,
+  "tags": [
+    {
+      "name": "AI Assistant"
+    },
+    {
+      "name": "Daher Plan"
+    }
+  ]
+}

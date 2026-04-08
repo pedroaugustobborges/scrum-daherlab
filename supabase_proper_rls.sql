@@ -128,17 +128,10 @@ BEGIN
             ON public.tasks FOR UPDATE TO authenticated
             USING (public.user_has_project_access(project_id));
 
-        -- DELETE: Admins, project creators, or task creators can delete
-        CREATE POLICY "Users can delete tasks"
+        -- DELETE: Any team member with project access can delete tasks
+        CREATE POLICY "Users can delete tasks in accessible projects"
             ON public.tasks FOR DELETE TO authenticated
-            USING (
-                public.is_admin() OR
-                created_by = auth.uid() OR
-                EXISTS (
-                    SELECT 1 FROM public.projects
-                    WHERE id = project_id AND created_by = auth.uid()
-                )
-            );
+            USING (public.user_has_project_access(project_id));
 
         RAISE NOTICE 'Fixed tasks policies';
     END IF;

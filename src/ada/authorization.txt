@@ -1,0 +1,4 @@
+Criar um header com o nome de Authorization e colocar o valor Basic NTc1MDQwNTpTc2lRZlNrWlhaNmd4aEdwYWNBS3JJMUJac2M4eEZyMA==
+
+https://api-prod.humand.co/public/api/v1/api-docs/#/
+https://api-prod.humand.co/marty/docs/swagger-ui/index.html#/

@@ -30,6 +30,8 @@ interface TasksByStatusModalProps {
   status: string | null;
   statusLabel: string;
   statusColor: string;
+  /** When provided, only tasks from this project are shown */
+  projectId?: string;
 }
 
 interface TaskItem {
@@ -61,6 +63,7 @@ export default function TasksByStatusModal({
   status,
   statusLabel,
   statusColor,
+  projectId,
 }: TasksByStatusModalProps) {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
@@ -91,10 +94,12 @@ export default function TasksByStatusModal({
       const to = from + ITEMS_PER_PAGE - 1;
 
       // Get total count
-      const { count, error: countError } = await supabase
+      let countQuery = supabase
         .from("tasks")
         .select("*", { count: "exact", head: true })
         .eq("status", status);
+      if (projectId) countQuery = countQuery.eq("project_id", projectId);
+      const { count, error: countError } = await countQuery;
 
       if (countError) throw countError;
       setTotalCount(count || 0);
@@ -112,40 +117,25 @@ export default function TasksByStatusModal({
       }> | null = null;
 
       // First try with blocked_comment_id (if migration has been applied)
-      const { data: tasksWithBlockedId, error: tasksWithBlockedIdError } = await supabase
+      let withBlockedQuery = supabase
         .from("tasks")
-        .select(
-          `
-          id,
-          title,
-          description,
-          created_at,
-          project_id,
-          assigned_to,
-          blocked_comment_id
-        `,
-        )
+        .select(`id, title, description, created_at, project_id, assigned_to, blocked_comment_id`)
         .eq("status", status)
         .order("created_at", { ascending: false })
         .range(from, to);
+      if (projectId) withBlockedQuery = withBlockedQuery.eq("project_id", projectId);
+      const { data: tasksWithBlockedId, error: tasksWithBlockedIdError } = await withBlockedQuery;
 
       // If the column doesn't exist, fetch without it
       if (tasksWithBlockedIdError && tasksWithBlockedIdError.code === "42703") {
-        const { data: tasksBasic, error: tasksBasicError } = await supabase
+        let basicQuery = supabase
           .from("tasks")
-          .select(
-            `
-            id,
-            title,
-            description,
-            created_at,
-            project_id,
-            assigned_to
-          `,
-          )
+          .select(`id, title, description, created_at, project_id, assigned_to`)
           .eq("status", status)
           .order("created_at", { ascending: false })
           .range(from, to);
+        if (projectId) basicQuery = basicQuery.eq("project_id", projectId);
+        const { data: tasksBasic, error: tasksBasicError } = await basicQuery;
 
         if (tasksBasicError) throw tasksBasicError;
         tasksData = tasksBasic;

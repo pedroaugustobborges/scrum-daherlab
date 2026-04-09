@@ -35,11 +35,13 @@ import {
   ZoomOut,
   Edit as EditIcon,
   CloudUpload,
+  BarChart,
 } from "@mui/icons-material";
 import Modal from "./Modal";
 import SprintDetailsModal from "./SprintDetailsModal";
 import CreateBacklogItemModal from "./CreateBacklogItemModal";
 import CreateSprintModal from "./CreateSprintModal";
+import { TasksByStatusModal } from "./dashboard";
 import { supabase } from "@/lib/supabase";
 import toast from "react-hot-toast";
 
@@ -343,7 +345,18 @@ export default function ProjectDetailsModal({
     completedSprints: 0,
     totalStoryPoints: 0,
     completedStoryPoints: 0,
+    todo: 0,
+    in_progress: 0,
+    review: 0,
+    done: 0,
+    blocked: 0,
   });
+  const [selectedStatus, setSelectedStatus] = useState<{
+    key: string;
+    label: string;
+    color: string;
+  } | null>(null);
+  const [statusModalOpen, setStatusModalOpen] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -468,6 +481,11 @@ export default function ProjectDetailsModal({
         completedSprints,
         totalStoryPoints,
         completedStoryPoints,
+        todo: allTasks.filter((t) => t.status === "todo").length,
+        in_progress: allTasks.filter((t) => t.status === "in-progress").length,
+        review: allTasks.filter((t) => t.status === "review").length,
+        done: allTasks.filter((t) => t.status === "done").length,
+        blocked: allTasks.filter((t) => t.status === "blocked").length,
       });
     } catch (error) {
       console.error("Error fetching project details:", error);
@@ -569,6 +587,19 @@ export default function ProjectDetailsModal({
       }
     }
   };
+
+  const handleStatusClick = (key: string, label: string, color: string) => {
+    setSelectedStatus({ key, label, color });
+    setStatusModalOpen(true);
+  };
+
+  const TASK_STATUS_TILES = [
+    { key: "todo",        label: "A Fazer",      value: statistics.todo,        color: "#6b7280" },
+    { key: "in-progress", label: "Em Progresso", value: statistics.in_progress, color: "#f59e0b" },
+    { key: "review",      label: "Em Revisão",   value: statistics.review,      color: "#8b5cf6" },
+    { key: "done",        label: "Concluído",    value: statistics.done,        color: "#10b981" },
+    { key: "blocked",     label: "Bloqueado",    value: statistics.blocked,     color: "#ef4444" },
+  ];
 
   if (loading) {
     return (
@@ -854,17 +885,85 @@ export default function ProjectDetailsModal({
             value={activeTab}
             onChange={(_, newValue) => setActiveTab(newValue)}
           >
-            <Tab
-              label="Sprints"
-              icon={<SpaceDashboard />}
-              iconPosition="start"
-            />
+            <Tab label="Visão Geral" icon={<BarChart />} iconPosition="start" />
+            <Tab label="Sprints" icon={<SpaceDashboard />} iconPosition="start" />
             <Tab label="Backlog" icon={<Inventory />} iconPosition="start" />
           </Tabs>
         </Box>
 
-        {/* Tab Panels */}
+        {/* Visão Geral Tab */}
         {activeTab === 0 && (
+          <Box>
+            {/* Progress bar */}
+            <Box sx={{ mb: 3 }}>
+              <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+                <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                  Progresso Geral
+                </Typography>
+                <Typography variant="body2" fontWeight={700} sx={{ color: "#6366f1" }}>
+                  {statistics.done}/{statistics.done + statistics.todo + statistics.in_progress + statistics.review + statistics.blocked}
+                </Typography>
+              </Box>
+              <LinearProgress
+                variant="determinate"
+                value={calculateProgress()}
+                sx={{
+                  height: 10,
+                  borderRadius: 5,
+                  bgcolor: "rgba(99, 102, 241, 0.1)",
+                  "& .MuiLinearProgress-bar": {
+                    background: "linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%)",
+                    borderRadius: 5,
+                  },
+                }}
+              />
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>
+                {statistics.completedStoryPoints} / {statistics.totalStoryPoints} story points concluídos
+              </Typography>
+            </Box>
+
+            {/* Status tiles grid */}
+            <Grid container spacing={2}>
+              {TASK_STATUS_TILES.map((tile) => (
+                <Grid item xs={6} sm={4} key={tile.key}>
+                  <Box
+                    onClick={() => tile.value > 0 && handleStatusClick(tile.key, tile.label, tile.color)}
+                    sx={{
+                      p: 2.5,
+                      borderRadius: 3,
+                      bgcolor: `${tile.color}08`,
+                      border: "2px solid",
+                      borderColor: `${tile.color}20`,
+                      cursor: tile.value > 0 ? "pointer" : "default",
+                      transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+                      "&:hover": tile.value > 0 ? {
+                        transform: "translateY(-4px)",
+                        boxShadow: `0 8px 24px ${tile.color}25`,
+                        borderColor: `${tile.color}50`,
+                        bgcolor: `${tile.color}12`,
+                      } : {},
+                    }}
+                  >
+                    <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ display: "block", mb: 0.5 }}>
+                      {tile.label}
+                    </Typography>
+                    <Typography variant="h4" fontWeight={800} sx={{ color: tile.color, lineHeight: 1 }}>
+                      {tile.value}
+                    </Typography>
+                    {tile.value > 0 && (
+                      <Typography variant="caption" sx={{ color: tile.color, opacity: 0.7, fontWeight: 500 }}>
+                        Ver tarefas →
+                      </Typography>
+                    )}
+                  </Box>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+        )}
+
+        {/* Tab Panels */}
+        {activeTab === 1 && (
           <Box>
             {/* Sprints Header with Create Button */}
             <Box
@@ -1049,7 +1148,7 @@ export default function ProjectDetailsModal({
           </Box>
         )}
 
-        {activeTab === 1 && (
+        {activeTab === 2 && (
           <Box>
             {/* Backlog Header with Create Button */}
             <Box
@@ -1513,6 +1612,19 @@ export default function ProjectDetailsModal({
           title={`Mapa de Processos - ${project.name}`}
         />
       )}
+
+      {/* Tasks by Status Modal */}
+      <TasksByStatusModal
+        open={statusModalOpen}
+        onClose={() => {
+          setStatusModalOpen(false);
+          setSelectedStatus(null);
+        }}
+        status={selectedStatus?.key || null}
+        statusLabel={selectedStatus?.label || ""}
+        statusColor={selectedStatus?.color || "#6366f1"}
+        projectId={project.id}
+      />
     </Modal>
   );
 }

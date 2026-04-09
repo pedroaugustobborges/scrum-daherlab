@@ -17,6 +17,10 @@ import {
   KeyboardArrowRight,
   Settings,
   TrendingUp,
+  CheckCircle,
+  AddTask,
+  DirectionsRun,
+  FolderOpen,
 } from "@mui/icons-material";
 import {
   PieChart,
@@ -36,7 +40,11 @@ import Navbar from "@/components/Navbar";
 import ActiveProjectsWidget from "@/components/ActiveProjectsWidget";
 import ActiveSprintsWidget from "@/components/ActiveSprintsWidget";
 import ActionItemsWidget from "@/components/ActionItemsWidget";
-import { WidgetCustomizationModal, TeamMemberDetailModal, TasksByStatusModal } from "@/components/dashboard";
+import {
+  WidgetCustomizationModal,
+  TeamMemberDetailModal,
+  TasksByStatusModal,
+} from "@/components/dashboard";
 import { IOSWidget } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
@@ -52,13 +60,46 @@ interface TaskStats {
   total: number;
 }
 
+type ActivityType =
+  | "task_done"
+  | "task_created"
+  | "sprint_created"
+  | "project_created";
+
 interface Activity {
   id: string;
-  action: string;
-  task: string;
+  type: ActivityType;
+  label: string;
+  name: string;
   time: string;
   created_at: string;
 }
+
+const ACTIVITY_CONFIG: Record<
+  ActivityType,
+  { Icon: React.ComponentType<any>; color: string; bg: string }
+> = {
+  task_done: {
+    Icon: CheckCircle,
+    color: "#10b981",
+    bg: "rgba(16, 185, 129, 0.1)",
+  },
+  task_created: {
+    Icon: AddTask,
+    color: "#6366f1",
+    bg: "rgba(99, 102, 241, 0.1)",
+  },
+  sprint_created: {
+    Icon: DirectionsRun,
+    color: "#f59e0b",
+    bg: "rgba(245, 158, 11, 0.1)",
+  },
+  project_created: {
+    Icon: FolderOpen,
+    color: "#8b5cf6",
+    bg: "rgba(139, 92, 246, 0.1)",
+  },
+};
 
 interface ProjectStats {
   total: number;
@@ -81,9 +122,20 @@ interface ProductivityData {
   created: number;
 }
 
-type ProductivityPeriod = "week" | "month" | "quarter" | "semester" | "year" | "triennium" | "quinquennium";
+type ProductivityPeriod =
+  | "week"
+  | "month"
+  | "quarter"
+  | "semester"
+  | "year"
+  | "triennium"
+  | "quinquennium";
 
-const PRODUCTIVITY_PERIODS: { key: ProductivityPeriod; label: string; shortLabel: string }[] = [
+const PRODUCTIVITY_PERIODS: {
+  key: ProductivityPeriod;
+  label: string;
+  shortLabel: string;
+}[] = [
   { key: "week", label: "Semana", shortLabel: "7D" },
   { key: "month", label: "Mês", shortLabel: "1M" },
   { key: "quarter", label: "Trimestre", shortLabel: "3M" },
@@ -93,7 +145,7 @@ const PRODUCTIVITY_PERIODS: { key: ProductivityPeriod; label: string; shortLabel
   { key: "quinquennium", label: "Quinquênio", shortLabel: "5A" },
 ];
 
-const ACTIVITIES_PER_PAGE = 4;
+const ACTIVITIES_PER_PAGE = 5;
 const TEAM_WORKLOAD_PER_PAGE = 4;
 
 // Widget component mapping
@@ -109,10 +161,7 @@ const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType | null> = {
 };
 
 // Widget grid sizes - widgets that take half width on large screens
-const LARGE_WIDGETS: WidgetType[] = [
-  "productivityTrend",
-  "teamWorkload",
-];
+const LARGE_WIDGETS: WidgetType[] = ["productivityTrend", "teamWorkload"];
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -125,8 +174,11 @@ export default function Dashboard() {
   const [recentActivities, setRecentActivities] = useState<Activity[]>([]);
   const [activitiesPage, setActivitiesPage] = useState(1);
   const [customizeModalOpen, setCustomizeModalOpen] = useState(false);
-  const [productivityData, setProductivityData] = useState<ProductivityData[]>([]);
-  const [productivityPeriod, setProductivityPeriod] = useState<ProductivityPeriod>("week");
+  const [productivityData, setProductivityData] = useState<ProductivityData[]>(
+    [],
+  );
+  const [productivityPeriod, setProductivityPeriod] =
+    useState<ProductivityPeriod>("week");
   const [productivityLoading, setProductivityLoading] = useState(false);
   const [teamWorkload, setTeamWorkload] = useState<TeamMember[]>([]);
   const [teamWorkloadPage, setTeamWorkloadPage] = useState(1);
@@ -231,11 +283,13 @@ export default function Dashboard() {
       // Fetch team workload - get all users who have tasks assigned
       if (tasks && tasks.length > 0) {
         // Get unique user IDs from tasks that have an assigned_to value
-        const assignedUserIds = [...new Set(
-          tasks
-            .map((t) => t.assigned_to)
-            .filter((id): id is string => id !== null && id !== undefined)
-        )];
+        const assignedUserIds = [
+          ...new Set(
+            tasks
+              .map((t) => t.assigned_to)
+              .filter((id): id is string => id !== null && id !== undefined),
+          ),
+        ];
 
         if (assignedUserIds.length > 0) {
           // Fetch profiles only for users who have tasks assigned
@@ -269,61 +323,65 @@ export default function Dashboard() {
       }
 
       // Fetch recent activities
-      const { data: recentTasks, error: tasksActivityError } = await supabase
-        .from("tasks")
-        .select("id, title, created_at, status")
-        .order("created_at", { ascending: false })
-        .limit(10);
-
-      if (tasksActivityError) throw tasksActivityError;
-
-      const { data: recentSprints, error: sprintsActivityError } =
-        await supabase
+      const [tasksRes, sprintsRes2, projectsRes2] = await Promise.all([
+        supabase
+          .from("tasks")
+          .select("id, title, status, created_at, updated_at")
+          .order("updated_at", { ascending: false })
+          .limit(15),
+        supabase
           .from("sprints")
           .select("id, name, created_at")
           .order("created_at", { ascending: false })
-          .limit(5);
-
-      if (sprintsActivityError) throw sprintsActivityError;
-
-      const { data: recentProjects, error: projectsActivityError } =
-        await supabase
+          .limit(8),
+        supabase
           .from("projects")
           .select("id, name, created_at")
           .order("created_at", { ascending: false })
-          .limit(5);
-
-      if (projectsActivityError) throw projectsActivityError;
+          .limit(8),
+      ]);
 
       const activities: Activity[] = [];
 
-      recentTasks?.forEach((task) => {
+      tasksRes.data?.forEach((task) => {
         if (task.status === "done") {
           activities.push({
-            id: task.id,
-            action: "Tarefa concluída",
-            task: task.title,
+            id: `task-done-${task.id}`,
+            type: "task_done",
+            label: "Tarefa concluída",
+            name: task.title,
+            time: formatTimeAgo(task.updated_at || task.created_at),
+            created_at: task.updated_at || task.created_at,
+          });
+        } else {
+          activities.push({
+            id: `task-created-${task.id}`,
+            type: "task_created",
+            label: "Tarefa criada",
+            name: task.title,
             time: formatTimeAgo(task.created_at),
             created_at: task.created_at,
           });
         }
       });
 
-      recentSprints?.forEach((sprint) => {
+      sprintsRes2.data?.forEach((sprint) => {
         activities.push({
-          id: sprint.id,
-          action: "Sprint criado",
-          task: sprint.name,
+          id: `sprint-${sprint.id}`,
+          type: "sprint_created",
+          label: "Sprint criado",
+          name: sprint.name,
           time: formatTimeAgo(sprint.created_at),
           created_at: sprint.created_at,
         });
       });
 
-      recentProjects?.forEach((project) => {
+      projectsRes2.data?.forEach((project) => {
         activities.push({
-          id: project.id,
-          action: "Projeto criado",
-          task: project.name,
+          id: `project-${project.id}`,
+          type: "project_created",
+          label: "Projeto criado",
+          name: project.name,
           time: formatTimeAgo(project.created_at),
           created_at: project.created_at,
         });
@@ -350,7 +408,20 @@ export default function Dashboard() {
       let intervals: { start: Date; end: Date; label: string }[] = [];
 
       const dayNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-      const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+      const monthNames = [
+        "Jan",
+        "Fev",
+        "Mar",
+        "Abr",
+        "Mai",
+        "Jun",
+        "Jul",
+        "Ago",
+        "Set",
+        "Out",
+        "Nov",
+        "Dez",
+      ];
 
       switch (period) {
         case "week":
@@ -374,12 +445,20 @@ export default function Dashboard() {
           // Last 30 days, grouped by week
           startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
           for (let i = 4; i >= 0; i--) {
-            const weekEnd = new Date(now.getTime() - i * 7 * 24 * 60 * 60 * 1000);
-            const weekStart = new Date(weekEnd.getTime() - 7 * 24 * 60 * 60 * 1000);
+            const weekEnd = new Date(
+              now.getTime() - i * 7 * 24 * 60 * 60 * 1000,
+            );
+            const weekStart = new Date(
+              weekEnd.getTime() - 7 * 24 * 60 * 60 * 1000,
+            );
             weekStart.setHours(0, 0, 0, 0);
             weekEnd.setHours(23, 59, 59, 999);
             const weekLabel = `${weekStart.getDate()}/${weekStart.getMonth() + 1}`;
-            intervals.push({ start: weekStart, end: weekEnd, label: weekLabel });
+            intervals.push({
+              start: weekStart,
+              end: weekEnd,
+              label: weekLabel,
+            });
           }
           break;
 
@@ -388,12 +467,20 @@ export default function Dashboard() {
           startDate = new Date(now);
           startDate.setMonth(startDate.getMonth() - 3);
           for (let i = 11; i >= 0; i--) {
-            const weekEnd = new Date(now.getTime() - i * 7 * 24 * 60 * 60 * 1000);
-            const weekStart = new Date(weekEnd.getTime() - 7 * 24 * 60 * 60 * 1000);
+            const weekEnd = new Date(
+              now.getTime() - i * 7 * 24 * 60 * 60 * 1000,
+            );
+            const weekStart = new Date(
+              weekEnd.getTime() - 7 * 24 * 60 * 60 * 1000,
+            );
             weekStart.setHours(0, 0, 0, 0);
             weekEnd.setHours(23, 59, 59, 999);
             const weekLabel = `${weekStart.getDate()}/${weekStart.getMonth() + 1}`;
-            intervals.push({ start: weekStart, end: weekEnd, label: weekLabel });
+            intervals.push({
+              start: weekStart,
+              end: weekEnd,
+              label: weekLabel,
+            });
           }
           break;
 
@@ -404,8 +491,20 @@ export default function Dashboard() {
           for (let i = 5; i >= 0; i--) {
             const monthDate = new Date(now);
             monthDate.setMonth(monthDate.getMonth() - i);
-            const monthStart = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
-            const monthEnd = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0, 23, 59, 59, 999);
+            const monthStart = new Date(
+              monthDate.getFullYear(),
+              monthDate.getMonth(),
+              1,
+            );
+            const monthEnd = new Date(
+              monthDate.getFullYear(),
+              monthDate.getMonth() + 1,
+              0,
+              23,
+              59,
+              59,
+              999,
+            );
             intervals.push({
               start: monthStart,
               end: monthEnd,
@@ -421,8 +520,20 @@ export default function Dashboard() {
           for (let i = 11; i >= 0; i--) {
             const monthDate = new Date(now);
             monthDate.setMonth(monthDate.getMonth() - i);
-            const monthStart = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
-            const monthEnd = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0, 23, 59, 59, 999);
+            const monthStart = new Date(
+              monthDate.getFullYear(),
+              monthDate.getMonth(),
+              1,
+            );
+            const monthEnd = new Date(
+              monthDate.getFullYear(),
+              monthDate.getMonth() + 1,
+              0,
+              23,
+              59,
+              59,
+              999,
+            );
             intervals.push({
               start: monthStart,
               end: monthEnd,
@@ -438,8 +549,20 @@ export default function Dashboard() {
           for (let i = 11; i >= 0; i--) {
             const quarterDate = new Date(now);
             quarterDate.setMonth(quarterDate.getMonth() - i * 3);
-            const quarterStart = new Date(quarterDate.getFullYear(), Math.floor(quarterDate.getMonth() / 3) * 3, 1);
-            const quarterEnd = new Date(quarterDate.getFullYear(), Math.floor(quarterDate.getMonth() / 3) * 3 + 3, 0, 23, 59, 59, 999);
+            const quarterStart = new Date(
+              quarterDate.getFullYear(),
+              Math.floor(quarterDate.getMonth() / 3) * 3,
+              1,
+            );
+            const quarterEnd = new Date(
+              quarterDate.getFullYear(),
+              Math.floor(quarterDate.getMonth() / 3) * 3 + 3,
+              0,
+              23,
+              59,
+              59,
+              999,
+            );
             const quarterNum = Math.floor(quarterStart.getMonth() / 3) + 1;
             intervals.push({
               start: quarterStart,
@@ -456,8 +579,20 @@ export default function Dashboard() {
           for (let i = 9; i >= 0; i--) {
             const semesterDate = new Date(now);
             semesterDate.setMonth(semesterDate.getMonth() - i * 6);
-            const semesterStart = new Date(semesterDate.getFullYear(), Math.floor(semesterDate.getMonth() / 6) * 6, 1);
-            const semesterEnd = new Date(semesterDate.getFullYear(), Math.floor(semesterDate.getMonth() / 6) * 6 + 6, 0, 23, 59, 59, 999);
+            const semesterStart = new Date(
+              semesterDate.getFullYear(),
+              Math.floor(semesterDate.getMonth() / 6) * 6,
+              1,
+            );
+            const semesterEnd = new Date(
+              semesterDate.getFullYear(),
+              Math.floor(semesterDate.getMonth() / 6) * 6 + 6,
+              0,
+              23,
+              59,
+              59,
+              999,
+            );
             const semesterNum = Math.floor(semesterStart.getMonth() / 6) + 1;
             intervals.push({
               start: semesterStart,
@@ -478,16 +613,18 @@ export default function Dashboard() {
 
       // Process tasks into intervals
       const data: ProductivityData[] = intervals.map((interval) => {
-        const created = tasks?.filter((t) => {
-          const createdAt = new Date(t.created_at);
-          return createdAt >= interval.start && createdAt <= interval.end;
-        }).length || 0;
+        const created =
+          tasks?.filter((t) => {
+            const createdAt = new Date(t.created_at);
+            return createdAt >= interval.start && createdAt <= interval.end;
+          }).length || 0;
 
-        const completed = tasks?.filter((t) => {
-          if (t.status !== "done") return false;
-          const updatedAt = new Date(t.updated_at);
-          return updatedAt >= interval.start && updatedAt <= interval.end;
-        }).length || 0;
+        const completed =
+          tasks?.filter((t) => {
+            if (t.status !== "done") return false;
+            const updatedAt = new Date(t.updated_at);
+            return updatedAt >= interval.start && updatedAt <= interval.end;
+          }).length || 0;
 
         return { label: interval.label, created, completed };
       });
@@ -554,7 +691,11 @@ export default function Dashboard() {
   };
 
   // Handle status click to open tasks modal
-  const handleStatusClick = (statusKey: string, label: string, color: string) => {
+  const handleStatusClick = (
+    statusKey: string,
+    label: string,
+    color: string,
+  ) => {
     setSelectedStatus({ key: statusKey, label, color });
     setStatusModalOpen(true);
   };
@@ -570,7 +711,9 @@ export default function Dashboard() {
     // Inline widgets
     switch (type) {
       case "productivityTrend": {
-        const currentPeriodConfig = PRODUCTIVITY_PERIODS.find(p => p.key === productivityPeriod);
+        const currentPeriodConfig = PRODUCTIVITY_PERIODS.find(
+          (p) => p.key === productivityPeriod,
+        );
         return (
           <IOSWidget accentColor="#10b981">
             <Box
@@ -606,7 +749,9 @@ export default function Dashboard() {
                 sx={{
                   display: "flex",
                   gap: 0.5,
-                  bgcolor: isDarkMode ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
+                  bgcolor: isDarkMode
+                    ? "rgba(255,255,255,0.05)"
+                    : "rgba(0,0,0,0.04)",
                   borderRadius: 2,
                   p: 0.5,
                 }}
@@ -621,18 +766,25 @@ export default function Dashboard() {
                       borderRadius: 1.5,
                       cursor: "pointer",
                       transition: "all 0.2s ease",
-                      bgcolor: productivityPeriod === period.key
-                        ? "#10b981"
-                        : "transparent",
-                      color: productivityPeriod === period.key
-                        ? "white"
-                        : isDarkMode ? "#94a3b8" : "#6b7280",
+                      bgcolor:
+                        productivityPeriod === period.key
+                          ? "#10b981"
+                          : "transparent",
+                      color:
+                        productivityPeriod === period.key
+                          ? "white"
+                          : isDarkMode
+                            ? "#94a3b8"
+                            : "#6b7280",
                       fontWeight: productivityPeriod === period.key ? 600 : 500,
                       fontSize: "0.7rem",
                       "&:hover": {
-                        bgcolor: productivityPeriod === period.key
-                          ? "#10b981"
-                          : isDarkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
+                        bgcolor:
+                          productivityPeriod === period.key
+                            ? "#10b981"
+                            : isDarkMode
+                              ? "rgba(255,255,255,0.1)"
+                              : "rgba(0,0,0,0.08)",
                       },
                     }}
                   >
@@ -643,9 +795,7 @@ export default function Dashboard() {
             </Box>
 
             {productivityLoading || loading ? (
-              <Box
-                sx={{ display: "flex", justifyContent: "center", py: 6 }}
-              >
+              <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
                 <CircularProgress size={32} sx={{ color: "#10b981" }} />
               </Box>
             ) : (
@@ -654,29 +804,67 @@ export default function Dashboard() {
                   <LineChart data={productivityData}>
                     <CartesianGrid
                       strokeDasharray="3 3"
-                      stroke={isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}
+                      stroke={
+                        isDarkMode
+                          ? "rgba(255,255,255,0.08)"
+                          : "rgba(0,0,0,0.06)"
+                      }
                     />
                     <XAxis
                       dataKey="label"
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fill: isDarkMode ? "#94a3b8" : "#6b7280", fontSize: 11 }}
-                      interval={productivityPeriod === "year" || productivityPeriod === "triennium" || productivityPeriod === "quinquennium" ? 1 : 0}
-                      angle={productivityPeriod === "quarter" || productivityPeriod === "triennium" || productivityPeriod === "quinquennium" ? -45 : 0}
-                      textAnchor={productivityPeriod === "quarter" || productivityPeriod === "triennium" || productivityPeriod === "quinquennium" ? "end" : "middle"}
-                      height={productivityPeriod === "quarter" || productivityPeriod === "triennium" || productivityPeriod === "quinquennium" ? 50 : 30}
+                      tick={{
+                        fill: isDarkMode ? "#94a3b8" : "#6b7280",
+                        fontSize: 11,
+                      }}
+                      interval={
+                        productivityPeriod === "year" ||
+                        productivityPeriod === "triennium" ||
+                        productivityPeriod === "quinquennium"
+                          ? 1
+                          : 0
+                      }
+                      angle={
+                        productivityPeriod === "quarter" ||
+                        productivityPeriod === "triennium" ||
+                        productivityPeriod === "quinquennium"
+                          ? -45
+                          : 0
+                      }
+                      textAnchor={
+                        productivityPeriod === "quarter" ||
+                        productivityPeriod === "triennium" ||
+                        productivityPeriod === "quinquennium"
+                          ? "end"
+                          : "middle"
+                      }
+                      height={
+                        productivityPeriod === "quarter" ||
+                        productivityPeriod === "triennium" ||
+                        productivityPeriod === "quinquennium"
+                          ? 50
+                          : 30
+                      }
                     />
                     <YAxis
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fill: isDarkMode ? "#94a3b8" : "#6b7280", fontSize: 12 }}
+                      tick={{
+                        fill: isDarkMode ? "#94a3b8" : "#6b7280",
+                        fontSize: 12,
+                      }}
                     />
                     <Tooltip
                       contentStyle={{
                         backgroundColor: isDarkMode ? "#1e293b" : "#ffffff",
-                        border: isDarkMode ? "1px solid rgba(255,255,255,0.1)" : "1px solid rgba(0,0,0,0.08)",
+                        border: isDarkMode
+                          ? "1px solid rgba(255,255,255,0.1)"
+                          : "1px solid rgba(0,0,0,0.08)",
                         borderRadius: 12,
-                        boxShadow: isDarkMode ? "0 10px 25px rgba(0, 0, 0, 0.4)" : "0 10px 25px rgba(0, 0, 0, 0.1)",
+                        boxShadow: isDarkMode
+                          ? "0 10px 25px rgba(0, 0, 0, 0.4)"
+                          : "0 10px 25px rgba(0, 0, 0, 0.1)",
                         padding: "12px 16px",
                         color: isDarkMode ? "#f1f5f9" : "#1e293b",
                       }}
@@ -694,9 +882,7 @@ export default function Dashboard() {
                             fontWeight: 500,
                           }}
                         >
-                          {value === "completed"
-                            ? "Concluídas"
-                            : "Criadas"}
+                          {value === "completed" ? "Concluídas" : "Criadas"}
                         </span>
                       )}
                     />
@@ -705,7 +891,16 @@ export default function Dashboard() {
                       dataKey="completed"
                       stroke="#10b981"
                       strokeWidth={2.5}
-                      dot={{ fill: "#10b981", strokeWidth: 0, r: productivityPeriod === "triennium" || productivityPeriod === "year" || productivityPeriod === "quinquennium" ? 3 : 4 }}
+                      dot={{
+                        fill: "#10b981",
+                        strokeWidth: 0,
+                        r:
+                          productivityPeriod === "triennium" ||
+                          productivityPeriod === "year" ||
+                          productivityPeriod === "quinquennium"
+                            ? 3
+                            : 4,
+                      }}
                       activeDot={{ r: 6, stroke: "#fff", strokeWidth: 2 }}
                     />
                     <Line
@@ -713,7 +908,16 @@ export default function Dashboard() {
                       dataKey="created"
                       stroke="#6366f1"
                       strokeWidth={2.5}
-                      dot={{ fill: "#6366f1", strokeWidth: 0, r: productivityPeriod === "triennium" || productivityPeriod === "year" || productivityPeriod === "quinquennium" ? 3 : 4 }}
+                      dot={{
+                        fill: "#6366f1",
+                        strokeWidth: 0,
+                        r:
+                          productivityPeriod === "triennium" ||
+                          productivityPeriod === "year" ||
+                          productivityPeriod === "quinquennium"
+                            ? 3
+                            : 4,
+                      }}
                       activeDot={{ r: 6, stroke: "#fff", strokeWidth: 2 }}
                     />
                   </LineChart>
@@ -764,21 +968,16 @@ export default function Dashboard() {
             </Box>
 
             {loading ? (
-              <Box
-                sx={{ display: "flex", justifyContent: "center", py: 6 }}
-              >
+              <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
                 <CircularProgress />
               </Box>
             ) : sortedTeamWorkload.length > 0 ? (
-              <Box
-                sx={{ display: "flex", flexDirection: "column", gap: 2 }}
-              >
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 {paginatedTeamWorkload.map((member) => {
                   const progress =
                     member.tasks_count > 0
                       ? Math.round(
-                          (member.completed_count / member.tasks_count) *
-                            100,
+                          (member.completed_count / member.tasks_count) * 100,
                         )
                       : 0;
 
@@ -801,7 +1000,10 @@ export default function Dashboard() {
                         },
                       }}
                     >
-                      <MuiTooltip title={`Ver detalhes de ${member.full_name}`} arrow>
+                      <MuiTooltip
+                        title={`Ver detalhes de ${member.full_name}`}
+                        arrow
+                      >
                         <Avatar
                           src={member.avatar_url}
                           sx={{
@@ -838,10 +1040,7 @@ export default function Dashboard() {
                           >
                             {member.full_name.split(" ")[0]}
                           </Typography>
-                          <Typography
-                            variant="caption"
-                            color="text.secondary"
-                          >
+                          <Typography variant="caption" color="text.secondary">
                             {member.completed_count}/{member.tasks_count}{" "}
                             tarefas
                           </Typography>
@@ -925,7 +1124,11 @@ export default function Dashboard() {
                     <Typography
                       variant="caption"
                       fontWeight={600}
-                      sx={{ color: "#7c3aed", minWidth: 60, textAlign: "center" }}
+                      sx={{
+                        color: "#7c3aed",
+                        minWidth: 60,
+                        textAlign: "center",
+                      }}
                     >
                       {teamWorkloadPage} / {totalTeamWorkloadPages}
                     </Typography>
@@ -933,7 +1136,7 @@ export default function Dashboard() {
                       size="small"
                       onClick={() =>
                         setTeamWorkloadPage((prev) =>
-                          Math.min(totalTeamWorkloadPages, prev + 1)
+                          Math.min(totalTeamWorkloadPages, prev + 1),
                         )
                       }
                       disabled={teamWorkloadPage === totalTeamWorkloadPages}
@@ -975,9 +1178,7 @@ export default function Dashboard() {
             </Typography>
 
             {loading ? (
-              <Box
-                sx={{ display: "flex", justifyContent: "center", py: 6 }}
-              >
+              <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
                 <CircularProgress />
               </Box>
             ) : taskStats && taskStats.total > 0 ? (
@@ -1039,7 +1240,10 @@ export default function Dashboard() {
                   ].map((stat) => (
                     <Grid item xs={6} key={stat.label}>
                       <Box
-                        onClick={() => stat.value > 0 && handleStatusClick(stat.key, stat.label, stat.color)}
+                        onClick={() =>
+                          stat.value > 0 &&
+                          handleStatusClick(stat.key, stat.label, stat.color)
+                        }
                         sx={{
                           p: 1.5,
                           borderRadius: 2,
@@ -1048,18 +1252,18 @@ export default function Dashboard() {
                           borderColor: `${stat.color}20`,
                           cursor: stat.value > 0 ? "pointer" : "default",
                           transition: "all 0.2s ease",
-                          "&:hover": stat.value > 0 ? {
-                            transform: "translateY(-2px)",
-                            boxShadow: `0 4px 12px ${stat.color}25`,
-                            borderColor: `${stat.color}40`,
-                            bgcolor: `${stat.color}12`,
-                          } : {},
+                          "&:hover":
+                            stat.value > 0
+                              ? {
+                                  transform: "translateY(-2px)",
+                                  boxShadow: `0 4px 12px ${stat.color}25`,
+                                  borderColor: `${stat.color}40`,
+                                  bgcolor: `${stat.color}12`,
+                                }
+                              : {},
                         }}
                       >
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                        >
+                        <Typography variant="caption" color="text.secondary">
                           {stat.label}
                         </Typography>
                         <Typography
@@ -1089,7 +1293,9 @@ export default function Dashboard() {
         const getInsightText = () => {
           if (!taskStats || taskStats.total === 0) return "";
 
-          const completedPercent = Math.round((taskStats.done / taskStats.total) * 100);
+          const completedPercent = Math.round(
+            (taskStats.done / taskStats.total) * 100,
+          );
 
           // Priority: blocked tasks (alert), then completion rate
           if (taskStats.blocked > 0) {
@@ -1106,14 +1312,27 @@ export default function Dashboard() {
 
         const taskStatusData = [
           { name: "A Fazer", value: taskStats?.todo || 0, color: "#6b7280" },
-          { name: "Em Progresso", value: taskStats?.in_progress || 0, color: "#f59e0b" },
-          { name: "Em Revisão", value: taskStats?.review || 0, color: "#8b5cf6" },
+          {
+            name: "Em Progresso",
+            value: taskStats?.in_progress || 0,
+            color: "#f59e0b",
+          },
+          {
+            name: "Em Revisão",
+            value: taskStats?.review || 0,
+            color: "#8b5cf6",
+          },
           { name: "Concluído", value: taskStats?.done || 0, color: "#10b981" },
-          { name: "Bloqueado", value: taskStats?.blocked || 0, color: "#ef4444" },
+          {
+            name: "Bloqueado",
+            value: taskStats?.blocked || 0,
+            color: "#ef4444",
+          },
         ].filter((item) => item.value > 0);
 
         const insightText = getInsightText();
-        const insightColor = taskStats?.blocked && taskStats.blocked > 0 ? "#ef4444" : "#6b7280";
+        const insightColor =
+          taskStats?.blocked && taskStats.blocked > 0 ? "#ef4444" : "#6b7280";
 
         return (
           <IOSWidget accentColor="#8b5cf6">
@@ -1136,13 +1355,17 @@ export default function Dashboard() {
             </Box>
 
             {loading ? (
-              <Box
-                sx={{ display: "flex", justifyContent: "center", py: 6 }}
-              >
+              <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
                 <CircularProgress />
               </Box>
             ) : taskStats && taskStats.total > 0 ? (
-              <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
                 {/* Donut Chart - Centered and larger */}
                 <Box sx={{ position: "relative", width: 200, height: 200 }}>
                   <ResponsiveContainer width="100%" height="100%">
@@ -1165,14 +1388,22 @@ export default function Dashboard() {
                         formatter={(value, name) => [`${value} tarefas`, name]}
                         contentStyle={{
                           backgroundColor: isDarkMode ? "#1e293b" : "#ffffff",
-                          border: isDarkMode ? "1px solid rgba(255,255,255,0.1)" : "1px solid rgba(0,0,0,0.08)",
+                          border: isDarkMode
+                            ? "1px solid rgba(255,255,255,0.1)"
+                            : "1px solid rgba(0,0,0,0.08)",
                           borderRadius: 12,
                           padding: "10px 14px",
-                          boxShadow: isDarkMode ? "0 4px 12px rgba(0,0,0,0.4)" : "0 4px 12px rgba(0,0,0,0.1)",
+                          boxShadow: isDarkMode
+                            ? "0 4px 12px rgba(0,0,0,0.4)"
+                            : "0 4px 12px rgba(0,0,0,0.1)",
                           color: isDarkMode ? "#f1f5f9" : "#1e293b",
                         }}
-                        labelStyle={{ color: isDarkMode ? "#f1f5f9" : "#1e293b" }}
-                        itemStyle={{ color: isDarkMode ? "#f1f5f9" : "#1e293b" }}
+                        labelStyle={{
+                          color: isDarkMode ? "#f1f5f9" : "#1e293b",
+                        }}
+                        itemStyle={{
+                          color: isDarkMode ? "#f1f5f9" : "#1e293b",
+                        }}
                       />
                     </PieChart>
                   </ResponsiveContainer>
@@ -1193,7 +1424,11 @@ export default function Dashboard() {
                     >
                       {taskStats.total}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary" fontWeight={500}>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      fontWeight={500}
+                    >
                       Total
                     </Typography>
                   </Box>
@@ -1211,7 +1446,9 @@ export default function Dashboard() {
                   }}
                 >
                   {taskStatusData.map((item) => {
-                    const percentage = Math.round((item.value / taskStats.total) * 100);
+                    const percentage = Math.round(
+                      (item.value / taskStats.total) * 100,
+                    );
                     return (
                       <Box
                         key={item.name}
@@ -1263,53 +1500,128 @@ export default function Dashboard() {
       case "recentActivity":
         return (
           <IOSWidget accentColor="#6366f1">
-            <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-              <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
+            <Box
+              sx={{ display: "flex", flexDirection: "column", height: "100%" }}
+            >
+              <Typography variant="h6" fontWeight={700} sx={{ mb: 2.5 }}>
                 Atividade Recente
               </Typography>
 
               {loading ? (
-                <Box
-                  sx={{ display: "flex", justifyContent: "center", py: 4 }}
-                >
+                <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
                   <CircularProgress />
                 </Box>
               ) : recentActivities.length > 0 ? (
                 <>
-                  <Box sx={{ flex: 1, overflowY: "auto" }}>
-                    {paginatedActivities.map((item, index) => (
-                      <Box
-                        key={item.id}
-                        sx={{
-                          py: 1.5,
-                          borderBottom:
-                            index < paginatedActivities.length - 1
-                              ? "1px solid"
-                              : "none",
-                          borderColor: "divider",
-                        }}
-                      >
-                        <Typography variant="body2" fontWeight={600}>
-                          {item.action}
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          noWrap
+                  <Box sx={{ flex: 1 }}>
+                    {paginatedActivities.map((item, index) => {
+                      const cfg = ACTIVITY_CONFIG[item.type];
+                      const isLast = index === paginatedActivities.length - 1;
+                      return (
+                        <Box
+                          key={item.id}
+                          sx={{
+                            display: "flex",
+                            gap: 1.5,
+                            position: "relative",
+                          }}
                         >
-                          {item.task}
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          display="block"
-                          color="text.secondary"
-                          sx={{ mt: 0.25 }}
-                        >
-                          {item.time}
-                        </Typography>
-                      </Box>
-                    ))}
+                          {/* Timeline column */}
+                          <Box
+                            sx={{
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "center",
+                              flexShrink: 0,
+                              width: 32,
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                width: 32,
+                                height: 32,
+                                borderRadius: "50%",
+                                bgcolor: cfg.bg,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                flexShrink: 0,
+                                zIndex: 1,
+                              }}
+                            >
+                              <cfg.Icon
+                                sx={{ fontSize: 16, color: cfg.color }}
+                              />
+                            </Box>
+                            {!isLast && (
+                              <Box
+                                sx={{
+                                  width: "2px",
+                                  flex: 1,
+                                  minHeight: 12,
+                                  bgcolor: "divider",
+                                  my: 0.5,
+                                }}
+                              />
+                            )}
+                          </Box>
+
+                          {/* Content */}
+                          <Box
+                            sx={{
+                              flex: 1,
+                              pb: isLast ? 0 : 2,
+                              pt: 0.25,
+                              minWidth: 0,
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "flex-start",
+                                gap: 1,
+                              }}
+                            >
+                              <Typography
+                                variant="caption"
+                                fontWeight={700}
+                                sx={{
+                                  color: cfg.color,
+                                  textTransform: "uppercase",
+                                  letterSpacing: "0.04em",
+                                  lineHeight: 1,
+                                }}
+                              >
+                                {item.label}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                color="text.disabled"
+                                sx={{ flexShrink: 0, lineHeight: 1 }}
+                              >
+                                {item.time}
+                              </Typography>
+                            </Box>
+                            <Typography
+                              variant="body2"
+                              fontWeight={500}
+                              sx={{
+                                mt: 0.4,
+                                color: "text.primary",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {item.name}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      );
+                    })}
                   </Box>
+
                   {totalActivitiesPages > 1 && (
                     <Box
                       sx={{

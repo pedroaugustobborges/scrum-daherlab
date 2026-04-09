@@ -94,16 +94,16 @@ export default function TeamProjectsModal({
       })
       setTeamMembers(members)
 
-      // Fetch sprints for this team to get project IDs
-      const { data: sprintsData, error: sprintsError } = await supabase
-        .from('sprints')
+      // Fetch current project associations from the canonical project_teams table
+      const { data: ptData, error: ptError } = await supabase
+        .from('project_teams')
         .select('project_id')
         .eq('team_id', team.id)
 
-      if (sprintsError) throw sprintsError
+      if (ptError) throw ptError
 
       // Get unique project IDs
-      const projectIds = [...new Set((sprintsData || []).map((s) => s.project_id).filter(Boolean))]
+      const projectIds = [...new Set((ptData || []).map((pt) => pt.project_id).filter(Boolean))]
 
       if (projectIds.length === 0) {
         setProjects([])
@@ -264,7 +264,7 @@ export default function TeamProjectsModal({
                 Nenhum projeto encontrado
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Este time ainda não está associado a nenhum projeto através de sprints
+                Este time ainda não está associado a nenhum projeto
               </Typography>
             </Box>
           ) : (

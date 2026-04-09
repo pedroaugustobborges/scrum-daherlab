@@ -48,6 +48,7 @@ import {
   ViewList,
   CalendarToday,
   ChevronRight,
+  Folder,
 } from '@mui/icons-material'
 import Navbar from '@/components/Navbar'
 import CreateTeamModal from '@/components/CreateTeamModal'
@@ -163,28 +164,27 @@ export default function Teams() {
       setAllMembers(membersList)
       setTeamMembersMap(membersMapping)
 
-      // Fetch all sprints to get team-project relationships
-      const { data: sprintsData, error: sprintsError } = await supabase
-        .from('sprints')
+      // Fetch team-project relationships from the canonical project_teams table
+      const { data: projectTeamsData, error: projectTeamsError } = await supabase
+        .from('project_teams')
         .select('team_id, project_id, projects(id, name)')
 
-      if (sprintsError) throw sprintsError
+      if (projectTeamsError) throw projectTeamsError
 
       // Build unique projects list and team-projects mapping
       const projectsSet = new Map<string, string>()
       const projectsMapping: Record<string, string[]> = {}
 
-      sprintsData?.forEach((sprint) => {
-        // Supabase returns the joined relation - handle both array and object cases
-        const projectData = sprint.projects
+      projectTeamsData?.forEach((pt) => {
+        const projectData = pt.projects
         const project = Array.isArray(projectData) ? projectData[0] : projectData
-        if (project && sprint.team_id) {
+        if (project && pt.team_id) {
           projectsSet.set(project.id, project.name)
-          if (!projectsMapping[sprint.team_id]) {
-            projectsMapping[sprint.team_id] = []
+          if (!projectsMapping[pt.team_id]) {
+            projectsMapping[pt.team_id] = []
           }
-          if (!projectsMapping[sprint.team_id].includes(project.id)) {
-            projectsMapping[sprint.team_id].push(project.id)
+          if (!projectsMapping[pt.team_id].includes(project.id)) {
+            projectsMapping[pt.team_id].push(project.id)
           }
         }
       })
@@ -243,6 +243,10 @@ export default function Teams() {
 
   const getMemberCount = (team: Team) => {
     return team.team_members?.[0]?.count || 0
+  }
+
+  const getProjectCount = (team: Team) => {
+    return (teamProjectsMap[team.id] || []).length
   }
 
   const formatDate = (date: string) => {
@@ -879,6 +883,15 @@ export default function Teams() {
 
                           <Box sx={{ flex: 1 }}>
                             <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ display: 'block', mb: 0.5 }}>
+                              Projetos
+                            </Typography>
+                            <Typography variant="h6" fontWeight={700} sx={{ color: '#8b5cf6' }}>
+                              {getProjectCount(team)}
+                            </Typography>
+                          </Box>
+
+                          <Box sx={{ flex: 1 }}>
+                            <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ display: 'block', mb: 0.5 }}>
                               Criado em
                             </Typography>
                             <Typography variant="body2" fontWeight={600}>
@@ -916,6 +929,9 @@ export default function Teams() {
                       </TableCell>
                       <TableCell sx={{ fontWeight: 700, color: '#6366f1', fontSize: '0.875rem', py: 2, display: { xs: 'none', sm: 'table-cell' } }}>
                         Membros
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: '#6366f1', fontSize: '0.875rem', py: 2, display: { xs: 'none', sm: 'table-cell' } }}>
+                        Projetos
                       </TableCell>
                       <TableCell sx={{ fontWeight: 700, color: '#6366f1', fontSize: '0.875rem', py: 2, display: { xs: 'none', md: 'table-cell' } }}>
                         Criado em
@@ -1002,6 +1018,14 @@ export default function Teams() {
                             <People sx={{ fontSize: 16, color: 'text.secondary' }} />
                             <Typography variant="body2" fontWeight={500}>
                               {getMemberCount(team)}
+                            </Typography>
+                          </Box>
+                        </TableCell>
+                        <TableCell sx={{ py: 2.5, display: { xs: 'none', sm: 'table-cell' } }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Folder sx={{ fontSize: 16, color: 'text.secondary' }} />
+                            <Typography variant="body2" fontWeight={500}>
+                              {getProjectCount(team)}
                             </Typography>
                           </Box>
                         </TableCell>

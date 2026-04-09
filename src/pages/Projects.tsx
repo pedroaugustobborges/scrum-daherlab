@@ -144,32 +144,32 @@ export default function Projects() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch projects, teams, and sprints in parallel
-      const [projectsRes, teamsRes, sprintsRes] = await Promise.all([
+      // Fetch projects, teams, and project_teams in parallel
+      const [projectsRes, teamsRes, projectTeamsRes] = await Promise.all([
         supabase
           .from("projects")
           .select("*")
           .order("created_at", { ascending: false }),
         supabase.from("teams").select("id, name").order("name"),
-        supabase.from("sprints").select("project_id, team_id"),
+        supabase.from("project_teams").select("project_id, team_id"),
       ]);
 
       if (projectsRes.error) throw projectsRes.error;
       if (teamsRes.error) throw teamsRes.error;
-      if (sprintsRes.error) throw sprintsRes.error;
+      if (projectTeamsRes.error) throw projectTeamsRes.error;
 
       setProjects(projectsRes.data || []);
       setTeams(teamsRes.data || []);
 
-      // Build project-teams mapping
+      // Build project-teams mapping from the canonical project_teams table
       const mapping: Record<string, string[]> = {};
-      sprintsRes.data?.forEach((sprint) => {
-        if (sprint.project_id && sprint.team_id) {
-          if (!mapping[sprint.project_id]) {
-            mapping[sprint.project_id] = [];
+      projectTeamsRes.data?.forEach((pt) => {
+        if (pt.project_id && pt.team_id) {
+          if (!mapping[pt.project_id]) {
+            mapping[pt.project_id] = [];
           }
-          if (!mapping[sprint.project_id].includes(sprint.team_id)) {
-            mapping[sprint.project_id].push(sprint.team_id);
+          if (!mapping[pt.project_id].includes(pt.team_id)) {
+            mapping[pt.project_id].push(pt.team_id);
           }
         }
       });

@@ -406,12 +406,18 @@ export default function ProjectDetailsModal({
       }));
       setBacklogItems(transformedBacklog);
 
-      // Get unique team members from sprints
+      // Get current team IDs from the canonical project_teams table
+      const { data: projectTeamsData } = await supabase
+        .from("project_teams")
+        .select("team_id")
+        .eq("project_id", project.id);
+
       const uniqueTeamIds = [
         ...new Set(
-          (sprintsRes.data || []).map((s) => s.team_id).filter(Boolean)
+          (projectTeamsData || []).map((pt) => pt.team_id).filter(Boolean)
         ),
       ];
+
       if (uniqueTeamIds.length > 0) {
         const { data: teamsData } = await supabase
           .from("team_members")
@@ -420,12 +426,13 @@ export default function ProjectDetailsModal({
           )
           .in("team_id", uniqueTeamIds);
 
+        // Deduplicate by user id — a member in multiple teams appears only once
         const uniqueMembers = teamsData
           ?.map((tm: any) => ({
             ...tm.user_profile,
             role: tm.role,
           }))
-          .filter((m: any) => m)
+          .filter((m: any) => m?.id)
           .reduce((acc: TeamMember[], curr: TeamMember) => {
             if (!acc.find((m) => m.id === curr.id)) {
               acc.push(curr);
@@ -434,6 +441,8 @@ export default function ProjectDetailsModal({
           }, []);
 
         setTeamMembers(uniqueMembers || []);
+      } else {
+        setTeamMembers([]);
       }
 
       // Calculate statistics
@@ -649,7 +658,7 @@ export default function ProjectDetailsModal({
                       fontWeight={600}
                       sx={{ mb: 1.5, display: "block" }}
                     >
-                      Membros do Time ({teamMembers.length})
+                      Membros do Projeto ({teamMembers.length})
                     </Typography>
                     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5 }}>
                       {teamMembers.map((member) => {

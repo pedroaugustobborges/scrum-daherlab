@@ -73,6 +73,7 @@ interface Activity {
   name: string;
   time: string;
   created_at: string;
+  projectName?: string;
 }
 
 const ACTIVITY_CONFIG: Record<
@@ -326,12 +327,12 @@ export default function Dashboard() {
       const [tasksRes, sprintsRes2, projectsRes2] = await Promise.all([
         supabase
           .from("tasks")
-          .select("id, title, status, created_at, updated_at")
+          .select("id, title, status, project_id, created_at, updated_at")
           .order("updated_at", { ascending: false })
           .limit(15),
         supabase
           .from("sprints")
-          .select("id, name, created_at")
+          .select("id, name, project_id, created_at")
           .order("created_at", { ascending: false })
           .limit(8),
         supabase
@@ -340,6 +341,22 @@ export default function Dashboard() {
           .order("created_at", { ascending: false })
           .limit(8),
       ]);
+
+      // Batch-resolve project names for tasks and sprints
+      const activityProjectIds = [
+        ...new Set([
+          ...(tasksRes.data || []).map((t) => t.project_id).filter(Boolean),
+          ...(sprintsRes2.data || []).map((s) => s.project_id).filter(Boolean),
+        ]),
+      ];
+      const projectNameMap: Record<string, string> = {};
+      if (activityProjectIds.length > 0) {
+        const { data: projectNames } = await supabase
+          .from("projects")
+          .select("id, name")
+          .in("id", activityProjectIds);
+        projectNames?.forEach((p) => { projectNameMap[p.id] = p.name; });
+      }
 
       const activities: Activity[] = [];
 
@@ -352,6 +369,7 @@ export default function Dashboard() {
             name: task.title,
             time: formatTimeAgo(task.updated_at || task.created_at),
             created_at: task.updated_at || task.created_at,
+            projectName: task.project_id ? projectNameMap[task.project_id] : undefined,
           });
         } else {
           activities.push({
@@ -361,6 +379,7 @@ export default function Dashboard() {
             name: task.title,
             time: formatTimeAgo(task.created_at),
             created_at: task.created_at,
+            projectName: task.project_id ? projectNameMap[task.project_id] : undefined,
           });
         }
       });
@@ -373,6 +392,7 @@ export default function Dashboard() {
           name: sprint.name,
           time: formatTimeAgo(sprint.created_at),
           created_at: sprint.created_at,
+          projectName: sprint.project_id ? projectNameMap[sprint.project_id] : undefined,
         });
       });
 
@@ -1575,44 +1595,35 @@ export default function Dashboard() {
                               minWidth: 0,
                             }}
                           >
-                            <Box
-                              sx={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "flex-start",
-                                gap: 1,
-                              }}
-                            >
-                              <Typography
-                                variant="caption"
-                                fontWeight={700}
-                                sx={{
-                                  color: cfg.color,
-                                  textTransform: "uppercase",
-                                  letterSpacing: "0.04em",
-                                  lineHeight: 1,
-                                }}
-                              >
-                                {item.label}
-                              </Typography>
-                              <Typography
-                                variant="caption"
-                                color="text.disabled"
-                                sx={{ flexShrink: 0, lineHeight: 1 }}
-                              >
+                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 1 }}>
+                              <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, minWidth: 0, flex: 1 }}>
+                                <Typography
+                                  variant="caption"
+                                  fontWeight={700}
+                                  sx={{ color: cfg.color, textTransform: "uppercase", letterSpacing: "0.04em", lineHeight: 1, flexShrink: 0 }}
+                                >
+                                  {item.label}
+                                </Typography>
+                                {item.projectName && (
+                                  <>
+                                    <Typography variant="caption" sx={{ color: "text.disabled", lineHeight: 1, flexShrink: 0 }}>·</Typography>
+                                    <Typography
+                                      variant="caption"
+                                      sx={{ color: "text.disabled", lineHeight: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                                    >
+                                      {item.projectName}
+                                    </Typography>
+                                  </>
+                                )}
+                              </Box>
+                              <Typography variant="caption" color="text.disabled" sx={{ flexShrink: 0, lineHeight: 1 }}>
                                 {item.time}
                               </Typography>
                             </Box>
                             <Typography
                               variant="body2"
                               fontWeight={500}
-                              sx={{
-                                mt: 0.4,
-                                color: "text.primary",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
-                              }}
+                              sx={{ mt: 0.4, color: "text.primary", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
                             >
                               {item.name}
                             </Typography>

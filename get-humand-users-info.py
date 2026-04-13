@@ -21,7 +21,7 @@ import requests
 # ---------------------------------------------------------------------------
 
 HUMAND_BASE_URL = "https://api-prod.humand.co/public/api/v1"
-HUMAND_AUTH     = "Basic NTc1MDQwNTpTc2lRZlNrWlhaNmd4aEdwYWNBS3JJMUJac2M4eEZyMA=="
+HUMAND_AUTH     = "Basic ODQwNDU3NjpqMVdzTDVwRnB5QlgteEhHTjNtMDNWc3djSDJMTFhYMg=="
 
 PAGE_LIMIT  = 50
 MAX_USERS   = 1000

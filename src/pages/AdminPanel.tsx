@@ -42,6 +42,8 @@ import {
   PersonAdd,
   Refresh,
   LockReset,
+  Edit,
+  Badge,
 } from "@mui/icons-material";
 import { Navigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -56,6 +58,7 @@ interface User {
   email: string;
   full_name: string;
   is_admin: boolean;
+  employee_internal_id: string | null;
   created_at: string;
   last_sign_in_at: string | null;
 }
@@ -69,10 +72,10 @@ export default function AdminPanel() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [resetPasswordDialogOpen, setResetPasswordDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
-  const [userToResetPassword, setUserToResetPassword] = useState<User | null>(
-    null,
-  );
+  const [userToResetPassword, setUserToResetPassword] = useState<User | null>(null);
+  const [userToEdit, setUserToEdit] = useState<User | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
   // Form state for creating user
@@ -80,7 +83,11 @@ export default function AdminPanel() {
     email: "",
     password: "",
     fullName: "",
+    cpf: "",
   });
+
+  // Form state for editing user
+  const [editForm, setEditForm] = useState({ fullName: "", cpf: "" });
   const [newPassword, setNewPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -111,14 +118,30 @@ export default function AdminPanel() {
     }
   };
 
+  const formatCpf = (value: string) => {
+    const digits = value.replace(/\D/g, "").slice(0, 11);
+    return digits
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+  };
+
+  const stripCpf = (value: string) => value.replace(/\D/g, "");
+
   const handleCreateUser = async () => {
-    if (!newUserForm.email || !newUserForm.password || !newUserForm.fullName) {
-      toast.error("Por favor, preencha todos os campos");
+    if (!newUserForm.email || !newUserForm.password || !newUserForm.fullName || !newUserForm.cpf) {
+      toast.error("Por favor, preencha todos os campos obrigatórios");
       return;
     }
 
     if (newUserForm.password.length < 6) {
       toast.error("A senha deve ter pelo menos 6 caracteres");
+      return;
+    }
+
+    const cpfDigits = stripCpf(newUserForm.cpf);
+    if (cpfDigits.length !== 11) {
+      toast.error("CPF inválido — informe os 11 dígitos");
       return;
     }
 
@@ -128,6 +151,7 @@ export default function AdminPanel() {
         user_email: newUserForm.email,
         user_password: newUserForm.password,
         user_full_name: newUserForm.fullName,
+        user_cpf: cpfDigits,
       });
 
       if (error) throw error;
@@ -135,7 +159,7 @@ export default function AdminPanel() {
       if (data?.success) {
         toast.success("Usuário criado com sucesso!");
         setCreateDialogOpen(false);
-        setNewUserForm({ email: "", password: "", fullName: "" });
+        setNewUserForm({ email: "", password: "", fullName: "", cpf: "" });
         await fetchUsers();
       } else {
         throw new Error(data?.error || "Failed to create user");
@@ -143,6 +167,44 @@ export default function AdminPanel() {
     } catch (error: any) {
       console.error("Error creating user:", error);
       toast.error(error.message || "Erro ao criar usuário");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleEditUser = async () => {
+    if (!userToEdit || !editForm.fullName) {
+      toast.error("Nome é obrigatório");
+      return;
+    }
+
+    const cpfDigits = stripCpf(editForm.cpf);
+    if (editForm.cpf && cpfDigits.length !== 11) {
+      toast.error("CPF inválido — informe os 11 dígitos");
+      return;
+    }
+
+    setActionLoading(true);
+    try {
+      const { data, error } = await supabase.rpc("admin_update_user_profile", {
+        target_user_id: userToEdit.id,
+        new_full_name: editForm.fullName,
+        new_cpf: cpfDigits || null,
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        toast.success("Usuário atualizado com sucesso!");
+        setEditDialogOpen(false);
+        setUserToEdit(null);
+        await fetchUsers();
+      } else {
+        throw new Error(data?.error || "Failed to update user");
+      }
+    } catch (error: any) {
+      console.error("Error updating user:", error);
+      toast.error(error.message || "Erro ao atualizar usuário");
     } finally {
       setActionLoading(false);
     }
@@ -501,6 +563,7 @@ export default function AdminPanel() {
                 <TableRow sx={{ bgcolor: "rgba(99, 102, 241, 0.05)" }}>
                   <TableCell sx={{ fontWeight: 700 }}>Usuário</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Email</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>CPF</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Criado em</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Último Login</TableCell>
@@ -512,7 +575,7 @@ export default function AdminPanel() {
               <TableBody>
                 {paginatedUsers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} align="center" sx={{ py: 8 }}>
+                    <TableCell colSpan={7} align="center" sx={{ py: 8 }}>
                       <Typography variant="body1" color="text.secondary">
                         Nenhum usuário encontrado
                       </Typography>
@@ -565,6 +628,28 @@ export default function AdminPanel() {
                         <Typography variant="body2">{u.email}</Typography>
                       </TableCell>
                       <TableCell>
+                        {u.employee_internal_id ? (
+                          <Chip
+                            label={u.employee_internal_id.replace(
+                              /(\d{3})(\d{3})(\d{3})(\d{2})/,
+                              "$1.$2.$3-$4",
+                            )}
+                            size="small"
+                            icon={<Badge sx={{ fontSize: 14 }} />}
+                            sx={{
+                              bgcolor: "rgba(99, 102, 241, 0.08)",
+                              color: "#6366f1",
+                              fontWeight: 600,
+                              fontFamily: "monospace",
+                            }}
+                          />
+                        ) : (
+                          <Typography variant="body2" color="text.disabled" fontStyle="italic">
+                            Não informado
+                          </Typography>
+                        )}
+                      </TableCell>
+                      <TableCell>
                         <Chip
                           label={u.is_admin ? "Admin" : "Usuário"}
                           size="small"
@@ -600,6 +685,33 @@ export default function AdminPanel() {
                             justifyContent: "flex-end",
                           }}
                         >
+                          <Tooltip title="Editar nome e CPF">
+                            <span>
+                              <IconButton
+                                size="small"
+                                onClick={() => {
+                                  setUserToEdit(u);
+                                  setEditForm({
+                                    fullName: u.full_name || "",
+                                    cpf: u.employee_internal_id
+                                      ? u.employee_internal_id.replace(
+                                          /(\d{3})(\d{3})(\d{3})(\d{2})/,
+                                          "$1.$2.$3-$4",
+                                        )
+                                      : "",
+                                  });
+                                  setEditDialogOpen(true);
+                                }}
+                                disabled={actionLoading}
+                                sx={{
+                                  bgcolor: "rgba(99, 102, 241, 0.1)",
+                                  "&:hover": { bgcolor: "rgba(99, 102, 241, 0.2)" },
+                                }}
+                              >
+                                <Edit sx={{ fontSize: 18, color: "#6366f1" }} />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
                           <Tooltip title="Redefinir senha">
                             <span>
                               <IconButton
@@ -772,6 +884,24 @@ export default function AdminPanel() {
             />
             <TextField
               fullWidth
+              label="CPF *"
+              value={newUserForm.cpf}
+              onChange={(e) =>
+                setNewUserForm({ ...newUserForm, cpf: formatCpf(e.target.value) })
+              }
+              placeholder="000.000.000-00"
+              inputProps={{ maxLength: 14 }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Badge sx={{ color: "#6366f1" }} />
+                  </InputAdornment>
+                ),
+              }}
+              helperText="CPF do colaborador (employee_internal_id no Humand)"
+            />
+            <TextField
+              fullWidth
               label="Senha"
               type={showPassword ? "text" : "password"}
               value={newUserForm.password}
@@ -863,6 +993,98 @@ export default function AdminPanel() {
             }
           >
             {actionLoading ? "Excluindo..." : "Excluir Usuário"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Edit User Dialog */}
+      <Dialog
+        open={editDialogOpen}
+        onClose={() => !actionLoading && setEditDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ fontWeight: 700 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Box
+              sx={{
+                width: 36,
+                height: 36,
+                borderRadius: 2,
+                background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Edit sx={{ color: "white", fontSize: 18 }} />
+            </Box>
+            Editar Usuário
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ mb: 3, mt: 1, p: 2, borderRadius: 2, bgcolor: "rgba(99, 102, 241, 0.05)", border: "1px solid rgba(99, 102, 241, 0.15)" }}>
+            <Typography variant="caption" color="text.secondary" fontWeight={600}>
+              EMAIL (não editável)
+            </Typography>
+            <Typography variant="body2" fontWeight={600} sx={{ color: "#6366f1" }}>
+              {userToEdit?.email}
+            </Typography>
+          </Box>
+          <Stack spacing={3}>
+            <TextField
+              fullWidth
+              label="Nome Completo *"
+              value={editForm.fullName}
+              onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Person sx={{ color: "#6366f1" }} />
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <TextField
+              fullWidth
+              label="CPF"
+              value={editForm.cpf}
+              onChange={(e) =>
+                setEditForm({ ...editForm, cpf: formatCpf(e.target.value) })
+              }
+              placeholder="000.000.000-00"
+              inputProps={{ maxLength: 14 }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Badge sx={{ color: "#6366f1" }} />
+                  </InputAdornment>
+                ),
+              }}
+              helperText="CPF do colaborador (employee_internal_id no Humand)"
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button
+            variant="outlined"
+            onClick={() => setEditDialogOpen(false)}
+            disabled={actionLoading}
+            sx={{ borderWidth: 2, "&:hover": { borderWidth: 2 } }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleEditUser}
+            disabled={actionLoading}
+            startIcon={actionLoading ? <CircularProgress size={20} /> : <Edit />}
+            sx={{
+              background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+              "&:hover": { background: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)" },
+            }}
+          >
+            {actionLoading ? "Salvando..." : "Salvar Alterações"}
           </Button>
         </DialogActions>
       </Dialog>

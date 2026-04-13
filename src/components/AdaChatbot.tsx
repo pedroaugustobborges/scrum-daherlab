@@ -54,6 +54,7 @@ interface TeamMember {
   full_name: string;
   email: string;
   role: string;
+  employee_internal_id: string | null;
 }
 
 interface TaskData {
@@ -136,7 +137,8 @@ export default function AdaChatbot({
             role,
             profiles:profiles!team_members_user_id_fkey(
               id,
-              full_name
+              full_name,
+              employee_internal_id
             )
           `,
           )
@@ -155,6 +157,7 @@ export default function AdaChatbot({
             full_name: m.profiles?.full_name || "Membro",
             email: "", // Will try to fetch separately
             role: m.role,
+            employee_internal_id: m.profiles?.employee_internal_id || null,
           }));
 
           // Remove duplicates
@@ -168,7 +171,7 @@ export default function AdaChatbot({
             const userIds = uniqueMembers.map((m) => m.id);
             const { data: profilesWithEmail } = await supabase
               .from("profiles")
-              .select("id, email")
+              .select("id, email, employee_internal_id")
               .in("id", userIds);
 
             if (profilesWithEmail) {
@@ -178,6 +181,9 @@ export default function AdaChatbot({
                 );
                 if (profileWithEmail?.email) {
                   member.email = profileWithEmail.email;
+                }
+                if (profileWithEmail?.employee_internal_id) {
+                  member.employee_internal_id = profileWithEmail.employee_internal_id;
                 }
               });
             }
@@ -493,6 +499,7 @@ export default function AdaChatbot({
           name: m.full_name,
           email: m.email,
           role: m.role,
+          humandChannelId: m.employee_internal_id || null,
         })),
         projectData: {
           stats,

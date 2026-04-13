@@ -25,7 +25,7 @@ from supabase import create_client, Client
 # ---------------------------------------------------------------------------
 
 HUMAND_BASE_URL = "https://api-prod.humand.co/public/api/v1"
-HUMAND_AUTH = "Basic NTc1MDQwNTpTc2lRZlNrWlhaNmd4aEdwYWNBS3JJMUJac2M4eEZyMA=="
+HUMAND_AUTH = "Basic ODQwNDU3NjpqMVdzTDVwRnB5QlgteEhHTjNtMDNWc3djSDJMTFhYMg=="
 
 SUPABASE_URL = "https://vzlgssqtzerleeskhzmo.supabase.co"
 SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ6bGdzc3F0emVybGVlc2toem1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDEwNDIyMywiZXhwIjoyMDc5NjgwMjIzfQ.bGpEOAup4ayfj1pZO-uwNCG3DAAvxJXV6l_OfNtwvKE"

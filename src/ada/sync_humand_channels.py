@@ -19,7 +19,7 @@ from supabase import create_client, Client
 # ---------------------------------------------------------------------------
 
 HUMAND_BASE_URL = "https://api-prod.humand.co"
-HUMAND_AUTH = "Basic NTc1MDQwNTpTc2lRZlNrWlhaNmd4aEdwYWNBS3JJMUJac2M4eEZyMA=="
+HUMAND_AUTH = "Basic ODQwNDU3NjpqMVdzTDVwRnB5QlgteEhHTjNtMDNWc3djSDJMTFhYMg=="
 
 SUPABASE_URL = "https://vzlgssqtzerleeskhzmo.supabase.co"
 # Use the service role key so we can write to the table without RLS restrictions

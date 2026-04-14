@@ -40,23 +40,8 @@ export default function Settings() {
   const [fullName, setFullName] = useState(
     user?.user_metadata?.full_name || "",
   );
-
-  // Fetch avatar from profiles table (same as Navbar)
-  useEffect(() => {
-    const fetchAvatar = async () => {
-      if (!user?.id) return;
-      const { data } = await supabase
-        .from("profiles")
-        .select("avatar_url")
-        .eq("id", user.id)
-        .single();
-
-      if (data?.avatar_url) {
-        setAvatarUrl(data.avatar_url);
-      }
-    };
-    fetchAvatar();
-  }, [user?.id]);
+  const [cpf, setCpf] = useState("");
+  const [originalCpf, setOriginalCpf] = useState("");
   const [updatingProfile, setUpdatingProfile] = useState(false);
 
   // Password section state
@@ -66,8 +51,49 @@ export default function Settings() {
   const [updatingPassword, setUpdatingPassword] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
+  const formatCpf = (value: string) => {
+    const digits = value.replace(/\D/g, "").slice(0, 11);
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+    if (digits.length <= 9)
+      return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+    return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+  };
+
+  const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCpf(formatCpf(e.target.value));
+  };
+
+  // Fetch avatar and CPF from profiles table
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user?.id) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("avatar_url, employee_internal_id")
+        .eq("id", user.id)
+        .single();
+
+      if (data?.avatar_url) {
+        setAvatarUrl(data.avatar_url);
+      }
+      if (data?.employee_internal_id) {
+        const formatted = formatCpf(data.employee_internal_id);
+        setCpf(formatted);
+        setOriginalCpf(formatted);
+      }
+    };
+    fetchProfile();
+  }, [user?.id]);
+
   const handleUpdateProfile = async () => {
     if (!user?.id) return;
+
+    const rawCpf = cpf.replace(/\D/g, "");
+    if (cpf && rawCpf.length !== 11) {
+      toast.error("CPF inválido. Informe os 11 dígitos.");
+      return;
+    }
 
     try {
       setUpdatingProfile(true);
@@ -82,11 +108,12 @@ export default function Settings() {
       // Update profiles table
       const { error: profileError } = await supabase
         .from("profiles")
-        .update({ full_name: fullName })
+        .update({ full_name: fullName, employee_internal_id: rawCpf || null })
         .eq("id", user.id);
 
       if (profileError) throw profileError;
 
+      setOriginalCpf(cpf);
       toast.success("Perfil atualizado com sucesso!");
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -206,6 +233,16 @@ export default function Settings() {
 
             <TextField
               fullWidth
+              label="CPF"
+              value={cpf}
+              onChange={handleCpfChange}
+              placeholder="000.000.000-00"
+              inputProps={{ maxLength: 14 }}
+              sx={{ mb: 2 }}
+            />
+
+            <TextField
+              fullWidth
               label="Email"
               value={user?.email || ""}
               disabled
@@ -218,7 +255,9 @@ export default function Settings() {
               startIcon={updatingProfile ? null : <Save />}
               onClick={handleUpdateProfile}
               disabled={
-                updatingProfile || fullName === user?.user_metadata?.full_name
+                updatingProfile ||
+                (fullName === user?.user_metadata?.full_name &&
+                  cpf === originalCpf)
               }
               sx={{
                 bgcolor: "#6366f1",

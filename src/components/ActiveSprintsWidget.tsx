@@ -16,9 +16,13 @@ interface ActiveSprint {
   total_stories: number
 }
 
+interface ActiveSprintsWidgetProps {
+  teamId?: string | null
+}
+
 const ITEMS_PER_PAGE = 2
 
-export default function ActiveSprintsWidget() {
+export default function ActiveSprintsWidget({ teamId }: ActiveSprintsWidgetProps = {}) {
   const theme = useTheme()
   const isDarkMode = theme.palette.mode === 'dark'
   const [loading, setLoading] = useState(true)
@@ -34,19 +38,26 @@ export default function ActiveSprintsWidget() {
   const paginatedSprints = activeSprints.slice(startIndex, startIndex + ITEMS_PER_PAGE)
 
   useEffect(() => {
+    setCurrentPage(1)
     fetchActiveSprints()
-  }, [])
+  }, [teamId])
 
   const fetchActiveSprints = async () => {
     try {
       setLoading(true)
 
-      // Fetch active sprints
-      const { data: sprints, error: sprintsError } = await supabase
+      // Fetch active sprints, optionally scoped to a team
+      let sprintsQuery = supabase
         .from('sprints')
         .select('id, name, start_date, end_date, project_id, team_id')
         .eq('status', 'active')
         .order('end_date', { ascending: true })
+
+      if (teamId) {
+        sprintsQuery = sprintsQuery.eq('team_id', teamId)
+      }
+
+      const { data: sprints, error: sprintsError } = await sprintsQuery
 
       if (sprintsError) throw sprintsError
 

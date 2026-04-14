@@ -44,6 +44,7 @@ import {
   WidgetCustomizationModal,
   TeamMemberDetailModal,
   TasksByStatusModal,
+  TeamFilter,
 } from "@/components/dashboard";
 import { IOSWidget } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
@@ -149,17 +150,14 @@ const PRODUCTIVITY_PERIODS: {
 const ACTIVITIES_PER_PAGE = 5;
 const TEAM_WORKLOAD_PER_PAGE = 4;
 
-// Widget component mapping
-const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType | null> = {
-  activeProjects: ActiveProjectsWidget,
-  activeSprints: ActiveSprintsWidget,
-  actionItems: ActionItemsWidget,
-  activityOverview: null,
-  taskDistribution: null,
-  recentActivity: null,
-  productivityTrend: null,
-  teamWorkload: null,
-};
+// Inline-only widget types (component-based widgets are handled directly in renderWidget)
+const INLINE_WIDGET_TYPES: WidgetType[] = [
+  "activityOverview",
+  "taskDistribution",
+  "recentActivity",
+  "productivityTrend",
+  "teamWorkload",
+];
 
 // Widget grid sizes - widgets that take half width on large screens
 const LARGE_WIDGETS: WidgetType[] = ["productivityTrend", "teamWorkload"];
@@ -191,6 +189,7 @@ export default function Dashboard() {
     color: string;
   } | null>(null);
   const [statusModalOpen, setStatusModalOpen] = useState(false);
+  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
 
   const totalActivitiesPages = Math.ceil(
     recentActivities.length / ACTIVITIES_PER_PAGE,
@@ -238,17 +237,33 @@ export default function Dashboard() {
   }, [user]);
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
+    fetchDashboardData(selectedTeamId);
+  }, [selectedTeamId]);
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = async (teamId: string | null = null) => {
     try {
       setLoading(true);
 
-      // Fetch ALL tasks
-      const { data: tasks, error: tasksError } = await supabase
+      // When a team is selected, scope tasks to sprints of that team
+      let sprintIds: string[] | null = null;
+      if (teamId) {
+        const { data: sprints } = await supabase
+          .from("sprints")
+          .select("id")
+          .eq("team_id", teamId);
+        sprintIds = sprints?.map((s) => s.id) ?? [];
+      }
+
+      // Fetch tasks (scoped to team's sprints when applicable)
+      let tasksQuery = supabase
         .from("tasks")
-        .select("status, assigned_to, created_at");
+        .select("status, assigned_to, created_at, sprint_id");
+      if (sprintIds !== null) {
+        tasksQuery = sprintIds.length > 0
+          ? tasksQuery.in("sprint_id", sprintIds)
+          : tasksQuery.in("sprint_id", ["00000000-0000-0000-0000-000000000000"]); // empty result
+      }
+      const { data: tasks, error: tasksError } = await tasksQuery;
 
       if (tasksError) throw tasksError;
 
@@ -264,10 +279,22 @@ export default function Dashboard() {
 
       setTaskStats(stats);
 
-      // Fetch project stats
-      const { data: projects, error: projectsError } = await supabase
-        .from("projects")
-        .select("status");
+      // Fetch project stats (scoped to team's projects when applicable)
+      let projectsQuery = supabase.from("projects").select("id, status");
+      if (teamId) {
+        const { data: teamProjects } = await supabase
+          .from("sprints")
+          .select("project_id")
+          .eq("team_id", teamId)
+          .not("project_id", "is", null);
+        const teamProjectIds = [
+          ...new Set((teamProjects ?? []).map((s: any) => s.project_id)),
+        ];
+        projectsQuery = teamProjectIds.length > 0
+          ? projectsQuery.in("id", teamProjectIds)
+          : projectsQuery.in("id", ["00000000-0000-0000-0000-000000000000"]);
+      }
+      const { data: projects, error: projectsError } = await projectsQuery;
 
       if (projectsError) throw projectsError;
 
@@ -282,59 +309,73 @@ export default function Dashboard() {
       setProjectStats(pStats);
 
       // Fetch team workload - get all users who have tasks assigned
-      if (tasks && tasks.length > 0) {
-        // Get unique user IDs from tasks that have an assigned_to value
-        const assignedUserIds = [
+      // Determine which user IDs to show in workload
+      // When a team is selected, use that team's member list; otherwise derive from tasks
+      let profileIds: string[] = [];
+      if (teamId) {
+        const { data: teamMembersData } = await supabase
+          .from("team_members")
+          .select("user_id")
+          .eq("team_id", teamId);
+        profileIds = (teamMembersData ?? []).map((m: any) => m.user_id);
+      } else if (tasks && tasks.length > 0) {
+        profileIds = [
           ...new Set(
             tasks
-              .map((t) => t.assigned_to)
+              .map((t: any) => t.assigned_to)
               .filter((id): id is string => id !== null && id !== undefined),
           ),
         ];
+      }
 
-        if (assignedUserIds.length > 0) {
-          // Fetch profiles only for users who have tasks assigned
-          const { data: profiles, error: profilesError } = await supabase
-            .from("profiles")
-            .select("id, full_name, avatar_url")
-            .in("id", assignedUserIds);
+      if (profileIds.length > 0) {
+        const { data: profiles, error: profilesError } = await supabase
+          .from("profiles")
+          .select("id, full_name, avatar_url")
+          .in("id", profileIds);
 
-          if (!profilesError && profiles) {
-            const workloadData: TeamMember[] = profiles.map((profile) => {
-              const memberTasks = tasks.filter(
-                (t) => t.assigned_to === profile.id,
-              );
-              return {
-                id: profile.id,
-                full_name: profile.full_name,
-                avatar_url: profile.avatar_url,
-                tasks_count: memberTasks.length,
-                completed_count: memberTasks.filter((t) => t.status === "done")
-                  .length,
-              };
-            });
-
-            setTeamWorkload(workloadData);
-          }
-        } else {
-          setTeamWorkload([]);
+        if (!profilesError && profiles) {
+          const workloadData: TeamMember[] = profiles.map((profile) => {
+            const memberTasks = (tasks ?? []).filter(
+              (t: any) => t.assigned_to === profile.id,
+            );
+            return {
+              id: profile.id,
+              full_name: profile.full_name,
+              avatar_url: profile.avatar_url,
+              tasks_count: memberTasks.length,
+              completed_count: memberTasks.filter((t: any) => t.status === "done")
+                .length,
+            };
+          });
+          setTeamWorkload(workloadData);
         }
       } else {
         setTeamWorkload([]);
       }
 
-      // Fetch recent activities
+      // Fetch recent activities (scoped to team when applicable)
+      let activityTasksQuery = supabase
+        .from("tasks")
+        .select("id, title, status, project_id, sprint_id, created_at, updated_at")
+        .order("updated_at", { ascending: false })
+        .limit(15);
+      let activitySprintsQuery = supabase
+        .from("sprints")
+        .select("id, name, project_id, created_at")
+        .order("created_at", { ascending: false })
+        .limit(8);
+      if (sprintIds !== null && sprintIds.length > 0) {
+        activityTasksQuery = activityTasksQuery.in("sprint_id", sprintIds);
+        activitySprintsQuery = activitySprintsQuery.in("id", sprintIds);
+      } else if (sprintIds !== null && sprintIds.length === 0) {
+        // No sprints for this team — skip by using impossible filter
+        activityTasksQuery = activityTasksQuery.in("sprint_id", ["00000000-0000-0000-0000-000000000000"]);
+        activitySprintsQuery = activitySprintsQuery.in("id", ["00000000-0000-0000-0000-000000000000"]);
+      }
       const [tasksRes, sprintsRes2, projectsRes2] = await Promise.all([
-        supabase
-          .from("tasks")
-          .select("id, title, status, project_id, created_at, updated_at")
-          .order("updated_at", { ascending: false })
-          .limit(15),
-        supabase
-          .from("sprints")
-          .select("id, name, project_id, created_at")
-          .order("created_at", { ascending: false })
-          .limit(8),
+        activityTasksQuery,
+        activitySprintsQuery,
         supabase
           .from("projects")
           .select("id, name, created_at")
@@ -420,7 +461,7 @@ export default function Dashboard() {
   };
 
   // Fetch productivity data based on selected period
-  const fetchProductivityData = async (period: ProductivityPeriod) => {
+  const fetchProductivityData = async (period: ProductivityPeriod, teamId: string | null = null) => {
     setProductivityLoading(true);
     try {
       const now = new Date();
@@ -623,11 +664,25 @@ export default function Dashboard() {
           break;
       }
 
-      // Fetch tasks for the entire period
-      const { data: tasks, error } = await supabase
+      // Fetch tasks for the entire period (scoped to team when applicable)
+      let prodSprintIds: string[] | null = null;
+      if (teamId) {
+        const { data: ts } = await supabase
+          .from("sprints")
+          .select("id")
+          .eq("team_id", teamId);
+        prodSprintIds = ts?.map((s) => s.id) ?? [];
+      }
+      let prodQuery = supabase
         .from("tasks")
-        .select("status, created_at, updated_at")
+        .select("status, created_at, updated_at, sprint_id")
         .gte("created_at", startDate.toISOString());
+      if (prodSprintIds !== null) {
+        prodQuery = prodSprintIds.length > 0
+          ? prodQuery.in("sprint_id", prodSprintIds)
+          : prodQuery.in("sprint_id", ["00000000-0000-0000-0000-000000000000"]);
+      }
+      const { data: tasks, error } = await prodQuery;
 
       if (error) throw error;
 
@@ -657,10 +712,10 @@ export default function Dashboard() {
     }
   };
 
-  // Fetch productivity data when period changes
+  // Fetch productivity data when period or team changes
   useEffect(() => {
-    fetchProductivityData(productivityPeriod);
-  }, [productivityPeriod]);
+    fetchProductivityData(productivityPeriod, selectedTeamId);
+  }, [productivityPeriod, selectedTeamId]);
 
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
@@ -722,11 +777,19 @@ export default function Dashboard() {
 
   // Render a widget by type
   const renderWidget = (type: WidgetType) => {
-    // Component-based widgets
-    const Component = WIDGET_COMPONENTS[type];
-    if (Component) {
-      return <Component />;
+    // Component-based widgets — receive teamId so they react to the filter
+    switch (type) {
+      case "activeProjects":
+        return <ActiveProjectsWidget teamId={selectedTeamId} />;
+      case "activeSprints":
+        return <ActiveSprintsWidget teamId={selectedTeamId} />;
+      case "actionItems":
+        return <ActionItemsWidget teamId={selectedTeamId} />;
+      default:
+        break;
     }
+
+    if (!INLINE_WIDGET_TYPES.includes(type)) return null;
 
     // Inline widgets
     switch (type) {
@@ -1735,6 +1798,18 @@ export default function Dashboard() {
                 summaryText
               )}
             </Typography>
+          </Box>
+
+          {/* Team filter — top left */}
+          <Box sx={{ position: "absolute", left: 0 }}>
+            <TeamFilter
+              value={selectedTeamId}
+              onChange={(id) => {
+                setSelectedTeamId(id);
+                setActivitiesPage(1);
+                setTeamWorkloadPage(1);
+              }}
+            />
           </Box>
 
           <IconButton

@@ -13,9 +13,13 @@ interface ActionItem {
   votes: number
 }
 
+interface ActionItemsWidgetProps {
+  teamId?: string | null
+}
+
 const ITEMS_PER_PAGE = 2
 
-export default function ActionItemsWidget() {
+export default function ActionItemsWidget({ teamId }: ActionItemsWidgetProps = {}) {
   const theme = useTheme()
   const isDarkMode = theme.palette.mode === 'dark'
   const [loading, setLoading] = useState(true)
@@ -29,15 +33,43 @@ export default function ActionItemsWidget() {
   const paginatedItems = actionItems.slice(startIndex, startIndex + ITEMS_PER_PAGE)
 
   useEffect(() => {
+    setCurrentPage(1)
     fetchActionItems()
-  }, [])
+  }, [teamId])
 
   const fetchActionItems = async () => {
     try {
       setLoading(true)
 
-      // Fetch all action items from retrospectives
-      const { data: items, error: itemsError } = await supabase
+      // When a team is selected, scope to retrospectives of that team's sprints
+      let retroIds: string[] | null = null
+      if (teamId) {
+        const { data: teamSprints } = await supabase
+          .from('sprints')
+          .select('id')
+          .eq('team_id', teamId)
+        const sprintIds = (teamSprints ?? []).map((s: any) => s.id)
+        if (sprintIds.length > 0) {
+          const { data: retros } = await supabase
+            .from('sprint_retrospectives')
+            .select('id')
+            .in('sprint_id', sprintIds)
+          retroIds = (retros ?? []).map((r: any) => r.id)
+        } else {
+          retroIds = []
+        }
+      }
+
+      if (retroIds !== null && retroIds.length === 0) {
+        setActionItems([])
+        setTotalCount(0)
+        setCompletionRate(0)
+        setLoading(false)
+        return
+      }
+
+      // Fetch action items from retrospectives
+      let itemsQuery = supabase
         .from('retrospective_items')
         .select(
           `
@@ -55,6 +87,12 @@ export default function ActionItemsWidget() {
         .eq('category', 'action_item')
         .order('votes', { ascending: false })
         .order('created_at', { ascending: false })
+
+      if (retroIds !== null) {
+        itemsQuery = itemsQuery.in('retrospective_id', retroIds)
+      }
+
+      const { data: items, error: itemsError } = await itemsQuery
 
       if (itemsError) throw itemsError
 

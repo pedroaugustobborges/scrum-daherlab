@@ -16,9 +16,13 @@ interface ActiveProject {
   total_tasks: number
 }
 
+interface ActiveProjectsWidgetProps {
+  teamId?: string | null
+}
+
 const ITEMS_PER_PAGE = 2
 
-export default function ActiveProjectsWidget() {
+export default function ActiveProjectsWidget({ teamId }: ActiveProjectsWidgetProps = {}) {
   const theme = useTheme()
   const isDarkMode = theme.palette.mode === 'dark'
   const [loading, setLoading] = useState(true)
@@ -34,19 +38,40 @@ export default function ActiveProjectsWidget() {
   const paginatedProjects = activeProjects.slice(startIndex, startIndex + ITEMS_PER_PAGE)
 
   useEffect(() => {
+    setCurrentPage(1)
     fetchActiveProjects()
-  }, [])
+  }, [teamId])
 
   const fetchActiveProjects = async () => {
     try {
       setLoading(true)
 
-      // Fetch active projects
-      const { data: projects, error: projectsError } = await supabase
+      // When a team is selected, scope to projects associated with that team's sprints
+      let projectQuery = supabase
         .from('projects')
         .select('id, name, description, start_date, end_date, status')
         .eq('status', 'active')
         .order('end_date', { ascending: true })
+
+      if (teamId) {
+        const { data: teamSprints } = await supabase
+          .from('sprints')
+          .select('project_id')
+          .eq('team_id', teamId)
+          .not('project_id', 'is', null)
+        const projectIds = [...new Set((teamSprints ?? []).map((s: any) => s.project_id))]
+        if (projectIds.length > 0) {
+          projectQuery = projectQuery.in('id', projectIds)
+        } else {
+          setActiveProjects([])
+          setTotalCount(0)
+          setOnTimeCount(0)
+          setLoading(false)
+          return
+        }
+      }
+
+      const { data: projects, error: projectsError } = await projectQuery
 
       if (projectsError) throw projectsError
 

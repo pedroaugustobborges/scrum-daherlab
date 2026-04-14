@@ -65,7 +65,17 @@ interface TaskData {
   story_points: number | null;
   assigned_to_name: string | null;
   sprint_name: string | null;
+  sprint_status: string | null;
   due_date: string | null;
+}
+
+interface SprintData {
+  id: string;
+  name: string;
+  status: string;
+  start_date: string | null;
+  end_date: string | null;
+  team_id: string | null;
 }
 
 interface AdaChatbotProps {
@@ -92,6 +102,7 @@ export default function AdaChatbot({
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [projectTasks, setProjectTasks] = useState<TaskData[]>([]);
+  const [projectSprints, setProjectSprints] = useState<SprintData[]>([]);
   const [userEmail, setUserEmail] = useState("");
   const [userName, setUserName] = useState("");
 
@@ -106,25 +117,18 @@ export default function AdaChatbot({
       if (!projectId) return;
 
       try {
-        // Get teams associated with this project via sprints
-        const { data: sprints } = await supabase
-          .from("sprints")
-          .select("team_id")
-          .eq("project_id", projectId);
+        // Always query both sources to collect all teams for this project
+        const [{ data: sprintTeams }, { data: projectTeamLinks }] = await Promise.all([
+          supabase.from("sprints").select("team_id").eq("project_id", projectId),
+          supabase.from("project_teams").select("team_id").eq("project_id", projectId),
+        ]);
 
-        const teamIds = [...new Set(sprints?.map((s) => s.team_id) || [])];
-
-        if (teamIds.length === 0) {
-          // Try to get project teams directly
-          const { data: projectTeams } = await supabase
-            .from("project_teams")
-            .select("team_id")
-            .eq("project_id", projectId);
-
-          if (projectTeams) {
-            teamIds.push(...projectTeams.map((pt) => pt.team_id));
-          }
-        }
+        const teamIds = [
+          ...new Set([
+            ...(sprintTeams?.map((s) => s.team_id).filter(Boolean) || []),
+            ...(projectTeamLinks?.map((pt) => pt.team_id).filter(Boolean) || []),
+          ]),
+        ];
 
         if (teamIds.length === 0) return;
 
@@ -208,24 +212,31 @@ export default function AdaChatbot({
       if (!projectId) return;
 
       try {
-        const { data: tasks, error } = await supabase
-          .from("tasks")
-          .select(
-            `
-            id,
-            title,
-            status,
-            priority,
-            story_points,
-            due_date,
-            assigned_to,
-            profiles:profiles!tasks_assigned_to_fkey(full_name),
-            sprints:sprints!tasks_sprint_id_fkey(name)
-          `,
-          )
-          .eq("project_id", projectId)
-          .order("created_at", { ascending: false })
-          .limit(100);
+        const [{ data: tasks, error }, { data: sprintsRaw }] = await Promise.all([
+          supabase
+            .from("tasks")
+            .select(
+              `
+              id,
+              title,
+              status,
+              priority,
+              story_points,
+              due_date,
+              assigned_to,
+              profiles:profiles!tasks_assigned_to_fkey(full_name),
+              sprints:sprints!tasks_sprint_id_fkey(name, status)
+            `,
+            )
+            .eq("project_id", projectId)
+            .order("created_at", { ascending: false })
+            .limit(100),
+          supabase
+            .from("sprints")
+            .select("id, name, status, start_date, end_date, team_id")
+            .eq("project_id", projectId)
+            .order("start_date", { ascending: false }),
+        ]);
 
         if (error) {
           console.error("Error fetching tasks:", error);
@@ -241,9 +252,14 @@ export default function AdaChatbot({
             story_points: t.story_points,
             assigned_to_name: t.profiles?.full_name || null,
             sprint_name: t.sprints?.name || null,
+            sprint_status: t.sprints?.status || null,
             due_date: t.due_date,
           }));
           setProjectTasks(formattedTasks);
+        }
+
+        if (sprintsRaw) {
+          setProjectSprints(sprintsRaw as SprintData[]);
         }
       } catch (error) {
         console.error("Error fetching project tasks:", error);
@@ -503,7 +519,8 @@ export default function AdaChatbot({
         })),
         projectData: {
           stats,
-          tasks: projectTasks.slice(0, 50), // Send first 50 tasks for context
+          sprints: projectSprints,
+          tasks: projectTasks.slice(0, 50),
           todoTasks: projectTasks
             .filter((t) => t.status === "todo")
             .slice(0, 10),

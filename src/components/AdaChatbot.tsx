@@ -505,6 +505,12 @@ export default function AdaChatbot({
     try {
       const stats = getProjectStats();
 
+      // Build conversation history (last 8 messages, excluding welcome and the current one)
+      const conversationHistory = messages
+        .filter((m) => m.id !== "welcome")
+        .slice(-8)
+        .map((m) => ({ role: m.role, content: m.content }));
+
       const payload = {
         message: userMessage.content,
         projectId,
@@ -513,6 +519,7 @@ export default function AdaChatbot({
         userEmail,
         userName,
         humandChannelId: userHumandId,
+        conversationHistory,
         teamMembers: teamMembers.map((m) => ({
           id: m.id,
           name: m.full_name,

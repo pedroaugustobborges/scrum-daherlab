@@ -105,6 +105,7 @@ export default function AdaChatbot({
   const [projectSprints, setProjectSprints] = useState<SprintData[]>([]);
   const [userEmail, setUserEmail] = useState("");
   const [userName, setUserName] = useState("");
+  const [userHumandId, setUserHumandId] = useState<string | null>(null);
 
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -281,12 +282,13 @@ export default function AdaChatbot({
       try {
         const { data: profile } = await supabase
           .from("profiles")
-          .select("full_name")
+          .select("full_name, employee_internal_id")
           .eq("id", user.id)
           .single();
 
         if (profile) {
           setUserName(profile.full_name || "");
+          setUserHumandId(profile.employee_internal_id || null);
         }
       } catch (error) {
         console.error("Error fetching user profile:", error);
@@ -510,6 +512,7 @@ export default function AdaChatbot({
         userId: user?.id,
         userEmail,
         userName,
+        humandChannelId: userHumandId,
         teamMembers: teamMembers.map((m) => ({
           id: m.id,
           name: m.full_name,

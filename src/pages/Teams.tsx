@@ -54,6 +54,7 @@ import Navbar from '@/components/Navbar'
 import CreateTeamModal from '@/components/CreateTeamModal'
 import EditTeamModal from '@/components/EditTeamModal'
 import TeamProjectsModal from '@/components/TeamProjectsModal'
+import DeleteTeamModal from '@/components/DeleteTeamModal'
 import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
 
@@ -118,6 +119,8 @@ export default function Teams() {
   const [allProjects, setAllProjects] = useState<Project[]>([])
   const [teamMembersMap, setTeamMembersMap] = useState<Record<string, string[]>>({})
   const [teamProjectsMap, setTeamProjectsMap] = useState<Record<string, string[]>>({})
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [teamToDelete, setTeamToDelete] = useState<Team | null>(null)
 
   useEffect(() => {
     fetchTeams()
@@ -221,19 +224,23 @@ export default function Teams() {
     setSelectedTeam(null)
   }
 
-  const handleDeleteTeam = async (team: Team) => {
-    const confirmed = window.confirm(
-      `Tem certeza que deseja excluir o time "${team.name}"?\n\nTodos os membros e sprints associados serão afetados. Esta ação não pode ser desfeita.`
-    )
+  const handleDeleteTeam = (team: Team) => {
+    setTeamToDelete(team)
+    setDeleteModalOpen(true)
+  }
 
-    if (!confirmed) return
+  const handleCloseDeleteModal = () => {
+    setDeleteModalOpen(false)
+    setTeamToDelete(null)
+  }
 
+  const confirmDeleteTeam = async () => {
+    if (!teamToDelete) return
     try {
-      const { error } = await supabase.from('teams').delete().eq('id', team.id)
-
+      const { error } = await supabase.from('teams').delete().eq('id', teamToDelete.id)
       if (error) throw error
-
       toast.success('Time excluído com sucesso!')
+      handleCloseDeleteModal()
       await fetchTeams()
     } catch (error) {
       console.error('Error deleting team:', error)
@@ -1148,6 +1155,13 @@ export default function Teams() {
           team={selectedTeam}
         />
       )}
+
+      <DeleteTeamModal
+        open={deleteModalOpen}
+        onClose={handleCloseDeleteModal}
+        onConfirm={confirmDeleteTeam}
+        team={teamToDelete}
+      />
     </Box>
   )
 }

@@ -551,27 +551,9 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
                 },
               }}
             />
-            {isEditing ? (
-              <TextField
-                autoFocus
-                size="small"
-                type="number"
-                value={editValue}
-                onChange={(e) => setEditValue(e.target.value)}
-                onBlur={handleSaveEdit}
-                onKeyDown={handleKeyDown}
-                inputProps={{ min: 0, max: 100 }}
-                sx={{ width: 60 }}
-              />
-            ) : (
-              <Typography
-                variant="caption"
-                sx={{ minWidth: 35, cursor: 'pointer' }}
-                onClick={() => handleStartEdit(task.id, 'percent_complete', String(task.percent_complete || 0))}
-              >
-                {task.percent_complete || 0}%
-              </Typography>
-            )}
+            <Typography variant="caption" sx={{ minWidth: 35 }}>
+              {task.percent_complete || 0}%
+            </Typography>
           </Box>
         )
 

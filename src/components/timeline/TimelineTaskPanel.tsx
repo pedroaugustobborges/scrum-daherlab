@@ -12,6 +12,7 @@ import {
   ChevronRight as ExpandIcon,
   Assignment as TaskIcon,
 } from '@mui/icons-material'
+import { useTheme } from '@/contexts/ThemeContext'
 import type { HierarchicalTask } from '@/types/hybrid'
 import { STATUS_CONFIG, PRIORITY_CONFIG } from './types'
 
@@ -25,6 +26,7 @@ interface Props {
 type FilterStatus = 'all' | 'todo' | 'in-progress' | 'review' | 'done' | 'blocked'
 
 export default function TimelineTaskPanel({ tasks, isLoading, onAddTask, hasTask }: Props) {
+  const { isDarkMode } = useTheme()
   const [collapsed, setCollapsed] = useState(false)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all')
@@ -38,6 +40,11 @@ export default function TimelineTaskPanel({ tasks, isLoading, onAddTask, hasTask
     })
   }, [tasks, search, statusFilter])
 
+  const panelBg = isDarkMode ? 'rgba(15,23,42,0.97)' : 'rgba(255,255,255,0.98)'
+  const borderColor = isDarkMode ? 'rgba(99,102,241,0.18)' : 'rgba(99,102,241,0.1)'
+  const titleColor = isDarkMode ? '#f1f5f9' : '#1f2937'
+  const subtitleColor = '#9ca3af'
+
   if (collapsed) {
     return (
       <Box sx={{
@@ -47,15 +54,23 @@ export default function TimelineTaskPanel({ tasks, isLoading, onAddTask, hasTask
         flexDirection: 'column',
         alignItems: 'center',
         pt: 2,
-        borderRight: '1px solid rgba(99,102,241,0.1)',
-        background: 'rgba(255,255,255,0.95)',
+        borderRight: `1px solid ${borderColor}`,
+        background: panelBg,
       }}>
         <Tooltip title="Expandir painel de tarefas" placement="right">
           <IconButton size="small" onClick={() => setCollapsed(false)}>
             <ExpandIcon />
           </IconButton>
         </Tooltip>
-        <Box sx={{ mt: 3, writingMode: 'vertical-rl', transform: 'rotate(180deg)', color: '#9ca3af', fontSize: 11, fontWeight: 600, letterSpacing: 0.5 }}>
+        <Box sx={{
+          mt: 3,
+          writingMode: 'vertical-rl',
+          transform: 'rotate(180deg)',
+          color: subtitleColor,
+          fontSize: 11,
+          fontWeight: 600,
+          letterSpacing: 0.5,
+        }}>
           TAREFAS
         </Box>
       </Box>
@@ -68,8 +83,8 @@ export default function TimelineTaskPanel({ tasks, isLoading, onAddTask, hasTask
       flexShrink: 0,
       display: 'flex',
       flexDirection: 'column',
-      borderRight: '1px solid rgba(99,102,241,0.1)',
-      background: 'rgba(255,255,255,0.98)',
+      borderRight: `1px solid ${borderColor}`,
+      background: panelBg,
       overflow: 'hidden',
     }}>
       {/* Panel header */}
@@ -79,18 +94,18 @@ export default function TimelineTaskPanel({ tasks, isLoading, onAddTask, hasTask
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        borderBottom: '1px solid rgba(99,102,241,0.08)',
+        borderBottom: `1px solid ${isDarkMode ? 'rgba(99,102,241,0.12)' : 'rgba(99,102,241,0.08)'}`,
       }}>
         <Box>
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1f2937', fontSize: '13px' }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 700, color: titleColor, fontSize: '13px' }}>
             Tarefas do Projeto
           </Typography>
-          <Typography variant="caption" sx={{ color: '#9ca3af' }}>
+          <Typography variant="caption" sx={{ color: subtitleColor }}>
             {tasks.length} tarefas disponíveis
           </Typography>
         </Box>
         <Tooltip title="Recolher painel" placement="left">
-          <IconButton size="small" onClick={() => setCollapsed(true)} sx={{ color: '#9ca3af' }}>
+          <IconButton size="small" onClick={() => setCollapsed(true)} sx={{ color: subtitleColor }}>
             <CollapseIcon />
           </IconButton>
         </Tooltip>
@@ -106,7 +121,7 @@ export default function TimelineTaskPanel({ tasks, isLoading, onAddTask, hasTask
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon sx={{ fontSize: 16, color: '#9ca3af' }} />
+                <SearchIcon sx={{ fontSize: 16, color: subtitleColor }} />
               </InputAdornment>
             ),
           }}
@@ -141,7 +156,7 @@ export default function TimelineTaskPanel({ tasks, isLoading, onAddTask, hasTask
         </FormControl>
       </Box>
 
-      <Divider sx={{ borderColor: 'rgba(99,102,241,0.08)' }} />
+      <Divider sx={{ borderColor: isDarkMode ? 'rgba(99,102,241,0.12)' : 'rgba(99,102,241,0.08)' }} />
 
       {/* Task list */}
       <Box sx={{ flex: 1, overflowY: 'auto', px: 1.5, py: 1 }}>
@@ -153,8 +168,8 @@ export default function TimelineTaskPanel({ tasks, isLoading, onAddTask, hasTask
 
         {!isLoading && filtered.length === 0 && (
           <Box sx={{ py: 4, textAlign: 'center' }}>
-            <TaskIcon sx={{ fontSize: 32, color: '#d1d5db', mb: 1 }} />
-            <Typography variant="caption" sx={{ color: '#9ca3af', display: 'block' }}>
+            <TaskIcon sx={{ fontSize: 32, color: isDarkMode ? '#334155' : '#d1d5db', mb: 1 }} />
+            <Typography variant="caption" sx={{ color: subtitleColor, display: 'block' }}>
               {search ? 'Nenhuma tarefa encontrada' : 'Sem tarefas no projeto'}
             </Typography>
           </Box>
@@ -165,6 +180,16 @@ export default function TimelineTaskPanel({ tasks, isLoading, onAddTask, hasTask
           const statusCfg = STATUS_CONFIG[task.status] || STATUS_CONFIG.todo
           const priorityCfg = PRIORITY_CONFIG[task.priority] || PRIORITY_CONFIG.medium
 
+          const cardBg = isDarkMode
+            ? added ? 'rgba(16,185,129,0.08)' : 'rgba(30,41,59,0.6)'
+            : added ? 'rgba(16,185,129,0.04)' : 'white'
+          const cardBorder = isDarkMode
+            ? added ? 'rgba(16,185,129,0.35)' : 'rgba(99,102,241,0.15)'
+            : added ? 'rgba(16,185,129,0.3)' : 'rgba(99,102,241,0.1)'
+          const cardBorderHover = isDarkMode
+            ? added ? 'rgba(16,185,129,0.5)' : 'rgba(99,102,241,0.35)'
+            : added ? 'rgba(16,185,129,0.4)' : 'rgba(99,102,241,0.3)'
+
           return (
             <Box
               key={task.id}
@@ -172,15 +197,13 @@ export default function TimelineTaskPanel({ tasks, isLoading, onAddTask, hasTask
                 mb: 1,
                 p: 1.5,
                 borderRadius: '12px',
-                border: `1.5px solid ${added ? 'rgba(16,185,129,0.3)' : 'rgba(99,102,241,0.1)'}`,
-                background: added ? 'rgba(16,185,129,0.04)' : 'white',
+                border: `1.5px solid ${cardBorder}`,
+                background: cardBg,
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 0.75,
                 transition: 'border-color 0.15s',
-                '&:hover': {
-                  borderColor: added ? 'rgba(16,185,129,0.4)' : 'rgba(99,102,241,0.3)',
-                },
+                '&:hover': { borderColor: cardBorderHover },
               }}
             >
               {/* Title row */}
@@ -189,7 +212,7 @@ export default function TimelineTaskPanel({ tasks, isLoading, onAddTask, hasTask
                   fontWeight: 600,
                   fontSize: '12px',
                   lineHeight: 1.4,
-                  color: '#1f2937',
+                  color: titleColor,
                   flex: 1,
                   display: '-webkit-box',
                   WebkitLineClamp: 2,
@@ -229,7 +252,7 @@ export default function TimelineTaskPanel({ tasks, isLoading, onAddTask, hasTask
               {task.description && (
                 <Typography variant="caption" sx={{
                   fontSize: '10.5px',
-                  color: '#6b7280',
+                  color: isDarkMode ? '#94a3b8' : '#6b7280',
                   lineHeight: 1.4,
                   display: '-webkit-box',
                   WebkitLineClamp: 2,
@@ -249,7 +272,7 @@ export default function TimelineTaskPanel({ tasks, isLoading, onAddTask, hasTask
                     height: 18,
                     fontSize: '9px',
                     fontWeight: 700,
-                    background: statusCfg.bg,
+                    background: isDarkMode ? `${statusCfg.color}22` : statusCfg.bg,
                     color: statusCfg.color,
                     border: `1px solid ${statusCfg.color}30`,
                     '& .MuiChip-label': { px: 0.75 },
@@ -268,7 +291,7 @@ export default function TimelineTaskPanel({ tasks, isLoading, onAddTask, hasTask
                   }}
                 />
                 {(task.due_date || task.start_date) && (
-                  <Typography variant="caption" sx={{ fontSize: '9px', color: '#9ca3af', alignSelf: 'center', ml: 'auto' }}>
+                  <Typography variant="caption" sx={{ fontSize: '9px', color: subtitleColor, alignSelf: 'center', ml: 'auto' }}>
                     {new Date(task.due_date || task.start_date!).toLocaleDateString('pt-BR')}
                   </Typography>
                 )}

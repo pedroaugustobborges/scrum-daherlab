@@ -8,6 +8,7 @@ import {
 } from '@mui/material'
 import { Close as CloseIcon, SwapHoriz as SwapHorizIcon } from '@mui/icons-material'
 import toast from 'react-hot-toast'
+import { useTheme } from '@/contexts/ThemeContext'
 import type { TimelineElement, TaskItem, TextItem, ShapeItem, ToolType, ShapeType } from './types'
 import {
   isTask, isText, isShape,
@@ -58,6 +59,7 @@ function ResizeHandle({ handle, onMouseDown }: {
   handle: ResizeHandle
   onMouseDown: (e: React.MouseEvent) => void
 }) {
+  const { isDarkMode } = useTheme()
   const pos: Record<ResizeHandle, React.CSSProperties> = {
     nw: { top: -5, left: -5 },
     ne: { top: -5, right: -5 },
@@ -72,13 +74,13 @@ function ResizeHandle({ handle, onMouseDown }: {
       sx={{
         position: 'absolute',
         width: 10, height: 10,
-        background: 'white',
+        background: isDarkMode ? '#1e293b' : 'white',
         border: '2px solid #6366f1',
         borderRadius: '2px',
         cursor: HANDLE_CURSORS[handle],
         zIndex: 1001,
         ...pos[handle],
-        '&:hover': { background: '#ede9fe' },
+        '&:hover': { background: isDarkMode ? '#334155' : '#ede9fe' },
       }}
     />
   )
@@ -369,6 +371,8 @@ const TimelineCanvas = forwardRef<TimelineCanvasHandle, Props>(function Timeline
     : activeTool !== 'select' ? 'crosshair'
     : 'default'
 
+  const { isDarkMode } = useTheme()
+
   const taskItems  = items.filter(isTask)  as TaskItem[]
   const textItems  = items.filter(isText)  as TextItem[]
   const shapeItems = items.filter(isShape) as ShapeItem[]
@@ -403,7 +407,10 @@ const TimelineCanvas = forwardRef<TimelineCanvasHandle, Props>(function Timeline
       sx={{
         flex: 1,
         overflow: 'auto',
-        background: 'radial-gradient(circle, rgba(99,102,241,0.055) 1px, transparent 1px)',
+        background: isDarkMode
+          ? 'radial-gradient(circle, rgba(99,102,241,0.18) 1px, transparent 1px)'
+          : 'radial-gradient(circle, rgba(99,102,241,0.055) 1px, transparent 1px)',
+        backgroundColor: isDarkMode ? '#0f172a' : undefined,
         backgroundSize: '32px 32px',
         position: 'relative',
       }}
@@ -468,14 +475,19 @@ const TimelineCanvas = forwardRef<TimelineCanvasHandle, Props>(function Timeline
               top: TIMELINE_Y - 14,
               width: 28, height: 28,
               borderRadius: '50%',
-              background: arrowDrag ? '#ecfdf5' : 'white',
+              background: arrowDrag
+                ? (isDarkMode ? '#064e3b' : '#ecfdf5')
+                : (isDarkMode ? '#1e293b' : 'white'),
               border: `2.5px solid ${arrowDrag ? '#059669' : '#10b981'}`,
               cursor: 'ew-resize',
               zIndex: 500,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 2px 10px rgba(0,0,0,0.14)',
+              boxShadow: isDarkMode ? '0 2px 10px rgba(0,0,0,0.4)' : '0 2px 10px rgba(0,0,0,0.14)',
               transition: 'background 0.1s, transform 0.1s',
-              '&:hover': { background: '#ecfdf5', transform: 'scale(1.15)' },
+              '&:hover': {
+                background: isDarkMode ? '#064e3b' : '#ecfdf5',
+                transform: 'scale(1.15)',
+              },
             }}
           >
             <SwapHorizIcon sx={{ fontSize: 14, color: '#10b981', pointerEvents: 'none' }} />
@@ -489,6 +501,9 @@ const TimelineCanvas = forwardRef<TimelineCanvasHandle, Props>(function Timeline
           const sc = STATUS_CONFIG[task.status] ?? STATUS_CONFIG.todo
           const sel = selectedId === task.id
           const dragging = dragState?.id === task.id || resizeState?.id === task.id
+          const cardBg = isDarkMode ? `${sc.color}18` : sc.bg
+          const titleColor = isDarkMode ? '#f1f5f9' : '#1f2937'
+          const descColor = isDarkMode ? '#94a3b8' : '#6b7280'
 
           return (
             <Box
@@ -497,17 +512,19 @@ const TimelineCanvas = forwardRef<TimelineCanvasHandle, Props>(function Timeline
               sx={{
                 position: 'absolute', left: x, top: y,
                 width: w, height: h,
-                background: sc.bg,
-                border: `2px solid ${sel ? '#6366f1' : sc.color + '80'}`,
+                background: cardBg,
+                border: `2px solid ${sel ? '#6366f1' : sc.color + (isDarkMode ? '60' : '80')}`,
                 borderRadius: '14px',
                 p: 1.5,
                 cursor: dragging ? 'grabbing' : 'grab',
                 zIndex: sel ? 200 : task.zIndex,
                 boxShadow: sel
                   ? '0 0 0 3px rgba(99,102,241,0.25), 0 8px 28px rgba(0,0,0,0.14)'
-                  : '0 2px 10px rgba(0,0,0,0.07)',
+                  : isDarkMode ? '0 2px 10px rgba(0,0,0,0.35)' : '0 2px 10px rgba(0,0,0,0.07)',
                 transition: 'box-shadow 0.15s, border-color 0.15s',
-                '&:hover': { boxShadow: '0 6px 20px rgba(0,0,0,0.12)' },
+                '&:hover': {
+                  boxShadow: isDarkMode ? '0 6px 20px rgba(0,0,0,0.45)' : '0 6px 20px rgba(0,0,0,0.12)',
+                },
                 '&:hover .item-delete': { opacity: 1 },
                 overflow: 'hidden',
               }}
@@ -528,12 +545,12 @@ const TimelineCanvas = forwardRef<TimelineCanvasHandle, Props>(function Timeline
                 {sc.label}
               </Box>
 
-              <Typography sx={{ fontWeight: 700, fontSize: '12px', lineHeight: 1.35, color: '#1f2937', mb: task.description ? 0.5 : 0, overflow: 'hidden' }}>
+              <Typography sx={{ fontWeight: 700, fontSize: '12px', lineHeight: 1.35, color: titleColor, mb: task.description ? 0.5 : 0, overflow: 'hidden' }}>
                 {task.title}
               </Typography>
 
               {task.description && (
-                <Typography sx={{ fontSize: '10.5px', color: '#6b7280', lineHeight: 1.4, overflow: 'auto', maxHeight: h - 90 }}>
+                <Typography sx={{ fontSize: '10.5px', color: descColor, lineHeight: 1.4, overflow: 'auto', maxHeight: h - 90 }}>
                   {task.description}
                 </Typography>
               )}
@@ -670,6 +687,7 @@ const TimelineCanvas = forwardRef<TimelineCanvasHandle, Props>(function Timeline
             const cx = x + w / 2
             const sc = STATUS_CONFIG[task.status]?.color ?? '#6b7280'
             const above = task.position === 'above'
+            const dotFill = isDarkMode ? '#0f172a' : 'white'
             return (
               <g key={task.id}>
                 <line
@@ -678,7 +696,7 @@ const TimelineCanvas = forwardRef<TimelineCanvasHandle, Props>(function Timeline
                   stroke={sc} strokeWidth={1.5} strokeDasharray="5,4" strokeOpacity={0.65}
                 />
                 <circle cx={cx} cy={TIMELINE_Y} r={DOT_RADIUS}
-                  fill="white" stroke={sc} strokeWidth={3} />
+                  fill={dotFill} stroke={sc} strokeWidth={3} />
               </g>
             )
           })}

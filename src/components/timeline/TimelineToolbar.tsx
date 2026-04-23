@@ -10,6 +10,7 @@ import {
   FileDownload as ExportIcon,
   Info as InfoIcon,
 } from "@mui/icons-material";
+import { useTheme } from "@/contexts/ThemeContext";
 import type { ToolType } from "./types";
 import { PRESET_COLORS } from "./types";
 
@@ -72,6 +73,8 @@ export default function TimelineToolbar({
   onReset,
   onExport,
 }: Props) {
+  const { isDarkMode } = useTheme();
+
   return (
     <Box
       sx={{
@@ -80,9 +83,13 @@ export default function TimelineToolbar({
         gap: 1,
         px: 2,
         py: 1,
-        background: "rgba(255,255,255,0.95)",
+        background: isDarkMode
+          ? "rgba(15,23,42,0.97)"
+          : "rgba(255,255,255,0.95)",
         backdropFilter: "blur(10px)",
-        borderBottom: "1px solid rgba(99,102,241,0.12)",
+        borderBottom: isDarkMode
+          ? "1px solid rgba(99,102,241,0.18)"
+          : "1px solid rgba(99,102,241,0.12)",
         flexShrink: 0,
         flexWrap: "wrap",
         rowGap: 0.5,
@@ -115,16 +122,23 @@ export default function TimelineToolbar({
                   activeTool === tool.id
                     ? "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)"
                     : "transparent",
-                color: activeTool === tool.id ? "white" : "#6b7280",
+                color:
+                  activeTool === tool.id
+                    ? "white"
+                    : isDarkMode
+                    ? "#94a3b8"
+                    : "#6b7280",
                 border:
                   activeTool === tool.id ? "none" : "1.5px solid transparent",
                 "&:hover": {
                   background:
                     activeTool === tool.id
                       ? "linear-gradient(135deg, #4f52e0 0%, #7c4fef 100%)"
+                      : isDarkMode
+                      ? "rgba(99,102,241,0.15)"
                       : "rgba(99,102,241,0.08)",
                   color: activeTool === tool.id ? "white" : "#6366f1",
-                  borderColor: "rgba(99,102,241,0.2)",
+                  borderColor: "rgba(99,102,241,0.3)",
                 },
                 transition: "all 0.15s ease",
               }}
@@ -157,7 +171,9 @@ export default function TimelineToolbar({
                 background: color,
                 border:
                   activeColor === color
-                    ? "3px solid white"
+                    ? isDarkMode
+                      ? "3px solid #1e293b"
+                      : "3px solid white"
                     : "2px solid transparent",
                 outline: activeColor === color ? `2px solid ${color}` : "none",
                 cursor: "pointer",
@@ -181,14 +197,18 @@ export default function TimelineToolbar({
             height: 36,
             borderRadius: "10px",
             color: "#6366f1",
-            "&:hover": { background: "rgba(99,102,241,0.08)" },
+            "&:hover": {
+              background: isDarkMode
+                ? "rgba(99,102,241,0.15)"
+                : "rgba(99,102,241,0.08)",
+            },
           }}
         >
           <ExportIcon />
         </IconButton>
       </Tooltip>
 
-      <Tooltip title="Limpar todo a área de desenho" arrow placement="bottom">
+      <Tooltip title="Limpar toda a área de desenho" arrow placement="bottom">
         <IconButton
           size="small"
           onClick={onClearAll}
@@ -197,7 +217,11 @@ export default function TimelineToolbar({
             height: 36,
             borderRadius: "10px",
             color: "#ef4444",
-            "&:hover": { background: "rgba(239,68,68,0.08)" },
+            "&:hover": {
+              background: isDarkMode
+                ? "rgba(239,68,68,0.15)"
+                : "rgba(239,68,68,0.08)",
+            },
           }}
         >
           <ClearIcon />
@@ -217,7 +241,11 @@ export default function TimelineToolbar({
             height: 36,
             borderRadius: "10px",
             color: "#f59e0b",
-            "&:hover": { background: "rgba(245,158,11,0.08)" },
+            "&:hover": {
+              background: isDarkMode
+                ? "rgba(245,158,11,0.15)"
+                : "rgba(245,158,11,0.08)",
+            },
           }}
         >
           <ResetIcon />

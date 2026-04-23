@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import { Box, Typography } from '@mui/material'
 import { useParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
+import { useTheme } from '@/contexts/ThemeContext'
 import { useTaskHierarchy } from '@/hooks/useTaskHierarchy'
 import type { HierarchicalTask } from '@/types/hybrid'
 import {
@@ -59,6 +60,7 @@ function buildTaskItem(task: HierarchicalTask, index: number, zBase: number): Ta
 
 export default function TimelineView() {
   const { projectId } = useParams<{ projectId: string }>()
+  const { isDarkMode } = useTheme()
   const [activeTool, setActiveTool] = useState<ToolType>('select')
   const [activeColor, setActiveColor] = useState('#6366f1')
   const canvasRef = useRef<TimelineCanvasHandle>(null)
@@ -160,9 +162,9 @@ export default function TimelineView() {
       minHeight: 500,
       borderRadius: '16px',
       overflow: 'hidden',
-      border: '1px solid rgba(99,102,241,0.1)',
-      background: 'white',
-      boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
+      border: isDarkMode ? '1px solid rgba(99,102,241,0.2)' : '1px solid rgba(99,102,241,0.1)',
+      background: isDarkMode ? '#0f172a' : 'white',
+      boxShadow: isDarkMode ? '0 4px 24px rgba(0,0,0,0.3)' : '0 4px 24px rgba(0,0,0,0.06)',
     }}>
       <TimelineToolbar
         activeTool={activeTool}

@@ -23,52 +23,8 @@ import AdminPanel from '@/pages/AdminPanel'
 import Planner from '@/pages/Planner'
 import Calendar from '@/pages/Calendar'
 import ProjectCalendarView from '@/pages/ProjectCalendarView'
+import TimelineView from '@/pages/TimelineView'
 
-// Placeholder component for views not yet implemented
-function PlaceholderView({ title }: { title: string }) {
-  return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '64px 24px',
-      textAlign: 'center',
-      background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, rgba(139, 92, 246, 0.03) 100%)',
-      borderRadius: '20px',
-      border: '2px dashed rgba(99, 102, 241, 0.2)',
-    }}>
-      <div style={{
-        width: '80px',
-        height: '80px',
-        borderRadius: '20px',
-        background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: '24px',
-        boxShadow: '0 10px 25px rgba(99, 102, 241, 0.3)',
-      }}>
-        <span style={{ fontSize: '32px' }}>🚧</span>
-      </div>
-      <h2 style={{
-        margin: '0 0 8px 0',
-        fontSize: '1.5rem',
-        fontWeight: 700,
-        color: '#1f2937',
-      }}>
-        {title}
-      </h2>
-      <p style={{
-        margin: 0,
-        color: '#6b7280',
-        maxWidth: '400px',
-      }}>
-        Este módulo está em desenvolvimento e estará disponível em breve.
-      </p>
-    </div>
-  )
-}
 
 function App() {
   return (
@@ -143,7 +99,7 @@ function App() {
           <Route path="wbs" element={<WBSView />} />
           <Route path="grid" element={<GridView />} />
           <Route path="calendar" element={<ProjectCalendarView />} />
-          <Route path="timeline" element={<PlaceholderView title="Linha do Tempo" />} />
+          <Route path="timeline" element={<TimelineView />} />
           <Route path="settings" element={<ProjectSettings />} />
         </Route>
         <Route

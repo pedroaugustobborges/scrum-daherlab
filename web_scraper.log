@@ -14040,3 +14040,1003 @@ receiveMessage@chrome://remote/content/marionette/actors/MarionetteCommandsChild
 2026-04-16 08:33:59,760 - INFO - Mensagem enviada ao Telegram com sucesso (chat_id=8587977306)
 2026-04-16 08:33:59,963 - INFO - Closing browser in 30 seconds (for verification)...
 2026-04-16 08:34:33,343 - INFO - Browser closed
+2026-04-20 10:03:17,003 - INFO - Initializing Web Scraper...
+2026-04-20 10:03:27,494 - INFO - Google Sheets initialized successfully
+2026-04-20 10:03:28,028 - INFO - Loaded 40 existing processes from spreadsheet
+2026-04-20 10:03:28,028 - INFO - Initialization complete
+2026-04-20 10:03:28,028 - INFO - Performing login...
+2026-04-20 10:03:34,146 - INFO - Waiting for page to load...
+2026-04-20 10:03:39,154 - INFO - Navigating to requests page...
+2026-04-20 10:03:44,323 - INFO - Applying first filter...
+2026-04-20 10:03:46,412 - INFO - Applying second filter...
+2026-04-20 10:03:48,494 - INFO - Original window: 0d9a67bc-0569-443d-b8f7-f153fd82ffbf
+2026-04-20 10:03:48,494 - INFO - Found 40 existing processes in spreadsheet before processing
+2026-04-20 10:03:48,494 - INFO - ================================================================================
+2026-04-20 10:03:48,494 - INFO - STARTING PROCESSING OF ALL REQUESTS
+2026-04-20 10:03:48,494 - INFO - ================================================================================
+2026-04-20 10:03:48,495 - INFO - ********************************************************************************
+2026-04-20 10:03:48,495 - INFO - LISTING PAGE 1
+2026-04-20 10:03:48,495 - INFO - ********************************************************************************
+2026-04-20 10:03:48,509 - INFO - Found approximately 7 items on this page
+2026-04-20 10:03:48,509 - INFO - 
+>>> Attempting to process item 1 (Page 1) <<<
+2026-04-20 10:03:48,510 - INFO - ################################################################################
+2026-04-20 10:03:48,510 - INFO - PROCESSING REQUEST 1 (table row 2)
+2026-04-20 10:03:48,510 - INFO - ################################################################################
+2026-04-20 10:03:48,512 - INFO - Extracting listing fields (item 0)...
+2026-04-20 10:03:48,540 - INFO - Clicking link to open details...
+2026-04-20 10:03:48,797 - INFO - Waiting for new window to open...
+2026-04-20 10:03:50,835 - INFO - Switched to popup window
+2026-04-20 10:04:02,529 - INFO - Page loaded successfully!
+2026-04-20 10:04:02,529 - INFO - ============================================================
+2026-04-20 10:04:02,529 - INFO - EXTRACTING REQUEST DATA
+2026-04-20 10:04:02,529 - INFO - ============================================================
+2026-04-20 10:04:02,530 - INFO - Extracting request fields...
+2026-04-20 10:04:03,133 - INFO - ============================================================
+2026-04-20 10:04:03,134 - INFO - EXTRACTING MODAL FIELDS
+2026-04-20 10:04:03,134 - INFO - ============================================================
+2026-04-20 10:04:03,134 - INFO - Extracting: OBJETO DO CONTRATO
+2026-04-20 10:04:35,519 - INFO -   Empty/Not found
+2026-04-20 10:04:35,519 - INFO - Extracting: ESPECIFICAÇÃO TÉCNICA
+2026-04-20 10:04:40,002 - INFO -   OK: Tabela II – PREÇO UNITÁRIO – ENXOVAL (EVASÃO) DE LINHA CAMA ...
+2026-04-20 10:04:40,002 - INFO - Extracting: QUALIFICAÇÃO TÉCNICA
+2026-04-20 10:04:42,201 - INFO -   OK: Para fins de qualificação técnico-operacional: a)Atestado de...
+2026-04-20 10:04:42,201 - INFO - Extracting: GLOSAS
+2026-04-20 10:04:44,351 - INFO -   OK: NÃO HÁ.
+2026-04-20 10:04:44,352 - INFO - Extracting: SLA (ACORDO DE NÍVEL DE SERVIÇO)
+2026-04-20 10:04:46,734 - INFO -   OK: 1. DISPOSIÇÕES GERAIS: 1.1. Fica estabelecido entre as parte...
+2026-04-20 10:04:46,734 - INFO - Modal fields filled: 4/5
+2026-04-20 10:04:46,734 - INFO - ============================================================
+2026-04-20 10:04:46,734 - INFO - EXTRACTING TABLE ITEMS
+2026-04-20 10:04:46,734 - INFO - ============================================================
+2026-04-20 10:04:46,734 - INFO - Page 1:
+2026-04-20 10:04:46,784 - INFO -   Found 2 items on this page
+2026-04-20 10:04:46,805 - INFO -   No more pages (Next button not found)
+2026-04-20 10:04:46,805 - INFO - ============================================================
+2026-04-20 10:04:46,806 - INFO - Total items extracted: 2 (in 1 page(s))
+2026-04-20 10:04:46,806 - INFO - Extracting Históricos Observação de Revisões...
+2026-04-20 10:04:46,827 - INFO -   Found 1 histórico entries
+2026-04-20 10:04:46,827 - INFO - New process CTS87.2026.ABR.00376, setting Situação to 'SOLICITAÇÃO NOVA'
+2026-04-20 10:04:46,828 - INFO - ============================================================
+2026-04-20 10:04:46,828 - INFO - SUMMARY - Request 1
+2026-04-20 10:04:46,828 - INFO - ============================================================
+2026-04-20 10:04:47,385 - INFO -   Entidade: UNIDADE I - HOSPITAL REGIONAL DR. ANTÔNIO FONTES
+2026-04-20 10:04:47,385 - INFO -   Nº SC: CTS87.2026.ABR.00376
+2026-04-20 10:04:47,385 - INFO -   Título: CONTRATAÇÃO PARA PRESTAÇÃO DE SERVIÇO DE LAVANDERI...
+2026-04-20 10:04:47,385 - INFO -   Fields filled: 37/38
+2026-04-20 10:04:47,385 - INFO -   Situação: SOLICITAÇÃO NOVA
+2026-04-20 10:04:47,385 - INFO -   Items: 2
+2026-04-20 10:04:47,385 - INFO -   Histórico entries: 1
+2026-04-20 10:04:47,385 - INFO - Inserting new data into spreadsheet...
+2026-04-20 10:04:48,324 - INFO - Data inserted into spreadsheet at row 42
+2026-04-20 10:04:48,325 - INFO - Inserted data successfully!
+2026-04-20 10:04:48,325 - INFO - Closing popup...
+2026-04-20 10:04:49,384 - INFO - Returned to main window
+2026-04-20 10:04:50,387 - INFO - [NEW] New request inserted! (Total new: 1)
+2026-04-20 10:04:51,388 - INFO - 
+>>> Attempting to process item 2 (Page 1) <<<
+2026-04-20 10:04:51,388 - INFO - ################################################################################
+2026-04-20 10:04:51,388 - INFO - PROCESSING REQUEST 2 (table row 3)
+2026-04-20 10:04:51,388 - INFO - ################################################################################
+2026-04-20 10:04:51,388 - INFO - Extracting listing fields (item 1)...
+2026-04-20 10:04:51,417 - INFO - Clicking link to open details...
+2026-04-20 10:04:51,668 - INFO - Waiting for new window to open...
+2026-04-20 10:04:53,669 - INFO - Switched to popup window
+2026-04-20 10:04:55,674 - INFO - Page loaded successfully!
+2026-04-20 10:04:55,674 - INFO - ============================================================
+2026-04-20 10:04:55,674 - INFO - EXTRACTING REQUEST DATA
+2026-04-20 10:04:55,674 - INFO - ============================================================
+2026-04-20 10:04:55,674 - INFO - Extracting request fields...
+2026-04-20 10:04:56,033 - INFO - ============================================================
+2026-04-20 10:04:56,033 - INFO - EXTRACTING MODAL FIELDS
+2026-04-20 10:04:56,033 - INFO - ============================================================
+2026-04-20 10:04:56,033 - INFO - Extracting: OBJETO DO CONTRATO
+2026-04-20 10:05:28,395 - INFO -   Empty/Not found
+2026-04-20 10:05:28,395 - INFO - Extracting: ESPECIFICAÇÃO TÉCNICA
+2026-04-20 10:05:30,564 - INFO -   OK: A empresa contratada deverá realizar os serviços de manutenç...
+2026-04-20 10:05:30,564 - INFO - Extracting: QUALIFICAÇÃO TÉCNICA
+2026-04-20 10:05:32,728 - INFO -   OK: A empresa participante deverá comprovar aptidão para execuçã...
+2026-04-20 10:05:32,728 - INFO - Extracting: GLOSAS
+2026-04-20 10:05:34,878 - INFO -   OK: Poderão ser aplicadas glosas totais ou parciais nos seguinte...
+2026-04-20 10:05:34,878 - INFO - Extracting: SLA (ACORDO DE NÍVEL DE SERVIÇO)
+2026-04-20 10:05:37,030 - INFO -   OK: A contratada deverá atender às demandas da contratante dentr...
+2026-04-20 10:05:37,030 - INFO - Modal fields filled: 4/5
+2026-04-20 10:05:37,030 - INFO - ============================================================
+2026-04-20 10:05:37,030 - INFO - EXTRACTING TABLE ITEMS
+2026-04-20 10:05:37,030 - INFO - ============================================================
+2026-04-20 10:05:37,030 - INFO - Page 1:
+2026-04-20 10:05:37,062 - INFO -   Found 1 items on this page
+2026-04-20 10:05:37,062 - INFO -   No more pages (Next button not found)
+2026-04-20 10:05:37,062 - INFO - ============================================================
+2026-04-20 10:05:37,062 - INFO - Total items extracted: 1 (in 1 page(s))
+2026-04-20 10:05:37,062 - INFO - Extracting Históricos Observação de Revisões...
+2026-04-20 10:05:37,081 - INFO -   Found 1 histórico entries
+2026-04-20 10:05:37,081 - INFO - New process CTS30.2026.ABR.01064, setting Situação to 'SOLICITAÇÃO NOVA'
+2026-04-20 10:05:37,081 - INFO - ============================================================
+2026-04-20 10:05:37,082 - INFO - SUMMARY - Request 2
+2026-04-20 10:05:37,082 - INFO - ============================================================
+2026-04-20 10:05:37,082 - INFO -   Entidade: HOSPITAL REGIONAL DE DOURADOS
+2026-04-20 10:05:37,082 - INFO -   Nº SC: CTS30.2026.ABR.01064
+2026-04-20 10:05:37,083 - INFO -   Título: SERVIÇO DE MANUTENÇÃO DE INSTRUMENTAIS CIRURGICOS
+2026-04-20 10:05:37,083 - INFO -   Fields filled: 37/38
+2026-04-20 10:05:37,083 - INFO -   Situação: SOLICITAÇÃO NOVA
+2026-04-20 10:05:37,083 - INFO -   Items: 1
+2026-04-20 10:05:37,083 - INFO -   Histórico entries: 1
+2026-04-20 10:05:37,083 - INFO - Inserting new data into spreadsheet...
+2026-04-20 10:05:37,759 - INFO - Data inserted into spreadsheet at row 43
+2026-04-20 10:05:37,759 - INFO - Inserted data successfully!
+2026-04-20 10:05:37,760 - INFO - Closing popup...
+2026-04-20 10:05:38,811 - INFO - Returned to main window
+2026-04-20 10:05:39,813 - INFO - [NEW] New request inserted! (Total new: 2)
+2026-04-20 10:05:40,814 - INFO - 
+>>> Attempting to process item 3 (Page 1) <<<
+2026-04-20 10:05:40,814 - INFO - ################################################################################
+2026-04-20 10:05:40,814 - INFO - PROCESSING REQUEST 3 (table row 4)
+2026-04-20 10:05:40,814 - INFO - ################################################################################
+2026-04-20 10:05:40,814 - INFO - Extracting listing fields (item 2)...
+2026-04-20 10:05:40,833 - INFO - Clicking link to open details...
+2026-04-20 10:05:41,077 - INFO - Waiting for new window to open...
+2026-04-20 10:05:43,079 - INFO - Switched to popup window
+2026-04-20 10:05:45,084 - INFO - Page loaded successfully!
+2026-04-20 10:05:45,084 - INFO - ============================================================
+2026-04-20 10:05:45,084 - INFO - EXTRACTING REQUEST DATA
+2026-04-20 10:05:45,084 - INFO - ============================================================
+2026-04-20 10:05:45,084 - INFO - Extracting request fields...
+2026-04-20 10:05:45,460 - INFO - ============================================================
+2026-04-20 10:05:45,460 - INFO - EXTRACTING MODAL FIELDS
+2026-04-20 10:05:45,460 - INFO - ============================================================
+2026-04-20 10:05:45,475 - INFO - Extracting: OBJETO DO CONTRATO
+2026-04-20 10:05:47,643 - INFO -   OK: Fornecimento contínuo de combustível.
+2026-04-20 10:05:47,643 - INFO - Extracting: ESPECIFICAÇÃO TÉCNICA
+2026-04-20 10:05:49,826 - INFO -   OK: O combustível deverá atender às especificações técnicas exig...
+2026-04-20 10:05:49,826 - INFO - Extracting: QUALIFICAÇÃO TÉCNICA
+2026-04-20 10:05:51,993 - INFO -   OK: A título de qualificação técnica, as empresas deverão aprese...
+2026-04-20 10:05:51,993 - INFO - Extracting: GLOSAS
+2026-04-20 10:05:54,142 - INFO -   OK: N/A
+2026-04-20 10:05:54,142 - INFO - Extracting: SLA (ACORDO DE NÍVEL DE SERVIÇO)
+2026-04-20 10:05:56,394 - INFO -   OK: Fica estabelecido entre as partes Acordo de Nível de Serviço...
+2026-04-20 10:05:56,394 - INFO - Modal fields filled: 5/5
+2026-04-20 10:05:56,394 - INFO - ============================================================
+2026-04-20 10:05:56,394 - INFO - EXTRACTING TABLE ITEMS
+2026-04-20 10:05:56,394 - INFO - ============================================================
+2026-04-20 10:05:56,394 - INFO - Page 1:
+2026-04-20 10:05:56,426 - INFO -   Found 1 items on this page
+2026-04-20 10:05:56,426 - INFO -   No more pages (Next button not found)
+2026-04-20 10:05:56,426 - INFO - ============================================================
+2026-04-20 10:05:56,426 - INFO - Total items extracted: 1 (in 1 page(s))
+2026-04-20 10:05:56,426 - INFO - Extracting Históricos Observação de Revisões...
+2026-04-20 10:05:56,443 - INFO -   Found 1 histórico entries
+2026-04-20 10:05:56,443 - INFO - New process CTP88.2026.ABR.00658, setting Situação to 'SOLICITAÇÃO NOVA'
+2026-04-20 10:05:56,443 - INFO - ============================================================
+2026-04-20 10:05:56,444 - INFO - SUMMARY - Request 3
+2026-04-20 10:05:56,444 - INFO - ============================================================
+2026-04-20 10:05:56,444 - INFO -   Entidade: HOSPITAL E MATERNIDADE SANTANA DE PARNAIBA
+2026-04-20 10:05:56,444 - INFO -   Nº SC: CTP88.2026.ABR.00658
+2026-04-20 10:05:56,444 - INFO -   Título: CONTRATAÇÃO DE FORNECIMENTO DE COMBUSTÍVEL.
+2026-04-20 10:05:56,445 - INFO -   Fields filled: 36/38
+2026-04-20 10:05:56,445 - INFO -   Situação: SOLICITAÇÃO NOVA
+2026-04-20 10:05:56,445 - INFO -   Items: 1
+2026-04-20 10:05:56,445 - INFO -   Histórico entries: 1
+2026-04-20 10:05:56,445 - INFO - Inserting new data into spreadsheet...
+2026-04-20 10:05:57,317 - INFO - Data inserted into spreadsheet at row 44
+2026-04-20 10:05:57,317 - INFO - Inserted data successfully!
+2026-04-20 10:05:57,317 - INFO - Closing popup...
+2026-04-20 10:05:58,373 - INFO - Returned to main window
+2026-04-20 10:05:59,374 - INFO - [NEW] New request inserted! (Total new: 3)
+2026-04-20 10:06:00,375 - INFO - 
+>>> Attempting to process item 4 (Page 1) <<<
+2026-04-20 10:06:00,375 - INFO - ################################################################################
+2026-04-20 10:06:00,375 - INFO - PROCESSING REQUEST 4 (table row 5)
+2026-04-20 10:06:00,375 - INFO - ################################################################################
+2026-04-20 10:06:00,375 - INFO - Extracting listing fields (item 3)...
+2026-04-20 10:06:00,409 - INFO - Clicking link to open details...
+2026-04-20 10:06:00,659 - INFO - Waiting for new window to open...
+2026-04-20 10:06:02,661 - INFO - Switched to popup window
+2026-04-20 10:06:04,665 - INFO - Page loaded successfully!
+2026-04-20 10:06:04,665 - INFO - ============================================================
+2026-04-20 10:06:04,665 - INFO - EXTRACTING REQUEST DATA
+2026-04-20 10:06:04,665 - INFO - ============================================================
+2026-04-20 10:06:04,665 - INFO - Extracting request fields...
+2026-04-20 10:06:05,040 - INFO - ============================================================
+2026-04-20 10:06:05,040 - INFO - EXTRACTING MODAL FIELDS
+2026-04-20 10:06:05,040 - INFO - ============================================================
+2026-04-20 10:06:05,041 - INFO - Extracting: OBJETO DO CONTRATO
+2026-04-20 10:06:07,207 - INFO -   OK: Trata-se da contratação de empresa com especialistas na área...
+2026-04-20 10:06:07,207 - INFO - Extracting: ESPECIFICAÇÃO TÉCNICA
+2026-04-20 10:06:09,626 - INFO -   OK: Trata-se da contratação de empresa com especialistas para pr...
+2026-04-20 10:06:09,626 - INFO - Extracting: QUALIFICAÇÃO TÉCNICA
+2026-04-20 10:06:11,806 - INFO -   OK: A título de qualificação técnico-operacional, as empresas de...
+2026-04-20 10:06:11,806 - INFO - Extracting: GLOSAS
+2026-04-20 10:06:13,974 - INFO -   OK: N/A
+2026-04-20 10:06:13,974 - INFO - Extracting: SLA (ACORDO DE NÍVEL DE SERVIÇO)
+2026-04-20 10:06:16,240 - INFO -   OK: 1. DISPOSIÇÕES GERAIS: 1.1. . Fica estabelecido entre as par...
+2026-04-20 10:06:16,240 - INFO - Modal fields filled: 5/5
+2026-04-20 10:06:16,240 - INFO - ============================================================
+2026-04-20 10:06:16,240 - INFO - EXTRACTING TABLE ITEMS
+2026-04-20 10:06:16,240 - INFO - ============================================================
+2026-04-20 10:06:16,240 - INFO - Page 1:
+2026-04-20 10:06:16,374 - INFO -   Found 4 items on this page
+2026-04-20 10:06:16,378 - INFO -   No more pages (Next button not found)
+2026-04-20 10:06:16,378 - INFO - ============================================================
+2026-04-20 10:06:16,378 - INFO - Total items extracted: 4 (in 1 page(s))
+2026-04-20 10:06:16,378 - INFO - Extracting Históricos Observação de Revisões...
+2026-04-20 10:06:16,390 - INFO -   Found 1 histórico entries
+2026-04-20 10:06:16,390 - INFO - New process CTS03.2026.ABR.00535, setting Situação to 'SOLICITAÇÃO NOVA'
+2026-04-20 10:06:16,391 - INFO - ============================================================
+2026-04-20 10:06:16,391 - INFO - SUMMARY - Request 4
+2026-04-20 10:06:16,391 - INFO - ============================================================
+2026-04-20 10:06:16,391 - INFO -   Entidade: HOSPITAL ESTADUAL DE JATAÍ DR. SERAFIM DE CARVALHO
+2026-04-20 10:06:16,391 - INFO -   Nº SC: CTS03.2026.ABR.00535
+2026-04-20 10:06:16,392 - INFO -   Título: PRESTAÇÃO DE SERVIÇOS MÉDICOS EM ANESTESIOLOGIA
+2026-04-20 10:06:16,392 - INFO -   Fields filled: 37/38
+2026-04-20 10:06:16,393 - INFO -   Situação: SOLICITAÇÃO NOVA
+2026-04-20 10:06:16,393 - INFO -   Items: 4
+2026-04-20 10:06:16,393 - INFO -   Histórico entries: 1
+2026-04-20 10:06:16,393 - INFO - Inserting new data into spreadsheet...
+2026-04-20 10:06:17,107 - INFO - Data inserted into spreadsheet at row 45
+2026-04-20 10:06:17,107 - INFO - Inserted data successfully!
+2026-04-20 10:06:17,107 - INFO - Closing popup...
+2026-04-20 10:06:18,157 - INFO - Returned to main window
+2026-04-20 10:06:19,159 - INFO - [NEW] New request inserted! (Total new: 4)
+2026-04-20 10:06:20,159 - INFO - 
+>>> Attempting to process item 5 (Page 1) <<<
+2026-04-20 10:06:20,159 - INFO - ################################################################################
+2026-04-20 10:06:20,159 - INFO - PROCESSING REQUEST 5 (table row 6)
+2026-04-20 10:06:20,159 - INFO - ################################################################################
+2026-04-20 10:06:20,162 - INFO - Extracting listing fields (item 4)...
+2026-04-20 10:06:20,190 - INFO - Clicking link to open details...
+2026-04-20 10:06:20,457 - INFO - Waiting for new window to open...
+2026-04-20 10:06:22,457 - INFO - Switched to popup window
+2026-04-20 10:06:24,464 - INFO - Page loaded successfully!
+2026-04-20 10:06:24,464 - INFO - ============================================================
+2026-04-20 10:06:24,464 - INFO - EXTRACTING REQUEST DATA
+2026-04-20 10:06:24,464 - INFO - ============================================================
+2026-04-20 10:06:24,464 - INFO - Extracting request fields...
+2026-04-20 10:06:24,806 - INFO - ============================================================
+2026-04-20 10:06:24,806 - INFO - EXTRACTING MODAL FIELDS
+2026-04-20 10:06:24,806 - INFO - ============================================================
+2026-04-20 10:06:24,806 - INFO - Extracting: OBJETO DO CONTRATO
+2026-04-20 10:06:57,151 - INFO -   Empty/Not found
+2026-04-20 10:06:57,151 - INFO - Extracting: ESPECIFICAÇÃO TÉCNICA
+2026-04-20 10:06:59,367 - INFO -   OK: Trata-se da contratação de empresa para prestação de serviço...
+2026-04-20 10:06:59,367 - INFO - Extracting: QUALIFICAÇÃO TÉCNICA
+2026-04-20 10:07:01,550 - INFO -   OK: 1.1.1. A título de qualificação técnica, as empresas deverão...
+2026-04-20 10:07:01,550 - INFO - Extracting: GLOSAS
+2026-04-20 10:07:03,717 - INFO -   OK: Aplica se SLA.
+2026-04-20 10:07:03,717 - INFO - Extracting: SLA (ACORDO DE NÍVEL DE SERVIÇO)
+2026-04-20 10:07:06,000 - INFO -   OK: 1. DISPOSIÇÕES GERAIS: 1.1. Fica estabelecido entre as parte...
+2026-04-20 10:07:06,000 - INFO - Modal fields filled: 4/5
+2026-04-20 10:07:06,000 - INFO - ============================================================
+2026-04-20 10:07:06,000 - INFO - EXTRACTING TABLE ITEMS
+2026-04-20 10:07:06,000 - INFO - ============================================================
+2026-04-20 10:07:06,000 - INFO - Page 1:
+2026-04-20 10:07:06,036 - INFO -   Found 1 items on this page
+2026-04-20 10:07:06,036 - INFO -   No more pages (Next button not found)
+2026-04-20 10:07:06,036 - INFO - ============================================================
+2026-04-20 10:07:06,036 - INFO - Total items extracted: 1 (in 1 page(s))
+2026-04-20 10:07:06,036 - INFO - Extracting Históricos Observação de Revisões...
+2026-04-20 10:07:06,052 - INFO -   Found 1 histórico entries
+2026-04-20 10:07:06,052 - INFO - New process CTS30.2026.ABR.00955, setting Situação to 'SOLICITAÇÃO NOVA'
+2026-04-20 10:07:06,052 - INFO - ============================================================
+2026-04-20 10:07:06,052 - INFO - SUMMARY - Request 5
+2026-04-20 10:07:06,052 - INFO - ============================================================
+2026-04-20 10:07:06,052 - INFO -   Entidade: HOSPITAL REGIONAL DE DOURADOS
+2026-04-20 10:07:06,053 - INFO -   Nº SC: CTS30.2026.ABR.00955
+2026-04-20 10:07:06,053 - INFO -   Título: CONTRATO DE PRESTAÇÃO DE SERVIÇO DE MANUTENÇÃO E P...
+2026-04-20 10:07:06,053 - INFO -   Fields filled: 37/38
+2026-04-20 10:07:06,053 - INFO -   Situação: SOLICITAÇÃO NOVA
+2026-04-20 10:07:06,053 - INFO -   Items: 1
+2026-04-20 10:07:06,053 - INFO -   Histórico entries: 1
+2026-04-20 10:07:06,053 - INFO - Inserting new data into spreadsheet...
+2026-04-20 10:07:06,650 - INFO - Data inserted into spreadsheet at row 46
+2026-04-20 10:07:06,650 - INFO - Inserted data successfully!
+2026-04-20 10:07:06,650 - INFO - Closing popup...
+2026-04-20 10:07:07,718 - INFO - Returned to main window
+2026-04-20 10:07:08,720 - INFO - [NEW] New request inserted! (Total new: 5)
+2026-04-20 10:07:09,720 - INFO - 
+>>> Attempting to process item 6 (Page 1) <<<
+2026-04-20 10:07:09,720 - INFO - ################################################################################
+2026-04-20 10:07:09,720 - INFO - PROCESSING REQUEST 6 (table row 7)
+2026-04-20 10:07:09,720 - INFO - ################################################################################
+2026-04-20 10:07:09,720 - INFO - Extracting listing fields (item 5)...
+2026-04-20 10:07:09,753 - INFO - Clicking link to open details...
+2026-04-20 10:07:10,018 - INFO - Waiting for new window to open...
+2026-04-20 10:07:12,022 - INFO - Switched to popup window
+2026-04-20 10:07:14,025 - INFO - Page loaded successfully!
+2026-04-20 10:07:14,025 - INFO - ============================================================
+2026-04-20 10:07:14,025 - INFO - EXTRACTING REQUEST DATA
+2026-04-20 10:07:14,025 - INFO - ============================================================
+2026-04-20 10:07:14,025 - INFO - Extracting request fields...
+2026-04-20 10:07:14,382 - INFO - ============================================================
+2026-04-20 10:07:14,382 - INFO - EXTRACTING MODAL FIELDS
+2026-04-20 10:07:14,382 - INFO - ============================================================
+2026-04-20 10:07:14,382 - INFO - Extracting: OBJETO DO CONTRATO
+2026-04-20 10:07:46,897 - INFO -   Empty/Not found
+2026-04-20 10:07:46,897 - INFO - Extracting: ESPECIFICAÇÃO TÉCNICA
+2026-04-20 10:07:49,077 - INFO -   OK: 1. Trata-se da contratação de empresa para prestar serviço d...
+2026-04-20 10:07:49,078 - INFO - Extracting: QUALIFICAÇÃO TÉCNICA
+2026-04-20 10:07:51,247 - INFO -   OK: 1. Para fins de qualificação técnico-operacional, as empresa...
+2026-04-20 10:07:51,247 - INFO - Extracting: GLOSAS
+2026-04-20 10:07:53,460 - INFO -   OK: N/A
+2026-04-20 10:07:53,461 - INFO - Extracting: SLA (ACORDO DE NÍVEL DE SERVIÇO)
+2026-04-20 10:07:55,628 - INFO -   OK: ACORDO DE NÍVEL DE SERVIÇO – SLA 1. DISPOSIÇÕES GERAIS 1.1. ...
+2026-04-20 10:07:55,628 - INFO - Modal fields filled: 4/5
+2026-04-20 10:07:55,628 - INFO - ============================================================
+2026-04-20 10:07:55,628 - INFO - EXTRACTING TABLE ITEMS
+2026-04-20 10:07:55,628 - INFO - ============================================================
+2026-04-20 10:07:55,628 - INFO - Page 1:
+2026-04-20 10:07:55,677 - INFO -   Found 1 items on this page
+2026-04-20 10:07:55,692 - INFO -   No more pages (Next button not found)
+2026-04-20 10:07:55,693 - INFO - ============================================================
+2026-04-20 10:07:55,693 - INFO - Total items extracted: 1 (in 1 page(s))
+2026-04-20 10:07:55,693 - INFO - Extracting Históricos Observação de Revisões...
+2026-04-20 10:07:55,702 - INFO -   Found 3 histórico entries
+2026-04-20 10:07:55,702 - INFO - New process CTS14.2026.JAN.00109, setting Situação to 'SOLICITAÇÃO NOVA'
+2026-04-20 10:07:55,702 - INFO - ============================================================
+2026-04-20 10:07:55,702 - INFO - SUMMARY - Request 6
+2026-04-20 10:07:55,702 - INFO - ============================================================
+2026-04-20 10:07:55,702 - INFO -   Entidade: CLÍNICA TEIA UNIDADE II CAIC DR. GILSON MOREIRA
+2026-04-20 10:07:55,702 - INFO -   Nº SC: CTS14.2026.JAN.00109
+2026-04-20 10:07:55,702 - INFO -   Título: SOLICITAÇÃO DE SERVIÇO DE MANUTENÇÃO SPLIT
+2026-04-20 10:07:55,707 - INFO -   Fields filled: 35/38
+2026-04-20 10:07:55,707 - INFO -   Situação: SOLICITAÇÃO NOVA
+2026-04-20 10:07:55,707 - INFO -   Items: 1
+2026-04-20 10:07:55,707 - INFO -   Histórico entries: 3
+2026-04-20 10:07:55,708 - INFO - Inserting new data into spreadsheet...
+2026-04-20 10:07:56,443 - INFO - Data inserted into spreadsheet at row 47
+2026-04-20 10:07:56,443 - INFO - Inserted data successfully!
+2026-04-20 10:07:56,443 - INFO - Closing popup...
+2026-04-20 10:07:57,489 - INFO - Returned to main window
+2026-04-20 10:07:58,492 - INFO - [NEW] New request inserted! (Total new: 6)
+2026-04-20 10:07:59,493 - INFO - 
+>>> Attempting to process item 7 (Page 1) <<<
+2026-04-20 10:07:59,493 - INFO - ################################################################################
+2026-04-20 10:07:59,493 - INFO - PROCESSING REQUEST 7 (table row 8)
+2026-04-20 10:07:59,493 - INFO - ################################################################################
+2026-04-20 10:08:04,553 - WARNING - Item 7 not found on this page
+2026-04-20 10:08:04,553 - ERROR - Error accessing item 7 (table row 8): Element not found at XPath: //*[@id="p1_cph1_SCs_GdSCs_GdSCs_Lkb_Sc_6"]
+2026-04-20 10:08:04,553 - INFO - Item 7 not found. Checking if this is the last page...
+2026-04-20 10:08:04,557 - INFO - Next button not found - last page reached
+2026-04-20 10:08:04,557 - INFO - Confirmed: This is the last page and there are no more items.
+2026-04-20 10:08:04,557 - INFO - Ending processing...
+2026-04-20 10:08:04,557 - INFO - Processing completed - termination condition met!
+2026-04-20 10:08:04,558 - INFO - ================================================================================
+2026-04-20 10:08:04,558 - INFO - CHECKING FOR PROCESSES THAT LEFT SEGECON
+2026-04-20 10:08:04,559 - INFO - ================================================================================
+2026-04-20 10:08:04,559 - INFO - Found 40 processes that are no longer in ecompras
+2026-04-20 10:08:04,559 - INFO - Marking CTS99.2026.MAR.01940 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:05,077 - INFO - Process CTS99.2026.MAR.01940 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 11
+2026-04-20 10:08:05,077 - INFO - Marking CTS02.2026.ABR.00511 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:05,527 - INFO - Process CTS02.2026.ABR.00511 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 15
+2026-04-20 10:08:05,527 - INFO - Marking CTS30.2026.FEV.00704 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:05,992 - INFO - Process CTS30.2026.FEV.00704 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 33
+2026-04-20 10:08:05,992 - INFO - Marking CTS28.2026.MAR.01790 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:06,444 - INFO - Process CTS28.2026.MAR.01790 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 40
+2026-04-20 10:08:06,444 - INFO - Marking CTS04.2026.ABR.03494 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:06,877 - INFO - Process CTS04.2026.ABR.03494 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 24
+2026-04-20 10:08:06,877 - INFO - Marking CTS87.2026.MAR.00292 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:07,429 - INFO - Process CTS87.2026.MAR.00292 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 18
+2026-04-20 10:08:07,430 - INFO - Marking CTS02.2026.FEV.00440 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:07,859 - INFO - Process CTS02.2026.FEV.00440 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 14
+2026-04-20 10:08:07,859 - INFO - Marking CTP87.2026.FEV.00217 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:08,292 - INFO - Process CTP87.2026.FEV.00217 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 27
+2026-04-20 10:08:08,292 - INFO - Marking CTS02.2026.ABR.00520 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:08,727 - INFO - Process CTS02.2026.ABR.00520 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 39
+2026-04-20 10:08:08,727 - INFO - Marking CTS03.2026.FEV.00339 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:09,214 - INFO - Process CTS03.2026.FEV.00339 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 9
+2026-04-20 10:08:09,214 - INFO - Marking CTP03.2026.FEV.00382 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:09,658 - INFO - Process CTP03.2026.FEV.00382 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 28
+2026-04-20 10:08:09,659 - INFO - Marking CTS99.2026.MAR.01899 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:10,108 - INFO - Process CTS99.2026.MAR.01899 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 5
+2026-04-20 10:08:10,109 - INFO - Marking CTP01.2026.ABR.03687 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:10,551 - INFO - Process CTP01.2026.ABR.03687 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 37
+2026-04-20 10:08:10,551 - INFO - Marking CTS85.2026.MAR.00140 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:10,992 - INFO - Process CTS85.2026.MAR.00140 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 35
+2026-04-20 10:08:10,992 - INFO - Marking CTS02.2025.SET.00198 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:11,443 - INFO - Process CTS02.2025.SET.00198 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 19
+2026-04-20 10:08:11,443 - INFO - Marking CTP28.2026.ABR.01935 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:11,874 - INFO - Process CTP28.2026.ABR.01935 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 23
+2026-04-20 10:08:11,874 - INFO - Marking CTS28.2026.MAR.01891 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:12,340 - INFO - Process CTS28.2026.MAR.01891 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 2
+2026-04-20 10:08:12,341 - INFO - Marking CTS08.2026.FEV.02076 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:12,793 - INFO - Process CTS08.2026.FEV.02076 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 31
+2026-04-20 10:08:12,793 - INFO - Marking CTP28.2026.FEV.01698 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:13,208 - INFO - Process CTP28.2026.FEV.01698 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 30
+2026-04-20 10:08:13,208 - INFO - Marking CTS04.2026.FEV.03246 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:13,659 - INFO - Process CTS04.2026.FEV.03246 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 32
+2026-04-20 10:08:13,659 - INFO - Marking CTS03.2026.JAN.00256 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:14,100 - INFO - Process CTS03.2026.JAN.00256 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 41
+2026-04-20 10:08:14,106 - INFO - Marking CTS85.2026.ABR.00161 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:14,559 - INFO - Process CTS85.2026.ABR.00161 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 22
+2026-04-20 10:08:14,559 - INFO - Marking CTS02.2026.ABR.00508 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:15,009 - INFO - Process CTS02.2026.ABR.00508 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 7
+2026-04-20 10:08:15,009 - INFO - Marking CTP01.2026.ABR.03681 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:15,459 - INFO - Process CTP01.2026.ABR.03681 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 38
+2026-04-20 10:08:15,459 - INFO - Marking CTS04.2026.MAR.03373 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:15,900 - INFO - Process CTS04.2026.MAR.03373 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 13
+2026-04-20 10:08:15,900 - INFO - Marking CTS87.2026.MAR.00314 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:16,350 - INFO - Process CTS87.2026.MAR.00314 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 17
+2026-04-20 10:08:16,350 - INFO - Marking CTS99.2026.ABR.01956 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:16,776 - INFO - Process CTS99.2026.ABR.01956 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 25
+2026-04-20 10:08:16,776 - INFO - Marking CTS87.2026.MAR.00316 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:17,209 - INFO - Process CTS87.2026.MAR.00316 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 26
+2026-04-20 10:08:17,209 - INFO - Marking CTS85.2026.ABR.00149 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:17,791 - INFO - Process CTS85.2026.ABR.00149 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 16
+2026-04-20 10:08:17,791 - INFO - Marking CTS29.2026.MAR.02922 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:18,257 - INFO - Process CTS29.2026.MAR.02922 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 4
+2026-04-20 10:08:18,257 - INFO - Marking CTP01.2026.MAR.03609 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:18,642 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_limit_value': '60', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_unit': '1/min/{project}/{user}', 'consumer': 'projects/110493255608', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'service': 'sheets.googleapis.com'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-04-20 10:08:18,642 - ERROR - Failed to mark CTP01.2026.MAR.03609 as left
+2026-04-20 10:08:18,642 - INFO - Marking CTS29.2026.FEV.02736 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:18,809 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_limit_value': '60', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_unit': '1/min/{project}/{user}', 'consumer': 'projects/110493255608', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'service': 'sheets.googleapis.com'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-04-20 10:08:18,809 - ERROR - Failed to mark CTS29.2026.FEV.02736 as left
+2026-04-20 10:08:18,809 - INFO - Marking CTS86.2026.MAR.00159 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:18,959 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_limit_value': '60', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_unit': '1/min/{project}/{user}', 'consumer': 'projects/110493255608', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'service': 'sheets.googleapis.com'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-04-20 10:08:18,959 - ERROR - Failed to mark CTS86.2026.MAR.00159 as left
+2026-04-20 10:08:18,959 - INFO - Marking CTP29.2026.ABR.02944 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:19,126 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_limit_value': '60', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_unit': '1/min/{project}/{user}', 'consumer': 'projects/110493255608', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'service': 'sheets.googleapis.com'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-04-20 10:08:19,126 - ERROR - Failed to mark CTP29.2026.ABR.02944 as left
+2026-04-20 10:08:19,126 - INFO - Marking CTS03.2026.MAR.00478 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:19,289 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_limit_value': '60', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_unit': '1/min/{project}/{user}', 'consumer': 'projects/110493255608', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'service': 'sheets.googleapis.com'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-04-20 10:08:19,290 - ERROR - Failed to mark CTS03.2026.MAR.00478 as left
+2026-04-20 10:08:19,290 - INFO - Marking CTS03.2026.FEV.00386 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:19,451 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_limit_value': '60', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_unit': '1/min/{project}/{user}', 'consumer': 'projects/110493255608', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'service': 'sheets.googleapis.com'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-04-20 10:08:19,455 - ERROR - Failed to mark CTS03.2026.FEV.00386 as left
+2026-04-20 10:08:19,455 - INFO - Marking CTS99.2026.MAR.01936 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:19,609 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_limit_value': '60', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_unit': '1/min/{project}/{user}', 'consumer': 'projects/110493255608', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'service': 'sheets.googleapis.com'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-04-20 10:08:19,609 - ERROR - Failed to mark CTS99.2026.MAR.01936 as left
+2026-04-20 10:08:19,609 - INFO - Marking CTS28.2026.ABR.01920 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:19,776 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_limit_value': '60', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_unit': '1/min/{project}/{user}', 'consumer': 'projects/110493255608', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'service': 'sheets.googleapis.com'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-04-20 10:08:19,776 - ERROR - Failed to mark CTS28.2026.ABR.01920 as left
+2026-04-20 10:08:19,776 - INFO - Marking CTP01.2026.ABR.03655 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:19,940 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_limit_value': '60', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_unit': '1/min/{project}/{user}', 'consumer': 'projects/110493255608', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'service': 'sheets.googleapis.com'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-04-20 10:08:19,941 - ERROR - Failed to mark CTP01.2026.ABR.03655 as left
+2026-04-20 10:08:19,942 - INFO - Marking CTS28.2026.ABR.01900 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-20 10:08:20,109 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'quota_limit_value': '60', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_unit': '1/min/{project}/{user}', 'consumer': 'projects/110493255608', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'service': 'sheets.googleapis.com'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-04-20 10:08:20,109 - ERROR - Failed to mark CTS28.2026.ABR.01900 as left
+2026-04-20 10:08:20,109 - INFO - ================================================================================
+2026-04-20 10:08:20,109 - INFO - PROCESSAMENTO CONCLUÍDO!
+2026-04-20 10:08:20,109 - INFO - ================================================================================
+2026-04-20 10:08:20,109 - INFO - Total de solicitações processadas: 6
+2026-04-20 10:08:20,109 - INFO - Solicitações novas inseridas: 6
+2026-04-20 10:08:20,109 - INFO - Solicitações atualizadas: 0
+2026-04-20 10:08:20,109 - INFO - Solicitações com erro: 0
+2026-04-20 10:08:20,109 - INFO - Solicitações que saíram da SEGECON: 30
+2026-04-20 10:08:20,109 - INFO - Páginas de listagem processadas: 1
+2026-04-20 10:08:20,109 - INFO - Processos únicos no ecompras: 6
+2026-04-20 10:08:20,109 - INFO - ================================================================================
+2026-04-20 10:08:20,109 - INFO - 
+2026-04-20 10:08:20,109 - INFO - ================================================================================
+2026-04-20 10:08:20,120 - INFO - RELATÓRIO DETALHADO DE ERROS
+2026-04-20 10:08:20,120 - INFO - ================================================================================
+2026-04-20 10:08:20,120 - ERROR -   1. Página 1, Índice 6 (ID: p1_cph1_SCs_GdSCs_GdSCs_Lkb_Sc_6)
+2026-04-20 10:08:20,120 - ERROR -      Nº SC: Desconhecido
+2026-04-20 10:08:20,120 - ERROR -      Motivo: NOT_FOUND - Element not found on page
+2026-04-20 10:08:20,121 - INFO - ================================================================================
+2026-04-20 10:08:20,121 - INFO - 
+2026-04-20 10:08:20,121 - INFO - ================================================================================
+2026-04-20 10:08:20,122 - INFO - LISTA DE NOVAS SOLICITAÇÕES INSERIDAS
+2026-04-20 10:08:20,122 - INFO - ================================================================================
+2026-04-20 10:08:20,122 - INFO -   1. Página 1, Índice 0 - Nº SC: CTS87.2026.ABR.00376
+2026-04-20 10:08:20,122 - INFO -   2. Página 1, Índice 1 - Nº SC: CTS30.2026.ABR.01064
+2026-04-20 10:08:20,122 - INFO -   3. Página 1, Índice 2 - Nº SC: CTP88.2026.ABR.00658
+2026-04-20 10:08:20,122 - INFO -   4. Página 1, Índice 3 - Nº SC: CTS03.2026.ABR.00535
+2026-04-20 10:08:20,122 - INFO -   5. Página 1, Índice 4 - Nº SC: CTS30.2026.ABR.00955
+2026-04-20 10:08:20,122 - INFO -   6. Página 1, Índice 5 - Nº SC: CTS14.2026.JAN.00109
+2026-04-20 10:08:20,123 - INFO - ================================================================================
+2026-04-20 10:08:20,123 - INFO - 
+2026-04-20 10:08:20,123 - INFO - ================================================================================
+2026-04-20 10:08:20,123 - INFO - LISTA DE SOLICITAÇÕES QUE SAÍRAM DA SEGECON
+2026-04-20 10:08:20,123 - INFO - ================================================================================
+2026-04-20 10:08:20,123 - INFO -   1. Nº SC: CTS99.2026.MAR.01940
+2026-04-20 10:08:20,124 - INFO -   2. Nº SC: CTS02.2026.ABR.00511
+2026-04-20 10:08:20,124 - INFO -   3. Nº SC: CTS30.2026.FEV.00704
+2026-04-20 10:08:20,124 - INFO -   4. Nº SC: CTS28.2026.MAR.01790
+2026-04-20 10:08:20,124 - INFO -   5. Nº SC: CTS04.2026.ABR.03494
+2026-04-20 10:08:20,124 - INFO -   6. Nº SC: CTS87.2026.MAR.00292
+2026-04-20 10:08:20,124 - INFO -   7. Nº SC: CTS02.2026.FEV.00440
+2026-04-20 10:08:20,124 - INFO -   8. Nº SC: CTP87.2026.FEV.00217
+2026-04-20 10:08:20,124 - INFO -   9. Nº SC: CTS02.2026.ABR.00520
+2026-04-20 10:08:20,124 - INFO -   10. Nº SC: CTS03.2026.FEV.00339
+2026-04-20 10:08:20,124 - INFO -   11. Nº SC: CTP03.2026.FEV.00382
+2026-04-20 10:08:20,124 - INFO -   12. Nº SC: CTS99.2026.MAR.01899
+2026-04-20 10:08:20,124 - INFO -   13. Nº SC: CTP01.2026.ABR.03687
+2026-04-20 10:08:20,124 - INFO -   14. Nº SC: CTS85.2026.MAR.00140
+2026-04-20 10:08:20,124 - INFO -   15. Nº SC: CTS02.2025.SET.00198
+2026-04-20 10:08:20,124 - INFO -   16. Nº SC: CTP28.2026.ABR.01935
+2026-04-20 10:08:20,126 - INFO -   17. Nº SC: CTS28.2026.MAR.01891
+2026-04-20 10:08:20,126 - INFO -   18. Nº SC: CTS08.2026.FEV.02076
+2026-04-20 10:08:20,126 - INFO -   19. Nº SC: CTP28.2026.FEV.01698
+2026-04-20 10:08:20,126 - INFO -   20. Nº SC: CTS04.2026.FEV.03246
+2026-04-20 10:08:20,126 - INFO -   21. Nº SC: CTS03.2026.JAN.00256
+2026-04-20 10:08:20,126 - INFO -   22. Nº SC: CTS85.2026.ABR.00161
+2026-04-20 10:08:20,126 - INFO -   23. Nº SC: CTS02.2026.ABR.00508
+2026-04-20 10:08:20,126 - INFO -   24. Nº SC: CTP01.2026.ABR.03681
+2026-04-20 10:08:20,126 - INFO -   25. Nº SC: CTS04.2026.MAR.03373
+2026-04-20 10:08:20,126 - INFO -   26. Nº SC: CTS87.2026.MAR.00314
+2026-04-20 10:08:20,126 - INFO -   27. Nº SC: CTS99.2026.ABR.01956
+2026-04-20 10:08:20,126 - INFO -   28. Nº SC: CTS87.2026.MAR.00316
+2026-04-20 10:08:20,126 - INFO -   29. Nº SC: CTS85.2026.ABR.00149
+2026-04-20 10:08:20,126 - INFO -   30. Nº SC: CTS29.2026.MAR.02922
+2026-04-20 10:08:20,126 - INFO - ================================================================================
+2026-04-20 10:08:22,026 - INFO - Mensagem enviada ao Telegram com sucesso (chat_id=6760564985)
+2026-04-20 10:08:23,557 - INFO - Mensagem enviada ao Telegram com sucesso (chat_id=1356469598)
+2026-04-20 10:08:25,024 - INFO - Mensagem enviada ao Telegram com sucesso (chat_id=8587977306)
+2026-04-20 10:08:25,227 - INFO - Closing browser in 30 seconds (for verification)...
+2026-04-20 10:08:58,505 - INFO - Browser closed
+2026-04-22 08:37:36,186 - INFO - Initializing Web Scraper...
+2026-04-22 08:37:45,160 - INFO - Google Sheets initialized successfully
+2026-04-22 08:37:45,685 - INFO - Loaded 46 existing processes from spreadsheet
+2026-04-22 08:37:45,685 - INFO - Initialization complete
+2026-04-22 08:37:45,685 - INFO - Performing login...
+2026-04-22 08:37:49,204 - INFO - Waiting for page to load...
+2026-04-22 08:37:54,205 - INFO - Navigating to requests page...
+2026-04-22 08:37:59,255 - INFO - Applying first filter...
+2026-04-22 08:38:01,339 - INFO - Applying second filter...
+2026-04-22 08:38:03,439 - INFO - Original window: 2a33a160-920e-4506-9826-556bc50e1f37
+2026-04-22 08:38:03,440 - INFO - Found 46 existing processes in spreadsheet before processing
+2026-04-22 08:38:03,441 - INFO - ================================================================================
+2026-04-22 08:38:03,441 - INFO - STARTING PROCESSING OF ALL REQUESTS
+2026-04-22 08:38:03,442 - INFO - ================================================================================
+2026-04-22 08:38:03,443 - INFO - ********************************************************************************
+2026-04-22 08:38:03,443 - INFO - LISTING PAGE 1
+2026-04-22 08:38:03,444 - INFO - ********************************************************************************
+2026-04-22 08:38:03,462 - INFO - Found approximately 6 items on this page
+2026-04-22 08:38:03,463 - INFO - 
+>>> Attempting to process item 1 (Page 1) <<<
+2026-04-22 08:38:03,463 - INFO - ################################################################################
+2026-04-22 08:38:03,463 - INFO - PROCESSING REQUEST 1 (table row 2)
+2026-04-22 08:38:03,463 - INFO - ################################################################################
+2026-04-22 08:38:03,466 - INFO - Extracting listing fields (item 0)...
+2026-04-22 08:38:03,494 - INFO - Process CTS87.2026.ABR.00376 exists in spreadsheet. Will open and check for updates...
+2026-04-22 08:38:03,495 - INFO - Clicking link to open details...
+2026-04-22 08:38:03,710 - INFO - Waiting for new window to open...
+2026-04-22 08:38:05,717 - INFO - Switched to popup window
+2026-04-22 08:38:13,306 - INFO - Page loaded successfully!
+2026-04-22 08:38:13,306 - INFO - ============================================================
+2026-04-22 08:38:13,306 - INFO - EXTRACTING REQUEST DATA
+2026-04-22 08:38:13,307 - INFO - ============================================================
+2026-04-22 08:38:13,307 - INFO - Extracting request fields...
+2026-04-22 08:38:13,888 - INFO - ============================================================
+2026-04-22 08:38:13,889 - INFO - EXTRACTING MODAL FIELDS
+2026-04-22 08:38:13,889 - INFO - ============================================================
+2026-04-22 08:38:13,889 - INFO - Extracting: OBJETO DO CONTRATO
+2026-04-22 08:38:46,512 - INFO -   Empty/Not found
+2026-04-22 08:38:46,513 - INFO - Extracting: ESPECIFICAÇÃO TÉCNICA
+2026-04-22 08:38:50,629 - INFO -   OK: Tabela II – PREÇO UNITÁRIO – ENXOVAL (EVASÃO) DE LINHA CAMA ...
+2026-04-22 08:38:50,629 - INFO - Extracting: QUALIFICAÇÃO TÉCNICA
+2026-04-22 08:38:52,845 - INFO -   OK: Para fins de qualificação técnico-operacional: a)Atestado de...
+2026-04-22 08:38:52,845 - INFO - Extracting: GLOSAS
+2026-04-22 08:38:55,043 - INFO -   OK: NÃO HÁ.
+2026-04-22 08:38:55,044 - INFO - Extracting: SLA (ACORDO DE NÍVEL DE SERVIÇO)
+2026-04-22 08:38:57,394 - INFO -   OK: 1. DISPOSIÇÕES GERAIS: 1.1. Fica estabelecido entre as parte...
+2026-04-22 08:38:57,394 - INFO - Modal fields filled: 4/5
+2026-04-22 08:38:57,394 - INFO - ============================================================
+2026-04-22 08:38:57,394 - INFO - EXTRACTING TABLE ITEMS
+2026-04-22 08:38:57,394 - INFO - ============================================================
+2026-04-22 08:38:57,403 - INFO - Page 1:
+2026-04-22 08:38:57,459 - INFO -   Found 2 items on this page
+2026-04-22 08:38:57,478 - INFO -   No more pages (Next button not found)
+2026-04-22 08:38:57,478 - INFO - ============================================================
+2026-04-22 08:38:57,478 - INFO - Total items extracted: 2 (in 1 page(s))
+2026-04-22 08:38:57,478 - INFO - Extracting Históricos Observação de Revisões...
+2026-04-22 08:38:57,497 - INFO -   Found 1 histórico entries
+2026-04-22 08:38:57,498 - INFO - No changes detected for CTS87.2026.ABR.00376, keeping existing Situação
+2026-04-22 08:38:57,498 - INFO - ============================================================
+2026-04-22 08:38:57,498 - INFO - SUMMARY - Request 1
+2026-04-22 08:38:57,498 - INFO - ============================================================
+2026-04-22 08:38:57,498 - INFO -   Entidade: UNIDADE I - HOSPITAL REGIONAL DR. ANTÔNIO FONTES
+2026-04-22 08:38:57,499 - INFO -   Nº SC: CTS87.2026.ABR.00376
+2026-04-22 08:38:57,499 - INFO -   Título: CONTRATAÇÃO PARA PRESTAÇÃO DE SERVIÇO DE LAVANDERI...
+2026-04-22 08:38:57,499 - INFO -   Fields filled: 37/38
+2026-04-22 08:38:57,499 - INFO -   Situação: SOLICITAÇÃO NOVA
+2026-04-22 08:38:57,499 - INFO -   Items: 2
+2026-04-22 08:38:57,499 - INFO -   Histórico entries: 1
+2026-04-22 08:38:57,499 - INFO - Updating existing data in spreadsheet...
+2026-04-22 08:38:57,936 - INFO - Data updated in spreadsheet at row 42
+2026-04-22 08:38:57,936 - INFO - Updated data successfully!
+2026-04-22 08:38:57,936 - INFO - Closing popup...
+2026-04-22 08:38:59,009 - INFO - Returned to main window
+2026-04-22 08:39:00,011 - INFO - [UPDATED] Process CTS87.2026.ABR.00376 updated. (Total updated: 1)
+2026-04-22 08:39:01,011 - INFO - 
+>>> Attempting to process item 2 (Page 1) <<<
+2026-04-22 08:39:01,011 - INFO - ################################################################################
+2026-04-22 08:39:01,011 - INFO - PROCESSING REQUEST 2 (table row 3)
+2026-04-22 08:39:01,011 - INFO - ################################################################################
+2026-04-22 08:39:01,011 - INFO - Extracting listing fields (item 1)...
+2026-04-22 08:39:01,058 - INFO - Process CTS30.2026.ABR.01064 exists in spreadsheet. Will open and check for updates...
+2026-04-22 08:39:01,058 - INFO - Clicking link to open details...
+2026-04-22 08:39:01,275 - INFO - Waiting for new window to open...
+2026-04-22 08:39:03,290 - INFO - Switched to popup window
+2026-04-22 08:39:05,293 - INFO - Page loaded successfully!
+2026-04-22 08:39:05,293 - INFO - ============================================================
+2026-04-22 08:39:05,293 - INFO - EXTRACTING REQUEST DATA
+2026-04-22 08:39:05,293 - INFO - ============================================================
+2026-04-22 08:39:05,302 - INFO - Extracting request fields...
+2026-04-22 08:39:05,624 - INFO - ============================================================
+2026-04-22 08:39:05,624 - INFO - EXTRACTING MODAL FIELDS
+2026-04-22 08:39:05,624 - INFO - ============================================================
+2026-04-22 08:39:05,624 - INFO - Extracting: OBJETO DO CONTRATO
+2026-04-22 08:39:38,142 - INFO -   Empty/Not found
+2026-04-22 08:39:38,142 - INFO - Extracting: ESPECIFICAÇÃO TÉCNICA
+2026-04-22 08:39:40,321 - INFO -   OK: A empresa contratada deverá realizar os serviços de manutenç...
+2026-04-22 08:39:40,322 - INFO - Extracting: QUALIFICAÇÃO TÉCNICA
+2026-04-22 08:39:42,509 - INFO -   OK: A empresa participante deverá comprovar aptidão para execuçã...
+2026-04-22 08:39:42,509 - INFO - Extracting: GLOSAS
+2026-04-22 08:39:44,704 - INFO -   OK: Poderão ser aplicadas glosas totais ou parciais nos seguinte...
+2026-04-22 08:39:44,704 - INFO - Extracting: SLA (ACORDO DE NÍVEL DE SERVIÇO)
+2026-04-22 08:39:46,869 - INFO -   OK: A contratada deverá atender às demandas da contratante dentr...
+2026-04-22 08:39:46,869 - INFO - Modal fields filled: 4/5
+2026-04-22 08:39:46,869 - INFO - ============================================================
+2026-04-22 08:39:46,870 - INFO - EXTRACTING TABLE ITEMS
+2026-04-22 08:39:46,870 - INFO - ============================================================
+2026-04-22 08:39:46,870 - INFO - Page 1:
+2026-04-22 08:39:46,901 - INFO -   Found 1 items on this page
+2026-04-22 08:39:46,904 - INFO -   No more pages (Next button not found)
+2026-04-22 08:39:46,904 - INFO - ============================================================
+2026-04-22 08:39:46,905 - INFO - Total items extracted: 1 (in 1 page(s))
+2026-04-22 08:39:46,905 - INFO - Extracting Históricos Observação de Revisões...
+2026-04-22 08:39:46,914 - INFO -   Found 1 histórico entries
+2026-04-22 08:39:46,914 - INFO - No changes detected for CTS30.2026.ABR.01064, keeping existing Situação
+2026-04-22 08:39:46,914 - INFO - ============================================================
+2026-04-22 08:39:46,914 - INFO - SUMMARY - Request 2
+2026-04-22 08:39:46,914 - INFO - ============================================================
+2026-04-22 08:39:46,914 - INFO -   Entidade: HOSPITAL REGIONAL DE DOURADOS
+2026-04-22 08:39:46,914 - INFO -   Nº SC: CTS30.2026.ABR.01064
+2026-04-22 08:39:46,914 - INFO -   Título: SERVIÇO DE MANUTENÇÃO DE INSTRUMENTAIS CIRURGICOS
+2026-04-22 08:39:46,914 - INFO -   Fields filled: 37/38
+2026-04-22 08:39:46,914 - INFO -   Situação: SOLICITAÇÃO NOVA
+2026-04-22 08:39:46,914 - INFO -   Items: 1
+2026-04-22 08:39:46,914 - INFO -   Histórico entries: 1
+2026-04-22 08:39:46,914 - INFO - Updating existing data in spreadsheet...
+2026-04-22 08:39:47,306 - INFO - Data updated in spreadsheet at row 43
+2026-04-22 08:39:47,306 - INFO - Updated data successfully!
+2026-04-22 08:39:47,306 - INFO - Closing popup...
+2026-04-22 08:39:48,372 - INFO - Returned to main window
+2026-04-22 08:39:49,374 - INFO - [UPDATED] Process CTS30.2026.ABR.01064 updated. (Total updated: 2)
+2026-04-22 08:39:50,375 - INFO - 
+>>> Attempting to process item 3 (Page 1) <<<
+2026-04-22 08:39:50,375 - INFO - ################################################################################
+2026-04-22 08:39:50,375 - INFO - PROCESSING REQUEST 3 (table row 4)
+2026-04-22 08:39:50,375 - INFO - ################################################################################
+2026-04-22 08:39:50,388 - INFO - Extracting listing fields (item 2)...
+2026-04-22 08:39:50,413 - INFO - Process CTS03.2026.ABR.00535 exists in spreadsheet. Will open and check for updates...
+2026-04-22 08:39:50,413 - INFO - Clicking link to open details...
+2026-04-22 08:39:50,640 - INFO - Waiting for new window to open...
+2026-04-22 08:39:52,655 - INFO - Switched to popup window
+2026-04-22 08:39:54,658 - INFO - Page loaded successfully!
+2026-04-22 08:39:54,658 - INFO - ============================================================
+2026-04-22 08:39:54,658 - INFO - EXTRACTING REQUEST DATA
+2026-04-22 08:39:54,658 - INFO - ============================================================
+2026-04-22 08:39:54,658 - INFO - Extracting request fields...
+2026-04-22 08:39:55,001 - INFO - ============================================================
+2026-04-22 08:39:55,001 - INFO - EXTRACTING MODAL FIELDS
+2026-04-22 08:39:55,002 - INFO - ============================================================
+2026-04-22 08:39:55,002 - INFO - Extracting: OBJETO DO CONTRATO
+2026-04-22 08:39:57,190 - INFO -   OK: Trata-se da contratação de empresa com especialistas na área...
+2026-04-22 08:39:57,190 - INFO - Extracting: ESPECIFICAÇÃO TÉCNICA
+2026-04-22 08:39:59,539 - INFO -   OK: Trata-se da contratação de empresa com especialistas para pr...
+2026-04-22 08:39:59,539 - INFO - Extracting: QUALIFICAÇÃO TÉCNICA
+2026-04-22 08:40:01,717 - INFO -   OK: A título de qualificação técnico-operacional, as empresas de...
+2026-04-22 08:40:01,719 - INFO - Extracting: GLOSAS
+2026-04-22 08:40:03,886 - INFO -   OK: N/A
+2026-04-22 08:40:03,886 - INFO - Extracting: SLA (ACORDO DE NÍVEL DE SERVIÇO)
+2026-04-22 08:40:06,134 - INFO -   OK: 1. DISPOSIÇÕES GERAIS: 1.1. . Fica estabelecido entre as par...
+2026-04-22 08:40:06,134 - INFO - Modal fields filled: 5/5
+2026-04-22 08:40:06,134 - INFO - ============================================================
+2026-04-22 08:40:06,134 - INFO - EXTRACTING TABLE ITEMS
+2026-04-22 08:40:06,134 - INFO - ============================================================
+2026-04-22 08:40:06,134 - INFO - Page 1:
+2026-04-22 08:40:06,233 - INFO -   Found 4 items on this page
+2026-04-22 08:40:06,233 - INFO -   No more pages (Next button not found)
+2026-04-22 08:40:06,233 - INFO - ============================================================
+2026-04-22 08:40:06,233 - INFO - Total items extracted: 4 (in 1 page(s))
+2026-04-22 08:40:06,233 - INFO - Extracting Históricos Observação de Revisões...
+2026-04-22 08:40:06,251 - INFO -   Found 1 histórico entries
+2026-04-22 08:40:06,251 - INFO - No changes detected for CTS03.2026.ABR.00535, keeping existing Situação
+2026-04-22 08:40:06,251 - INFO - ============================================================
+2026-04-22 08:40:06,251 - INFO - SUMMARY - Request 3
+2026-04-22 08:40:06,251 - INFO - ============================================================
+2026-04-22 08:40:06,252 - INFO -   Entidade: HOSPITAL ESTADUAL DE JATAÍ DR. SERAFIM DE CARVALHO
+2026-04-22 08:40:06,252 - INFO -   Nº SC: CTS03.2026.ABR.00535
+2026-04-22 08:40:06,252 - INFO -   Título: PRESTAÇÃO DE SERVIÇOS MÉDICOS EM ANESTESIOLOGIA
+2026-04-22 08:40:06,252 - INFO -   Fields filled: 37/38
+2026-04-22 08:40:06,252 - INFO -   Situação: SOLICITAÇÃO NOVA
+2026-04-22 08:40:06,252 - INFO -   Items: 4
+2026-04-22 08:40:06,252 - INFO -   Histórico entries: 1
+2026-04-22 08:40:06,252 - INFO - Updating existing data in spreadsheet...
+2026-04-22 08:40:06,611 - INFO - Data updated in spreadsheet at row 45
+2026-04-22 08:40:06,611 - INFO - Updated data successfully!
+2026-04-22 08:40:06,611 - INFO - Closing popup...
+2026-04-22 08:40:07,677 - INFO - Returned to main window
+2026-04-22 08:40:08,680 - INFO - [UPDATED] Process CTS03.2026.ABR.00535 updated. (Total updated: 3)
+2026-04-22 08:40:09,681 - INFO - 
+>>> Attempting to process item 4 (Page 1) <<<
+2026-04-22 08:40:09,682 - INFO - ################################################################################
+2026-04-22 08:40:09,683 - INFO - PROCESSING REQUEST 4 (table row 5)
+2026-04-22 08:40:09,684 - INFO - ################################################################################
+2026-04-22 08:40:09,699 - INFO - Extracting listing fields (item 3)...
+2026-04-22 08:40:09,749 - INFO - Process CTS30.2026.ABR.00955 exists in spreadsheet. Will open and check for updates...
+2026-04-22 08:40:09,749 - INFO - Clicking link to open details...
+2026-04-22 08:40:09,968 - INFO - Waiting for new window to open...
+2026-04-22 08:40:11,982 - INFO - Switched to popup window
+2026-04-22 08:40:13,989 - INFO - Page loaded successfully!
+2026-04-22 08:40:13,989 - INFO - ============================================================
+2026-04-22 08:40:13,989 - INFO - EXTRACTING REQUEST DATA
+2026-04-22 08:40:13,989 - INFO - ============================================================
+2026-04-22 08:40:13,989 - INFO - Extracting request fields...
+2026-04-22 08:40:14,299 - INFO - ============================================================
+2026-04-22 08:40:14,299 - INFO - EXTRACTING MODAL FIELDS
+2026-04-22 08:40:14,299 - INFO - ============================================================
+2026-04-22 08:40:14,299 - INFO - Extracting: OBJETO DO CONTRATO
+2026-04-22 08:40:46,867 - INFO -   Empty/Not found
+2026-04-22 08:40:46,867 - INFO - Extracting: ESPECIFICAÇÃO TÉCNICA
+2026-04-22 08:40:49,065 - INFO -   OK: Trata-se da contratação de empresa para prestação de serviço...
+2026-04-22 08:40:49,065 - INFO - Extracting: QUALIFICAÇÃO TÉCNICA
+2026-04-22 08:40:51,246 - INFO -   OK: 1.1.1. A título de qualificação técnica, as empresas deverão...
+2026-04-22 08:40:51,247 - INFO - Extracting: GLOSAS
+2026-04-22 08:40:53,444 - INFO -   OK: Aplica se SLA.
+2026-04-22 08:40:53,445 - INFO - Extracting: SLA (ACORDO DE NÍVEL DE SERVIÇO)
+2026-04-22 08:40:55,694 - INFO -   OK: 1. DISPOSIÇÕES GERAIS: 1.1. Fica estabelecido entre as parte...
+2026-04-22 08:40:55,694 - INFO - Modal fields filled: 4/5
+2026-04-22 08:40:55,695 - INFO - ============================================================
+2026-04-22 08:40:55,695 - INFO - EXTRACTING TABLE ITEMS
+2026-04-22 08:40:55,695 - INFO - ============================================================
+2026-04-22 08:40:55,695 - INFO - Page 1:
+2026-04-22 08:40:55,717 - INFO -   Found 1 items on this page
+2026-04-22 08:40:55,727 - INFO -   No more pages (Next button not found)
+2026-04-22 08:40:55,727 - INFO - ============================================================
+2026-04-22 08:40:55,727 - INFO - Total items extracted: 1 (in 1 page(s))
+2026-04-22 08:40:55,728 - INFO - Extracting Históricos Observação de Revisões...
+2026-04-22 08:40:55,730 - INFO -   Found 1 histórico entries
+2026-04-22 08:40:55,730 - INFO - No changes detected for CTS30.2026.ABR.00955, keeping existing Situação
+2026-04-22 08:40:55,730 - INFO - ============================================================
+2026-04-22 08:40:55,730 - INFO - SUMMARY - Request 4
+2026-04-22 08:40:55,730 - INFO - ============================================================
+2026-04-22 08:40:55,730 - INFO -   Entidade: HOSPITAL REGIONAL DE DOURADOS
+2026-04-22 08:40:55,730 - INFO -   Nº SC: CTS30.2026.ABR.00955
+2026-04-22 08:40:55,740 - INFO -   Título: CONTRATO DE PRESTAÇÃO DE SERVIÇO DE MANUTENÇÃO E P...
+2026-04-22 08:40:55,740 - INFO -   Fields filled: 37/38
+2026-04-22 08:40:55,740 - INFO -   Situação: SOLICITAÇÃO NOVA
+2026-04-22 08:40:55,740 - INFO -   Items: 1
+2026-04-22 08:40:55,740 - INFO -   Histórico entries: 1
+2026-04-22 08:40:55,740 - INFO - Updating existing data in spreadsheet...
+2026-04-22 08:40:56,030 - INFO - Data updated in spreadsheet at row 46
+2026-04-22 08:40:56,030 - INFO - Updated data successfully!
+2026-04-22 08:40:56,030 - INFO - Closing popup...
+2026-04-22 08:40:57,096 - INFO - Returned to main window
+2026-04-22 08:40:58,097 - INFO - [UPDATED] Process CTS30.2026.ABR.00955 updated. (Total updated: 4)
+2026-04-22 08:40:59,098 - INFO - 
+>>> Attempting to process item 5 (Page 1) <<<
+2026-04-22 08:40:59,098 - INFO - ################################################################################
+2026-04-22 08:40:59,098 - INFO - PROCESSING REQUEST 5 (table row 6)
+2026-04-22 08:40:59,098 - INFO - ################################################################################
+2026-04-22 08:40:59,098 - INFO - Extracting listing fields (item 4)...
+2026-04-22 08:40:59,128 - INFO - Process CTS03.2026.FEV.00386 exists in spreadsheet. Will open and check for updates...
+2026-04-22 08:40:59,128 - INFO - Clicking link to open details...
+2026-04-22 08:40:59,347 - INFO - Waiting for new window to open...
+2026-04-22 08:41:01,353 - INFO - Switched to popup window
+2026-04-22 08:41:03,363 - INFO - Page loaded successfully!
+2026-04-22 08:41:03,363 - INFO - ============================================================
+2026-04-22 08:41:03,363 - INFO - EXTRACTING REQUEST DATA
+2026-04-22 08:41:03,363 - INFO - ============================================================
+2026-04-22 08:41:03,363 - INFO - Extracting request fields...
+2026-04-22 08:41:03,686 - INFO - ============================================================
+2026-04-22 08:41:03,686 - INFO - EXTRACTING MODAL FIELDS
+2026-04-22 08:41:03,686 - INFO - ============================================================
+2026-04-22 08:41:03,686 - INFO - Extracting: OBJETO DO CONTRATO
+2026-04-22 08:41:05,858 - INFO -   OK: Locação de sistema de videomonitoramento IP com Inteligência...
+2026-04-22 08:41:05,858 - INFO - Extracting: ESPECIFICAÇÃO TÉCNICA
+2026-04-22 08:41:08,180 - INFO -   OK: 3. DO ESCOPO E REGIME DE EXECUÇÃO 3.1. A contratada deverá f...
+2026-04-22 08:41:08,180 - INFO - Extracting: QUALIFICAÇÃO TÉCNICA
+2026-04-22 08:41:10,359 - INFO -   OK: 7. DA QUALIFICAÇÃO TÉCNICA E GARANTIAS Atestado(s) de Capaci...
+2026-04-22 08:41:10,360 - INFO - Extracting: GLOSAS
+2026-04-22 08:41:12,524 - INFO -   OK: Descumprimento de SLA
+2026-04-22 08:41:12,525 - INFO - Extracting: SLA (ACORDO DE NÍVEL DE SERVIÇO)
+2026-04-22 08:41:14,761 - INFO -   OK: 1. DISPOSIÇÕES GERAIS: 1.1. Fica estabelecido entre as parte...
+2026-04-22 08:41:14,761 - INFO - Modal fields filled: 5/5
+2026-04-22 08:41:14,761 - INFO - ============================================================
+2026-04-22 08:41:14,761 - INFO - EXTRACTING TABLE ITEMS
+2026-04-22 08:41:14,761 - INFO - ============================================================
+2026-04-22 08:41:14,761 - INFO - Page 1:
+2026-04-22 08:41:14,808 - INFO -   Found 1 items on this page
+2026-04-22 08:41:14,808 - INFO -   No more pages (Next button not found)
+2026-04-22 08:41:14,808 - INFO - ============================================================
+2026-04-22 08:41:14,808 - INFO - Total items extracted: 1 (in 1 page(s))
+2026-04-22 08:41:14,808 - INFO - Extracting Históricos Observação de Revisões...
+2026-04-22 08:41:14,830 - INFO -   Found 5 histórico entries
+2026-04-22 08:41:14,831 - INFO - Data changed for CTS03.2026.FEV.00386, setting Situação to 'ANÁLISE INICIADA'
+2026-04-22 08:41:14,831 - INFO - ============================================================
+2026-04-22 08:41:14,831 - INFO - SUMMARY - Request 5
+2026-04-22 08:41:14,831 - INFO - ============================================================
+2026-04-22 08:41:14,831 - INFO -   Entidade: HOSPITAL ESTADUAL DE JATAÍ DR. SERAFIM DE CARVALHO
+2026-04-22 08:41:14,831 - INFO -   Nº SC: CTS03.2026.FEV.00386
+2026-04-22 08:41:14,831 - INFO -   Título: SERV LOCAÇÃO DE SISTEMA DE VIDEOMONITORAMENTO IP C...
+2026-04-22 08:41:14,831 - INFO -   Fields filled: 38/38
+2026-04-22 08:41:14,831 - INFO -   Situação: ANÁLISE INICIADA
+2026-04-22 08:41:14,831 - INFO -   Items: 1
+2026-04-22 08:41:14,831 - INFO -   Histórico entries: 5
+2026-04-22 08:41:14,831 - INFO - Updating existing data in spreadsheet...
+2026-04-22 08:41:15,259 - INFO - Data updated in spreadsheet at row 6
+2026-04-22 08:41:15,259 - INFO - Updated data successfully!
+2026-04-22 08:41:15,259 - INFO - Closing popup...
+2026-04-22 08:41:16,323 - INFO - Returned to main window
+2026-04-22 08:41:17,325 - INFO - [UPDATED] Process CTS03.2026.FEV.00386 updated. (Total updated: 5)
+2026-04-22 08:41:18,326 - INFO - 
+>>> Attempting to process item 6 (Page 1) <<<
+2026-04-22 08:41:18,326 - INFO - ################################################################################
+2026-04-22 08:41:18,326 - INFO - PROCESSING REQUEST 6 (table row 7)
+2026-04-22 08:41:18,326 - INFO - ################################################################################
+2026-04-22 08:41:23,411 - WARNING - Item 6 not found on this page
+2026-04-22 08:41:23,411 - ERROR - Error accessing item 6 (table row 7): Element not found at XPath: //*[@id="p1_cph1_SCs_GdSCs_GdSCs_Lkb_Sc_5"]
+2026-04-22 08:41:23,411 - INFO - Item 6 not found. Checking if this is the last page...
+2026-04-22 08:41:23,422 - INFO - Next button not found - last page reached
+2026-04-22 08:41:23,422 - INFO - Confirmed: This is the last page and there are no more items.
+2026-04-22 08:41:23,424 - INFO - Ending processing...
+2026-04-22 08:41:23,424 - INFO - Processing completed - termination condition met!
+2026-04-22 08:41:23,425 - INFO - ================================================================================
+2026-04-22 08:41:23,426 - INFO - CHECKING FOR PROCESSES THAT LEFT SEGECON
+2026-04-22 08:41:23,426 - INFO - ================================================================================
+2026-04-22 08:41:23,427 - INFO - Found 41 processes that are no longer in ecompras
+2026-04-22 08:41:23,428 - INFO - Marking CTS14.2026.JAN.00109 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:24,125 - INFO - Process CTS14.2026.JAN.00109 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 47
+2026-04-22 08:41:24,125 - INFO - Marking CTP03.2026.FEV.00382 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:24,690 - INFO - Process CTP03.2026.FEV.00382 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 28
+2026-04-22 08:41:24,690 - INFO - Marking CTS02.2026.FEV.00440 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:25,208 - INFO - Process CTS02.2026.FEV.00440 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 14
+2026-04-22 08:41:25,208 - INFO - Marking CTS03.2026.FEV.00339 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:25,708 - INFO - Process CTS03.2026.FEV.00339 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 9
+2026-04-22 08:41:25,722 - INFO - Marking CTS85.2026.ABR.00149 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:26,272 - INFO - Process CTS85.2026.ABR.00149 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 16
+2026-04-22 08:41:26,273 - INFO - Marking CTS99.2026.ABR.01956 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:26,823 - INFO - Process CTS99.2026.ABR.01956 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 25
+2026-04-22 08:41:26,823 - INFO - Marking CTP29.2026.ABR.02944 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:27,356 - INFO - Process CTP29.2026.ABR.02944 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 12
+2026-04-22 08:41:27,356 - INFO - Marking CTS29.2026.FEV.02736 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:27,905 - INFO - Process CTS29.2026.FEV.02736 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 29
+2026-04-22 08:41:27,906 - INFO - Marking CTP01.2026.ABR.03681 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:28,441 - INFO - Process CTP01.2026.ABR.03681 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 38
+2026-04-22 08:41:28,441 - INFO - Marking CTS99.2026.MAR.01899 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:28,950 - INFO - Process CTS99.2026.MAR.01899 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 5
+2026-04-22 08:41:28,950 - INFO - Marking CTS30.2026.FEV.00704 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:29,450 - INFO - Process CTS30.2026.FEV.00704 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 33
+2026-04-22 08:41:29,450 - INFO - Marking CTP01.2026.ABR.03687 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:29,987 - INFO - Process CTP01.2026.ABR.03687 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 37
+2026-04-22 08:41:29,988 - INFO - Marking CTS87.2026.MAR.00316 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:30,524 - INFO - Process CTS87.2026.MAR.00316 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 26
+2026-04-22 08:41:30,524 - INFO - Marking CTS85.2026.ABR.00161 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:31,060 - INFO - Process CTS85.2026.ABR.00161 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 22
+2026-04-22 08:41:31,060 - INFO - Marking CTP88.2026.ABR.00658 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:31,641 - INFO - Process CTP88.2026.ABR.00658 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 44
+2026-04-22 08:41:31,641 - INFO - Marking CTS03.2026.JAN.00256 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:32,206 - INFO - Process CTS03.2026.JAN.00256 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 41
+2026-04-22 08:41:32,206 - INFO - Marking CTS04.2026.FEV.03246 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:32,775 - INFO - Process CTS04.2026.FEV.03246 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 32
+2026-04-22 08:41:32,775 - INFO - Marking CTS28.2026.ABR.01900 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:33,308 - INFO - Process CTS28.2026.ABR.01900 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 10
+2026-04-22 08:41:33,308 - INFO - Marking CTS02.2026.ABR.00511 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:33,855 - INFO - Process CTS02.2026.ABR.00511 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 15
+2026-04-22 08:41:33,856 - INFO - Marking CTS03.2026.MAR.00478 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:34,374 - INFO - Process CTS03.2026.MAR.00478 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 8
+2026-04-22 08:41:34,374 - INFO - Marking CTP28.2026.FEV.01698 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:34,924 - INFO - Process CTP28.2026.FEV.01698 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 30
+2026-04-22 08:41:34,924 - INFO - Marking CTS02.2026.ABR.00520 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:35,458 - INFO - Process CTS02.2026.ABR.00520 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 39
+2026-04-22 08:41:35,458 - INFO - Marking CTP87.2026.FEV.00217 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:35,995 - INFO - Process CTP87.2026.FEV.00217 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 27
+2026-04-22 08:41:35,996 - INFO - Marking CTS87.2026.MAR.00314 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:36,522 - INFO - Process CTS87.2026.MAR.00314 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 17
+2026-04-22 08:41:36,523 - INFO - Marking CTS87.2026.MAR.00292 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:37,122 - INFO - Process CTS87.2026.MAR.00292 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 18
+2026-04-22 08:41:37,122 - INFO - Marking CTS99.2026.MAR.01940 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:37,672 - INFO - Process CTS99.2026.MAR.01940 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 11
+2026-04-22 08:41:37,672 - INFO - Marking CTP28.2026.ABR.01935 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:38,237 - INFO - Process CTP28.2026.ABR.01935 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 23
+2026-04-22 08:41:38,238 - INFO - Marking CTS28.2026.MAR.01790 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:38,805 - INFO - Process CTS28.2026.MAR.01790 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 40
+2026-04-22 08:41:38,805 - INFO - Marking CTS28.2026.ABR.01920 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:39,338 - INFO - Process CTS28.2026.ABR.01920 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 34
+2026-04-22 08:41:39,338 - INFO - Marking CTS04.2026.ABR.03494 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:39,874 - INFO - Process CTS04.2026.ABR.03494 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 24
+2026-04-22 08:41:39,874 - INFO - Marking CTS99.2026.MAR.01936 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:40,393 - INFO - Process CTS99.2026.MAR.01936 marked as 'SOLICITAÇÃO SAIU DA SEGECON' at row 21
+2026-04-22 08:41:40,393 - INFO - Marking CTS08.2026.FEV.02076 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:40,604 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_unit': '1/min/{project}/{user}', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_limit_value': '60'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-04-22 08:41:40,604 - ERROR - Failed to mark CTS08.2026.FEV.02076 as left
+2026-04-22 08:41:40,604 - INFO - Marking CTS85.2026.MAR.00140 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:40,805 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_unit': '1/min/{project}/{user}', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_limit_value': '60'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-04-22 08:41:40,805 - ERROR - Failed to mark CTS85.2026.MAR.00140 as left
+2026-04-22 08:41:40,805 - INFO - Marking CTP01.2026.ABR.03655 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:41,037 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_unit': '1/min/{project}/{user}', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_limit_value': '60'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-04-22 08:41:41,038 - ERROR - Failed to mark CTP01.2026.ABR.03655 as left
+2026-04-22 08:41:41,039 - INFO - Marking CTS02.2025.SET.00198 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:41,240 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_unit': '1/min/{project}/{user}', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_limit_value': '60'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-04-22 08:41:41,240 - ERROR - Failed to mark CTS02.2025.SET.00198 as left
+2026-04-22 08:41:41,240 - INFO - Marking CTS02.2026.ABR.00508 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:41,440 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_unit': '1/min/{project}/{user}', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_limit_value': '60'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-04-22 08:41:41,440 - ERROR - Failed to mark CTS02.2026.ABR.00508 as left
+2026-04-22 08:41:41,440 - INFO - Marking CTS29.2026.MAR.02922 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:41,672 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_unit': '1/min/{project}/{user}', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_limit_value': '60'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-04-22 08:41:41,672 - ERROR - Failed to mark CTS29.2026.MAR.02922 as left
+2026-04-22 08:41:41,672 - INFO - Marking CTS04.2026.MAR.03373 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:41,888 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_unit': '1/min/{project}/{user}', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_limit_value': '60'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-04-22 08:41:41,888 - ERROR - Failed to mark CTS04.2026.MAR.03373 as left
+2026-04-22 08:41:41,888 - INFO - Marking CTS86.2026.MAR.00159 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:42,105 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_unit': '1/min/{project}/{user}', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_limit_value': '60'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-04-22 08:41:42,105 - ERROR - Failed to mark CTS86.2026.MAR.00159 as left
+2026-04-22 08:41:42,105 - INFO - Marking CTS28.2026.MAR.01891 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:42,296 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_unit': '1/min/{project}/{user}', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_limit_value': '60'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-04-22 08:41:42,296 - ERROR - Failed to mark CTS28.2026.MAR.01891 as left
+2026-04-22 08:41:42,299 - INFO - Marking CTP01.2026.MAR.03609 as 'SOLICITAÇÃO SAIU DA SEGECON'...
+2026-04-22 08:41:42,522 - ERROR - Error marking process as left: {'code': 429, 'message': "Quota exceeded for quota metric 'Write requests' and limit 'Write requests per minute per user' of service 'sheets.googleapis.com' for consumer 'project_number:110493255608'.", 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'RATE_LIMIT_EXCEEDED', 'domain': 'googleapis.com', 'metadata': {'service': 'sheets.googleapis.com', 'consumer': 'projects/110493255608', 'quota_limit': 'WriteRequestsPerMinutePerUser', 'quota_unit': '1/min/{project}/{user}', 'quota_location': 'global', 'quota_metric': 'sheets.googleapis.com/write_requests', 'quota_limit_value': '60'}}, {'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Request a higher quota limit.', 'url': 'https://cloud.google.com/docs/quotas/help/request_increase'}]}]}
+2026-04-22 08:41:42,522 - ERROR - Failed to mark CTP01.2026.MAR.03609 as left
+2026-04-22 08:41:42,522 - INFO - ================================================================================
+2026-04-22 08:41:42,522 - INFO - PROCESSAMENTO CONCLUÍDO!
+2026-04-22 08:41:42,522 - INFO - ================================================================================
+2026-04-22 08:41:42,522 - INFO - Total de solicitações processadas: 5
+2026-04-22 08:41:42,522 - INFO - Solicitações novas inseridas: 0
+2026-04-22 08:41:42,522 - INFO - Solicitações atualizadas: 5
+2026-04-22 08:41:42,522 - INFO - Solicitações com erro: 0
+2026-04-22 08:41:42,522 - INFO - Solicitações que saíram da SEGECON: 31
+2026-04-22 08:41:42,522 - INFO - Páginas de listagem processadas: 1
+2026-04-22 08:41:42,522 - INFO - Processos únicos no ecompras: 5
+2026-04-22 08:41:42,522 - INFO - ================================================================================
+2026-04-22 08:41:42,522 - INFO - 
+2026-04-22 08:41:42,522 - INFO - ================================================================================
+2026-04-22 08:41:42,522 - INFO - RELATÓRIO DETALHADO DE ERROS
+2026-04-22 08:41:42,522 - INFO - ================================================================================
+2026-04-22 08:41:42,522 - ERROR -   1. Página 1, Índice 5 (ID: p1_cph1_SCs_GdSCs_GdSCs_Lkb_Sc_5)
+2026-04-22 08:41:42,522 - ERROR -      Nº SC: Desconhecido
+2026-04-22 08:41:42,522 - ERROR -      Motivo: NOT_FOUND - Element not found on page
+2026-04-22 08:41:42,522 - INFO - ================================================================================
+2026-04-22 08:41:42,522 - INFO - 
+2026-04-22 08:41:42,522 - INFO - ================================================================================
+2026-04-22 08:41:42,532 - INFO - LISTA DE SOLICITAÇÕES ATUALIZADAS
+2026-04-22 08:41:42,532 - INFO - ================================================================================
+2026-04-22 08:41:42,532 - INFO -   1. Página 1, Índice 0 - Nº SC: CTS87.2026.ABR.00376
+2026-04-22 08:41:42,532 - INFO -   2. Página 1, Índice 1 - Nº SC: CTS30.2026.ABR.01064
+2026-04-22 08:41:42,532 - INFO -   3. Página 1, Índice 2 - Nº SC: CTS03.2026.ABR.00535
+2026-04-22 08:41:42,532 - INFO -   4. Página 1, Índice 3 - Nº SC: CTS30.2026.ABR.00955
+2026-04-22 08:41:42,532 - INFO -   5. Página 1, Índice 4 - Nº SC: CTS03.2026.FEV.00386
+2026-04-22 08:41:42,532 - INFO - ================================================================================
+2026-04-22 08:41:42,532 - INFO - 
+2026-04-22 08:41:42,532 - INFO - ================================================================================
+2026-04-22 08:41:42,533 - INFO - LISTA DE SOLICITAÇÕES QUE SAÍRAM DA SEGECON
+2026-04-22 08:41:42,533 - INFO - ================================================================================
+2026-04-22 08:41:42,533 - INFO -   1. Nº SC: CTS14.2026.JAN.00109
+2026-04-22 08:41:42,533 - INFO -   2. Nº SC: CTP03.2026.FEV.00382
+2026-04-22 08:41:42,533 - INFO -   3. Nº SC: CTS02.2026.FEV.00440
+2026-04-22 08:41:42,533 - INFO -   4. Nº SC: CTS03.2026.FEV.00339
+2026-04-22 08:41:42,534 - INFO -   5. Nº SC: CTS85.2026.ABR.00149
+2026-04-22 08:41:42,534 - INFO -   6. Nº SC: CTS99.2026.ABR.01956
+2026-04-22 08:41:42,534 - INFO -   7. Nº SC: CTP29.2026.ABR.02944
+2026-04-22 08:41:42,534 - INFO -   8. Nº SC: CTS29.2026.FEV.02736
+2026-04-22 08:41:42,534 - INFO -   9. Nº SC: CTP01.2026.ABR.03681
+2026-04-22 08:41:42,534 - INFO -   10. Nº SC: CTS99.2026.MAR.01899
+2026-04-22 08:41:42,534 - INFO -   11. Nº SC: CTS30.2026.FEV.00704
+2026-04-22 08:41:42,534 - INFO -   12. Nº SC: CTP01.2026.ABR.03687
+2026-04-22 08:41:42,534 - INFO -   13. Nº SC: CTS87.2026.MAR.00316
+2026-04-22 08:41:42,534 - INFO -   14. Nº SC: CTS85.2026.ABR.00161
+2026-04-22 08:41:42,534 - INFO -   15. Nº SC: CTP88.2026.ABR.00658
+2026-04-22 08:41:42,534 - INFO -   16. Nº SC: CTS03.2026.JAN.00256
+2026-04-22 08:41:42,534 - INFO -   17. Nº SC: CTS04.2026.FEV.03246
+2026-04-22 08:41:42,534 - INFO -   18. Nº SC: CTS28.2026.ABR.01900
+2026-04-22 08:41:42,535 - INFO -   19. Nº SC: CTS02.2026.ABR.00511
+2026-04-22 08:41:42,535 - INFO -   20. Nº SC: CTS03.2026.MAR.00478
+2026-04-22 08:41:42,535 - INFO -   21. Nº SC: CTP28.2026.FEV.01698
+2026-04-22 08:41:42,535 - INFO -   22. Nº SC: CTS02.2026.ABR.00520
+2026-04-22 08:41:42,535 - INFO -   23. Nº SC: CTP87.2026.FEV.00217
+2026-04-22 08:41:42,535 - INFO -   24. Nº SC: CTS87.2026.MAR.00314
+2026-04-22 08:41:42,535 - INFO -   25. Nº SC: CTS87.2026.MAR.00292
+2026-04-22 08:41:42,535 - INFO -   26. Nº SC: CTS99.2026.MAR.01940
+2026-04-22 08:41:42,535 - INFO -   27. Nº SC: CTP28.2026.ABR.01935
+2026-04-22 08:41:42,535 - INFO -   28. Nº SC: CTS28.2026.MAR.01790
+2026-04-22 08:41:42,536 - INFO -   29. Nº SC: CTS28.2026.ABR.01920
+2026-04-22 08:41:42,536 - INFO -   30. Nº SC: CTS04.2026.ABR.03494
+2026-04-22 08:41:42,536 - INFO -   31. Nº SC: CTS99.2026.MAR.01936
+2026-04-22 08:41:42,536 - INFO - ================================================================================
+2026-04-22 08:41:43,930 - INFO - Mensagem enviada ao Telegram com sucesso (chat_id=6760564985)
+2026-04-22 08:42:00,469 - INFO - Mensagem enviada ao Telegram com sucesso (chat_id=1356469598)
+2026-04-22 08:42:17,034 - INFO - Mensagem enviada ao Telegram com sucesso (chat_id=8587977306)
+2026-04-22 08:42:17,242 - INFO - Closing browser in 30 seconds (for verification)...
+2026-04-22 08:42:50,515 - INFO - Browser closed

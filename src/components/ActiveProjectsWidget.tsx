@@ -18,11 +18,12 @@ interface ActiveProject {
 
 interface ActiveProjectsWidgetProps {
   teamId?: string | null
+  strategicFilter?: 'all' | 'yes' | 'no'
 }
 
 const ITEMS_PER_PAGE = 2
 
-export default function ActiveProjectsWidget({ teamId }: ActiveProjectsWidgetProps = {}) {
+export default function ActiveProjectsWidget({ teamId, strategicFilter = 'all' }: ActiveProjectsWidgetProps = {}) {
   const theme = useTheme()
   const isDarkMode = theme.palette.mode === 'dark'
   const [loading, setLoading] = useState(true)
@@ -40,7 +41,7 @@ export default function ActiveProjectsWidget({ teamId }: ActiveProjectsWidgetPro
   useEffect(() => {
     setCurrentPage(1)
     fetchActiveProjects()
-  }, [teamId])
+  }, [teamId, strategicFilter])
 
   const fetchActiveProjects = async () => {
     try {
@@ -52,6 +53,11 @@ export default function ActiveProjectsWidget({ teamId }: ActiveProjectsWidgetPro
         .select('id, name, description, start_date, end_date, status')
         .eq('status', 'active')
         .order('end_date', { ascending: true })
+
+      if (strategicFilter !== 'all') {
+        projectQuery = projectQuery.eq('strategic_planning', strategicFilter === 'yes')
+        // Note: projects always have strategic_planning set, so no NULL handling needed here
+      }
 
       if (teamId) {
         const { data: teamSprints } = await supabase

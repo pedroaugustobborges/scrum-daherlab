@@ -23,6 +23,7 @@ import {
   TrendingUp,
   Save,
   Groups,
+  Insights,
 } from '@mui/icons-material'
 import toast from 'react-hot-toast'
 import Modal from './Modal'
@@ -44,6 +45,7 @@ interface EditProjectModalProps {
     status: string
     start_date: string
     end_date: string
+    strategic_planning?: boolean | null
   }
 }
 
@@ -71,6 +73,7 @@ export default function EditProjectModal({
     status: 'active',
     start_date: '',
     end_date: '',
+    strategic_planning: null as boolean | null,
   })
 
   useEffect(() => {
@@ -81,6 +84,7 @@ export default function EditProjectModal({
         status: project.status || 'active',
         start_date: project.start_date || '',
         end_date: project.end_date || '',
+        strategic_planning: project.strategic_planning ?? false,
       })
       fetchTeams()
       fetchProjectTeams()
@@ -134,6 +138,11 @@ export default function EditProjectModal({
       return
     }
 
+    if (formData.strategic_planning === null) {
+      toast.error('Informe se o projeto pertence ao Planejamento Estratégico')
+      return
+    }
+
     setLoading(true)
 
     try {
@@ -145,6 +154,7 @@ export default function EditProjectModal({
           status: formData.status,
           start_date: formData.start_date || null,
           end_date: formData.end_date || null,
+          strategic_planning: formData.strategic_planning,
         })
         .eq('id', project.id)
 
@@ -236,6 +246,71 @@ export default function EditProjectModal({
               ),
             }}
           />
+
+          {/* Planejamento Estratégico */}
+          <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+              <Insights sx={{ color: '#6366f1', fontSize: 20 }} />
+              <Typography variant="body2" fontWeight={600} color="text.secondary">
+                Planejamento Estratégico
+              </Typography>
+              <Chip
+                label="Obrigatório"
+                size="small"
+                sx={{
+                  height: 20,
+                  fontSize: '0.65rem',
+                  bgcolor: 'rgba(239, 68, 68, 0.1)',
+                  color: '#ef4444',
+                }}
+              />
+            </Box>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
+              Este projeto pertence ao Planejamento Estratégico da organização?
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1.5 }}>
+              {[
+                { value: true, label: 'Sim', color: '#10b981', bg: 'rgba(16,185,129,0.08)', bgActive: 'rgba(16,185,129,0.15)', border: 'rgba(16,185,129,0.3)', borderActive: '#10b981' },
+                { value: false, label: 'Não', color: '#6b7280', bg: 'rgba(107,114,128,0.06)', bgActive: 'rgba(107,114,128,0.12)', border: 'rgba(107,114,128,0.2)', borderActive: '#6b7280' },
+              ].map((opt) => {
+                const isSelected = formData.strategic_planning === opt.value
+                return (
+                  <Box
+                    key={String(opt.value)}
+                    onClick={() => setFormData((prev) => ({ ...prev, strategic_planning: opt.value }))}
+                    sx={{
+                      flex: 1,
+                      py: 1.5,
+                      borderRadius: 2,
+                      border: '2px solid',
+                      borderColor: isSelected ? opt.borderActive : opt.border,
+                      background: isSelected ? opt.bgActive : opt.bg,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 1,
+                      cursor: 'pointer',
+                      transition: 'all 0.18s ease',
+                      '&:hover': { borderColor: opt.borderActive, background: opt.bgActive },
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: 8, height: 8, borderRadius: '50%',
+                        bgcolor: isSelected ? opt.color : 'transparent',
+                        border: '2px solid',
+                        borderColor: isSelected ? opt.color : opt.border,
+                        transition: 'all 0.18s ease',
+                      }}
+                    />
+                    <Typography variant="body2" sx={{ fontWeight: isSelected ? 700 : 500, color: isSelected ? opt.color : 'text.secondary' }}>
+                      {opt.label}
+                    </Typography>
+                  </Box>
+                )
+              })}
+            </Box>
+          </Box>
 
           <Box>
             <TextField

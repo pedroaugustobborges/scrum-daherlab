@@ -68,6 +68,7 @@ interface Project {
   start_date: string;
   end_date: string;
   created_at: string;
+  strategic_planning?: boolean | null;
   teams?: string[];
 }
 

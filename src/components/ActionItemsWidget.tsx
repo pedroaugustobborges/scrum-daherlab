@@ -15,11 +15,12 @@ interface ActionItem {
 
 interface ActionItemsWidgetProps {
   teamId?: string | null
+  strategicFilter?: 'all' | 'yes' | 'no'
 }
 
 const ITEMS_PER_PAGE = 2
 
-export default function ActionItemsWidget({ teamId }: ActionItemsWidgetProps = {}) {
+export default function ActionItemsWidget({ teamId, strategicFilter = 'all' }: ActionItemsWidgetProps = {}) {
   const theme = useTheme()
   const isDarkMode = theme.palette.mode === 'dark'
   const [loading, setLoading] = useState(true)
@@ -35,28 +36,69 @@ export default function ActionItemsWidget({ teamId }: ActionItemsWidgetProps = {
   useEffect(() => {
     setCurrentPage(1)
     fetchActionItems()
-  }, [teamId])
+  }, [teamId, strategicFilter])
 
   const fetchActionItems = async () => {
     try {
       setLoading(true)
 
-      // When a team is selected, scope to retrospectives of that team's sprints
+      // Scope to team and/or strategic filter
       let retroIds: string[] | null = null
-      if (teamId) {
-        const { data: teamSprints } = await supabase
-          .from('sprints')
-          .select('id')
-          .eq('team_id', teamId)
-        const sprintIds = (teamSprints ?? []).map((s: any) => s.id)
-        if (sprintIds.length > 0) {
-          const { data: retros } = await supabase
-            .from('sprint_retrospectives')
+      const needSprintScope = teamId || strategicFilter !== 'all'
+      if (needSprintScope) {
+        if (strategicFilter !== 'all') {
+          const { data: strategicProjects } = await supabase
+            .from('projects')
             .select('id')
-            .in('sprint_id', sprintIds)
-          retroIds = (retros ?? []).map((r: any) => r.id)
-        } else {
-          retroIds = []
+            .eq('strategic_planning', strategicFilter === 'yes')
+          const projectIds = (strategicProjects ?? []).map((p: any) => p.id)
+
+          if (strategicFilter === 'no') {
+            // Two-query approach to avoid PostgREST OR+IS NULL unreliability
+            const collectedSprintIds: string[] = []
+            if (projectIds.length > 0) {
+              let q1 = supabase.from('sprints').select('id').in('project_id', projectIds)
+              if (teamId) q1 = q1.eq('team_id', teamId)
+              const { data: d1 } = await q1
+              ;(d1 ?? []).forEach((s: any) => collectedSprintIds.push(s.id))
+            }
+            let q2 = supabase.from('sprints').select('id').is('project_id', null)
+            if (teamId) q2 = q2.eq('team_id', teamId)
+            const { data: d2 } = await q2
+            ;(d2 ?? []).forEach((s: any) => collectedSprintIds.push(s.id))
+
+            if (collectedSprintIds.length > 0) {
+              const { data: retros } = await supabase.from('sprint_retrospectives').select('id').in('sprint_id', collectedSprintIds)
+              retroIds = (retros ?? []).map((r: any) => r.id)
+            } else {
+              retroIds = []
+            }
+          } else {
+            // "Sim": single query
+            let sprintsQ = supabase.from('sprints').select('id')
+            if (teamId) sprintsQ = sprintsQ.eq('team_id', teamId)
+            sprintsQ = projectIds.length > 0
+              ? sprintsQ.in('project_id', projectIds)
+              : sprintsQ.in('project_id', ['00000000-0000-0000-0000-000000000000'])
+            const { data: teamSprints } = await sprintsQ
+            const sprintIds = (teamSprints ?? []).map((s: any) => s.id)
+            if (sprintIds.length > 0) {
+              const { data: retros } = await supabase.from('sprint_retrospectives').select('id').in('sprint_id', sprintIds)
+              retroIds = (retros ?? []).map((r: any) => r.id)
+            } else {
+              retroIds = []
+            }
+          }
+        } else if (teamId) {
+          // Team filter only, no strategic filter
+          const { data: teamSprints } = await supabase.from('sprints').select('id').eq('team_id', teamId)
+          const sprintIds = (teamSprints ?? []).map((s: any) => s.id)
+          if (sprintIds.length > 0) {
+            const { data: retros } = await supabase.from('sprint_retrospectives').select('id').in('sprint_id', sprintIds)
+            retroIds = (retros ?? []).map((r: any) => r.id)
+          } else {
+            retroIds = []
+          }
         }
       }
 

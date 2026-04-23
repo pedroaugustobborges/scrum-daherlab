@@ -18,11 +18,12 @@ interface ActiveSprint {
 
 interface ActiveSprintsWidgetProps {
   teamId?: string | null
+  strategicFilter?: 'all' | 'yes' | 'no'
 }
 
 const ITEMS_PER_PAGE = 2
 
-export default function ActiveSprintsWidget({ teamId }: ActiveSprintsWidgetProps = {}) {
+export default function ActiveSprintsWidget({ teamId, strategicFilter = 'all' }: ActiveSprintsWidgetProps = {}) {
   const theme = useTheme()
   const isDarkMode = theme.palette.mode === 'dark'
   const [loading, setLoading] = useState(true)
@@ -40,13 +41,13 @@ export default function ActiveSprintsWidget({ teamId }: ActiveSprintsWidgetProps
   useEffect(() => {
     setCurrentPage(1)
     fetchActiveSprints()
-  }, [teamId])
+  }, [teamId, strategicFilter])
 
   const fetchActiveSprints = async () => {
     try {
       setLoading(true)
 
-      // Fetch active sprints, optionally scoped to a team
+      // Fetch active sprints, optionally scoped to a team and/or strategic filter
       let sprintsQuery = supabase
         .from('sprints')
         .select('id, name, start_date, end_date, project_id, team_id')
@@ -55,6 +56,81 @@ export default function ActiveSprintsWidget({ teamId }: ActiveSprintsWidgetProps
 
       if (teamId) {
         sprintsQuery = sprintsQuery.eq('team_id', teamId)
+      }
+
+      if (strategicFilter !== 'all') {
+        const { data: strategicProjects } = await supabase
+          .from('projects')
+          .select('id')
+          .eq('strategic_planning', strategicFilter === 'yes')
+        const projectIds = (strategicProjects ?? []).map((p: any) => p.id)
+        if (strategicFilter === 'no') {
+          // "Não": two separate queries to avoid PostgREST OR+IS NULL unreliability
+          const collectedIds: string[] = []
+
+          if (projectIds.length > 0) {
+            let q1 = supabase.from('sprints').select('id, name, start_date, end_date, project_id, team_id')
+              .eq('status', 'active').in('project_id', projectIds).order('end_date', { ascending: true })
+            if (teamId) q1 = q1.eq('team_id', teamId)
+            const { data: d1 } = await q1
+            ;(d1 ?? []).forEach((s: any) => collectedIds.push(s.id))
+          }
+
+          let q2 = supabase.from('sprints').select('id, name, start_date, end_date, project_id, team_id')
+            .eq('status', 'active').is('project_id', null).order('end_date', { ascending: true })
+          if (teamId) q2 = q2.eq('team_id', teamId)
+          const { data: d2 } = await q2
+          ;(d2 ?? []).forEach((s: any) => collectedIds.push(s.id))
+
+          if (collectedIds.length === 0) {
+            setTotalCount(0)
+            setActiveSprints([])
+            setDaysRemaining(0)
+            setLoading(false)
+            return
+          }
+
+          // Re-fetch full sprint data for the collected IDs
+          const { data: sprints, error: sprintsError } = await supabase
+            .from('sprints')
+            .select('id, name, start_date, end_date, project_id, team_id')
+            .in('id', collectedIds)
+            .order('end_date', { ascending: true })
+
+          if (sprintsError) throw sprintsError
+
+          if (!sprints || sprints.length === 0) {
+            setTotalCount(0)
+            setActiveSprints([])
+            setDaysRemaining(0)
+            return
+          }
+
+          setTotalCount(sprints.length)
+          const nearestSprint = sprints[0]
+          const endDate = new Date(nearestSprint.end_date).getTime()
+          const now2 = Date.now()
+          const diff2 = endDate - now2
+          const days2 = Math.ceil(diff2 / (1000 * 60 * 60 * 24))
+          setDaysRemaining(days2 > 0 ? days2 : 0)
+
+          const sprintData = await Promise.all(
+            sprints.map(async (sprint) => {
+              const { data: tasks } = await supabase.from('tasks').select('status').eq('sprint_id', sprint.id)
+              const completed = tasks?.filter((t) => t.status === 'done').length || 0
+              const total = tasks?.length || 0
+              return { id: sprint.id, name: sprint.name, start_date: sprint.start_date, end_date: sprint.end_date, project_id: sprint.project_id, team_id: sprint.team_id, completed_stories: completed, total_stories: total }
+            })
+          )
+          setActiveSprints(sprintData)
+          setLoading(false)
+          return
+        } else {
+          // "Sim": only explicitly strategic projects
+          sprintsQuery = projectIds.length > 0
+            ? sprintsQuery.in('project_id', projectIds)
+            : sprintsQuery.in('project_id', ['00000000-0000-0000-0000-000000000000'])
+        }
       }
 
       const { data: sprints, error: sprintsError } = await sprintsQuery

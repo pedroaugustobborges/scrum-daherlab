@@ -6,12 +6,12 @@ import {
   Box, Dialog, DialogTitle, DialogContent, DialogActions,
   TextField, Button, Typography, IconButton, Tooltip,
 } from '@mui/material'
-import { Close as CloseIcon, SwapHoriz as SwapHorizIcon } from '@mui/icons-material'
+import { Close as CloseIcon, SwapHoriz as SwapHorizIcon, DirectionsRun as RunIcon } from '@mui/icons-material'
 import toast from 'react-hot-toast'
 import { useTheme } from '@/contexts/ThemeContext'
-import type { TimelineElement, TaskItem, TextItem, ShapeItem, ToolType, ShapeType } from './types'
+import type { TimelineElement, TaskItem, TextItem, ShapeItem, SprintItem, ToolType, ShapeType } from './types'
 import {
-  isTask, isText, isShape,
+  isTask, isText, isShape, isSprint,
   STATUS_CONFIG,
   CANVAS_WIDTH, CANVAS_HEIGHT,
   TIMELINE_Y, TIMELINE_HEIGHT, TIMELINE_START_X,
@@ -373,9 +373,10 @@ const TimelineCanvas = forwardRef<TimelineCanvasHandle, Props>(function Timeline
 
   const { isDarkMode } = useTheme()
 
-  const taskItems  = items.filter(isTask)  as TaskItem[]
-  const textItems  = items.filter(isText)  as TextItem[]
-  const shapeItems = items.filter(isShape) as ShapeItem[]
+  const taskItems   = items.filter(isTask)   as TaskItem[]
+  const textItems   = items.filter(isText)   as TextItem[]
+  const shapeItems  = items.filter(isShape)  as ShapeItem[]
+  const sprintItems = items.filter(isSprint) as SprintItem[]
 
   // ── Create preview rect ───────────────────────────────────────────────────
   const preview = createState ? {
@@ -564,6 +565,139 @@ const TimelineCanvas = forwardRef<TimelineCanvasHandle, Props>(function Timeline
           )
         })}
 
+        {/* ── SPRINT CARDS ────────────────────────────────────────────────────── */}
+        {sprintItems.map(sprint => {
+          const x = rx(sprint); const y = ry(sprint)
+          const w = rw(sprint); const h = rh(sprint)
+          const sel = selectedId === sprint.id
+          const dragging = dragState?.id === sprint.id || resizeState?.id === sprint.id
+          const SPRINT_COLOR = '#7c3aed'
+          const cardBg = isDarkMode
+            ? 'linear-gradient(145deg, rgba(109,40,217,0.22) 0%, rgba(139,92,246,0.12) 100%)'
+            : 'linear-gradient(145deg, rgba(237,233,254,0.95) 0%, rgba(221,214,254,0.7) 100%)'
+          const borderCol = sel ? '#6366f1' : isDarkMode ? 'rgba(139,92,246,0.55)' : 'rgba(109,40,217,0.35)'
+          const titleCol  = isDarkMode ? '#f1f5f9' : '#1e1b4b'
+          const descCol   = isDarkMode ? '#a5b4fc' : '#4c1d95'
+          const dateCol   = isDarkMode ? '#818cf8' : '#6d28d9'
+
+          return (
+            <Box
+              key={sprint.id}
+              onMouseDown={e => handleItemDown(e, sprint.id)}
+              sx={{
+                position: 'absolute', left: x, top: y, width: w, height: h,
+                background: cardBg,
+                border: `2px solid ${borderCol}`,
+                borderRadius: '16px',
+                p: 1.75,
+                cursor: dragging ? 'grabbing' : 'grab',
+                zIndex: sel ? 200 : sprint.zIndex,
+                boxShadow: sel
+                  ? '0 0 0 3px rgba(124,58,237,0.28), 0 10px 32px rgba(109,40,217,0.22)'
+                  : isDarkMode
+                    ? '0 4px 16px rgba(0,0,0,0.45), inset 0 1px 0 rgba(139,92,246,0.15)'
+                    : '0 4px 16px rgba(109,40,217,0.14), inset 0 1px 0 rgba(255,255,255,0.8)',
+                transition: 'box-shadow 0.15s, border-color 0.15s',
+                '&:hover': {
+                  boxShadow: isDarkMode
+                    ? '0 8px 28px rgba(0,0,0,0.55), inset 0 1px 0 rgba(139,92,246,0.2)'
+                    : '0 8px 28px rgba(109,40,217,0.2), inset 0 1px 0 rgba(255,255,255,0.9)',
+                },
+                '&:hover .item-delete': { opacity: 1 },
+                overflow: 'hidden',
+              }}
+            >
+              {/* Top accent gradient bar */}
+              <Box sx={{
+                position: 'absolute', top: 0, left: 0, right: 0, height: 4,
+                background: 'linear-gradient(90deg, #7c3aed 0%, #a855f7 50%, #6366f1 100%)',
+                borderRadius: '14px 14px 0 0',
+              }} />
+
+              <DeleteBtn
+                onDelete={() => { onRemoveItem(sprint.id); setSelectedId(null) }}
+                onMouseDown={e => e.stopPropagation()}
+              />
+              {sel && renderResizeHandles(sprint.id)}
+
+              {/* Header row: icon + label */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.25, mb: 1 }}>
+                <Box sx={{
+                  width: 30, height: 30, borderRadius: '8px',
+                  background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0,
+                  boxShadow: '0 3px 8px rgba(124,58,237,0.4)',
+                }}>
+                  <RunIcon sx={{ fontSize: 17, color: 'white' }} />
+                </Box>
+                <Box component="span" sx={{
+                  display: 'inline-block',
+                  background: isDarkMode ? 'rgba(139,92,246,0.25)' : 'rgba(109,40,217,0.12)',
+                  color: SPRINT_COLOR,
+                  px: 0.85, py: 0.15,
+                  borderRadius: '5px',
+                  fontSize: '9px', fontWeight: 800, letterSpacing: 0.8,
+                }}>
+                  SPRINT
+                </Box>
+              </Box>
+
+              {/* Sprint name */}
+              <Typography sx={{
+                fontWeight: 800,
+                fontSize: '13px',
+                lineHeight: 1.3,
+                color: titleCol,
+                mb: sprint.description ? 0.6 : 0,
+                overflow: 'hidden',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+              }}>
+                {sprint.name}
+              </Typography>
+
+              {/* Description */}
+              {sprint.description && (
+                <Typography sx={{
+                  fontSize: '10.5px',
+                  color: descCol,
+                  lineHeight: 1.45,
+                  overflow: 'hidden',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                }}>
+                  {sprint.description}
+                </Typography>
+              )}
+
+              {/* Date range */}
+              {(sprint.startDate || sprint.endDate) && (
+                <Box sx={{
+                  position: 'absolute', bottom: 10, left: 14, right: 14,
+                  display: 'flex', alignItems: 'center', gap: 0.5,
+                }}>
+                  <Box sx={{
+                    width: 5, height: 5, borderRadius: '50%',
+                    background: dateCol, flexShrink: 0,
+                  }} />
+                  <Typography sx={{ fontSize: '9.5px', color: dateCol, fontWeight: 600 }}>
+                    {sprint.startDate
+                      ? new Date(sprint.startDate).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
+                      : '?'}
+                    {' → '}
+                    {sprint.endDate
+                      ? new Date(sprint.endDate).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
+                      : '?'}
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+          )
+        })}
+
         {/* ── SHAPE ITEMS ─────────────────────────────────────────────────────── */}
         {shapeItems.map(shape => {
           const x = rx(shape); const y = ry(shape)
@@ -697,6 +831,33 @@ const TimelineCanvas = forwardRef<TimelineCanvasHandle, Props>(function Timeline
                 />
                 <circle cx={cx} cy={TIMELINE_Y} r={DOT_RADIUS}
                   fill={dotFill} stroke={sc} strokeWidth={3} />
+              </g>
+            )
+          })}
+
+          {/* Sprint dots + dashed connector lines (purple, larger dot) */}
+          {sprintItems.map(sprint => {
+            const x = rx(sprint); const y = ry(sprint)
+            const w = rw(sprint); const h = rh(sprint)
+            const cx = x + w / 2
+            const above = sprint.position === 'above'
+            const dotFill = isDarkMode ? '#0f172a' : 'white'
+            const SPRINT_DOT_R = DOT_RADIUS + 3
+            return (
+              <g key={sprint.id}>
+                <line
+                  x1={cx} y1={above ? y + h : y}
+                  x2={cx} y2={above ? TIMELINE_Y - SPRINT_DOT_R : TIMELINE_Y + SPRINT_DOT_R}
+                  stroke="#7c3aed" strokeWidth={2} strokeDasharray="6,4" strokeOpacity={0.7}
+                />
+                {/* Outer glow ring */}
+                <circle cx={cx} cy={TIMELINE_Y} r={SPRINT_DOT_R + 3}
+                  fill="none" stroke="#7c3aed" strokeWidth={1.5} strokeOpacity={0.25} />
+                <circle cx={cx} cy={TIMELINE_Y} r={SPRINT_DOT_R}
+                  fill={dotFill} stroke="#7c3aed" strokeWidth={3.5} />
+                {/* Inner filled circle for sprints */}
+                <circle cx={cx} cy={TIMELINE_Y} r={SPRINT_DOT_R - 5}
+                  fill="#7c3aed" fillOpacity={0.7} />
               </g>
             )
           })}

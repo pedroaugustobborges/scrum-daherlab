@@ -45,29 +45,43 @@ export interface ShapeItem extends BaseItem {
   label: string
 }
 
-export type TimelineElement = TaskItem | TextItem | ShapeItem
+export interface SprintItem extends BaseItem {
+  type: 'sprint'
+  sprintId: string
+  name: string
+  description?: string
+  startDate: string | null
+  endDate: string | null
+  position: TaskPosition
+}
+
+export type TimelineElement = TaskItem | TextItem | ShapeItem | SprintItem
 
 // ---- Discriminators ----
 
-export const isTask  = (i: TimelineElement): i is TaskItem  => i.type === 'task'
-export const isText  = (i: TimelineElement): i is TextItem  => i.type === 'text'
-export const isShape = (i: TimelineElement): i is ShapeItem =>
+export const isTask   = (i: TimelineElement): i is TaskItem   => i.type === 'task'
+export const isText   = (i: TimelineElement): i is TextItem   => i.type === 'text'
+export const isSprint = (i: TimelineElement): i is SprintItem => i.type === 'sprint'
+export const isShape  = (i: TimelineElement): i is ShapeItem  =>
   i.type === 'rect' || i.type === 'circle' || i.type === 'diamond'
 
 // ---- Canvas Constants ----
 
-export const CANVAS_WIDTH          = 4000
-export const CANVAS_HEIGHT         = 860
-export const TIMELINE_Y            = 420
-export const TIMELINE_HEIGHT       = 26
-export const TIMELINE_START_X      = 60
+export const CANVAS_WIDTH           = 4000
+export const CANVAS_HEIGHT          = 860
+export const TIMELINE_Y             = 420
+export const TIMELINE_HEIGHT        = 26
+export const TIMELINE_START_X       = 60
 export const DEFAULT_TIMELINE_END_X = 500    // fallback when project has no tasks
-export const DOT_RADIUS            = 9
-export const TASK_W                = 210
-export const TASK_H                = 130
-export const TASK_SPACING_X        = 270
-export const MIN_ITEM_W            = 120
-export const MIN_ITEM_H            = 80
+export const DOT_RADIUS             = 9
+export const TASK_W                 = 210
+export const TASK_H                 = 130
+export const TASK_SPACING_X         = 270
+export const SPRINT_W               = 270
+export const SPRINT_H               = 168
+export const SPRINT_SPACING_X       = 340
+export const MIN_ITEM_W             = 120
+export const MIN_ITEM_H             = 80
 
 // ---- Status / Priority palettes (shared) ----
 

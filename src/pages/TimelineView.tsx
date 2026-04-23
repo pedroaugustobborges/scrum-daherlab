@@ -5,16 +5,19 @@ import toast from 'react-hot-toast'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useTaskHierarchy } from '@/hooks/useTaskHierarchy'
 import type { HierarchicalTask } from '@/types/hybrid'
+import { supabase } from '@/lib/supabase'
 import {
   TimelineCanvas,
   TimelineToolbar,
   TimelineTaskPanel,
   useTimelineStore,
 } from '@/components/timeline'
-import type { TimelineCanvasHandle, ToolType, TaskItem } from '@/components/timeline'
+import type { TimelineCanvasHandle, ToolType, TaskItem, SprintItem } from '@/components/timeline'
+import type { SprintInfo } from '@/components/timeline/TimelineTaskPanel'
 import {
   TIMELINE_Y, TIMELINE_START_X,
   TASK_W, TASK_H, TASK_SPACING_X,
+  SPRINT_W, SPRINT_H, SPRINT_SPACING_X,
   DEFAULT_TIMELINE_END_X,
 } from '@/components/timeline/types'
 
@@ -28,15 +31,25 @@ function nextTaskPosition(n: number): { x: number; y: number; position: 'above' 
   return { x, y, position }
 }
 
-/**
- * Minimum arrow length needed to cover `totalTasks` task cards.
- * Based on the dot position of the last card plus a trailing margin.
- */
-function requiredArrowEndX(totalTasks: number): number {
-  if (totalTasks === 0) return DEFAULT_TIMELINE_END_X
-  const lastCardX  = TIMELINE_START_X + 80 + (totalTasks - 1) * TASK_SPACING_X
+/** Calculate where to place sprint card N on the canvas.
+ *  Sprints are pushed far from the arrow so they clear the task card zone:
+ *  - Task 'above' cards occupy ~200–330; sprint 'above' cards land at ~27–195 (above that).
+ *  - Task 'below' cards occupy ~490–620; sprint 'below' cards land at ~650–818 (below that).
+ *  This gives a ~225px dashed connector line for visual clarity. */
+function nextSprintPosition(n: number): { x: number; y: number; position: 'above' | 'below' } {
+  const x        = TIMELINE_START_X + 60 + n * SPRINT_SPACING_X
+  const position = n % 2 === 0 ? 'below' : 'above'
+  const y        = position === 'below'
+    ? TIMELINE_Y + 230          // card top at 650, no overlap with task-below zone (490–620)
+    : TIMELINE_Y - SPRINT_H - 225  // card top at 27, card bottom at 195, no overlap with task-above zone (200–330)
+  return { x, y, position }
+}
+
+function requiredArrowEndX(totalItems: number): number {
+  if (totalItems === 0) return DEFAULT_TIMELINE_END_X
+  const lastCardX  = TIMELINE_START_X + 80 + (totalItems - 1) * TASK_SPACING_X
   const lastDotX   = lastCardX + TASK_W / 2
-  return lastDotX + 120   // 120 px trailing margin after the last dot
+  return lastDotX + 120
 }
 
 function buildTaskItem(task: HierarchicalTask, index: number, zBase: number): TaskItem {
@@ -58,6 +71,24 @@ function buildTaskItem(task: HierarchicalTask, index: number, zBase: number): Ta
   }
 }
 
+function buildSprintItem(sprint: SprintInfo, index: number, zBase: number): SprintItem {
+  const { x, y, position } = nextSprintPosition(index)
+  return {
+    id: uid(),
+    type: 'sprint',
+    sprintId: sprint.id,
+    name: sprint.name,
+    description: sprint.description ?? undefined,
+    startDate: sprint.start_date,
+    endDate: sprint.end_date,
+    position,
+    x, y,
+    width: SPRINT_W,
+    height: SPRINT_H,
+    zIndex: zBase + index + 1,
+  }
+}
+
 export default function TimelineView() {
   const { projectId } = useParams<{ projectId: string }>()
   const { isDarkMode } = useTheme()
@@ -68,9 +99,25 @@ export default function TimelineView() {
   const { data: tasks = [], isLoading } = useTaskHierarchy(projectId)
   const store = useTimelineStore(projectId ?? '')
 
-  // ── Auto-populate: add any task that is not yet on canvas and not dismissed ──
-  // Uses stable ref-based helpers (hasTask / isDismissed) so there is no
-  // re-render loop — the effect only re-runs when the project task list changes.
+  // ── Fetch sprints for this project ────────────────────────────────────────
+  const [sprints, setSprints] = useState<SprintInfo[]>([])
+  const [sprintsLoading, setSprintsLoading] = useState(true)
+
+  useEffect(() => {
+    if (!projectId) { setSprintsLoading(false); return }
+    setSprintsLoading(true)
+    supabase
+      .from('sprints')
+      .select('id, name, start_date, end_date, status, created_at')
+      .eq('project_id', projectId)
+      .order('created_at', { ascending: true })
+      .then(({ data, error }) => {
+        if (!error) setSprints((data ?? []) as SprintInfo[])
+        setSprintsLoading(false)
+      })
+  }, [projectId])
+
+  // ── Auto-populate tasks ───────────────────────────────────────────────────
   useEffect(() => {
     if (isLoading || tasks.length === 0) return
 
@@ -79,42 +126,79 @@ export default function TimelineView() {
       .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
     if (missing.length === 0) return
 
-    const baseIndex  = store.taskItems.length
-    const zBase      = store.items.length
-    const newItems   = missing.map((task, i) => buildTaskItem(task, baseIndex + i, zBase))
+    const baseIndex = store.taskItems.length
+    const zBase     = store.items.length
+    const newItems  = missing.map((task, i) => buildTaskItem(task, baseIndex + i, zBase))
     store.batchAddItems(newItems)
 
-    // Grow the arrow to cover all tasks (never shrink — user's drag is preserved)
     const totalTasks = baseIndex + missing.length
     const needed     = requiredArrowEndX(totalTasks)
     if (needed > store.timelineEndX) store.setTimelineEndX(needed)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tasks, isLoading])
-  // ^ intentionally omit `store` — its mutation helpers use refs and are stable
 
-  // ── Manual "add" from the panel (re-adds a dismissed task) ───────────────
+  // ── Auto-populate sprints ─────────────────────────────────────────────────
+  useEffect(() => {
+    if (sprintsLoading || sprints.length === 0) return
+
+    const missing = sprints.filter(
+      s => !store.hasSprint(s.id) && !store.isSprintDismissed(s.id),
+    )
+    if (missing.length === 0) return
+
+    const baseIndex = store.sprintItems.length
+    const zBase     = store.items.length
+    const newItems  = missing.map((sprint, i) => buildSprintItem(sprint, baseIndex + i, zBase))
+    store.batchAddItems(newItems)
+
+    // Grow arrow to cover sprint cards too (sprint x spans can be wider)
+    const maxSprintX = store.sprintItems.length + missing.length
+    const needed = Math.max(
+      requiredArrowEndX(store.taskItems.length),
+      TIMELINE_START_X + 60 + (maxSprintX - 1) * SPRINT_SPACING_X + SPRINT_W + 60,
+    )
+    if (needed > store.timelineEndX) store.setTimelineEndX(needed)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sprints, sprintsLoading])
+
+  // ── Manual add from panel ─────────────────────────────────────────────────
   const addTaskToTimeline = useCallback((task: HierarchicalTask) => {
     if (!projectId) return
     if (store.hasTask(task.id)) {
       toast('Tarefa já está na linha do tempo', { icon: 'ℹ️' })
       return
     }
-    const index    = store.taskItems.length
-    const item     = buildTaskItem(task, index, store.items.length)
+    const index  = store.taskItems.length
+    const item   = buildTaskItem(task, index, store.items.length)
     store.addItem(item)
 
-    // Grow arrow if the new card would fall outside current length
     const needed = requiredArrowEndX(index + 1)
     if (needed > store.timelineEndX) store.setTimelineEndX(needed)
-
     toast.success(`"${task.title}" adicionado à linha do tempo`)
   }, [projectId, store])
 
-  // ── Remove: tasks go to dismissed (won't auto-re-add); shapes/text just delete ──
+  const addSprintToTimeline = useCallback((sprint: SprintInfo) => {
+    if (!projectId) return
+    if (store.hasSprint(sprint.id)) {
+      toast('Sprint já está na linha do tempo', { icon: 'ℹ️' })
+      return
+    }
+    const index = store.sprintItems.length
+    const item  = buildSprintItem(sprint, index, store.items.length)
+    store.addItem(item)
+
+    const needed = TIMELINE_START_X + 60 + index * SPRINT_SPACING_X + SPRINT_W + 60
+    if (needed > store.timelineEndX) store.setTimelineEndX(needed)
+    toast.success(`Sprint "${sprint.name}" adicionado à linha do tempo`)
+  }, [projectId, store])
+
+  // ── Remove items ──────────────────────────────────────────────────────────
   const handleRemoveItem = useCallback((id: string) => {
     const item = store.items.find(i => i.id === id)
     if (item?.type === 'task') {
       store.dismissTask((item as TaskItem).taskId)
+    } else if (item?.type === 'sprint') {
+      store.dismissSprint((item as SprintItem).sprintId)
     } else {
       store.removeItem(id)
     }
@@ -124,23 +208,27 @@ export default function TimelineView() {
   const handleClearAll = useCallback(() => {
     if (store.items.length === 0) return
     store.clearAll()
-    toast.success('Canvas limpo — as tarefas serão recarregadas automaticamente')
+    toast.success('Canvas limpo — os itens serão recarregados automaticamente')
   }, [store])
 
   const handleReset = useCallback(() => {
     store.resetToDefault()
-    if (isLoading || tasks.length === 0) {
+    if ((isLoading || tasks.length === 0) && (sprintsLoading || sprints.length === 0)) {
       toast.success('Canvas restaurado')
       return
     }
-    const sorted = [...tasks].sort(
+    const sortedTasks = [...tasks].sort(
       (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
     )
-    const newItems = sorted.map((task, i) => buildTaskItem(task, i, 0))
-    store.batchAddItems(newItems)
-    store.setTimelineEndX(requiredArrowEndX(newItems.length))
-    toast.success('Canvas restaurado com todas as tarefas')
-  }, [store, tasks, isLoading])
+    const newTaskItems = sortedTasks.map((task, i) => buildTaskItem(task, i, 0))
+
+    const sortedSprints = [...sprints] // already sorted by created_at from DB
+    const newSprintItems = sortedSprints.map((sprint, i) => buildSprintItem(sprint, i, newTaskItems.length))
+
+    store.batchAddItems([...newTaskItems, ...newSprintItems])
+    store.setTimelineEndX(requiredArrowEndX(newTaskItems.length))
+    toast.success('Canvas restaurado com todas as tarefas e sprints')
+  }, [store, tasks, isLoading, sprints, sprintsLoading])
 
   const handleExport = useCallback(() => {
     canvasRef.current?.exportPng()
@@ -182,6 +270,10 @@ export default function TimelineView() {
           isLoading={isLoading}
           onAddTask={addTaskToTimeline}
           hasTask={store.hasTask}
+          sprints={sprints}
+          sprintsLoading={sprintsLoading}
+          onAddSprint={addSprintToTimeline}
+          hasSprint={store.hasSprint}
         />
 
         <TimelineCanvas

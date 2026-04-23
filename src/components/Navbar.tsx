@@ -17,8 +17,6 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
-  Collapse,
-  alpha,
 } from "@mui/material";
 import {
   Dashboard,
@@ -26,18 +24,12 @@ import {
   People,
   Settings,
   Logout,
-  SpaceDashboard,
   MenuBook,
-  Inventory,
   AdminPanelSettings,
   Menu as MenuIcon,
   Close,
-  KeyboardArrowDown,
-  ViewList,
   ViewKanban,
   CalendarMonth,
-  ExpandLess,
-  ExpandMore,
 } from "@mui/icons-material";
 import { useTheme as useMUITheme } from "@mui/material/styles";
 import { useAuth } from "@/contexts/AuthContext";
@@ -45,11 +37,7 @@ import { supabase } from "@/lib/supabase";
 
 export default function Navbar() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [projectsAnchorEl, setProjectsAnchorEl] = useState<null | HTMLElement>(
-    null,
-  );
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [mobileProjectsOpen, setMobileProjectsOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const { user, signOut, isAdmin } = useAuth();
   const muiTheme = useMUITheme();
@@ -111,14 +99,6 @@ export default function Navbar() {
     setAnchorEl(null);
   };
 
-  const handleProjectsMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setProjectsAnchorEl(event.currentTarget);
-  };
-
-  const handleProjectsMenuClose = () => {
-    setProjectsAnchorEl(null);
-  };
-
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -128,13 +108,6 @@ export default function Navbar() {
     }
     handleClose();
   };
-
-  // Projects dropdown items
-  const projectsMenuItems = [
-    { label: "Ver Todos", path: "/projects", icon: <ViewList /> },
-    { label: "Sprints", path: "/sprints", icon: <SpaceDashboard /> },
-    { label: "Backlog", path: "/backlog", icon: <Inventory /> },
-  ];
 
   // Main navigation items
   const menuItems = [
@@ -165,9 +138,7 @@ export default function Navbar() {
       .toUpperCase()
       .slice(0, 2);
   };
-  const isProjectsActive = projectsMenuItems.some(
-    (item) => location.pathname === item.path,
-  );
+  const isProjectsActive = location.pathname === "/projects";
 
   return (
     <AppBar
@@ -252,21 +223,11 @@ export default function Navbar() {
             Painel
           </Button>
 
-          {/* Projetos Dropdown */}
+          {/* Projetos */}
           <Button
             color="inherit"
             startIcon={<Assignment />}
-            endIcon={
-              <KeyboardArrowDown
-                sx={{
-                  transform: Boolean(projectsAnchorEl)
-                    ? "rotate(180deg)"
-                    : "rotate(0deg)",
-                  transition: "transform 0.2s",
-                }}
-              />
-            }
-            onClick={handleProjectsMenuOpen}
+            onClick={() => navigate("/projects")}
             sx={{
               display: { xs: "none", md: "flex" },
               fontWeight: 600,
@@ -291,92 +252,6 @@ export default function Navbar() {
           >
             Projetos
           </Button>
-
-          {/* Projects Dropdown Menu */}
-          <Menu
-            anchorEl={projectsAnchorEl}
-            open={Boolean(projectsAnchorEl)}
-            onClose={handleProjectsMenuClose}
-            PaperProps={{
-              sx: {
-                mt: 1.5,
-                borderRadius: 3,
-                minWidth: 200,
-                boxShadow: isDarkMode
-                  ? "0 10px 40px rgba(0,0,0,0.5)"
-                  : "0 10px 40px rgba(0,0,0,0.15)",
-                border: isDarkMode
-                  ? "1px solid rgba(99, 102, 241, 0.2)"
-                  : "1px solid rgba(99, 102, 241, 0.1)",
-                overflow: "visible",
-                "&:before": {
-                  content: '""',
-                  display: "block",
-                  position: "absolute",
-                  top: 0,
-                  left: 24,
-                  width: 12,
-                  height: 12,
-                  bgcolor: "background.paper",
-                  transform: "translateY(-50%) rotate(45deg)",
-                  borderLeft: isDarkMode
-                    ? "1px solid rgba(99, 102, 241, 0.2)"
-                    : "1px solid rgba(99, 102, 241, 0.1)",
-                  borderTop: isDarkMode
-                    ? "1px solid rgba(99, 102, 241, 0.2)"
-                    : "1px solid rgba(99, 102, 241, 0.1)",
-                },
-              },
-            }}
-            transformOrigin={{ horizontal: "left", vertical: "top" }}
-            anchorOrigin={{ horizontal: "left", vertical: "bottom" }}
-          >
-            {projectsMenuItems.map((item, index) => (
-              <MenuItem
-                key={item.path}
-                onClick={() => {
-                  navigate(item.path);
-                  handleProjectsMenuClose();
-                }}
-                sx={{
-                  py: 1.5,
-                  px: 2,
-                  borderRadius: 2,
-                  mx: 1,
-                  my: index === 0 ? 1 : 0.5,
-                  mb: index === projectsMenuItems.length - 1 ? 1 : 0.5,
-                  backgroundColor: isActive(item.path)
-                    ? alpha("#6366f1", isDarkMode ? 0.2 : 0.1)
-                    : "transparent",
-                  color: isActive(item.path)
-                    ? isDarkMode
-                      ? "#818cf8"
-                      : "#6366f1"
-                    : "inherit",
-                  fontWeight: isActive(item.path) ? 600 : 500,
-                  transition: "all 0.2s",
-                  "&:hover": {
-                    backgroundColor: alpha("#6366f1", isDarkMode ? 0.15 : 0.08),
-                    transform: "translateX(4px)",
-                  },
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    color: isActive(item.path)
-                      ? isDarkMode
-                        ? "#818cf8"
-                        : "#6366f1"
-                      : "inherit",
-                    minWidth: 36,
-                  }}
-                >
-                  {item.icon}
-                </ListItemIcon>
-                {item.label}
-              </MenuItem>
-            ))}
-          </Menu>
 
           {/* Other menu items */}
           {menuItems.slice(1).map((item) => (
@@ -587,10 +462,13 @@ export default function Navbar() {
               </ListItemButton>
             </ListItem>
 
-            {/* Projetos Collapsible */}
-            <ListItem disablePadding sx={{ mb: 0.5 }}>
+            {/* Projetos */}
+            <ListItem disablePadding sx={{ mb: 1 }}>
               <ListItemButton
-                onClick={() => setMobileProjectsOpen(!mobileProjectsOpen)}
+                onClick={() => {
+                  navigate("/projects");
+                  handleDrawerToggle();
+                }}
                 sx={{
                   borderRadius: 2,
                   color: "white",
@@ -611,48 +489,8 @@ export default function Navbar() {
                     fontWeight: isProjectsActive ? 700 : 500,
                   }}
                 />
-                {mobileProjectsOpen ? (
-                  <ExpandLess sx={{ color: "white" }} />
-                ) : (
-                  <ExpandMore sx={{ color: "white" }} />
-                )}
               </ListItemButton>
             </ListItem>
-            <Collapse in={mobileProjectsOpen} timeout="auto" unmountOnExit>
-              <List component="div" disablePadding>
-                {projectsMenuItems.map((item) => (
-                  <ListItem key={item.path} disablePadding sx={{ pl: 2 }}>
-                    <ListItemButton
-                      onClick={() => {
-                        navigate(item.path);
-                        handleDrawerToggle();
-                      }}
-                      sx={{
-                        borderRadius: 2,
-                        color: "white",
-                        backgroundColor: isActive(item.path)
-                          ? "rgba(255,255,255,0.2)"
-                          : "transparent",
-                        "&:hover": {
-                          backgroundColor: "rgba(255,255,255,0.1)",
-                        },
-                      }}
-                    >
-                      <ListItemIcon sx={{ color: "white", minWidth: 36 }}>
-                        {item.icon}
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={item.label}
-                        primaryTypographyProps={{
-                          fontWeight: isActive(item.path) ? 700 : 500,
-                          fontSize: "0.9rem",
-                        }}
-                      />
-                    </ListItemButton>
-                  </ListItem>
-                ))}
-              </List>
-            </Collapse>
 
             {/* Other Menu Items */}
             {menuItems.slice(1).map((item) => (

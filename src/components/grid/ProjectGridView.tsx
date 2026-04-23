@@ -33,6 +33,7 @@ import {
 } from '@mui/icons-material'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
+import { useTaskMilestone } from '@/hooks/useTaskMilestone'
 import {
   useTaskHierarchy,
   buildTaskTree,
@@ -76,6 +77,7 @@ const priorityOptions: { value: TaskPriority; label: string; color: string }[] =
 export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
   const theme = useTheme()
   const { user } = useAuth()
+  const { checkAndNotifyMilestone } = useTaskMilestone()
   const isDarkMode = theme.palette.mode === 'dark'
   const { data: tasks = [], isLoading } = useTaskHierarchy(projectId)
   const createTask = useCreateTask()
@@ -355,10 +357,20 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
       updates.blocked_comment_id = null
     }
 
-    updateTask.mutate({
-      id: task.id,
-      projectId,
-      updates,
+    // Stamp completion time for accurate milestone timing
+    if (newStatus === 'done') {
+      updates.completed_at = new Date().toISOString()
+    } else if (task.status === 'done') {
+      updates.completed_at = null
+    }
+
+    updateTask.mutate({ id: task.id, projectId, updates }, {
+      onSuccess: () => {
+        // Gamification: check milestone when current user's task is marked done
+        if (newStatus === 'done' && task.status !== 'done' && user && task.assigned_to === user.id) {
+          void checkAndNotifyMilestone(user.id)
+        }
+      },
     })
   }
 

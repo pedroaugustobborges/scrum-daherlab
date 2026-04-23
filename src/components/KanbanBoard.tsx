@@ -20,6 +20,7 @@ import toast from 'react-hot-toast'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import confetti from 'canvas-confetti'
+import { useTaskMilestone } from '@/hooks/useTaskMilestone'
 
 interface Sprint {
   id: string
@@ -90,6 +91,7 @@ function DroppableColumn({ id, children }: { id: string; children: React.ReactNo
 export default function KanbanBoard({ stories, onRefresh, onDeleteStory, currentSprintId, isStakeholder = false }: KanbanBoardProps) {
   const theme = useTheme()
   const { user } = useAuth()
+  const { checkAndNotifyMilestone } = useTaskMilestone()
   const isDarkMode = theme.palette.mode === 'dark'
   const [activeId, setActiveId] = useState<string | null>(null)
   const [storiesByStatus, setStoriesByStatus] = useState<Record<string, UserStory[]>>({})
@@ -497,6 +499,13 @@ export default function KanbanBoard({ stories, onRefresh, onDeleteStory, current
         updateData.blocked_comment_id = null
       }
 
+      // Stamp completion time so milestone timing is accurate
+      if (newStatus === 'done') {
+        updateData.completed_at = new Date().toISOString()
+      } else if (story.status === 'done') {
+        updateData.completed_at = null
+      }
+
       const { error } = await supabase.from('tasks').update(updateData).eq('id', storyId)
 
       if (error) throw error
@@ -504,6 +513,8 @@ export default function KanbanBoard({ stories, onRefresh, onDeleteStory, current
       // Celebrate if moved to 'done' column
       if (newStatus === 'done') {
         celebrateCompletion()
+        // Fire-and-forget: check for gamification milestone
+        if (user) void checkAndNotifyMilestone(user.id)
         toast.success('🎉 Parabéns! Tarefa concluída!', {
           duration: 4000,
           icon: '✨',

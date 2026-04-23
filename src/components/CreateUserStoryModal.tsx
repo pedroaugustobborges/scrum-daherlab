@@ -27,6 +27,8 @@ import {
 import toast from "react-hot-toast";
 import Modal from "./Modal";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTaskMilestone } from "@/hooks/useTaskMilestone";
 
 interface CreateUserStoryModalProps {
   open: boolean;
@@ -72,6 +74,8 @@ export default function CreateUserStoryModal({
   sprintId,
   projectId,
 }: CreateUserStoryModalProps) {
+  const { user } = useAuth();
+  const { checkAndNotifyMilestone } = useTaskMilestone();
   const [loading, setLoading] = useState(false);
   const [loadingProfiles, setLoadingProfiles] = useState(false);
   const [loadingTasks, setLoadingTasks] = useState(false);
@@ -221,6 +225,8 @@ export default function CreateUserStoryModal({
           assigned_to: formData.assigned_to || null,
           due_date: formData.due_date || null,
           created_by: user.user?.id,
+          // Stamp completion time if created directly as done
+          completed_at: formData.status === "done" ? new Date().toISOString() : null,
         },
       ]).select().single();
 
@@ -243,6 +249,15 @@ export default function CreateUserStoryModal({
           console.error("Error creating dependencies:", depError);
           toast.error("História criada, mas erro ao criar dependências");
         }
+      }
+
+      // Gamification: task created directly as done and assigned to current user
+      if (
+        formData.status === "done" &&
+        user.user &&
+        formData.assigned_to === user.user.id
+      ) {
+        void checkAndNotifyMilestone(user.user.id);
       }
 
       toast.success(sprintId ? "História de usuário criada com sucesso!" : "Item adicionado ao backlog!");

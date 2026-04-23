@@ -53,6 +53,7 @@ import BlockReasonModal from "./BlockReasonModal";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import confetti from "canvas-confetti";
+import { useTaskMilestone } from "@/hooks/useTaskMilestone";
 
 interface StoryDetailsModalProps {
   open: boolean;
@@ -149,6 +150,7 @@ export default function StoryDetailsModal({
   isStakeholder = false,
 }: StoryDetailsModalProps) {
   const { user } = useAuth();
+  const { checkAndNotifyMilestone } = useTaskMilestone();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -534,12 +536,29 @@ export default function StoryDetailsModal({
           updateData.blocked_comment_id = null;
         }
 
+        // Stamp completion time for accurate milestone timing
+        if (formData.status === "done" && story?.status !== "done") {
+          updateData.completed_at = new Date().toISOString();
+        } else if (story?.status === "done" && formData.status !== "done") {
+          updateData.completed_at = null;
+        }
+
         const { error } = await supabase
           .from("tasks")
           .update(updateData)
           .eq("id", storyId);
 
         if (error) throw error;
+
+        // Gamification: check milestone when current user's task is marked done
+        if (
+          formData.status === "done" &&
+          story?.status !== "done" &&
+          user &&
+          formData.assigned_to === user.id
+        ) {
+          void checkAndNotifyMilestone(user.id);
+        }
       }
 
       toast.success("História atualizada com sucesso!");

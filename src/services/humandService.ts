@@ -8,8 +8,8 @@
  * No React dependencies — pure functions, easy to test and reuse.
  */
 
-const HUMAND_API_URL = import.meta.env.VITE_APP_URL
-  ? `${import.meta.env.VITE_APP_URL}/api/humand-message`
+const HUMAND_API_URL = import.meta.env.DEV
+  ? (import.meta.env.VITE_HUMAND_PROXY_URL || "/api/humand-message")
   : "/api/humand-message";
 
 // ---------------------------------------------------------------------------

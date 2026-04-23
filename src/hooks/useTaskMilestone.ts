@@ -1,15 +1,21 @@
 /**
  * useTaskMilestone
  *
- * Gamification hook: detects when the current user reaches a multiple-of-10
- * task completion milestone and sends a congratulation via Humand.
+ * Gamification hook: sends a Humand congratulation when the current user
+ * reaches a multiple-of-10 task completion milestone.
  *
  * Calling convention:
  *   const { checkAndNotifyMilestone } = useTaskMilestone()
- *   // After marking a task done:
- *   void checkAndNotifyMilestone(userId)
+ *   void checkAndNotifyMilestone(userId)   // fire-and-forget after any task → done
  *
- * The call is fire-and-forget — it never blocks the UI.
+ * Design:
+ *   On every call the hook finds the HIGHEST uncelebrated milestone ≤ the
+ *   user's total done-task count. This means it is self-healing: if a
+ *   milestone was skipped (e.g. the feature wasn't deployed yet), the NEXT
+ *   task completion will catch it automatically — no login, no page refresh.
+ *
+ *   All lower uncelebrated milestones are silently recorded; only the highest
+ *   one gets a Humand message (avoids notification spam on first run).
  */
 
 import { useCallback } from 'react';
@@ -22,18 +28,19 @@ import {
 const MILESTONE_INTERVAL = 10;
 
 // ---------------------------------------------------------------------------
-// Helpers (pure, not exported — keep the public surface small)
+// Module-private helpers (pure)
 // ---------------------------------------------------------------------------
 
-/** Returns the duration in ms between the oldest and newest timestamp in a set. */
+type TaskRow = { completed_at: string | null; updated_at: string | null };
+
+const bestTimestamp = (row: TaskRow) => row.completed_at ?? row.updated_at;
+
 function batchDuration(timestamps: (string | null)[]): number | null {
   const valid = timestamps
     .filter(Boolean)
     .map((t) => new Date(t!).getTime())
     .filter((n) => !isNaN(n));
-
   if (valid.length < 2) return null;
-
   return Math.max(...valid) - Math.min(...valid);
 }
 
@@ -43,14 +50,16 @@ function batchDuration(timestamps: (string | null)[]): number | null {
 
 export function useTaskMilestone() {
   /**
-   * Main entry point. Call right after a task is persisted as "done".
+   * Call right after a task is persisted as "done".
    *
-   * Steps:
-   *  1. Count all tasks assigned to the user that are "done".
-   *  2. If the count is a multiple of MILESTONE_INTERVAL, check whether
-   *     we have already notified for this milestone (idempotency).
-   *  3. Fetch the last 2 × MILESTONE_INTERVAL completed tasks for timing.
-   *  4. Build message, send via Humand, then persist the milestone record.
+   * Algorithm:
+   *  1. Count all done tasks assigned to the user.
+   *  2. Compute the highest milestone ≤ count (floor to nearest 10).
+   *  3. If that milestone is already recorded → nothing to do.
+   *  4. Otherwise find ALL uncelebrated milestones up to that point.
+   *  5. Silently insert every lower missing milestone (no message).
+   *  6. Fetch timing data and send Humand message for the highest one.
+   *  7. Persist the highest milestone record.
    */
   const checkAndNotifyMilestone = useCallback(async (userId: string): Promise<void> => {
     try {
@@ -61,29 +70,47 @@ export function useTaskMilestone() {
         .eq('assigned_to', userId)
         .eq('status', 'done');
 
-      if (countError || count === null) return;
-      if (count === 0 || count % MILESTONE_INTERVAL !== 0) return;
+      if (countError || !count || count < MILESTONE_INTERVAL) return;
 
-      const milestone = count;
+      // ── 2. Highest milestone the user has reached ─────────────────────────
+      const highest = Math.floor(count / MILESTONE_INTERVAL) * MILESTONE_INTERVAL;
 
-      // ── 2. Idempotency check ──────────────────────────────────────────────
-      const { data: existing } = await supabase
+      // ── 3. Fast-path: is the highest already celebrated? ─────────────────
+      const { data: topRecord } = await supabase
         .from('user_task_milestones')
         .select('id')
         .eq('user_id', userId)
-        .eq('milestone', milestone)
+        .eq('milestone', highest)
         .maybeSingle();
 
-      if (existing) return; // already notified
+      if (topRecord) return;
 
-      // ── 3. Fetch user profile (name + Humand external ID) ─────────────────
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('full_name, employee_internal_id')
-        .eq('id', userId)
-        .single();
+      // ── 4. Find every uncelebrated milestone up to `highest` ─────────────
+      const expected: number[] = [];
+      for (let m = MILESTONE_INTERVAL; m <= highest; m += MILESTONE_INTERVAL) {
+        expected.push(m);
+      }
 
-      // ── 4. Timing: fetch last 2×N tasks by completion date ────────────────
+      const { data: existing } = await supabase
+        .from('user_task_milestones')
+        .select('milestone')
+        .eq('user_id', userId)
+        .in('milestone', expected);
+
+      const recorded  = new Set((existing ?? []).map((r) => r.milestone));
+      const missing   = expected.filter((m) => !recorded.has(m));
+
+      if (missing.length === 0) return;
+
+      // ── 5. Silently record all lower missing milestones (no Humand msg) ───
+      const lowerMissing = missing.filter((m) => m < highest);
+      if (lowerMissing.length > 0) {
+        await supabase
+          .from('user_task_milestones')
+          .insert(lowerMissing.map((m) => ({ user_id: userId, milestone: m })));
+      }
+
+      // ── 6. Timing data ────────────────────────────────────────────────────
       const { data: recentTasks } = await supabase
         .from('tasks')
         .select('completed_at, updated_at')
@@ -92,24 +119,28 @@ export function useTaskMilestone() {
         .order('completed_at', { ascending: false, nullsFirst: false })
         .limit(MILESTONE_INTERVAL * 2);
 
-      const getTimestamp = (row: { completed_at: string | null; updated_at: string | null }) =>
-        row.completed_at ?? row.updated_at;
+      const rows         = (recentTasks ?? []) as TaskRow[];
+      const currentBatch = rows.slice(0, MILESTONE_INTERVAL);
+      const prevBatch    = rows.slice(MILESTONE_INTERVAL, MILESTONE_INTERVAL * 2);
 
-      const currentBatch  = (recentTasks ?? []).slice(0, MILESTONE_INTERVAL);
-      const previousBatch = (recentTasks ?? []).slice(MILESTONE_INTERVAL, MILESTONE_INTERVAL * 2);
-
-      const batchDurationMs         = batchDuration(currentBatch.map(getTimestamp));
-      const previousBatchDurationMs = previousBatch.length === MILESTONE_INTERVAL
-        ? batchDuration(previousBatch.map(getTimestamp))
+      const batchDurationMs     = batchDuration(currentBatch.map(bestTimestamp));
+      const prevBatchDurationMs = prevBatch.length === MILESTONE_INTERVAL
+        ? batchDuration(prevBatch.map(bestTimestamp))
         : null;
 
-      // ── 5. Send Humand message ────────────────────────────────────────────
-      const userName = profile?.full_name ?? 'Colaborador';
+      // ── 7. Fetch profile ──────────────────────────────────────────────────
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name, employee_internal_id')
+        .eq('id', userId)
+        .single();
+
+      // ── 8. Send Humand message ────────────────────────────────────────────
       const text = buildMilestoneMessage({
-        milestone,
-        userName,
+        milestone:              highest,
+        userName:               profile?.full_name ?? 'Colaborador',
         batchDurationMs,
-        previousBatchDurationMs,
+        previousBatchDurationMs: prevBatchDurationMs,
       });
 
       const externalId = profile?.employee_internal_id ?? null;
@@ -117,15 +148,14 @@ export function useTaskMilestone() {
         await sendHumandMessage(externalId, text);
       }
 
-      // ── 6. Persist milestone record (prevents re-notification) ───────────
+      // ── 9. Persist the highest milestone (idempotency guard) ─────────────
       await supabase.from('user_task_milestones').insert({
-        user_id:                   userId,
-        milestone,
-        batch_duration_ms:         batchDurationMs,
-        previous_batch_duration_ms: previousBatchDurationMs,
+        user_id:                    userId,
+        milestone:                  highest,
+        batch_duration_ms:          batchDurationMs,
+        previous_batch_duration_ms: prevBatchDurationMs,
       });
     } catch (err) {
-      // Never let gamification errors surface to the user
       console.error('useTaskMilestone error:', err);
     }
   }, []);

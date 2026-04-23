@@ -8,8 +8,10 @@
  * No React dependencies — pure functions, easy to test and reuse.
  */
 
-const HUMAND_API_URL = import.meta.env.DEV
-  ? (import.meta.env.VITE_HUMAND_PROXY_URL || "/api/humand-message")
+// In development Vite serves no serverless functions; skip the call unless
+// VITE_HUMAND_PROXY_URL is explicitly set (e.g. pointing to `vercel dev`).
+const HUMAND_API_URL: string | null = import.meta.env.DEV
+  ? (import.meta.env.VITE_HUMAND_PROXY_URL ?? null)
   : "/api/humand-message";
 
 // ---------------------------------------------------------------------------
@@ -69,17 +71,19 @@ export function buildMilestoneMessage({
     previousBatchDurationMs !== null &&
     batchDurationMs < previousBatchDurationMs;
 
-  const header = `Oiê!! 🎉 Parabéns, ${firstName}! Você concluiu ${milestone} tarefas no Daher Plan!`;
+  const header =
+    `Oiê!! Parabéns, ${firstName}! 🎉 \n` +
+    `Você concluiu ${milestone} tarefas no Daher Plan!`;
 
   if (isFaster) {
     const current = formatDuration(batchDurationMs!);
     const previous = formatDuration(previousBatchDurationMs!);
     return (
       `${header}\n\n` +
-      `🚀 E mais: você está cada vez mais rápido!\n` +
+      `E mais: você está cada vez mais rápido!\n` +
       `  • Bloco anterior de 10 tarefas realizadas foi feito no prazo de: ${previous}\n` +
-      `  • Bloco atual:    ${current}\n\n` +
-      `Continue assim — cada tarefa concluída aproxima o time da entrega! 💪\n\n` +
+      `  • Bloco atual:    ${current} 🚀 \n\n` +
+      `Continue assim — cada tarefa concluída aproxima o time da realização deste projeto! 💪\n\n\n\n` +
       `Obs.: Esta mensagem foi enviada pela assistente Ada (Daher Plan). ` +
       `Não é possível responder à Ada por este canal — para continuar, acesse o Daher Plan.`
     );
@@ -107,6 +111,14 @@ export async function sendHumandMessage(
   userExternalId: string,
   text: string,
 ): Promise<boolean> {
+  if (!HUMAND_API_URL) {
+    console.info(
+      "[dev] Humand message skipped (no proxy URL configured):",
+      text.slice(0, 80),
+    );
+    return true;
+  }
+
   const response = await fetch(HUMAND_API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

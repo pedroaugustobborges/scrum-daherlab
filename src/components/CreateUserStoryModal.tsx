@@ -211,7 +211,7 @@ export default function CreateUserStoryModal({
     setLoading(true);
 
     try {
-      const { data: user } = await supabase.auth.getUser();
+      const { data: authData } = await supabase.auth.getUser();
 
       const { data: newTask, error } = await supabase.from("tasks").insert([
         {
@@ -224,7 +224,7 @@ export default function CreateUserStoryModal({
           project_id: projectId,
           assigned_to: formData.assigned_to || null,
           due_date: formData.due_date || null,
-          created_by: user.user?.id,
+          created_by: authData.user?.id,
           // Stamp completion time if created directly as done
           completed_at: formData.status === "done" ? new Date().toISOString() : null,
         },
@@ -254,10 +254,10 @@ export default function CreateUserStoryModal({
       // Gamification: task created directly as done and assigned to current user
       if (
         formData.status === "done" &&
-        user.user &&
-        formData.assigned_to === user.user.id
+        user &&
+        formData.assigned_to === user.id
       ) {
-        void checkAndNotifyMilestone(user.user.id);
+        void checkAndNotifyMilestone(user.id);
       }
 
       toast.success(sprintId ? "História de usuário criada com sucesso!" : "Item adicionado ao backlog!");

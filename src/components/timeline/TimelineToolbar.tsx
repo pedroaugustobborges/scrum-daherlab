@@ -6,6 +6,7 @@ import {
   RadioButtonUnchecked as CircleIcon,
   Diamond as DiamondIcon,
   DeleteSweep as ClearIcon,
+  RestartAlt as ResetIcon,
   FileDownload as ExportIcon,
   Info as InfoIcon,
 } from '@mui/icons-material'
@@ -33,6 +34,7 @@ interface Props {
   onToolChange: (tool: ToolType) => void
   onColorChange: (color: string) => void
   onClearAll: () => void
+  onReset: () => void
   onExport: () => void
 }
 
@@ -42,6 +44,7 @@ export default function TimelineToolbar({
   onToolChange,
   onColorChange,
   onClearAll,
+  onReset,
   onExport,
 }: Props) {
   return (
@@ -148,10 +151,24 @@ export default function TimelineToolbar({
           sx={{
             width: 36, height: 36, borderRadius: '10px',
             color: '#ef4444',
-            '&:hover': { background: 'rgba(239,68,68,0.08)', borderColor: 'rgba(239,68,68,0.2)' },
+            '&:hover': { background: 'rgba(239,68,68,0.08)' },
           }}
         >
           <ClearIcon />
+        </IconButton>
+      </Tooltip>
+
+      <Tooltip title="Restaurar canvas — recoloca todas as tarefas na ordem original" arrow placement="bottom">
+        <IconButton
+          size="small"
+          onClick={onReset}
+          sx={{
+            width: 36, height: 36, borderRadius: '10px',
+            color: '#f59e0b',
+            '&:hover': { background: 'rgba(245,158,11,0.08)' },
+          }}
+        >
+          <ResetIcon />
         </IconButton>
       </Tooltip>
 

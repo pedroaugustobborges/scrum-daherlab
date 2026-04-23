@@ -131,13 +131,25 @@ export function useTimelineStore(projectId: string) {
     persist(nextItems, nextDismissed, endXRef.current)
   }, [persist])
 
-  /** Clear everything; tasks will auto-populate again on next load. */
+  /** Remove all canvas items but keep dismissed list and arrow length. */
   const clearAll = useCallback(() => {
+    itemsRef.current = []                          // ← eager
+    setItems([])
+    persist([], dismissedRef.current, endXRef.current)
+  }, [persist])
+
+  /**
+   * Full reset: wipe items, dismissed list, and arrow length.
+   * After this the caller should immediately re-populate from project tasks.
+   */
+  const resetToDefault = useCallback(() => {
     itemsRef.current     = []                      // ← eager
     dismissedRef.current = []                      // ← eager
+    endXRef.current      = DEFAULT_TIMELINE_END_X  // ← eager
     setItems([])
     setDismissedTaskIds([])
-    persist([], [], endXRef.current)
+    setTimelineEndXRaw(DEFAULT_TIMELINE_END_X)
+    persist([], [], DEFAULT_TIMELINE_END_X)
   }, [persist])
 
   /** Update the arrow end position. */
@@ -161,7 +173,7 @@ export function useTimelineStore(projectId: string) {
 
   return {
     items, taskItems, timelineEndX,
-    addItem, batchAddItems, updateItem, removeItem, dismissTask, clearAll,
+    addItem, batchAddItems, updateItem, removeItem, dismissTask, clearAll, resetToDefault,
     setTimelineEndX, hasTask, isDismissed,
   }
 }

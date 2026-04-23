@@ -125,6 +125,21 @@ export default function TimelineView() {
     toast.success('Canvas limpo — as tarefas serão recarregadas automaticamente')
   }, [store])
 
+  const handleReset = useCallback(() => {
+    store.resetToDefault()
+    if (isLoading || tasks.length === 0) {
+      toast.success('Canvas restaurado')
+      return
+    }
+    const sorted = [...tasks].sort(
+      (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    )
+    const newItems = sorted.map((task, i) => buildTaskItem(task, i, 0))
+    store.batchAddItems(newItems)
+    store.setTimelineEndX(requiredArrowEndX(newItems.length))
+    toast.success('Canvas restaurado com todas as tarefas')
+  }, [store, tasks, isLoading])
+
   const handleExport = useCallback(() => {
     canvasRef.current?.exportPng()
   }, [])
@@ -155,6 +170,7 @@ export default function TimelineView() {
         onToolChange={setActiveTool}
         onColorChange={setActiveColor}
         onClearAll={handleClearAll}
+        onReset={handleReset}
         onExport={handleExport}
       />
 

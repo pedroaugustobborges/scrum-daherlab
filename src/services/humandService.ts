@@ -80,7 +80,7 @@ export function buildMilestoneMessage({
     const previous = formatDuration(previousBatchDurationMs!);
     return (
       `${header}\n\n` +
-      `E mais: você está cada vez mais rápido!\n` +
+      `E mais: você está cada vez mais veloz!\n` +
       `  • Bloco anterior de 10 tarefas realizadas foi feito no prazo de: ${previous}\n` +
       `  • Bloco atual:    ${current} 🚀 \n\n` +
       `Continue assim — cada tarefa concluída aproxima o time da realização deste projeto! 💪\n\n\n\n` +

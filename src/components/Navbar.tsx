@@ -31,7 +31,6 @@ import {
   ViewKanban,
   CalendarMonth,
 } from "@mui/icons-material";
-import { useTheme as useMUITheme } from "@mui/material/styles";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 
@@ -40,8 +39,6 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const { user, signOut, isAdmin } = useAuth();
-  const muiTheme = useMUITheme();
-  const isDarkMode = muiTheme.palette.mode === "dark";
 
   // Fetch avatar from profiles table
   useEffect(() => {

@@ -10,7 +10,11 @@
       "Bash(git commit -m \"$\\(cat <<''EOF''\nfix: Add Vercel serverless proxy for Ada chatbot \\(CORS fix\\)\n\n- Add /api/ada-chat serverless function to proxy requests to n8n\n- Update AdaChatbot to use local API endpoint\n- Fixes CORS issues when calling n8n from production\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(where node:*)",
+      "Read(//mnt/c/Users/16144-pedro/Documents/python_projects/**)",
+      "Bash(cmd:*)",
+      "Bash(/mnt/c/Windows/System32/cmd.exe /c \"npm run build 2>&1\")"
     ],
     "deny": [],
     "ask": []

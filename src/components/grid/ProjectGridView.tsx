@@ -393,7 +393,6 @@ function SortableTaskRow({
     teamMembers,
     expandedIds,
     onToggleExpand,
-    projectId,
     isDarkMode,
   } = handlers
 

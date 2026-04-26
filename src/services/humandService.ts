@@ -72,7 +72,7 @@ export function buildMilestoneMessage({
     batchDurationMs < previousBatchDurationMs;
 
   const header =
-    `Oiê!! Parabéns, ${firstName}! 🎉 \n` +
+    `Oiê!! ${firstName}, estou passando para te dizer parabéns!! 🎉 \n` +
     `Você concluiu ${milestone} tarefas no Daher Plan!`;
 
   if (isFaster) {
@@ -83,13 +83,13 @@ export function buildMilestoneMessage({
       `E mais: você está cada vez mais veloz!\n` +
       `  • Bloco anterior de 10 tarefas realizadas foi feito no prazo de: ${previous}\n` +
       `  • Bloco atual:    ${current} 🚀 \n\n` +
-      `Continue assim — cada tarefa concluída aproxima você e seus times da realização do propósito de cuidar de vidas! 💪\n\n\n\n`
+      `Continue assim — cada tarefa concluída aproxima você e seus times da realização do propósito de cuidar de vidas! 💪❤️‍🩹\n\n\n\n`
     );
   }
 
   return (
     `${header}\n\n` +
-    `Continue com o ótimo trabalho! O time conta com você para realização de mais um projeto para entregarmos cuidado com maior qualidade e eficiência à população. 🌟\n\n`
+    `Continue com o ótimo trabalho! O time conta com você para realização de mais um projeto para entregarmos cuidado com maior qualidade e eficiência à população. 🏥🌟\n\n`
   );
 }
 

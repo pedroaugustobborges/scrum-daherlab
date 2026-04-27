@@ -89,7 +89,7 @@ export function buildMilestoneMessage({
 
   return (
     `${header}\n\n` +
-    `Continue com o ótimo trabalho! O time conta com você para realização de mais um projeto para entregarmos cuidado com maior qualidade e eficiência à população. 🏥🌟\n\n`
+    `Continue com o ótimo trabalho! O time conta com você para realização de mais um projeto para entregar cuidado com maior qualidade e eficiência à população. 🏥🌟\n\n`
   );
 }
 

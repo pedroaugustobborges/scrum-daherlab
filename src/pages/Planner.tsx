@@ -61,6 +61,7 @@ import Navbar from '@/components/Navbar'
 import StoryDetailsModal from '@/components/StoryDetailsModal'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
+import { useTaskMilestone } from '@/hooks/useTaskMilestone'
 import confetti from 'canvas-confetti'
 
 interface Task {
@@ -459,6 +460,7 @@ function DroppableColumn({ id, children }: { id: string; children: React.ReactNo
 export default function Planner() {
   const navigate = useNavigate()
   const { user } = useAuth()
+  const { checkAndNotifyMilestone } = useTaskMilestone()
   const [loading, setLoading] = useState(true)
   const [tasks, setTasks] = useState<Task[]>([])
   const [filteredTasks, setFilteredTasks] = useState<Task[]>([])
@@ -805,7 +807,11 @@ export default function Planner() {
     }
 
     try {
-      const { error } = await supabase.from('tasks').update({ status: newStatus }).eq('id', taskId)
+      const updateData: Record<string, unknown> = { status: newStatus }
+      if (newStatus === 'done') updateData.completed_at = new Date().toISOString()
+      else if (task.status === 'done') updateData.completed_at = null
+
+      const { error } = await supabase.from('tasks').update(updateData).eq('id', taskId)
 
       if (error) throw error
 
@@ -813,6 +819,7 @@ export default function Planner() {
       setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t)))
 
       if (newStatus === 'done') {
+        if (user && task.assigned_to === user.id) void checkAndNotifyMilestone(user.id)
         confetti({
           particleCount: 100,
           spread: 70,

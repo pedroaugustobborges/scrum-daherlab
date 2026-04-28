@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, memo, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   DndContext,
@@ -119,16 +119,13 @@ type FlatTaskItem = HierarchicalTask & {
 type RenderItem = FlatTaskItem | SprintSectionItem;
 
 interface TaskHandlers {
-  editingCell: { id: string; field: string } | null;
-  editValue: string;
-  setEditValue: (v: string) => void;
-  onStartEdit: (id: string, field: string, value: string) => void;
-  onSaveEdit: () => Promise<void>;
-  onKeyDown: (e: React.KeyboardEvent) => void;
+  // Editing is now local to each row — only the save callback lives here
+  onSaveEdit: (id: string, field: string, value: string) => Promise<void>;
   onStatusChange: (task: HierarchicalTask, status: TaskStatus) => void;
   onUpdate: (id: string, updates: Record<string, unknown>) => void;
   teamMembers: TeamMember[];
-  expandedIds: Set<string>;
+  // Pre-computed per-task completion %; avoids recursive traversal inside every row render
+  percentMap: ReadonlyMap<string, number>;
   onToggleExpand: (id: string) => void;
   projectId: string;
   isDarkMode: boolean;
@@ -220,41 +217,128 @@ function CannotCompleteDialog({
   onClose: () => void;
 }) {
   return (
-    <Dialog open={!!taskTitle} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle
+    <Dialog
+      open={!!taskTitle}
+      onClose={onClose}
+      maxWidth="xs"
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: 3,
+          overflow: "hidden",
+          boxShadow: "0 24px 64px rgba(99, 102, 241, 0.18)",
+        },
+      }}
+    >
+      {/* Gradient header strip */}
+      <Box
         sx={{
-          fontWeight: 700,
-          fontSize: "1rem",
+          background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+          pt: 3.5,
+          pb: 2.5,
+          px: 3,
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
-          gap: 1,
-          pb: 1,
+          gap: 1.5,
         }}
       >
-        Não é possível concluir a tarefa
-      </DialogTitle>
-      <DialogContent>
-        <DialogContentText sx={{ fontSize: "0.875rem", lineHeight: 1.6 }}>
-          A tarefa <strong>&ldquo;{taskTitle}&rdquo;</strong> não pode ser
-          marcada como <strong>Concluída</strong> pois nenhuma de suas
-          subtarefas possui o status <strong>Concluído</strong>.
+        {/* Ada avatar */}
+        <Box
+          sx={{
+            width: 72,
+            height: 72,
+            borderRadius: "50%",
+            border: "3px solid rgba(255,255,255,0.4)",
+            overflow: "hidden",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
+            bgcolor: "white",
+            flexShrink: 0,
+          }}
+        >
+          <Box
+            component="video"
+            src="/ADA.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        </Box>
+
+        <Box sx={{ textAlign: "center" }}>
+          <Typography
+            sx={{
+              color: "white",
+              fontWeight: 700,
+              fontSize: "0.7rem",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              opacity: 0.85,
+              mb: 0.25,
+            }}
+          >
+            Ada · Assistente
+          </Typography>
+          <Typography
+            sx={{
+              color: "white",
+              fontWeight: 700,
+              fontSize: "1.05rem",
+              lineHeight: 1.3,
+            }}
+          >
+            Atenção antes de concluir!
+          </Typography>
+        </Box>
+      </Box>
+
+      {/* Body */}
+      <DialogContent sx={{ px: 3.5, pt: 2.5, pb: 1 }}>
+        <Typography
+          sx={{
+            fontSize: "0.875rem",
+            lineHeight: 1.75,
+            color: "text.primary",
+            textAlign: "justify",
+          }}
+        >
+          Oi! Percebi que você está tentando concluir a tarefa{" "}
+          <Box component="span" sx={{ fontWeight: 700, color: "primary.main" }}>
+            &ldquo;{taskTitle}&rdquo;
+          </Box>
+          , mas nenhuma das suas subtarefas foi concluída ainda. 😊
           <br />
           <br />
-          Conclua ao menos uma subtarefa antes de concluir a tarefa pai.
-        </DialogContentText>
+          Conclua pelo menos uma subtarefa antes de marcar a tarefa mãe como{" "}
+          <Box component="span" sx={{ fontWeight: 600 }}>
+            Concluída
+          </Box>
+          .
+        </Typography>
       </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 2 }}>
+
+      <DialogActions sx={{ px: 3.5, pb: 3, pt: 1.5, justifyContent: "center" }}>
         <Button
           onClick={onClose}
           variant="contained"
-          size="small"
+          size="medium"
           sx={{
             background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
             textTransform: "none",
-            fontWeight: 600,
+            fontWeight: 700,
+            fontSize: "0.875rem",
+            borderRadius: 2,
+            px: 4,
+            py: 1,
+            boxShadow: "0 4px 14px rgba(99, 102, 241, 0.4)",
+            "&:hover": {
+              boxShadow: "0 6px 20px rgba(99, 102, 241, 0.5)",
+            },
           }}
         >
-          Entendido
+          Entendido!
         </Button>
       </DialogActions>
     </Dialog>
@@ -470,6 +554,7 @@ function DroppableSprintHeaderRow({
 interface SortableTaskRowProps {
   task: FlatTaskItem;
   selected: boolean;
+  isExpanded: boolean;
   onToggleSelect: (id: string) => void;
   activeDragId: string | null;
   handlers: TaskHandlers;
@@ -477,9 +562,10 @@ interface SortableTaskRowProps {
   onDelete: (id: string) => void;
 }
 
-function SortableTaskRow({
+const SortableTaskRow = memo(function SortableTaskRow({
   task,
   selected,
+  isExpanded,
   onToggleSelect,
   activeDragId,
   handlers,
@@ -496,27 +582,46 @@ function SortableTaskRow({
   } = useSortable({ id: task.id });
 
   const {
-    editingCell,
-    editValue,
-    setEditValue,
-    onStartEdit,
     onSaveEdit,
-    onKeyDown,
     onStatusChange,
     onUpdate,
     teamMembers,
-    expandedIds,
+    percentMap,
     onToggleExpand,
     isDarkMode,
   } = handlers;
+
+  // ── Local editing state (isolates keystrokes to this row only) ──────────────
+  const [editing, setEditing] = useState<{
+    field: string;
+    value: string;
+  } | null>(null);
+
+  const handleStartEdit = useCallback((field: string, initialValue: string) => {
+    setEditing({ field, value: initialValue });
+  }, []);
+
+  const handleCommit = useCallback(async () => {
+    if (!editing) return;
+    const { field, value } = editing;
+    setEditing(null);
+    await onSaveEdit(task.id, field, value);
+  }, [editing, onSaveEdit, task.id]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter") void handleCommit();
+      else if (e.key === "Escape") setEditing(null);
+    },
+    [handleCommit],
+  );
 
   const isDropTarget = isOver && !isDragging;
   const isBeingDragged = activeDragId === task.id;
 
   // ── renderCell ──────────────────────────────────────────────────────────────
   const renderCell = (field: string) => {
-    const isEditing =
-      editingCell?.id === task.id && editingCell?.field === field;
+    const isEditing = editing?.field === field;
 
     switch (field) {
       case "title":
@@ -533,7 +638,7 @@ function SortableTaskRow({
                 }}
                 sx={{ mr: 0.5 }}
               >
-                {expandedIds.has(task.id) ? (
+                {isExpanded ? (
                   <ExpandMore fontSize="small" />
                 ) : (
                   <ChevronRight fontSize="small" />
@@ -551,10 +656,12 @@ function SortableTaskRow({
               <TextField
                 autoFocus
                 size="small"
-                value={editValue}
-                onChange={(e) => setEditValue(e.target.value)}
-                onBlur={onSaveEdit}
-                onKeyDown={onKeyDown}
+                value={editing!.value}
+                onChange={(e) =>
+                  setEditing({ field: "title", value: e.target.value })
+                }
+                onBlur={() => void handleCommit()}
+                onKeyDown={handleKeyDown}
                 sx={{ flex: 1 }}
               />
             ) : (
@@ -566,7 +673,7 @@ function SortableTaskRow({
                   flex: 1,
                   "&:hover": { bgcolor: "rgba(99, 102, 241, 0.05)" },
                 }}
-                onClick={() => onStartEdit(task.id, "title", task.title)}
+                onClick={() => handleStartEdit("title", task.title)}
               >
                 {task.title}
               </Typography>
@@ -627,7 +734,7 @@ function SortableTaskRow({
         );
 
       case "percent_complete": {
-        const pct = computePercent(task);
+        const pct = percentMap.get(task.id) ?? 0;
         const progressBar = (
           <LinearProgress
             variant="determinate"
@@ -677,10 +784,12 @@ function SortableTaskRow({
             autoFocus
             size="small"
             type="number"
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            onBlur={onSaveEdit}
-            onKeyDown={onKeyDown}
+            value={editing!.value}
+            onChange={(e) =>
+              setEditing({ field: "percent_complete", value: e.target.value })
+            }
+            onBlur={() => void handleCommit()}
+            onKeyDown={handleKeyDown}
             inputProps={{ min: 0, max: 100 }}
             sx={{ width: 80 }}
           />
@@ -693,9 +802,7 @@ function SortableTaskRow({
               minWidth: 100,
               cursor: "text",
             }}
-            onClick={() =>
-              onStartEdit(task.id, "percent_complete", String(pct))
-            }
+            onClick={() => handleStartEdit("percent_complete", String(pct))}
           >
             {progressBar}
             <Typography
@@ -724,10 +831,10 @@ function SortableTaskRow({
             autoFocus
             size="small"
             type="date"
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            onBlur={onSaveEdit}
-            onKeyDown={onKeyDown}
+            value={editing!.value}
+            onChange={(e) => setEditing({ field, value: e.target.value })}
+            onBlur={() => void handleCommit()}
+            onKeyDown={handleKeyDown}
             InputLabelProps={{ shrink: true }}
             sx={{ width: 140 }}
           />
@@ -739,11 +846,7 @@ function SortableTaskRow({
               "&:hover": { bgcolor: "rgba(99, 102, 241, 0.05)" },
             }}
             onClick={() =>
-              onStartEdit(
-                task.id,
-                field,
-                dateValue ? dateValue.split("T")[0] : "",
-              )
+              handleStartEdit(field, dateValue ? dateValue.split("T")[0] : "")
             }
           >
             {formatDate(dateValue)}
@@ -774,10 +877,12 @@ function SortableTaskRow({
             autoFocus
             size="small"
             type="number"
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            onBlur={onSaveEdit}
-            onKeyDown={onKeyDown}
+            value={editing!.value}
+            onChange={(e) =>
+              setEditing({ field: "planned_duration", value: e.target.value })
+            }
+            onBlur={() => void handleCommit()}
+            onKeyDown={handleKeyDown}
             inputProps={{ min: 0 }}
             sx={{ width: 80 }}
           />
@@ -789,7 +894,7 @@ function SortableTaskRow({
               "&:hover": { bgcolor: "rgba(99, 102, 241, 0.05)" },
             }}
             onClick={() =>
-              onStartEdit(task.id, "planned_duration", String(dur || ""))
+              handleStartEdit("planned_duration", String(dur || ""))
             }
           >
             {dur ? `${dur}d` : "-"}
@@ -966,7 +1071,7 @@ function SortableTaskRow({
       </TableCell>
     </TableRow>
   );
-}
+});
 
 // ─── ProjectGridView (main) ───────────────────────────────────────────────────
 
@@ -978,6 +1083,9 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
   const isDarkMode = theme.palette.mode === "dark";
 
   const { data: tasks = [], isLoading } = useTaskHierarchy(projectId);
+  // Stable ref so callbacks can read the latest tasks without being in their dep array
+  const tasksRef = useRef(tasks);
+  tasksRef.current = tasks;
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
@@ -1046,11 +1154,6 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
   // ── UI state ─────────────────────────────────────────────────────────────────
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [editingCell, setEditingCell] = useState<{
-    id: string;
-    field: string;
-  } | null>(null);
-  const [editValue, setEditValue] = useState<string>("");
   const [blockReasonModalOpen, setBlockReasonModalOpen] = useState(false);
   const [pendingBlockTask, setPendingBlockTask] = useState<{
     id: string;
@@ -1070,6 +1173,19 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
 
   // ── Tree / grouped list ───────────────────────────────────────────────────────
   const taskTree = useMemo(() => buildTaskTree(tasks), [tasks]);
+
+  // Pre-compute completion % for every task once per tree change (O(n) walk)
+  const percentMap = useMemo(() => {
+    const map = new Map<string, number>();
+    function walk(nodes: HierarchicalTask[]) {
+      for (const node of nodes) {
+        map.set(node.id, computePercent(node));
+        if (node.children?.length) walk(node.children);
+      }
+    }
+    walk(taskTree);
+    return map;
+  }, [taskTree]);
 
   const groupedRenderList = useMemo((): RenderItem[] => {
     if (sprints.length === 0) {
@@ -1144,15 +1260,7 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
     else setSelectedIds(new Set(visibleTaskItems.map((t) => t.id)));
   }, [visibleTaskItems, selectedIds]);
 
-  // ── Cell editing ──────────────────────────────────────────────────────────────
-  const handleStartEdit = useCallback(
-    (id: string, field: string, value: string) => {
-      setEditingCell({ id, field });
-      setEditValue(value);
-    },
-    [],
-  );
-
+  // ── Cell editing helpers (pure, no closure over state) ───────────────────────
   const calcDuration = (start: string | null, end: string | null) => {
     if (!start || !end) return null;
     const [sy, sm, sd] = start.split("T")[0].split("-").map(Number);
@@ -1170,115 +1278,102 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
     return date.toISOString().split("T")[0];
   };
 
-  const handleSaveEdit = useCallback(async () => {
-    if (!editingCell) return;
-    const { id, field } = editingCell;
-    const task = tasks.find((t) => t.id === id);
-    if (!task) return;
+  // ── Cell editing save (new signature: receives id+field+value from row) ────────
+  const handleSaveEdit = useCallback(
+    async (id: string, field: string, value: string) => {
+      const task = tasksRef.current.find((t) => t.id === id);
+      if (!task) return;
 
-    let updateValue: unknown = editValue;
-    const extra: Record<string, unknown> = {};
+      let updateValue: unknown = value;
+      const extra: Record<string, unknown> = {};
 
-    if (field === "percent_complete") {
-      updateValue = Math.min(100, Math.max(0, parseInt(editValue) || 0));
-      const newPct = updateValue as number;
-      // Bidirectional sync for leaf tasks only (parent % is computed, not stored)
-      const isLeaf = !tasks.some((t) => t.parent_task_id === task.id);
-      if (isLeaf) {
-        if (newPct === 100 && task.status !== "done") {
-          extra.status = "done";
-          extra.completed_at = new Date().toISOString();
-        } else if (newPct < 100 && task.status === "done") {
-          extra.status = "in-progress";
-          extra.completed_at = null;
+      if (field === "percent_complete") {
+        updateValue = Math.min(100, Math.max(0, parseInt(value) || 0));
+        const newPct = updateValue as number;
+        const isLeaf = !tasksRef.current.some(
+          (t) => t.parent_task_id === task.id,
+        );
+        if (isLeaf) {
+          if (newPct === 100 && task.status !== "done") {
+            extra.status = "done";
+            extra.completed_at = new Date().toISOString();
+          } else if (newPct < 100 && task.status === "done") {
+            extra.status = "in-progress";
+            extra.completed_at = null;
+          }
         }
+      } else if (["planned_duration", "story_points"].includes(field)) {
+        updateValue = parseInt(value) || 0;
       }
-    } else if (["planned_duration", "story_points"].includes(field)) {
-      updateValue = parseInt(editValue) || 0;
-    }
-    if (field === "start_date" && editValue) {
-      if (task.end_date)
-        extra.planned_duration = calcDuration(editValue, task.end_date);
-      else if (task.planned_duration)
-        extra.end_date = calcEndDate(editValue, task.planned_duration);
-    }
-    if (field === "end_date" && editValue && task.start_date) {
-      extra.planned_duration = calcDuration(task.start_date, editValue);
-    }
-    if (field === "planned_duration" && updateValue && task.start_date) {
-      extra.end_date = calcEndDate(
-        task.start_date.split("T")[0],
-        updateValue as number,
-      );
-    }
-
-    await updateTask.mutateAsync({
-      id,
-      projectId,
-      updates: { [field]: updateValue, ...extra },
-    });
-    setEditingCell(null);
-    setEditValue("");
-
-    // Milestone check when a leaf task reaches 100% and auto-transitions to done
-    if (
-      field === "percent_complete" &&
-      extra.status === "done" &&
-      user &&
-      task.assigned_to === user.id
-    ) {
-      void checkAndNotifyMilestone(user.id);
-    }
-
-    // Propagate percent_complete up the ancestor chain.
-    // Blocked siblings are excluded from each parent's average.
-    if (field === "percent_complete" && task.parent_task_id) {
-      let workingTasks = tasks.map((t) =>
-        t.id === id ? { ...t, percent_complete: updateValue as number } : t,
-      );
-      let childId = id;
-
-      while (true) {
-        const child = workingTasks.find((t) => t.id === childId);
-        if (!child?.parent_task_id) break;
-
-        const parentId = child.parent_task_id;
-        const activeChildren = workingTasks.filter(
-          (t) => t.parent_task_id === parentId && t.status !== "blocked",
+      if (field === "start_date" && value) {
+        if (task.end_date)
+          extra.planned_duration = calcDuration(value, task.end_date);
+        else if (task.planned_duration)
+          extra.end_date = calcEndDate(value, task.planned_duration);
+      }
+      if (field === "end_date" && value && task.start_date) {
+        extra.planned_duration = calcDuration(task.start_date, value);
+      }
+      if (field === "planned_duration" && updateValue && task.start_date) {
+        extra.end_date = calcEndDate(
+          task.start_date.split("T")[0],
+          updateValue as number,
         );
-        if (activeChildren.length === 0) break;
-
-        const avg = Math.round(
-          activeChildren.reduce(
-            (sum, c) => sum + (c.percent_complete || 0),
-            0,
-          ) / activeChildren.length,
-        );
-        await supabase
-          .from("tasks")
-          .update({ percent_complete: avg })
-          .eq("id", parentId);
-        workingTasks = workingTasks.map((t) =>
-          t.id === parentId ? { ...t, percent_complete: avg } : t,
-        );
-        childId = parentId;
       }
 
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.tasks.hierarchy(projectId),
+      await updateTask.mutateAsync({
+        id,
+        projectId,
+        updates: { [field]: updateValue, ...extra },
       });
-    }
-  }, [editingCell, editValue, tasks, updateTask, projectId, queryClient, user, checkAndNotifyMilestone]);
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === "Enter") handleSaveEdit();
-      else if (e.key === "Escape") {
-        setEditingCell(null);
-        setEditValue("");
+      if (
+        field === "percent_complete" &&
+        extra.status === "done" &&
+        user &&
+        task.assigned_to === user.id
+      ) {
+        void checkAndNotifyMilestone(user.id);
+      }
+
+      if (field === "percent_complete" && task.parent_task_id) {
+        let workingTasks = tasksRef.current.map((t) =>
+          t.id === id ? { ...t, percent_complete: updateValue as number } : t,
+        );
+        let childId = id;
+
+        while (true) {
+          const child = workingTasks.find((t) => t.id === childId);
+          if (!child?.parent_task_id) break;
+
+          const parentId = child.parent_task_id;
+          const activeChildren = workingTasks.filter(
+            (t) => t.parent_task_id === parentId && t.status !== "blocked",
+          );
+          if (activeChildren.length === 0) break;
+
+          const avg = Math.round(
+            activeChildren.reduce(
+              (sum, c) => sum + (c.percent_complete || 0),
+              0,
+            ) / activeChildren.length,
+          );
+          await supabase
+            .from("tasks")
+            .update({ percent_complete: avg })
+            .eq("id", parentId);
+          workingTasks = workingTasks.map((t) =>
+            t.id === parentId ? { ...t, percent_complete: avg } : t,
+          );
+          childId = parentId;
+        }
+
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.tasks.hierarchy(projectId),
+        });
       }
     },
-    [handleSaveEdit],
+    [updateTask, projectId, user, checkAndNotifyMilestone, queryClient],
   );
 
   // ── Task CRUD ─────────────────────────────────────────────────────────────────
@@ -1398,12 +1493,14 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
         return;
       }
 
-      const isParent = tasks.some((t) => t.parent_task_id === task.id);
+      const isParent = tasksRef.current.some(
+        (t) => t.parent_task_id === task.id,
+      );
 
       // Mother task: must have at least one direct child with status "done"
       // before it can be marked as "Concluído"
       if (isParent && newStatus === "done") {
-        const hasChildDone = tasks.some(
+        const hasChildDone = tasksRef.current.some(
           (t) => t.parent_task_id === task.id && t.status === "done",
         );
         if (!hasChildDone) {
@@ -1442,7 +1539,7 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
             !isParent && newStatus === "done"
               ? 100
               : task.percent_complete || 0;
-          let workingTasks = tasks.map((t) =>
+          let workingTasks = tasksRef.current.map((t) =>
             t.id === task.id
               ? { ...t, status: newStatus, percent_complete: newPct }
               : t,
@@ -1483,7 +1580,7 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
         // mutation onError already shows a toast
       }
     },
-    [updateTask, projectId, user, checkAndNotifyMilestone, tasks, queryClient],
+    [updateTask, projectId, user, checkAndNotifyMilestone, queryClient],
   );
 
   const handleBlockConfirm = useCallback(
@@ -1673,32 +1770,23 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
   // ── Handlers bundle (passed to SortableTaskRow) ──────────────────────────────
   const taskHandlers: TaskHandlers = useMemo(
     () => ({
-      editingCell,
-      editValue,
-      setEditValue,
-      onStartEdit: handleStartEdit,
       onSaveEdit: handleSaveEdit,
-      onKeyDown: handleKeyDown,
       onStatusChange: handleStatusChange,
       onUpdate: (id: string, updates: Record<string, unknown>) =>
         updateTask.mutate({ id, projectId, updates }),
       teamMembers,
-      expandedIds,
+      percentMap,
       onToggleExpand: toggleExpand,
       projectId,
       isDarkMode,
     }),
     [
-      editingCell,
-      editValue,
-      handleStartEdit,
       handleSaveEdit,
-      handleKeyDown,
       handleStatusChange,
       updateTask,
       projectId,
       teamMembers,
-      expandedIds,
+      percentMap,
       toggleExpand,
       isDarkMode,
     ],
@@ -1876,6 +1964,7 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
                         key={task.id}
                         task={task}
                         selected={selectedIds.has(task.id)}
+                        isExpanded={expandedIds.has(task.id)}
                         onToggleSelect={toggleSelect}
                         activeDragId={activeDragId}
                         handlers={taskHandlers}

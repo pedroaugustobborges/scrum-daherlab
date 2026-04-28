@@ -202,10 +202,63 @@ function computePercent(task: HierarchicalTask): number {
   if (!task.children || task.children.length === 0) {
     return task.percent_complete || 0;
   }
+  // Blocked children are excluded from the average (they are on hold)
+  const active = task.children.filter((c) => c.status !== "blocked");
+  if (active.length === 0) return task.percent_complete || 0;
   const avg =
-    task.children.reduce((sum, c) => sum + computePercent(c), 0) /
-    task.children.length;
+    active.reduce((sum, c) => sum + computePercent(c), 0) / active.length;
   return Math.round(avg);
+}
+
+// ─── CannotCompleteDialog ─────────────────────────────────────────────────────
+
+function CannotCompleteDialog({
+  taskTitle,
+  onClose,
+}: {
+  taskTitle: string | null;
+  onClose: () => void;
+}) {
+  return (
+    <Dialog open={!!taskTitle} onClose={onClose} maxWidth="xs" fullWidth>
+      <DialogTitle
+        sx={{
+          fontWeight: 700,
+          fontSize: "1rem",
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          pb: 1,
+        }}
+      >
+        Não é possível concluir a tarefa
+      </DialogTitle>
+      <DialogContent>
+        <DialogContentText sx={{ fontSize: "0.875rem", lineHeight: 1.6 }}>
+          A tarefa <strong>&ldquo;{taskTitle}&rdquo;</strong> não pode ser
+          marcada como <strong>Concluída</strong> pois nenhuma de suas
+          subtarefas possui o status <strong>Concluído</strong>.
+          <br />
+          <br />
+          Conclua ao menos uma subtarefa antes de concluir a tarefa pai.
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions sx={{ px: 3, pb: 2 }}>
+        <Button
+          onClick={onClose}
+          variant="contained"
+          size="small"
+          sx={{
+            background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+            textTransform: "none",
+            fontWeight: 600,
+          }}
+        >
+          Entendido
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
 }
 
 // ─── ConfirmMoveDialog ────────────────────────────────────────────────────────
@@ -1003,6 +1056,9 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
     id: string;
     title: string;
   } | null>(null);
+  const [noChildDoneTask, setNoChildDoneTask] = useState<{
+    title: string;
+  } | null>(null);
 
   // ── Drag state ────────────────────────────────────────────────────────────────
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
@@ -1125,6 +1181,18 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
 
     if (field === "percent_complete") {
       updateValue = Math.min(100, Math.max(0, parseInt(editValue) || 0));
+      const newPct = updateValue as number;
+      // Bidirectional sync for leaf tasks only (parent % is computed, not stored)
+      const isLeaf = !tasks.some((t) => t.parent_task_id === task.id);
+      if (isLeaf) {
+        if (newPct === 100 && task.status !== "done") {
+          extra.status = "done";
+          extra.completed_at = new Date().toISOString();
+        } else if (newPct < 100 && task.status === "done") {
+          extra.status = "in-progress";
+          extra.completed_at = null;
+        }
+      }
     } else if (["planned_duration", "story_points"].includes(field)) {
       updateValue = parseInt(editValue) || 0;
     }
@@ -1152,8 +1220,18 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
     setEditingCell(null);
     setEditValue("");
 
-    // Propagate percent_complete up the ancestor chain so all parent rows
-    // stored in the DB stay in sync with the computed UI value.
+    // Milestone check when a leaf task reaches 100% and auto-transitions to done
+    if (
+      field === "percent_complete" &&
+      extra.status === "done" &&
+      user &&
+      task.assigned_to === user.id
+    ) {
+      void checkAndNotifyMilestone(user.id);
+    }
+
+    // Propagate percent_complete up the ancestor chain.
+    // Blocked siblings are excluded from each parent's average.
     if (field === "percent_complete" && task.parent_task_id) {
       let workingTasks = tasks.map((t) =>
         t.id === id ? { ...t, percent_complete: updateValue as number } : t,
@@ -1165,14 +1243,16 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
         if (!child?.parent_task_id) break;
 
         const parentId = child.parent_task_id;
-        const siblings = workingTasks.filter(
-          (t) => t.parent_task_id === parentId,
+        const activeChildren = workingTasks.filter(
+          (t) => t.parent_task_id === parentId && t.status !== "blocked",
         );
-        if (siblings.length === 0) break;
+        if (activeChildren.length === 0) break;
 
         const avg = Math.round(
-          siblings.reduce((sum, c) => sum + (c.percent_complete || 0), 0) /
-            siblings.length,
+          activeChildren.reduce(
+            (sum, c) => sum + (c.percent_complete || 0),
+            0,
+          ) / activeChildren.length,
         );
         await supabase
           .from("tasks")
@@ -1188,7 +1268,7 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
         queryKey: queryKeys.tasks.hierarchy(projectId),
       });
     }
-  }, [editingCell, editValue, tasks, updateTask, projectId, queryClient]);
+  }, [editingCell, editValue, tasks, updateTask, projectId, queryClient, user, checkAndNotifyMilestone]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -1311,35 +1391,99 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
 
   // ── Status / blocking ────────────────────────────────────────────────────────
   const handleStatusChange = useCallback(
-    (task: HierarchicalTask, newStatus: TaskStatus) => {
+    async (task: HierarchicalTask, newStatus: TaskStatus) => {
       if (newStatus === "blocked" && task.status !== "blocked") {
         setPendingBlockTask({ id: task.id, title: task.title });
         setBlockReasonModalOpen(true);
         return;
       }
+
+      const isParent = tasks.some((t) => t.parent_task_id === task.id);
+
+      // Mother task: must have at least one direct child with status "done"
+      // before it can be marked as "Concluído"
+      if (isParent && newStatus === "done") {
+        const hasChildDone = tasks.some(
+          (t) => t.parent_task_id === task.id && t.status === "done",
+        );
+        if (!hasChildDone) {
+          setNoChildDoneTask({ title: task.title });
+          return;
+        }
+      }
+
       const updates: Record<string, unknown> = { status: newStatus };
       if (task.status === "blocked" && newStatus !== "blocked")
         updates.blocked_comment_id = null;
-      if (newStatus === "done") updates.completed_at = new Date().toISOString();
-      else if (task.status === "done") updates.completed_at = null;
+      if (newStatus === "done") {
+        updates.completed_at = new Date().toISOString();
+        // Sync percent to 100 for leaf tasks (parent % is always computed)
+        if (!isParent) updates.percent_complete = 100;
+      } else if (task.status === "done") {
+        updates.completed_at = null;
+      }
 
-      updateTask.mutate(
-        { id: task.id, projectId, updates },
-        {
-          onSuccess: () => {
-            if (
-              newStatus === "done" &&
-              task.status !== "done" &&
-              user &&
-              task.assigned_to === user.id
-            ) {
-              void checkAndNotifyMilestone(user.id);
-            }
-          },
-        },
-      );
+      try {
+        await updateTask.mutateAsync({ id: task.id, projectId, updates });
+
+        if (
+          newStatus === "done" &&
+          task.status !== "done" &&
+          user &&
+          task.assigned_to === user.id
+        ) {
+          void checkAndNotifyMilestone(user.id);
+        }
+
+        // Propagate the changed task's effective percent up to its parent(s).
+        // This also handles blocked-status changes, which alter the active pool.
+        if (task.parent_task_id) {
+          const newPct =
+            !isParent && newStatus === "done"
+              ? 100
+              : task.percent_complete || 0;
+          let workingTasks = tasks.map((t) =>
+            t.id === task.id
+              ? { ...t, status: newStatus, percent_complete: newPct }
+              : t,
+          );
+          let childId = task.id;
+
+          while (true) {
+            const child = workingTasks.find((t) => t.id === childId);
+            if (!child?.parent_task_id) break;
+
+            const parentId = child.parent_task_id;
+            const activeChildren = workingTasks.filter(
+              (t) => t.parent_task_id === parentId && t.status !== "blocked",
+            );
+            if (activeChildren.length === 0) break;
+
+            const avg = Math.round(
+              activeChildren.reduce(
+                (sum, c) => sum + (c.percent_complete || 0),
+                0,
+              ) / activeChildren.length,
+            );
+            await supabase
+              .from("tasks")
+              .update({ percent_complete: avg })
+              .eq("id", parentId);
+            workingTasks = workingTasks.map((t) =>
+              t.id === parentId ? { ...t, percent_complete: avg } : t,
+            );
+            childId = parentId;
+          }
+
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.tasks.hierarchy(projectId),
+          });
+        }
+      } catch {
+        // mutation onError already shows a toast
+      }
     },
-    [updateTask, projectId, user, checkAndNotifyMilestone],
+    [updateTask, projectId, user, checkAndNotifyMilestone, tasks, queryClient],
   );
 
   const handleBlockConfirm = useCallback(
@@ -1797,6 +1941,12 @@ export default function ProjectGridView({ projectId }: ProjectGridViewProps) {
       <ConfirmMoveDialog
         state={confirmMove}
         onClose={() => setConfirmMove(null)}
+      />
+
+      {/* Cannot-complete dialog: shown when a mother task has no done children */}
+      <CannotCompleteDialog
+        taskTitle={noChildDoneTask?.title ?? null}
+        onClose={() => setNoChildDoneTask(null)}
       />
 
       {/* Block reason modal */}

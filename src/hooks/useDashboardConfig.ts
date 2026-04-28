@@ -2,8 +2,24 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/queryClient'
 import { useAuth } from '@/contexts/AuthContext'
-import { DashboardConfig, DEFAULT_DASHBOARD_CONFIG, WidgetConfig } from '@/types'
+import { DashboardConfig, DEFAULT_DASHBOARD_CONFIG, WidgetConfig, WidgetType } from '@/types'
 import toast from 'react-hot-toast'
+
+/**
+ * Renames obsolete widget types from old dashboard configs so users' visibility /
+ * order preferences are preserved when a widget is renamed between releases.
+ */
+const WIDGET_TYPE_MIGRATIONS: Record<string, WidgetType> = {
+  actionItems: 'actionLatency',
+}
+
+function migrateStoredConfig(raw: DashboardConfig): DashboardConfig {
+  const migratedWidgets = (raw.widgets ?? []).map((w) => {
+    const newType = WIDGET_TYPE_MIGRATIONS[w.type as string]
+    return newType ? { ...w, type: newType } : w
+  })
+  return { ...raw, widgets: migratedWidgets }
+}
 
 /**
  * Hook for fetching and updating dashboard configuration
@@ -37,7 +53,7 @@ export function useDashboardConfig() {
       // Return stored config or default if null/empty
       if (data?.dashboard_config && typeof data.dashboard_config === 'object') {
         // Validate and merge with defaults to ensure all widget types exist
-        const storedConfig = data.dashboard_config as DashboardConfig
+        const storedConfig = migrateStoredConfig(data.dashboard_config as DashboardConfig)
         const mergedWidgets = DEFAULT_DASHBOARD_CONFIG.widgets.map((defaultWidget) => {
           const storedWidget = storedConfig.widgets?.find((w) => w.type === defaultWidget.type)
           return storedWidget || defaultWidget

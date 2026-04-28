@@ -39,7 +39,7 @@ import { useTheme as useMUITheme } from "@mui/material/styles";
 import Navbar from "@/components/Navbar";
 import ActiveProjectsWidget from "@/components/ActiveProjectsWidget";
 import ActiveSprintsWidget from "@/components/ActiveSprintsWidget";
-import ActionItemsWidget from "@/components/ActionItemsWidget";
+import ActionLatencyWidget from "@/components/ActionLatencyWidget";
 import {
   WidgetCustomizationModal,
   TeamMemberDetailModal,
@@ -889,8 +889,8 @@ export default function Dashboard() {
         return <ActiveProjectsWidget teamId={selectedTeamId} strategicFilter={selectedStrategic} />;
       case "activeSprints":
         return <ActiveSprintsWidget teamId={selectedTeamId} strategicFilter={selectedStrategic} />;
-      case "actionItems":
-        return <ActionItemsWidget teamId={selectedTeamId} strategicFilter={selectedStrategic} />;
+      case "actionLatency":
+        return <ActionLatencyWidget teamId={selectedTeamId} strategicFilter={selectedStrategic} />;
       default:
         break;
     }

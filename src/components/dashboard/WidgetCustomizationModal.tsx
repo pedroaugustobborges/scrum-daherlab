@@ -15,7 +15,7 @@ import {
   Close,
   Assignment,
   SpaceDashboard,
-  CheckCircle,
+  HourglassEmpty,
   TrendingUp,
   PieChart,
   History,
@@ -54,7 +54,7 @@ interface WidgetCustomizationModalProps {
 const WIDGET_ICONS: Record<WidgetType, React.ReactNode> = {
   activeProjects: <Assignment sx={{ fontSize: 20, color: '#1e40af' }} />,
   activeSprints: <SpaceDashboard sx={{ fontSize: 20, color: '#0891b2' }} />,
-  actionItems: <CheckCircle sx={{ fontSize: 20, color: '#059669' }} />,
+  actionLatency: <HourglassEmpty sx={{ fontSize: 20, color: '#f97316' }} />,
   activityOverview: <TrendingUp sx={{ fontSize: 20, color: '#6366f1' }} />,
   taskDistribution: <PieChart sx={{ fontSize: 20, color: '#8b5cf6' }} />,
   recentActivity: <History sx={{ fontSize: 20, color: '#6366f1' }} />,

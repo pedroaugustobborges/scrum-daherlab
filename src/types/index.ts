@@ -59,7 +59,7 @@ export interface Task {
 export type WidgetType =
   | 'activeProjects'
   | 'activeSprints'
-  | 'actionItems'
+  | 'actionLatency'
   | 'activityOverview'
   | 'taskDistribution'
   | 'recentActivity'
@@ -82,7 +82,7 @@ export const DEFAULT_DASHBOARD_CONFIG: DashboardConfig = {
   widgets: [
     { id: '1', type: 'activeProjects', visible: true, order: 0 },
     { id: '2', type: 'activeSprints', visible: true, order: 1 },
-    { id: '3', type: 'actionItems', visible: true, order: 2 },
+    { id: '3', type: 'actionLatency', visible: true, order: 2 },
     { id: '4', type: 'productivityTrend', visible: true, order: 3 },
     { id: '5', type: 'teamWorkload', visible: true, order: 4 },
     { id: '6', type: 'activityOverview', visible: true, order: 5 },
@@ -95,7 +95,7 @@ export const DEFAULT_DASHBOARD_CONFIG: DashboardConfig = {
 export const WIDGET_LABELS: Record<WidgetType, string> = {
   activeProjects: 'Projetos Ativos',
   activeSprints: 'Sprints Ativos',
-  actionItems: 'Ações Pendentes',
+  actionLatency: 'Latência de Ações',
   activityOverview: 'Visão Geral',
   taskDistribution: 'Status das Tarefas',
   recentActivity: 'Atividade Recente',

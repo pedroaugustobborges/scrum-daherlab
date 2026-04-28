@@ -28,6 +28,14 @@ import {
 const MILESTONE_INTERVAL = 10;
 
 // ---------------------------------------------------------------------------
+// In-flight guard — module-level so it is shared across every mounted view.
+// JS is single-threaded: has() + add() is an atomic check-and-set, so this
+// reliably prevents concurrent calls (Grid + Kanban + Planner all mounted)
+// from each running the full flow before the DB insert completes.
+// ---------------------------------------------------------------------------
+const inFlight = new Set<string>();
+
+// ---------------------------------------------------------------------------
 // Module-private helpers (pure)
 // ---------------------------------------------------------------------------
 
@@ -62,6 +70,9 @@ export function useTaskMilestone() {
    *  7. Persist the highest milestone record.
    */
   const checkAndNotifyMilestone = useCallback(async (userId: string): Promise<void> => {
+    // Skip if another call for this user is already in progress
+    if (inFlight.has(userId)) return;
+    inFlight.add(userId);
     try {
       // ── 1. Count done tasks ───────────────────────────────────────────────
       const { count, error: countError } = await supabase
@@ -157,6 +168,8 @@ export function useTaskMilestone() {
       });
     } catch (err) {
       console.error('useTaskMilestone error:', err);
+    } finally {
+      inFlight.delete(userId);
     }
   }, []);
 

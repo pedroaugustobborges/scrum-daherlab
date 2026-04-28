@@ -49,12 +49,6 @@ function latestTimestamp(
   return Math.max(...candidates);
 }
 
-function daysSince(isoTs: string | null): number {
-  if (!isoTs) return -1;
-  const ms = Date.now() - new Date(isoTs).getTime();
-  return Math.max(0, Math.floor(ms / 86_400_000));
-}
-
 function latencyChip(days: number): {
   label: string;
   bgcolor: string;

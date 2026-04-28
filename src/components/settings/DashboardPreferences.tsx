@@ -9,7 +9,7 @@ import {
   Dashboard,
   Assignment,
   SpaceDashboard,
-  CheckCircle,
+  HourglassEmpty,
   TrendingUp,
   PieChart,
   History,
@@ -24,7 +24,7 @@ import { WidgetType, WIDGET_LABELS } from '@/types'
 const WIDGET_ICONS: Record<WidgetType, React.ReactNode> = {
   activeProjects: <Assignment sx={{ fontSize: 18 }} />,
   activeSprints: <SpaceDashboard sx={{ fontSize: 18 }} />,
-  actionItems: <CheckCircle sx={{ fontSize: 18 }} />,
+  actionLatency: <HourglassEmpty sx={{ fontSize: 18 }} />,
   activityOverview: <TrendingUp sx={{ fontSize: 18 }} />,
   taskDistribution: <PieChart sx={{ fontSize: 18 }} />,
   recentActivity: <History sx={{ fontSize: 18 }} />,

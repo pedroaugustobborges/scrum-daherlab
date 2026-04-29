@@ -1868,15 +1868,44 @@ export default function Dashboard() {
         {/* Clean Header Section */}
         <Box
           sx={{
-            display: "flex",
-            justifyContent: "center",
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr auto", md: "1fr auto 1fr" },
+            gridTemplateAreas: {
+              xs: '"heading settings" "filters filters"',
+              md: '"filters heading settings"',
+            },
             alignItems: "center",
-            position: "relative",
             mb: 4,
-            textAlign: "center",
+            gap: { xs: 1.5, md: 0 },
           }}
         >
-          <Box>
+          {/* Filters — left on desktop, below heading on mobile */}
+          <Box
+            sx={{
+              gridArea: "filters",
+              display: "flex",
+              gap: 1,
+              alignItems: "center",
+              justifyContent: { xs: "center", md: "flex-start" },
+              flexWrap: "wrap",
+            }}
+          >
+            <TeamFilter
+              value={selectedTeamId}
+              onChange={(id) => {
+                setSelectedTeamId(id);
+                setActivitiesPage(1);
+                setTeamWorkloadPage(1);
+              }}
+            />
+            <StrategicFilter
+              value={selectedStrategic}
+              onChange={setSelectedStrategic}
+            />
+          </Box>
+
+          {/* Heading — always centered */}
+          <Box sx={{ gridArea: "heading", textAlign: "center" }}>
             <Typography
               variant="h4"
               fontWeight={700}
@@ -1906,36 +1935,28 @@ export default function Dashboard() {
             </Typography>
           </Box>
 
-          {/* Filters — top left */}
-          <Box sx={{ position: "absolute", left: 0, display: "flex", gap: 1, alignItems: "center" }}>
-            <TeamFilter
-              value={selectedTeamId}
-              onChange={(id) => {
-                setSelectedTeamId(id);
-                setActivitiesPage(1);
-                setTeamWorkloadPage(1);
-              }}
-            />
-            <StrategicFilter
-              value={selectedStrategic}
-              onChange={setSelectedStrategic}
-            />
-          </Box>
-
-          <IconButton
-            onClick={() => setCustomizeModalOpen(true)}
+          {/* Settings — right on all screens */}
+          <Box
             sx={{
-              position: "absolute",
-              right: 0,
-              bgcolor: "rgba(99, 102, 241, 0.08)",
-              color: "#6366f1",
-              "&:hover": {
-                bgcolor: "rgba(99, 102, 241, 0.15)",
-              },
+              gridArea: "settings",
+              display: "flex",
+              justifyContent: "flex-end",
+              alignItems: "center",
             }}
           >
-            <Settings fontSize="small" />
-          </IconButton>
+            <IconButton
+              onClick={() => setCustomizeModalOpen(true)}
+              sx={{
+                bgcolor: "rgba(99, 102, 241, 0.08)",
+                color: "#6366f1",
+                "&:hover": {
+                  bgcolor: "rgba(99, 102, 241, 0.15)",
+                },
+              }}
+            >
+              <Settings fontSize="small" />
+            </IconButton>
+          </Box>
         </Box>
 
         {/* All Widgets - Rendered in user's chosen order */}

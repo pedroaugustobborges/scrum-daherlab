@@ -42,6 +42,7 @@ import {
   Edit,
   Folder,
   Download,
+  Insights,
   Search,
   FilterList,
   Clear,
@@ -121,7 +122,7 @@ export default function Projects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [projectTeams, setProjectTeams] = useState<Record<string, string[]>>(
-    {}
+    {},
   );
   const [loading, setLoading] = useState(true);
   const [exportLoading, setExportLoading] = useState(false);
@@ -239,7 +240,7 @@ export default function Projects() {
       if (filters.teams.length > 0) {
         const projectTeamIds = projectTeams[project.id] || [];
         const hasMatchingTeam = filters.teams.some((teamId) =>
-          projectTeamIds.includes(teamId)
+          projectTeamIds.includes(teamId),
         );
         if (!hasMatchingTeam) {
           return false;
@@ -274,7 +275,7 @@ export default function Projects() {
 
   const handleViewModeChange = (
     _event: React.MouseEvent<HTMLElement>,
-    newMode: "card" | "list" | null
+    newMode: "card" | "list" | null,
   ) => {
     if (newMode !== null) {
       setViewMode(newMode);
@@ -285,7 +286,7 @@ export default function Projects() {
 
   const handlePageChange = (
     _event: React.ChangeEvent<unknown>,
-    page: number
+    page: number,
   ) => {
     setCurrentPage(page);
   };
@@ -1090,6 +1091,31 @@ export default function Projects() {
                               {formatDate(project.end_date)}
                             </Typography>
                           </Box>
+
+                          <Box sx={{ flex: 1 }}>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 0.5,
+                                mb: 0.5,
+                              }}
+                            >
+                              <Insights
+                                sx={{ fontSize: 14, color: "text.secondary" }}
+                              />
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                fontWeight={600}
+                              >
+                                Estratégico
+                              </Typography>
+                            </Box>
+                            <Typography variant="body2" fontWeight={600}>
+                              {project.strategic_planning ? "Sim" : "Não"}
+                            </Typography>
+                          </Box>
                         </Box>
                       </CardContent>
                     </Card>
@@ -1160,6 +1186,17 @@ export default function Projects() {
                         Data de Término
                       </TableCell>
                       <TableCell
+                        sx={{
+                          fontWeight: 700,
+                          color: "#6366f1",
+                          fontSize: "0.875rem",
+                          py: 2,
+                          display: { xs: "none", md: "table-cell" },
+                        }}
+                      >
+                        Plan. Estratégico
+                      </TableCell>
+                      <TableCell
                         align="right"
                         sx={{
                           fontWeight: 700,
@@ -1214,8 +1251,7 @@ export default function Projects() {
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center",
-                                boxShadow:
-                                  "0 4px 8px rgba(99, 102, 241, 0.25)",
+                                boxShadow: "0 4px 8px rgba(99, 102, 241, 0.25)",
                                 flexShrink: 0,
                               }}
                             >
@@ -1316,6 +1352,42 @@ export default function Projects() {
                             </Typography>
                           </Box>
                         </TableCell>
+                        <TableCell
+                          sx={{
+                            py: 2.5,
+                            display: { xs: "none", md: "table-cell" },
+                          }}
+                        >
+                          <Chip
+                            label={project.strategic_planning ? "Sim" : "Não"}
+                            size="small"
+                            icon={
+                              project.strategic_planning ? (
+                                <Insights
+                                  sx={{ fontSize: "14px !important" }}
+                                />
+                              ) : undefined
+                            }
+                            sx={{
+                              fontWeight: 700,
+                              fontSize: "0.75rem",
+                              ...(project.strategic_planning
+                                ? {
+                                    bgcolor: "rgba(16, 185, 129, 0.1)",
+                                    color: "#059669",
+                                    border:
+                                      "1px solid rgba(16, 185, 129, 0.25)",
+                                    "& .MuiChip-icon": { color: "#059669" },
+                                  }
+                                : {
+                                    bgcolor: "rgba(107, 114, 128, 0.08)",
+                                    color: "text.disabled",
+                                    border:
+                                      "1px solid rgba(107, 114, 128, 0.15)",
+                                  }),
+                            }}
+                          />
+                        </TableCell>
                         <TableCell align="right" sx={{ py: 2.5 }}>
                           <Box
                             sx={{
@@ -1338,9 +1410,7 @@ export default function Projects() {
                                   },
                                 }}
                               >
-                                <Edit
-                                  sx={{ color: "#6366f1", fontSize: 18 }}
-                                />
+                                <Edit sx={{ color: "#6366f1", fontSize: 18 }} />
                               </IconButton>
                             </Tooltip>
                             <Tooltip title="Excluir Projeto">

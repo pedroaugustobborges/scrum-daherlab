@@ -164,6 +164,61 @@ const INLINE_WIDGET_TYPES: WidgetType[] = [
 // Widget grid sizes - widgets that take half width on large screens
 const LARGE_WIDGETS: WidgetType[] = ["productivityTrend", "teamWorkload"];
 
+/**
+ * Maps a completion percentage (0-100) to a continuous HSL color
+ * that flows smoothly from red (0%) through amber/yellow to green (100%).
+ * Every single percentage point produces a distinct, perceptibly different hue.
+ */
+// Piecewise-linear color stops for the team workload bar.
+// Each entry: [progressPct, lightShade, richShade, textColor]
+const PROGRESS_COLOR_STOPS: Array<[number, string, string, string]> = [
+  [0,   "#fca5a5", "#ef4444", "#dc2626"],
+  [30,  "#fdba74", "#f97316", "#ea580c"],
+  [55,  "#fcd34d", "#f59e0b", "#d97706"],
+  [75,  "#86efac", "#22c55e", "#16a34a"],
+  [100, "#6ee7b7", "#10b981", "#059669"],
+];
+
+function hexToRgb(hex: string): [number, number, number] {
+  return [
+    parseInt(hex.slice(1, 3), 16),
+    parseInt(hex.slice(3, 5), 16),
+    parseInt(hex.slice(5, 7), 16),
+  ];
+}
+
+function lerpHex(a: string, b: string, t: number): string {
+  const [ar, ag, ab] = hexToRgb(a);
+  const [br, bg, bb] = hexToRgb(b);
+  return `rgb(${Math.round(ar + (br - ar) * t)},${Math.round(ag + (bg - ag) * t)},${Math.round(ab + (bb - ab) * t)})`;
+}
+
+function getProgressStyle(progress: number): { gradient: string; color: string } {
+  const p = Math.max(0, Math.min(100, progress));
+  const stops = PROGRESS_COLOR_STOPS;
+
+  let lo = stops[0], hi = stops[stops.length - 1];
+  for (let i = 0; i < stops.length - 1; i++) {
+    if (p >= stops[i][0] && p <= stops[i + 1][0]) {
+      lo = stops[i];
+      hi = stops[i + 1];
+      break;
+    }
+  }
+
+  const range = hi[0] - lo[0];
+  const t = range === 0 ? 0 : (p - lo[0]) / range;
+
+  const light = lerpHex(lo[1], hi[1], t);
+  const rich  = lerpHex(lo[2], hi[2], t);
+  const text  = lerpHex(lo[3], hi[3], t);
+
+  return {
+    gradient: `linear-gradient(90deg, ${light} 0%, ${rich} 100%)`,
+    color: text,
+  };
+}
+
 export default function Dashboard() {
   const { user } = useAuth();
   const { dashboardConfig } = useDashboardConfig();
@@ -1234,35 +1289,44 @@ export default function Dashboard() {
                             tarefas
                           </Typography>
                         </Box>
-                        <LinearProgress
-                          variant="determinate"
-                          value={progress}
+                        {/* Custom glossy progress bar */}
+                        <Box
                           sx={{
+                            position: "relative",
                             height: 8,
                             borderRadius: 4,
-                            bgcolor: "rgba(124, 58, 237, 0.1)",
-                            "& .MuiLinearProgress-bar": {
-                              borderRadius: 4,
-                              bgcolor:
-                                progress >= 75
-                                  ? "#10b981"
-                                  : progress >= 50
-                                    ? "#f59e0b"
-                                    : "#7c3aed",
-                            },
+                            bgcolor: "rgba(0,0,0,0.07)",
+                            overflow: "hidden",
                           }}
-                        />
+                        >
+                          <Box
+                            sx={{
+                              position: "absolute",
+                              inset: 0,
+                              right: "auto",
+                              width: `${progress}%`,
+                              borderRadius: 4,
+                              background: getProgressStyle(progress).gradient,
+                              transition:
+                                "width 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
+                              "&::after": {
+                                content: '""',
+                                position: "absolute",
+                                inset: 0,
+                                borderRadius: "inherit",
+                                background:
+                                  "linear-gradient(to bottom, rgba(255,255,255,0.30) 0%, transparent 55%)",
+                                pointerEvents: "none",
+                              },
+                            }}
+                          />
+                        </Box>
                       </Box>
                       <Typography
                         variant="caption"
                         fontWeight={700}
                         sx={{
-                          color:
-                            progress >= 75
-                              ? "#10b981"
-                              : progress >= 50
-                                ? "#f59e0b"
-                                : "#7c3aed",
+                          color: getProgressStyle(progress).color,
                           minWidth: 36,
                           textAlign: "right",
                         }}

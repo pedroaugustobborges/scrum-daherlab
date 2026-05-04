@@ -31,6 +31,7 @@ import {
   Image as ImageIcon,
   Insights,
 } from "@mui/icons-material";
+import { OnHoldReasonField } from "@/components/ui";
 import toast from "react-hot-toast";
 import Modal from "./Modal";
 import { supabase } from "@/lib/supabase";
@@ -74,6 +75,7 @@ export default function CreateProjectModal({
     start_date: "",
     end_date: "",
     strategic_planning: null as boolean | null,
+    on_hold_reason: "",
   });
 
   // Image upload state
@@ -277,6 +279,11 @@ export default function CreateProjectModal({
       return;
     }
 
+    if (formData.status === "on-hold" && !formData.on_hold_reason.trim()) {
+      toast.error("Informe o motivo para criar o projeto em espera");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -292,6 +299,7 @@ export default function CreateProjectModal({
             end_date: formData.end_date || null,
             created_by: user?.id,
             strategic_planning: formData.strategic_planning,
+            on_hold_reason: formData.status === "on-hold" ? formData.on_hold_reason.trim() : null,
           },
         ])
         .select("id")
@@ -363,6 +371,7 @@ export default function CreateProjectModal({
       start_date: "",
       end_date: "",
       strategic_planning: null,
+      on_hold_reason: "",
     });
     setSelectedTeams([]);
     handleRemoveImage();
@@ -792,6 +801,12 @@ export default function CreateProjectModal({
                 </MenuItem>
               ))}
             </TextField>
+
+            <OnHoldReasonField
+              visible={formData.status === "on-hold"}
+              value={formData.on_hold_reason}
+              onChange={(v) => handleChange("on_hold_reason", v)}
+            />
           </Box>
 
           {/* Team Selection */}

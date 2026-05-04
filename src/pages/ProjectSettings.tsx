@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -20,7 +20,7 @@ import {
   Alert,
   Chip,
   Grid,
-} from '@mui/material'
+} from "@mui/material";
 import {
   ViewKanban,
   List,
@@ -37,136 +37,160 @@ import {
   Refresh,
   Warning,
   CheckCircle,
-} from '@mui/icons-material'
-import { useNavigate } from 'react-router-dom'
-import toast from 'react-hot-toast'
-import { useProjectContext } from './ProjectDetail'
-import { useUpdateProjectConfig, useCreateProjectConfig } from '@/hooks/useProjectConfig'
-import { supabase } from '@/lib/supabase'
-import DeleteProjectModal from '@/components/DeleteProjectModal'
-import type { ProjectConfiguration, GanttZoomLevel, Methodology } from '@/types/hybrid'
+} from "@mui/icons-material";
+import { OnHoldReasonField } from "@/components/ui";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { useProjectContext } from "./ProjectDetail";
+import {
+  useUpdateProjectConfig,
+  useCreateProjectConfig,
+} from "@/hooks/useProjectConfig";
+import { supabase } from "@/lib/supabase";
+import DeleteProjectModal from "@/components/DeleteProjectModal";
+import {
+  notifyProjectOnHold,
+  notifyProjectReactivated,
+} from "@/services/humandService";
+import type {
+  ProjectConfiguration,
+  GanttZoomLevel,
+  Methodology,
+} from "@/types/hybrid";
 
 interface ModuleOption {
-  key: keyof Pick<ProjectConfiguration,
-    'module_kanban' | 'module_backlog' | 'module_sprints' |
-    'module_gantt' | 'module_wbs' | 'module_grid_view' |
-    'module_calendar' | 'module_timeline'
-  >
-  label: string
-  description: string
-  icon: React.ReactNode
-  category: 'agile' | 'predictive' | 'shared'
-  color: string
+  key: keyof Pick<
+    ProjectConfiguration,
+    | "module_kanban"
+    | "module_backlog"
+    | "module_sprints"
+    | "module_gantt"
+    | "module_wbs"
+    | "module_grid_view"
+    | "module_calendar"
+    | "module_timeline"
+  >;
+  label: string;
+  description: string;
+  icon: React.ReactNode;
+  category: "agile" | "predictive" | "shared";
+  color: string;
 }
 
 const modules: ModuleOption[] = [
   {
-    key: 'module_kanban',
-    label: 'Kanban Board',
-    description: 'Visualize o fluxo de trabalho com colunas drag-and-drop',
+    key: "module_kanban",
+    label: "Kanban Board",
+    description: "Visualize o fluxo de trabalho com colunas drag-and-drop",
     icon: <ViewKanban />,
-    category: 'agile',
-    color: '#6366f1',
+    category: "agile",
+    color: "#6366f1",
   },
   {
-    key: 'module_backlog',
-    label: 'Product Backlog',
-    description: 'Gerencie e priorize itens do backlog do produto',
+    key: "module_backlog",
+    label: "Product Backlog",
+    description: "Gerencie e priorize itens do backlog do produto",
     icon: <List />,
-    category: 'agile',
-    color: '#6366f1',
+    category: "agile",
+    color: "#6366f1",
   },
   {
-    key: 'module_sprints',
-    label: 'Sprints',
-    description: 'Organize o trabalho em iterações com burndown e velocity',
+    key: "module_sprints",
+    label: "Sprints",
+    description: "Organize o trabalho em iterações com burndown e velocity",
     icon: <Speed />,
-    category: 'agile',
-    color: '#6366f1',
+    category: "agile",
+    color: "#6366f1",
   },
   {
-    key: 'module_gantt',
-    label: 'Gráfico de Gantt',
-    description: 'Visualize cronograma com dependências e caminho crítico',
+    key: "module_gantt",
+    label: "Gráfico de Gantt",
+    description: "Visualize cronograma com dependências e caminho crítico",
     icon: <Timeline />,
-    category: 'predictive',
-    color: '#10b981',
+    category: "predictive",
+    color: "#10b981",
   },
   {
-    key: 'module_wbs',
-    label: 'WBS (Estrutura Analítica)',
-    description: 'Diagrama hierárquico de decomposição do trabalho',
+    key: "module_wbs",
+    label: "WBS (Estrutura Analítica)",
+    description: "Diagrama hierárquico de decomposição do trabalho",
     icon: <AccountTree />,
-    category: 'predictive',
-    color: '#10b981',
+    category: "predictive",
+    color: "#10b981",
   },
   {
-    key: 'module_grid_view',
-    label: 'Visão em Grade',
-    description: 'Lista hierárquica de tarefas estilo MS Project',
+    key: "module_grid_view",
+    label: "Visão em Grade",
+    description: "Lista hierárquica de tarefas estilo MS Project",
     icon: <TableChart />,
-    category: 'predictive',
-    color: '#10b981',
+    category: "predictive",
+    color: "#10b981",
   },
   {
-    key: 'module_calendar',
-    label: 'Calendário',
-    description: 'Visualize tarefas e marcos em formato de calendário',
+    key: "module_calendar",
+    label: "Calendário",
+    description: "Visualize tarefas e marcos em formato de calendário",
     icon: <CalendarMonth />,
-    category: 'shared',
-    color: '#f59e0b',
+    category: "shared",
+    color: "#f59e0b",
   },
   {
-    key: 'module_timeline',
-    label: 'Linha do Tempo',
-    description: 'Visão temporal horizontal de eventos e entregas',
+    key: "module_timeline",
+    label: "Linha do Tempo",
+    description: "Visão temporal horizontal de eventos e entregas",
     icon: <LinearScale />,
-    category: 'shared',
-    color: '#f59e0b',
+    category: "shared",
+    color: "#f59e0b",
   },
-]
+];
 
 const categoryLabels = {
-  agile: { label: 'Módulos Ágeis', color: '#6366f1' },
-  predictive: { label: 'Módulos Preditivos', color: '#10b981' },
-  shared: { label: 'Módulos Compartilhados', color: '#f59e0b' },
-}
+  agile: { label: "Módulos Ágeis", color: "#6366f1" },
+  predictive: { label: "Módulos Preditivos", color: "#10b981" },
+  shared: { label: "Módulos Compartilhados", color: "#f59e0b" },
+};
 
-const methodologyInfo: Record<Methodology, {
-  label: string
-  description: string
-  color: string
-  modules: string[]
-}> = {
+const methodologyInfo: Record<
+  Methodology,
+  {
+    label: string;
+    description: string;
+    color: string;
+    modules: string[];
+  }
+> = {
   agile: {
-    label: 'Ágil',
-    description: 'Sprints, Kanban, Backlog - Ideal para projetos iterativos e adaptativos',
-    color: '#6366f1',
-    modules: ['Kanban', 'Backlog', 'Sprints'],
+    label: "Ágil",
+    description:
+      "Sprints, Kanban, Backlog - Ideal para projetos iterativos e adaptativos",
+    color: "#6366f1",
+    modules: ["Kanban", "Backlog", "Sprints"],
   },
   predictive: {
-    label: 'Preditivo',
-    description: 'Gantt, WBS, Caminho Crítico - Ideal para projetos com escopo bem definido',
-    color: '#10b981',
-    modules: ['Gantt', 'WBS', 'Grade'],
+    label: "Preditivo",
+    description:
+      "Gantt, WBS, Caminho Crítico - Ideal para projetos com escopo bem definido",
+    color: "#10b981",
+    modules: ["Gantt", "WBS", "Grade"],
   },
   hybrid: {
-    label: 'Híbrido',
-    description: 'Combine Ágil + Preditivo - Flexibilidade total para qualquer projeto',
-    color: '#f59e0b',
-    modules: ['Todos os módulos'],
+    label: "Híbrido",
+    description:
+      "Combine Ágil + Preditivo - Flexibilidade total para qualquer projeto",
+    color: "#f59e0b",
+    modules: ["Todos os módulos"],
   },
-}
+};
 
 const statusOptions = [
-  { value: 'active', label: 'Ativo', color: '#10b981' },
-  { value: 'on-hold', label: 'Em Espera', color: '#f59e0b' },
-  { value: 'completed', label: 'Concluído', color: '#6366f1' },
-]
+  { value: "active", label: "Ativo", color: "#10b981" },
+  { value: "on-hold", label: "Em Espera", color: "#f59e0b" },
+  { value: "completed", label: "Concluído", color: "#6366f1" },
+];
 
 // Default config values for when no config exists
 const defaultConfig: Partial<ProjectConfiguration> = {
-  methodology: 'agile',
+  methodology: "agile",
   module_kanban: true,
   module_backlog: true,
   module_sprints: true,
@@ -175,232 +199,269 @@ const defaultConfig: Partial<ProjectConfiguration> = {
   module_grid_view: false,
   module_calendar: true,
   module_timeline: false,
-  gantt_zoom_level: 'week',
+  gantt_zoom_level: "week",
   working_days_per_week: 5,
   hours_per_day: 8,
-}
+};
 
 export default function ProjectSettings() {
-  const navigate = useNavigate()
-  const { project, config, refreshProject } = useProjectContext()
-  const updateConfig = useUpdateProjectConfig()
-  const createConfig = useCreateProjectConfig()
+  const navigate = useNavigate();
+  const { project, config, refreshProject } = useProjectContext();
+  const updateConfig = useUpdateProjectConfig();
+  const createConfig = useCreateProjectConfig();
 
-  const [configCreated, setConfigCreated] = useState(false)
+  const [configCreated, setConfigCreated] = useState(false);
 
   // Project info state
   const [projectInfo, setProjectInfo] = useState({
-    name: project?.name || '',
-    description: project?.description || '',
-    status: project?.status || 'active',
-    start_date: project?.start_date || '',
-    end_date: project?.end_date || '',
-  })
+    name: project?.name || "",
+    description: project?.description || "",
+    status: project?.status || "active",
+    start_date: project?.start_date || "",
+    end_date: project?.end_date || "",
+    on_hold_reason: (project as any)?.on_hold_reason || "",
+  });
 
   // Config state - use default if no config exists
   const [localConfig, setLocalConfig] = useState<Partial<ProjectConfiguration>>(
-    config || defaultConfig
-  )
+    config || defaultConfig,
+  );
 
-  const [hasChanges, setHasChanges] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [archiveDialogOpen, setArchiveDialogOpen] = useState(false)
+  const [hasChanges, setHasChanges] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
 
   // Auto-create config if it doesn't exist
   useEffect(() => {
     const createDefaultConfig = async () => {
       if (!config && project?.id && !configCreated && !createConfig.isPending) {
-        setConfigCreated(true)
+        setConfigCreated(true);
         try {
           await createConfig.mutateAsync({
             projectId: project.id,
-            methodology: 'agile',
-          })
-          await refreshProject()
+            methodology: "agile",
+          });
+          await refreshProject();
         } catch (error) {
-          console.error('Error creating default config:', error)
+          console.error("Error creating default config:", error);
         }
       }
-    }
-    createDefaultConfig()
-  }, [config, project?.id, configCreated, createConfig, refreshProject])
+    };
+    createDefaultConfig();
+  }, [config, project?.id, configCreated, createConfig, refreshProject]);
 
   // Sync state when project/config changes
   useEffect(() => {
     if (project) {
       setProjectInfo({
-        name: project.name || '',
-        description: project.description || '',
-        status: project.status || 'active',
-        start_date: project.start_date || '',
-        end_date: project.end_date || '',
-      })
+        name: project.name || "",
+        description: project.description || "",
+        status: project.status || "active",
+        start_date: project.start_date || "",
+        end_date: project.end_date || "",
+        on_hold_reason: (project as any)?.on_hold_reason || "",
+      });
     }
-  }, [project])
+  }, [project]);
 
   useEffect(() => {
     if (config) {
-      setLocalConfig(config)
+      setLocalConfig(config);
     }
-  }, [config])
+  }, [config]);
 
   const handleProjectInfoChange = (field: string, value: string) => {
-    setProjectInfo((prev) => ({ ...prev, [field]: value }))
-    setHasChanges(true)
-  }
+    setProjectInfo((prev) => ({ ...prev, [field]: value }));
+    setHasChanges(true);
+  };
 
   const handleModuleToggle = (key: keyof ProjectConfiguration) => {
     setLocalConfig((prev) => ({
       ...prev,
       [key]: !prev[key as keyof typeof prev],
-    }))
-    setHasChanges(true)
-  }
+    }));
+    setHasChanges(true);
+  };
 
-  const handleSettingChange = (key: keyof ProjectConfiguration, value: unknown) => {
+  const handleSettingChange = (
+    key: keyof ProjectConfiguration,
+    value: unknown,
+  ) => {
     setLocalConfig((prev) => ({
       ...prev,
       [key]: value,
-    }))
-    setHasChanges(true)
-  }
+    }));
+    setHasChanges(true);
+  };
 
   const handleMethodologyChange = (methodology: Methodology) => {
     // Update methodology and set recommended modules
     const newConfig: Partial<ProjectConfiguration> = {
       ...localConfig,
       methodology,
-    }
+    };
 
     // Apply recommended module defaults based on methodology
-    if (methodology === 'agile') {
-      newConfig.module_kanban = true
-      newConfig.module_backlog = true
-      newConfig.module_sprints = true
-      newConfig.module_gantt = false
-      newConfig.module_wbs = false
-      newConfig.module_grid_view = false
-    } else if (methodology === 'predictive') {
-      newConfig.module_kanban = false
-      newConfig.module_backlog = false
-      newConfig.module_sprints = false
-      newConfig.module_gantt = true
-      newConfig.module_wbs = true
-      newConfig.module_grid_view = true
-    } else if (methodology === 'hybrid') {
-      newConfig.module_kanban = true
-      newConfig.module_backlog = true
-      newConfig.module_sprints = true
-      newConfig.module_gantt = true
-      newConfig.module_wbs = true
-      newConfig.module_grid_view = true
+    if (methodology === "agile") {
+      newConfig.module_kanban = true;
+      newConfig.module_backlog = true;
+      newConfig.module_sprints = true;
+      newConfig.module_gantt = false;
+      newConfig.module_wbs = false;
+      newConfig.module_grid_view = false;
+    } else if (methodology === "predictive") {
+      newConfig.module_kanban = false;
+      newConfig.module_backlog = false;
+      newConfig.module_sprints = false;
+      newConfig.module_gantt = true;
+      newConfig.module_wbs = true;
+      newConfig.module_grid_view = true;
+    } else if (methodology === "hybrid") {
+      newConfig.module_kanban = true;
+      newConfig.module_backlog = true;
+      newConfig.module_sprints = true;
+      newConfig.module_gantt = true;
+      newConfig.module_wbs = true;
+      newConfig.module_grid_view = true;
     }
 
-    setLocalConfig(newConfig)
-    setHasChanges(true)
-  }
+    setLocalConfig(newConfig);
+    setHasChanges(true);
+  };
 
   const handleSave = async () => {
-    if (!project?.id) return
+    if (!project?.id) return;
 
-    setSaving(true)
+    if (
+      projectInfo.status === "on-hold" &&
+      !projectInfo.on_hold_reason.trim()
+    ) {
+      toast.error("Informe o motivo para colocar o projeto em espera");
+      return;
+    }
+
+    setSaving(true);
+
+    const previousStatus = project.status;
+
     try {
       // Update project info
       const { error: projectError } = await supabase
-        .from('projects')
+        .from("projects")
         .update({
           name: projectInfo.name,
           description: projectInfo.description,
           status: projectInfo.status,
           start_date: projectInfo.start_date || null,
           end_date: projectInfo.end_date || null,
+          on_hold_reason:
+            projectInfo.status === "on-hold"
+              ? projectInfo.on_hold_reason.trim()
+              : null,
         })
-        .eq('id', project.id)
+        .eq("id", project.id);
 
-      if (projectError) throw projectError
+      if (projectError) throw projectError;
 
       // Update or create config
       if (config) {
-        // Config exists - update it
         await updateConfig.mutateAsync({
           projectId: project.id,
           updates: localConfig,
-        })
+        });
       } else {
-        // Config doesn't exist - create it
         await createConfig.mutateAsync({
           projectId: project.id,
-          methodology: (localConfig.methodology as Methodology) || 'agile',
+          methodology: (localConfig.methodology as Methodology) || "agile",
           modules: localConfig,
-        })
+        });
       }
 
-      setHasChanges(false)
-      await refreshProject()
-      toast.success('Configurações salvas com sucesso')
+      // Ada notifications — fire-and-forget
+      if (previousStatus !== "on-hold" && projectInfo.status === "on-hold") {
+        notifyProjectOnHold({
+          projectId: project.id,
+          projectName: projectInfo.name,
+          reason: projectInfo.on_hold_reason.trim(),
+        });
+      } else if (
+        previousStatus === "on-hold" &&
+        projectInfo.status === "active"
+      ) {
+        notifyProjectReactivated({
+          projectId: project.id,
+          projectName: projectInfo.name,
+        });
+      }
+
+      setHasChanges(false);
+      await refreshProject();
+      toast.success("Configurações salvas com sucesso");
     } catch (error) {
-      console.error('Error saving settings:', error)
-      toast.error('Erro ao salvar configurações')
+      console.error("Error saving settings:", error);
+      toast.error("Erro ao salvar configurações");
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   const handleArchive = async () => {
-    if (!project?.id) return
+    if (!project?.id) return;
 
     try {
       const { error } = await supabase
-        .from('projects')
-        .update({ status: 'archived' })
-        .eq('id', project.id)
+        .from("projects")
+        .update({ status: "archived" })
+        .eq("id", project.id);
 
-      if (error) throw error
+      if (error) throw error;
 
-      toast.success('Projeto arquivado')
-      navigate('/projects')
+      toast.success("Projeto arquivado");
+      navigate("/projects");
     } catch (error) {
-      console.error('Error archiving project:', error)
-      toast.error('Erro ao arquivar projeto')
+      console.error("Error archiving project:", error);
+      toast.error("Erro ao arquivar projeto");
     }
-    setArchiveDialogOpen(false)
-  }
+    setArchiveDialogOpen(false);
+  };
 
   const handleDelete = async () => {
     if (!project?.id) {
-      toast.error('Projeto não encontrado')
-      throw new Error('Project not found')
+      toast.error("Projeto não encontrado");
+      throw new Error("Project not found");
     }
 
     const { error } = await supabase
-      .from('projects')
+      .from("projects")
       .delete()
-      .eq('id', project.id)
+      .eq("id", project.id);
 
     if (error) {
-      console.error('Error deleting project:', error)
-      toast.error('Erro ao excluir projeto')
-      throw error
+      console.error("Error deleting project:", error);
+      toast.error("Erro ao excluir projeto");
+      throw error;
     }
 
-    toast.success('Projeto excluído')
-    setDeleteDialogOpen(false)
-    navigate('/projects')
-  }
+    toast.success("Projeto excluído");
+    setDeleteDialogOpen(false);
+    navigate("/projects");
+  };
 
-  const renderModulesByCategory = (category: 'agile' | 'predictive' | 'shared') => {
-    const categoryModules = modules.filter((m) => m.category === category)
-    const categoryInfo = categoryLabels[category]
+  const renderModulesByCategory = (
+    category: "agile" | "predictive" | "shared",
+  ) => {
+    const categoryModules = modules.filter((m) => m.category === category);
+    const categoryInfo = categoryLabels[category];
 
     return (
       <Box key={category} sx={{ mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
           <Box
             sx={{
               width: 8,
               height: 8,
-              borderRadius: '50%',
+              borderRadius: "50%",
               bgcolor: categoryInfo.color,
             }}
           />
@@ -409,25 +470,26 @@ export default function ProjectSettings() {
           </Typography>
         </Box>
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
           {categoryModules.map((module) => {
-            const isEnabled = localConfig[module.key] ?? config?.[module.key] ?? false
+            const isEnabled =
+              localConfig[module.key] ?? config?.[module.key] ?? false;
 
             return (
               <Paper
                 key={module.key}
                 sx={{
                   p: 1.5,
-                  display: 'flex',
-                  alignItems: 'center',
+                  display: "flex",
+                  alignItems: "center",
                   gap: 1.5,
-                  border: '1px solid',
+                  border: "1px solid",
                   borderColor: isEnabled
                     ? alpha(module.color, 0.3)
-                    : 'transparent',
+                    : "transparent",
                   bgcolor: isEnabled
                     ? alpha(module.color, 0.02)
-                    : 'background.paper',
+                    : "background.paper",
                 }}
               >
                 <Box
@@ -437,12 +499,12 @@ export default function ProjectSettings() {
                     borderRadius: 1.5,
                     bgcolor: isEnabled
                       ? alpha(module.color, 0.15)
-                      : 'rgba(0, 0, 0, 0.05)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: isEnabled ? module.color : 'text.secondary',
-                    '& svg': { fontSize: 20 },
+                      : "rgba(0, 0, 0, 0.05)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: isEnabled ? module.color : "text.secondary",
+                    "& svg": { fontSize: 20 },
                   }}
                 >
                   {module.icon}
@@ -462,43 +524,43 @@ export default function ProjectSettings() {
                   checked={isEnabled}
                   onChange={() => handleModuleToggle(module.key)}
                   sx={{
-                    '& .MuiSwitch-switchBase.Mui-checked': {
+                    "& .MuiSwitch-switchBase.Mui-checked": {
                       color: module.color,
                     },
-                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                    "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
                       bgcolor: module.color,
                     },
                   }}
                 />
               </Paper>
-            )
+            );
           })}
         </Box>
       </Box>
-    )
-  }
+    );
+  };
 
   // Show loading while creating config
   if (!config && createConfig.isPending) {
     return (
-      <Box sx={{ textAlign: 'center', py: 8 }}>
+      <Box sx={{ textAlign: "center", py: 8 }}>
         <CircularProgress />
         <Typography sx={{ mt: 2 }}>Criando configuração padrão...</Typography>
       </Box>
-    )
+    );
   }
 
   // Use local config values (will have defaults if no config exists yet)
-  const currentMethodology = localConfig.methodology ?? 'agile'
+  const currentMethodology = localConfig.methodology ?? "agile";
 
   return (
     <Box>
       {/* Header */}
       <Box
         sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
           mb: 3,
         }}
       >
@@ -511,18 +573,24 @@ export default function ProjectSettings() {
           </Typography>
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={{ display: "flex", gap: 1 }}>
           {hasChanges && (
             <Button
               variant="contained"
-              startIcon={saving ? <CircularProgress size={20} color="inherit" /> : <Save />}
+              startIcon={
+                saving ? (
+                  <CircularProgress size={20} color="inherit" />
+                ) : (
+                  <Save />
+                )
+              }
               onClick={handleSave}
               disabled={saving}
               sx={{
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
               }}
             >
-              {saving ? 'Salvando...' : 'Salvar Alterações'}
+              {saving ? "Salvando..." : "Salvar Alterações"}
             </Button>
           )}
         </Box>
@@ -533,8 +601,8 @@ export default function ProjectSettings() {
         <Grid item xs={12} lg={8}>
           {/* Project Info */}
           <Paper sx={{ p: 3, mb: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-              <Edit sx={{ color: '#6366f1' }} />
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 3 }}>
+              <Edit sx={{ color: "#6366f1" }} />
               <Typography variant="h6" fontWeight={700}>
                 Informações do Projeto
               </Typography>
@@ -546,7 +614,9 @@ export default function ProjectSettings() {
                   fullWidth
                   label="Nome do Projeto"
                   value={projectInfo.name}
-                  onChange={(e) => handleProjectInfoChange('name', e.target.value)}
+                  onChange={(e) =>
+                    handleProjectInfoChange("name", e.target.value)
+                  }
                   required
                 />
               </Grid>
@@ -555,7 +625,9 @@ export default function ProjectSettings() {
                   fullWidth
                   label="Descrição"
                   value={projectInfo.description}
-                  onChange={(e) => handleProjectInfoChange('description', e.target.value)}
+                  onChange={(e) =>
+                    handleProjectInfoChange("description", e.target.value)
+                  }
                   multiline
                   rows={3}
                 />
@@ -566,16 +638,20 @@ export default function ProjectSettings() {
                   <Select
                     value={projectInfo.status}
                     label="Status"
-                    onChange={(e) => handleProjectInfoChange('status', e.target.value)}
+                    onChange={(e) =>
+                      handleProjectInfoChange("status", e.target.value)
+                    }
                   >
                     {statusOptions.map((opt) => (
                       <MenuItem key={opt.value} value={opt.value}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                        >
                           <Box
                             sx={{
                               width: 8,
                               height: 8,
-                              borderRadius: '50%',
+                              borderRadius: "50%",
                               bgcolor: opt.color,
                             }}
                           />
@@ -586,13 +662,24 @@ export default function ProjectSettings() {
                   </Select>
                 </FormControl>
               </Grid>
+
+              <Grid item xs={12}>
+                <OnHoldReasonField
+                  visible={projectInfo.status === "on-hold"}
+                  value={projectInfo.on_hold_reason}
+                  onChange={(v) => handleProjectInfoChange("on_hold_reason", v)}
+                  sx={{ mt: 0 }}
+                />
+              </Grid>
               <Grid item xs={12} sm={4}>
                 <TextField
                   fullWidth
                   type="date"
                   label="Data de Início"
                   value={projectInfo.start_date}
-                  onChange={(e) => handleProjectInfoChange('start_date', e.target.value)}
+                  onChange={(e) =>
+                    handleProjectInfoChange("start_date", e.target.value)
+                  }
                   InputLabelProps={{ shrink: true }}
                 />
               </Grid>
@@ -602,7 +689,9 @@ export default function ProjectSettings() {
                   type="date"
                   label="Data de Término"
                   value={projectInfo.end_date}
-                  onChange={(e) => handleProjectInfoChange('end_date', e.target.value)}
+                  onChange={(e) =>
+                    handleProjectInfoChange("end_date", e.target.value)
+                  }
                   InputLabelProps={{ shrink: true }}
                 />
               </Grid>
@@ -611,66 +700,89 @@ export default function ProjectSettings() {
 
           {/* Methodology */}
           <Paper sx={{ p: 3, mb: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <Refresh sx={{ color: '#6366f1' }} />
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+              <Refresh sx={{ color: "#6366f1" }} />
               <Typography variant="h6" fontWeight={700}>
                 Metodologia
               </Typography>
             </Box>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              Alterar a metodologia ajustará os módulos recomendados automaticamente
+              Alterar a metodologia ajustará os módulos recomendados
+              automaticamente
             </Typography>
 
             <Grid container spacing={2}>
-              {(['agile', 'predictive', 'hybrid'] as Methodology[]).map((method) => {
-                const info = methodologyInfo[method]
-                const isSelected = currentMethodology === method
+              {(["agile", "predictive", "hybrid"] as Methodology[]).map(
+                (method) => {
+                  const info = methodologyInfo[method];
+                  const isSelected = currentMethodology === method;
 
-                return (
-                  <Grid item xs={12} sm={4} key={method}>
-                    <Paper
-                      onClick={() => handleMethodologyChange(method)}
-                      sx={{
-                        p: 2,
-                        cursor: 'pointer',
-                        border: '2px solid',
-                        borderColor: isSelected ? info.color : 'transparent',
-                        bgcolor: isSelected ? alpha(info.color, 0.05) : 'background.paper',
-                        transition: 'all 0.2s',
-                        '&:hover': {
-                          borderColor: alpha(info.color, 0.5),
-                          transform: 'translateY(-2px)',
-                        },
-                      }}
-                    >
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                        {isSelected && <CheckCircle sx={{ color: info.color, fontSize: 20 }} />}
-                        <Typography variant="subtitle1" fontWeight={700}>
-                          {info.label}
+                  return (
+                    <Grid item xs={12} sm={4} key={method}>
+                      <Paper
+                        onClick={() => handleMethodologyChange(method)}
+                        sx={{
+                          p: 2,
+                          cursor: "pointer",
+                          border: "2px solid",
+                          borderColor: isSelected ? info.color : "transparent",
+                          bgcolor: isSelected
+                            ? alpha(info.color, 0.05)
+                            : "background.paper",
+                          transition: "all 0.2s",
+                          "&:hover": {
+                            borderColor: alpha(info.color, 0.5),
+                            transform: "translateY(-2px)",
+                          },
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1,
+                            mb: 1,
+                          }}
+                        >
+                          {isSelected && (
+                            <CheckCircle
+                              sx={{ color: info.color, fontSize: 20 }}
+                            />
+                          )}
+                          <Typography variant="subtitle1" fontWeight={700}>
+                            {info.label}
+                          </Typography>
+                        </Box>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          display="block"
+                          sx={{ mb: 1.5 }}
+                        >
+                          {info.description}
                         </Typography>
-                      </Box>
-                      <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1.5 }}>
-                        {info.description}
-                      </Typography>
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {info.modules.map((mod) => (
-                          <Chip
-                            key={mod}
-                            label={mod}
-                            size="small"
-                            sx={{
-                              height: 20,
-                              fontSize: '0.65rem',
-                              bgcolor: alpha(info.color, 0.1),
-                              color: info.color,
-                            }}
-                          />
-                        ))}
-                      </Box>
-                    </Paper>
-                  </Grid>
-                )
-              })}
+                        <Box
+                          sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}
+                        >
+                          {info.modules.map((mod) => (
+                            <Chip
+                              key={mod}
+                              label={mod}
+                              size="small"
+                              sx={{
+                                height: 20,
+                                fontSize: "0.65rem",
+                                bgcolor: alpha(info.color, 0.1),
+                                color: info.color,
+                              }}
+                            />
+                          ))}
+                        </Box>
+                      </Paper>
+                    </Grid>
+                  );
+                },
+              )}
             </Grid>
           </Paper>
 
@@ -683,9 +795,9 @@ export default function ProjectSettings() {
               Ative ou desative os módulos conforme as necessidades do projeto
             </Typography>
 
-            {renderModulesByCategory('agile')}
-            {renderModulesByCategory('predictive')}
-            {renderModulesByCategory('shared')}
+            {renderModulesByCategory("agile")}
+            {renderModulesByCategory("predictive")}
+            {renderModulesByCategory("shared")}
           </Paper>
         </Grid>
 
@@ -697,14 +809,23 @@ export default function ProjectSettings() {
               Configurações do Gantt
             </Typography>
 
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+            <Box
+              sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}
+            >
               <FormControl fullWidth size="small">
                 <InputLabel>Nível de Zoom Padrão</InputLabel>
                 <Select
-                  value={localConfig.gantt_zoom_level ?? config?.gantt_zoom_level ?? 'week'}
+                  value={
+                    localConfig.gantt_zoom_level ??
+                    config?.gantt_zoom_level ??
+                    "week"
+                  }
                   label="Nível de Zoom Padrão"
                   onChange={(e) =>
-                    handleSettingChange('gantt_zoom_level', e.target.value as GanttZoomLevel)
+                    handleSettingChange(
+                      "gantt_zoom_level",
+                      e.target.value as GanttZoomLevel,
+                    )
                   }
                 >
                   <MenuItem value="day">Dia</MenuItem>
@@ -720,9 +841,16 @@ export default function ProjectSettings() {
                 size="small"
                 type="number"
                 label="Dias de Trabalho por Semana"
-                value={localConfig.working_days_per_week ?? config?.working_days_per_week ?? 5}
+                value={
+                  localConfig.working_days_per_week ??
+                  config?.working_days_per_week ??
+                  5
+                }
                 onChange={(e) =>
-                  handleSettingChange('working_days_per_week', parseInt(e.target.value))
+                  handleSettingChange(
+                    "working_days_per_week",
+                    parseInt(e.target.value),
+                  )
                 }
                 inputProps={{ min: 1, max: 7 }}
               />
@@ -734,7 +862,10 @@ export default function ProjectSettings() {
                 label="Horas por Dia"
                 value={localConfig.hours_per_day ?? config?.hours_per_day ?? 8}
                 onChange={(e) =>
-                  handleSettingChange('hours_per_day', parseFloat(e.target.value))
+                  handleSettingChange(
+                    "hours_per_day",
+                    parseFloat(e.target.value),
+                  )
                 }
                 inputProps={{ min: 1, max: 24, step: 0.5 }}
               />
@@ -746,8 +877,8 @@ export default function ProjectSettings() {
             sx={{
               p: 2,
               mb: 3,
-              bgcolor: 'rgba(99, 102, 241, 0.05)',
-              border: '1px solid rgba(99, 102, 241, 0.2)',
+              bgcolor: "rgba(99, 102, 241, 0.05)",
+              border: "1px solid rgba(99, 102, 241, 0.2)",
             }}
           >
             <Typography variant="body2" color="text.secondary">
@@ -758,21 +889,27 @@ export default function ProjectSettings() {
           </Paper>
 
           {/* Danger Zone */}
-          <Paper sx={{ p: 3, border: '1px solid', borderColor: 'error.light' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <Warning sx={{ color: 'error.main' }} />
+          <Paper sx={{ p: 3, border: "1px solid", borderColor: "error.light" }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+              <Warning sx={{ color: "error.main" }} />
               <Typography variant="h6" fontWeight={700} color="error.main">
                 Zona de Perigo
               </Typography>
             </Box>
 
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <Box>
                 <Typography variant="body2" fontWeight={600} gutterBottom>
                   Arquivar Projeto
                 </Typography>
-                <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>
-                  O projeto será movido para arquivados e não aparecerá na lista principal
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  display="block"
+                  sx={{ mb: 1 }}
+                >
+                  O projeto será movido para arquivados e não aparecerá na lista
+                  principal
                 </Typography>
                 <Button
                   variant="outlined"
@@ -791,8 +928,14 @@ export default function ProjectSettings() {
                 <Typography variant="body2" fontWeight={600} gutterBottom>
                   Excluir Projeto
                 </Typography>
-                <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>
-                  Esta ação é irreversível. Todas as tarefas e dados serão perdidos.
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  display="block"
+                  sx={{ mb: 1 }}
+                >
+                  Esta ação é irreversível. Todas as tarefas e dados serão
+                  perdidos.
                 </Typography>
                 <Button
                   variant="outlined"
@@ -810,11 +953,15 @@ export default function ProjectSettings() {
       </Grid>
 
       {/* Archive Dialog */}
-      <Dialog open={archiveDialogOpen} onClose={() => setArchiveDialogOpen(false)}>
+      <Dialog
+        open={archiveDialogOpen}
+        onClose={() => setArchiveDialogOpen(false)}
+      >
         <DialogTitle>Arquivar Projeto</DialogTitle>
         <DialogContent>
           <Alert severity="warning" sx={{ mt: 1 }}>
-            O projeto "{project?.name}" será arquivado. Você poderá restaurá-lo posteriormente.
+            O projeto "{project?.name}" será arquivado. Você poderá restaurá-lo
+            posteriormente.
           </Alert>
         </DialogContent>
         <DialogActions>
@@ -833,5 +980,5 @@ export default function ProjectSettings() {
         project={project}
       />
     </Box>
-  )
+  );
 }

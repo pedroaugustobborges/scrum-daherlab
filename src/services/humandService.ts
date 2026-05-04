@@ -237,3 +237,118 @@ export async function notifyProjectTeamMembers({
     console.error("notifyProjectTeamMembers error:", err);
   }
 }
+
+// ---------------------------------------------------------------------------
+// Project status change notifications (on-hold / reactivation)
+// ---------------------------------------------------------------------------
+
+/**
+ * Shared helper: resolves all unique user profiles for the teams linked to a
+ * project. Used by the on-hold and reactivation notifiers below.
+ */
+async function getProjectMemberProfiles(projectId: string) {
+  const { data: projectTeams, error: ptError } = await supabase
+    .from("project_teams")
+    .select("team_id")
+    .eq("project_id", projectId);
+
+  if (ptError || !projectTeams?.length) return [];
+
+  const teamIds = projectTeams.map((pt) => pt.team_id as string);
+
+  const { data: memberships, error: tmError } = await supabase
+    .from("team_members")
+    .select("user_id")
+    .in("team_id", teamIds);
+
+  if (tmError || !memberships?.length) return [];
+
+  const uniqueUserIds = [...new Set(memberships.map((m) => m.user_id as string))];
+
+  const { data: profiles, error: profError } = await supabase
+    .from("profiles")
+    .select("full_name, employee_internal_id")
+    .in("id", uniqueUserIds);
+
+  if (profError) return [];
+  return profiles ?? [];
+}
+
+export function buildProjectOnHoldMessage({
+  firstName,
+  projectName,
+  reason,
+}: {
+  firstName: string;
+  projectName: string;
+  reason: string;
+}): string {
+  return (
+    `Oi, ${firstName}! ⏸️\n\n` +
+    `Preciso te comunicar que o projeto *${projectName}* entrou em período de espera.\n\n` +
+    `Motivo registrado:\n"${reason}"\n\n` +
+    `Assim que o projeto retomar, estarei aqui com você para continuarmos essa jornada! ` +
+    `Pode contar comigo. 💙\n\n` +
+    `— Ada, sua assistente no Daher Plan`
+  );
+}
+
+export function buildProjectReactivatedMessage({
+  firstName,
+  projectName,
+}: {
+  firstName: string;
+  projectName: string;
+}): string {
+  return (
+    `Oi, ${firstName}! 🎉\n\n` +
+    `Ótima notícia — o projeto *${projectName}* voltou a estar ativo! 🚀\n\n` +
+    `Estou animada para retomar essa jornada com você! ` +
+    `Estarei aqui em cada etapa para ajudar a alcançar todos os objetivos. Vamos nessa! 💪❤️‍🩹\n\n` +
+    `— Ada, sua assistente no Daher Plan`
+  );
+}
+
+/** Notifies all project team members that the project was set to "Em Espera". Fire-and-forget. */
+export async function notifyProjectOnHold({
+  projectId,
+  projectName,
+  reason,
+}: {
+  projectId: string;
+  projectName: string;
+  reason: string;
+}): Promise<void> {
+  try {
+    const profiles = await getProjectMemberProfiles(projectId);
+    for (const profile of profiles) {
+      const externalId = profile.employee_internal_id as string | null;
+      if (!externalId) continue;
+      const firstName = ((profile.full_name as string | null) ?? "Colaborador").split(" ")[0];
+      await sendHumandMessage(externalId, buildProjectOnHoldMessage({ firstName, projectName, reason }));
+    }
+  } catch (err) {
+    console.error("notifyProjectOnHold error:", err);
+  }
+}
+
+/** Notifies all project team members that the project was reactivated. Fire-and-forget. */
+export async function notifyProjectReactivated({
+  projectId,
+  projectName,
+}: {
+  projectId: string;
+  projectName: string;
+}): Promise<void> {
+  try {
+    const profiles = await getProjectMemberProfiles(projectId);
+    for (const profile of profiles) {
+      const externalId = profile.employee_internal_id as string | null;
+      if (!externalId) continue;
+      const firstName = ((profile.full_name as string | null) ?? "Colaborador").split(" ")[0];
+      await sendHumandMessage(externalId, buildProjectReactivatedMessage({ firstName, projectName }));
+    }
+  } catch (err) {
+    console.error("notifyProjectReactivated error:", err);
+  }
+}

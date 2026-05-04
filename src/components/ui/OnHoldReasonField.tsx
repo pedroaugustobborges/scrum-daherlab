@@ -1,13 +1,21 @@
-import { Box, Chip, Collapse, TextField, Typography, type SxProps, type Theme } from '@mui/material'
-import { PauseCircle } from '@mui/icons-material'
+import {
+  Box,
+  Chip,
+  Collapse,
+  TextField,
+  Typography,
+  type SxProps,
+  type Theme,
+} from "@mui/material";
+import { PauseCircle } from "@mui/icons-material";
 
 interface OnHoldReasonFieldProps {
   /** Controls the slide-in Collapse — pass `status === 'on-hold'` from the parent. */
-  visible: boolean
-  value: string
-  onChange: (value: string) => void
+  visible: boolean;
+  value: string;
+  onChange: (value: string) => void;
   /** Override the wrapping Box's sx (e.g. to strip the default mt: 2 inside a Grid). */
-  sx?: SxProps<Theme>
+  sx?: SxProps<Theme>;
 }
 
 /**
@@ -27,7 +35,7 @@ export default function OnHoldReasonField({
   onChange,
   sx,
 }: OnHoldReasonFieldProps) {
-  const hasError = visible && !value.trim()
+  const hasError = visible && !value.trim();
 
   return (
     <Collapse in={visible} unmountOnExit>
@@ -36,15 +44,19 @@ export default function OnHoldReasonField({
           mt: 2,
           p: 2,
           borderRadius: 2,
-          border: '1.5px solid',
-          borderColor: 'rgba(245, 158, 11, 0.4)',
-          bgcolor: 'rgba(245, 158, 11, 0.04)',
+          border: "1.5px solid",
+          borderColor: "rgba(245, 158, 11, 0.4)",
+          bgcolor: "rgba(245, 158, 11, 0.04)",
           ...sx,
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-          <PauseCircle sx={{ color: '#f59e0b', fontSize: 18 }} />
-          <Typography variant="body2" fontWeight={600} sx={{ color: '#b45309' }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
+          <PauseCircle sx={{ color: "#f59e0b", fontSize: 18 }} />
+          <Typography
+            variant="body2"
+            fontWeight={600}
+            sx={{ color: "#b45309" }}
+          >
             Motivo da Espera
           </Typography>
           <Chip
@@ -52,9 +64,9 @@ export default function OnHoldReasonField({
             size="small"
             sx={{
               height: 18,
-              fontSize: '0.6rem',
-              bgcolor: 'rgba(245, 158, 11, 0.12)',
-              color: '#b45309',
+              fontSize: "0.6rem",
+              bgcolor: "rgba(245, 158, 11, 0.12)",
+              color: "#b45309",
             }}
           />
         </Box>
@@ -67,16 +79,20 @@ export default function OnHoldReasonField({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           error={hasError}
-          helperText={hasError ? 'O motivo é obrigatório para por o projeto em espera' : ''}
+          helperText={
+            hasError
+              ? "Escreva de forma profissional, pois a Ada enviará essa informação para todo o time."
+              : ""
+          }
           sx={{
-            '& .MuiOutlinedInput-root': {
-              '& fieldset': { borderColor: 'rgba(245, 158, 11, 0.35)' },
-              '&:hover fieldset': { borderColor: '#f59e0b' },
-              '&.Mui-focused fieldset': { borderColor: '#f59e0b' },
+            "& .MuiOutlinedInput-root": {
+              "& fieldset": { borderColor: "rgba(245, 158, 11, 0.35)" },
+              "&:hover fieldset": { borderColor: "#f59e0b" },
+              "&.Mui-focused fieldset": { borderColor: "#f59e0b" },
             },
           }}
         />
       </Box>
     </Collapse>
-  )
+  );
 }

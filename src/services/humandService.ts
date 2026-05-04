@@ -158,11 +158,10 @@ export function buildProjectWelcomeMessage({
   return (
     `Oi, ${firstName}! 👋\n\n` +
     `Fico muito feliz em saber que você integra o projeto *${projectName}*! 🎉\n` +
-    `\n Cuja idealização foi idealizada como: \n\n` +
+    `\n Cuja idealização foi descrita como: \n` +
     descriptionLine +
-    `\n Incrível, não é? Esse projeto vai entregar otimização real aos processos de saúde — e eu estou animada para começar essa jornada!\n\n` +
-    `Estarei aqui com você em cada etapa do caminho, para ajudar a alcançar todos os objetivos deste projeto. Vamos nessa! 🚀❤️‍🩹\n\n` +
-    `— Ada, sua assistente no Daher Plan`
+    `\n\n Incrível, não é? Esse projeto vai entregar otimização real aos processos de saúde — e eu estou animada para começar essa jornada!\n\n` +
+    `Estarei aqui com você em cada etapa do caminho, para ajudar a alcançar todos os objetivos deste projeto. Vamos nessa! 🚀❤️‍🩹\n\n`
   );
 }
 

@@ -279,7 +279,9 @@ async function getProjectMemberProfiles(projectId: string) {
     return [];
   }
 
-  const uniqueUserIds = [...new Set(memberships.map((m) => m.user_id as string))];
+  const uniqueUserIds = [
+    ...new Set(memberships.map((m) => m.user_id as string)),
+  ];
 
   // Step 3 — fetch their profiles (name + Humand external ID)
   const { data: profiles, error: profError } = await supabase
@@ -294,7 +296,10 @@ async function getProjectMemberProfiles(projectId: string) {
 
   const withId = (profiles ?? []).filter((p) => p.employee_internal_id);
   if (!withId.length) {
-    console.warn("[humandService] No profiles with employee_internal_id found. Users:", uniqueUserIds);
+    console.warn(
+      "[humandService] No profiles with employee_internal_id found. Users:",
+      uniqueUserIds,
+    );
   }
 
   return profiles ?? [];
@@ -314,8 +319,7 @@ export function buildProjectOnHoldMessage({
     `Preciso te comunicar que o projeto *${projectName}* entrou em período de espera.\n\n` +
     `Motivo registrado:\n"${reason}"\n\n` +
     `Assim que o projeto retomar, estarei aqui com você para continuarmos essa jornada! ` +
-    `Pode contar comigo. 💙\n\n` +
-    `— Ada, sua assistente no Daher Plan`
+    `Pode contar comigo. 💙\n\n`
   );
 }
 
@@ -350,8 +354,13 @@ export async function notifyProjectOnHold({
     for (const profile of profiles) {
       const externalId = profile.employee_internal_id as string | null;
       if (!externalId) continue;
-      const firstName = ((profile.full_name as string | null) ?? "Colaborador").split(" ")[0];
-      await sendHumandMessage(externalId, buildProjectOnHoldMessage({ firstName, projectName, reason }));
+      const firstName = (
+        (profile.full_name as string | null) ?? "Colaborador"
+      ).split(" ")[0];
+      await sendHumandMessage(
+        externalId,
+        buildProjectOnHoldMessage({ firstName, projectName, reason }),
+      );
     }
   } catch (err) {
     console.error("notifyProjectOnHold error:", err);
@@ -371,8 +380,13 @@ export async function notifyProjectReactivated({
     for (const profile of profiles) {
       const externalId = profile.employee_internal_id as string | null;
       if (!externalId) continue;
-      const firstName = ((profile.full_name as string | null) ?? "Colaborador").split(" ")[0];
-      await sendHumandMessage(externalId, buildProjectReactivatedMessage({ firstName, projectName }));
+      const firstName = (
+        (profile.full_name as string | null) ?? "Colaborador"
+      ).split(" ")[0];
+      await sendHumandMessage(
+        externalId,
+        buildProjectReactivatedMessage({ firstName, projectName }),
+      );
     }
   } catch (err) {
     console.error("notifyProjectReactivated error:", err);

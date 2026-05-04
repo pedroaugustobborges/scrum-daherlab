@@ -36,7 +36,7 @@ import toast from "react-hot-toast";
 import Modal from "./Modal";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
-import { notifyProjectTeamMembers } from "@/services/humandService";
+import { notifyProjectTeamMembers, notifyProjectOnHold } from "@/services/humandService";
 
 interface Team {
   id: string;
@@ -343,13 +343,21 @@ export default function CreateProjectModal({
         }
       }
 
-      // Notify all team members via Humand (Ada welcome message)
-      // Fire-and-forget: runs after the UI already closes so it never blocks the user
+      // Ada notifications — fire-and-forget
       notifyProjectTeamMembers({
         teamIds: selectedTeams,
         projectName: formData.name,
         projectDescription: formData.description ?? '',
       });
+
+      // If project is created directly as "Em Espera", also send the on-hold notification
+      if (formData.status === "on-hold" && projectData?.id) {
+        notifyProjectOnHold({
+          projectId: projectData.id,
+          projectName: formData.name,
+          reason: formData.on_hold_reason.trim(),
+        });
+      }
 
       toast.success("Projeto criado com sucesso!");
       resetForm();

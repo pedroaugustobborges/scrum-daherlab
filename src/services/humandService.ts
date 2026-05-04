@@ -247,30 +247,56 @@ export async function notifyProjectTeamMembers({
  * project. Used by the on-hold and reactivation notifiers below.
  */
 async function getProjectMemberProfiles(projectId: string) {
+  // Step 1 — find which teams are linked to the project
   const { data: projectTeams, error: ptError } = await supabase
     .from("project_teams")
     .select("team_id")
     .eq("project_id", projectId);
 
-  if (ptError || !projectTeams?.length) return [];
+  if (ptError) {
+    console.error("[humandService] project_teams query failed:", ptError);
+    return [];
+  }
+  if (!projectTeams?.length) {
+    console.warn("[humandService] No teams found for project:", projectId);
+    return [];
+  }
 
   const teamIds = projectTeams.map((pt) => pt.team_id as string);
 
+  // Step 2 — find all members of those teams
   const { data: memberships, error: tmError } = await supabase
     .from("team_members")
     .select("user_id")
     .in("team_id", teamIds);
 
-  if (tmError || !memberships?.length) return [];
+  if (tmError) {
+    console.error("[humandService] team_members query failed:", tmError);
+    return [];
+  }
+  if (!memberships?.length) {
+    console.warn("[humandService] No members found for teams:", teamIds);
+    return [];
+  }
 
   const uniqueUserIds = [...new Set(memberships.map((m) => m.user_id as string))];
 
+  // Step 3 — fetch their profiles (name + Humand external ID)
   const { data: profiles, error: profError } = await supabase
     .from("profiles")
     .select("full_name, employee_internal_id")
     .in("id", uniqueUserIds);
 
-  if (profError) return [];
+  if (profError) {
+    console.error("[humandService] profiles query failed:", profError);
+    return [];
+  }
+
+  const withId = (profiles ?? []).filter((p) => p.employee_internal_id);
+  if (!withId.length) {
+    console.warn("[humandService] No profiles with employee_internal_id found. Users:", uniqueUserIds);
+  }
+
   return profiles ?? [];
 }
 

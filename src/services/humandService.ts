@@ -3,10 +3,11 @@
  *
  * Single-responsibility service for:
  *   - Building milestone congratulation messages
+ *   - Building project welcome messages (sent by Ada on project creation)
  *   - Sending messages through the Humand API proxy
- *
- * No React dependencies — pure functions, easy to test and reuse.
+ *   - Notifying all team members when a new project is created
  */
+import { supabase } from "@/lib/supabase";
 
 // In development Vite serves no serverless functions; skip the call unless
 // VITE_HUMAND_PROXY_URL is explicitly set (e.g. pointing to `vercel dev`).
@@ -128,4 +129,112 @@ export async function sendHumandMessage(
 
   const data = await response.json();
   return data.success === true;
+}
+
+// ---------------------------------------------------------------------------
+// Project welcome message
+// ---------------------------------------------------------------------------
+
+export interface ProjectWelcomeMessageParams {
+  firstName: string;
+  projectName: string;
+  projectDescription: string;
+}
+
+/**
+ * Builds the welcome message Ada sends to each team member when a new project
+ * is created. The message is intentionally gender-neutral in Portuguese —
+ * "você" is used throughout to avoid gendered greetings like "Bem-vindo/a".
+ */
+export function buildProjectWelcomeMessage({
+  firstName,
+  projectName,
+  projectDescription,
+}: ProjectWelcomeMessageParams): string {
+  const descriptionLine = projectDescription?.trim()
+    ? `\n${projectDescription.trim()}\n`
+    : "";
+
+  return (
+    `Oi, ${firstName}! 👋\n\n` +
+    `Fico muito feliz em saber que você integra o projeto *${projectName}*! 🎉\n` +
+    `\n Cuja idealização foi idealizada como: \n\n` +
+    descriptionLine +
+    `\n Incrível, não é? Esse projeto vai entregar otimização real aos processos de saúde — e eu estou animada para começar essa jornada!\n\n` +
+    `Estarei aqui com você em cada etapa do caminho, para ajudar a alcançar todos os objetivos deste projeto. Vamos nessa! 🚀❤️‍🩹\n\n` +
+    `— Ada, sua assistente no Daher Plan`
+  );
+}
+
+/**
+ * After a project is created, fetches every member of the linked teams and
+ * sends them a welcome message from Ada via Humand.
+ *
+ * Silently skips members who haven't registered their CPF (employee_internal_id).
+ * Never throws — errors are logged so they don't block the UI flow.
+ */
+export async function notifyProjectTeamMembers({
+  teamIds,
+  projectName,
+  projectDescription,
+}: {
+  teamIds: string[];
+  projectName: string;
+  projectDescription: string;
+}): Promise<void> {
+  if (!teamIds.length) return;
+
+  try {
+    // 1. Collect all user IDs across the selected teams
+    const { data: memberships, error: membershipsError } = await supabase
+      .from("team_members")
+      .select("user_id")
+      .in("team_id", teamIds);
+
+    if (membershipsError) {
+      console.error(
+        "notifyProjectTeamMembers: team_members query failed",
+        membershipsError,
+      );
+      return;
+    }
+
+    const uniqueUserIds = [
+      ...new Set((memberships ?? []).map((m) => m.user_id as string)),
+    ];
+    if (!uniqueUserIds.length) return;
+
+    // 2. Fetch profiles to get name + Humand external ID (CPF)
+    const { data: profiles, error: profilesError } = await supabase
+      .from("profiles")
+      .select("full_name, employee_internal_id")
+      .in("id", uniqueUserIds);
+
+    if (profilesError) {
+      console.error(
+        "notifyProjectTeamMembers: profiles query failed",
+        profilesError,
+      );
+      return;
+    }
+
+    // 3. Send a welcome message to each member who has a registered CPF
+    for (const profile of profiles ?? []) {
+      const externalId = profile.employee_internal_id as string | null;
+      if (!externalId) continue;
+
+      const firstName = (
+        (profile.full_name as string | null) ?? "Colaborador"
+      ).split(" ")[0];
+      const text = buildProjectWelcomeMessage({
+        firstName,
+        projectName,
+        projectDescription,
+      });
+
+      await sendHumandMessage(externalId, text);
+    }
+  } catch (err) {
+    console.error("notifyProjectTeamMembers error:", err);
+  }
 }

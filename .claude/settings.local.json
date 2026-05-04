@@ -14,7 +14,11 @@
       "Bash(where node:*)",
       "Read(//mnt/c/Users/16144-pedro/Documents/python_projects/**)",
       "Bash(cmd:*)",
-      "Bash(/mnt/c/Windows/System32/cmd.exe /c \"npm run build 2>&1\")"
+      "Bash(/mnt/c/Windows/System32/cmd.exe /c \"npm run build 2>&1\")",
+      "Bash(grep -l \"employee_internal_id\\\\|cpf\\\\|admin_create_user\\\\|admin_update_user\" /c/Users/16144-pedro/Documents/python_projects/scrum_daherlab/*.sql)",
+      "Bash(xargs grep:*)",
+      "Bash(ls -1 /c/Users/16144-pedro/Documents/python_projects/scrum_daherlab/*.sql)",
+      "Bash(xargs -I {} basename {})"
     ],
     "deny": [],
     "ask": []

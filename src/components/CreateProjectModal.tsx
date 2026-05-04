@@ -35,6 +35,7 @@ import toast from "react-hot-toast";
 import Modal from "./Modal";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
+import { notifyProjectTeamMembers } from "@/services/humandService";
 
 interface Team {
   id: string;
@@ -333,6 +334,14 @@ export default function CreateProjectModal({
           toast.error("Projeto criado, mas houve erro ao associar times");
         }
       }
+
+      // Notify all team members via Humand (Ada welcome message)
+      // Fire-and-forget: runs after the UI already closes so it never blocks the user
+      notifyProjectTeamMembers({
+        teamIds: selectedTeams,
+        projectName: formData.name,
+        projectDescription: formData.description ?? '',
+      });
 
       toast.success("Projeto criado com sucesso!");
       resetForm();

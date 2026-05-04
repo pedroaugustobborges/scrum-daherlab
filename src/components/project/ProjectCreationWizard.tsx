@@ -23,6 +23,7 @@ import toast from 'react-hot-toast'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { useCreateProjectConfig } from '@/hooks/useProjectConfig'
+import { notifyProjectTeamMembers } from '@/services/humandService'
 import type { WizardData, Methodology } from '@/types/hybrid'
 import WizardStepBasicInfo from './WizardStepBasicInfo'
 import WizardStepMethodology from './WizardStepMethodology'
@@ -219,6 +220,14 @@ export default function ProjectCreationWizard({
           // Don't throw - project was created successfully
         }
       }
+
+      // Notify all team members via Humand (Ada welcome message)
+      // Fire-and-forget: runs after the UI already closes so it never blocks the user
+      notifyProjectTeamMembers({
+        teamIds: wizardData.selectedTeams,
+        projectName: wizardData.name,
+        projectDescription: wizardData.description ?? '',
+      });
 
       toast.success('Projeto criado com sucesso!')
       resetWizard()

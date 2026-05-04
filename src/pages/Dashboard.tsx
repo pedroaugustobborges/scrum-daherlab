@@ -169,6 +169,16 @@ const LARGE_WIDGETS: WidgetType[] = ["productivityTrend", "teamWorkload"];
  * that flows smoothly from red (0%) through amber/yellow to green (100%).
  * Every single percentage point produces a distinct, perceptibly different hue.
  */
+// Per-status gradient stops for the "Status das Tarefas" donut chart.
+// light = top/inner highlight, rich = bottom/outer depth, used in SVG linearGradient.
+const DONUT_GRADIENTS: Record<string, { light: string; rich: string }> = {
+  todo:        { light: "#cbd5e1", rich: "#475569" },
+  in_progress: { light: "#fde68a", rich: "#d97706" },
+  review:      { light: "#ddd6fe", rich: "#7c3aed" },
+  done:        { light: "#6ee7b7", rich: "#059669" },
+  blocked:     { light: "#fca5a5", rich: "#dc2626" },
+};
+
 // Piecewise-linear color stops for the team workload bar.
 // Each entry: [progressPct, lightShade, richShade, textColor]
 const PROGRESS_COLOR_STOPS: Array<[number, string, string, string]> = [
@@ -1564,23 +1574,11 @@ export default function Dashboard() {
         };
 
         const taskStatusData = [
-          { name: "A Fazer", value: taskStats?.todo || 0, color: "#6b7280" },
-          {
-            name: "Em Progresso",
-            value: taskStats?.in_progress || 0,
-            color: "#f59e0b",
-          },
-          {
-            name: "Em Revisão",
-            value: taskStats?.review || 0,
-            color: "#8b5cf6",
-          },
-          { name: "Concluído", value: taskStats?.done || 0, color: "#10b981" },
-          {
-            name: "Bloqueado",
-            value: taskStats?.blocked || 0,
-            color: "#ef4444",
-          },
+          { name: "A Fazer",      value: taskStats?.todo || 0,        color: "#6b7280", gradId: "todo"        },
+          { name: "Em Progresso", value: taskStats?.in_progress || 0, color: "#f59e0b", gradId: "in_progress" },
+          { name: "Em Revisão",   value: taskStats?.review || 0,      color: "#8b5cf6", gradId: "review"      },
+          { name: "Concluído",    value: taskStats?.done || 0,        color: "#10b981", gradId: "done"        },
+          { name: "Bloqueado",    value: taskStats?.blocked || 0,     color: "#ef4444", gradId: "blocked"     },
         ].filter((item) => item.value > 0);
 
         const insightText = getInsightText();
@@ -1623,6 +1621,14 @@ export default function Dashboard() {
                 <Box sx={{ position: "relative", width: 200, height: 200 }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
+                      <defs>
+                        {Object.entries(DONUT_GRADIENTS).map(([id, { light, rich }]) => (
+                          <linearGradient key={id} id={`donut-${id}`} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%"   stopColor={light} stopOpacity={1} />
+                            <stop offset="100%" stopColor={rich}  stopOpacity={1} />
+                          </linearGradient>
+                        ))}
+                      </defs>
                       <Pie
                         data={taskStatusData}
                         cx="50%"
@@ -1634,7 +1640,7 @@ export default function Dashboard() {
                         stroke="none"
                       >
                         {taskStatusData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
+                          <Cell key={`cell-${index}`} fill={`url(#donut-${entry.gradId})`} />
                         ))}
                       </Pie>
                       <Tooltip
@@ -1712,22 +1718,23 @@ export default function Dashboard() {
                           px: 1.5,
                           py: 0.5,
                           borderRadius: 2,
-                          bgcolor: `${item.color}10`,
+                          bgcolor: `${DONUT_GRADIENTS[item.gradId].light}28`,
                         }}
                       >
                         <Box
                           sx={{
-                            width: 8,
-                            height: 8,
+                            width: 9,
+                            height: 9,
                             borderRadius: "50%",
-                            bgcolor: item.color,
+                            background: `radial-gradient(circle at 35% 35%, ${DONUT_GRADIENTS[item.gradId].light}, ${DONUT_GRADIENTS[item.gradId].rich})`,
                             flexShrink: 0,
+                            boxShadow: `0 1px 3px ${DONUT_GRADIENTS[item.gradId].rich}60`,
                           }}
                         />
                         <Typography
                           variant="caption"
                           sx={{
-                            color: item.color,
+                            color: DONUT_GRADIENTS[item.gradId].rich,
                             fontWeight: 600,
                             fontSize: "0.75rem",
                           }}

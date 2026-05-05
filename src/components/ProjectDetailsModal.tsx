@@ -8,7 +8,6 @@ import {
   Tab,
   Card,
   CardContent,
-  LinearProgress,
   Stack,
   Avatar,
   Grid,
@@ -18,6 +17,9 @@ import {
   Fade,
   Backdrop,
   useTheme,
+  ToggleButton,
+  ToggleButtonGroup,
+  alpha,
 } from "@mui/material";
 import {
   CalendarToday,
@@ -36,6 +38,7 @@ import {
   Edit as EditIcon,
   CloudUpload,
   BarChart,
+  CheckCircle,
 } from "@mui/icons-material";
 import Modal from "./Modal";
 import SprintDetailsModal from "./SprintDetailsModal";
@@ -357,6 +360,7 @@ export default function ProjectDetailsModal({
     color: string;
   } | null>(null);
   const [statusModalOpen, setStatusModalOpen] = useState(false);
+  const [progressMode, setProgressMode] = useState<'tasks' | 'points'>('tasks');
 
   useEffect(() => {
     if (open) {
@@ -500,13 +504,6 @@ export default function ProjectDetailsModal({
     return new Date(date).toLocaleDateString("pt-BR");
   };
 
-  const calculateProgress = () => {
-    if (statistics.totalStoryPoints === 0) return 0;
-    return Math.round(
-      (statistics.completedStoryPoints / statistics.totalStoryPoints) * 100
-    );
-  };
-
   const handleOpenSprintDetails = (sprint: Sprint) => {
     setSelectedSprint(sprint);
     setSprintDetailsOpen(true);
@@ -592,6 +589,17 @@ export default function ProjectDetailsModal({
     setSelectedStatus({ key, label, color });
     setStatusModalOpen(true);
   };
+
+  const totalTasks = statistics.todo + statistics.in_progress + statistics.review + statistics.done + statistics.blocked;
+  const tasksProgress = totalTasks > 0 ? Math.round((statistics.done / totalTasks) * 100) : 0;
+  const pointsProgress = statistics.totalStoryPoints > 0 ? Math.round((statistics.completedStoryPoints / statistics.totalStoryPoints) * 100) : 0;
+  const activeProgress = progressMode === 'tasks' ? tasksProgress : pointsProgress;
+  const progressBarGradient = progressMode === 'tasks'
+    ? 'linear-gradient(90deg, #818cf8 0%, #6366f1 100%)'
+    : 'linear-gradient(90deg, #fde68a 0%, #f59e0b 100%)';
+  const progressLabelColor = progressMode === 'tasks' ? '#6366f1' : '#d97706';
+  const showInsight = totalTasks > 0 && statistics.totalStoryPoints > 0 && Math.abs(pointsProgress - tasksProgress) >= 10;
+  const insightDelta = pointsProgress - tasksProgress;
 
   const TASK_STATUS_TILES = [
     { key: "todo",        label: "A Fazer",      value: statistics.todo,        color: "#6b7280" },
@@ -780,45 +788,111 @@ export default function ProjectDetailsModal({
                       border: "1px solid rgba(99, 102, 241, 0.2)",
                     }}
                   >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1,
-                        mb: 1,
-                      }}
-                    >
-                      <TrendingUp sx={{ fontSize: 20, color: "#6366f1" }} />
-                      <Typography variant="body2" fontWeight={600}>
-                        Progresso Geral
-                      </Typography>
+                    {/* Header row */}
+                    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+                        {progressMode === 'tasks'
+                          ? <CheckCircle sx={{ fontSize: 18, color: "#6366f1" }} />
+                          : <Functions sx={{ fontSize: 18, color: "#d97706" }} />
+                        }
+                        <Typography variant="body2" fontWeight={600}>
+                          Progresso Geral
+                        </Typography>
+                      </Box>
+                      <Chip
+                        label={`${activeProgress}%`}
+                        size="small"
+                        sx={{
+                          fontWeight: 700,
+                          fontSize: '0.75rem',
+                          bgcolor: alpha(progressLabelColor, 0.12),
+                          color: progressLabelColor,
+                          height: 22,
+                        }}
+                      />
                     </Box>
-                    <Typography
-                      variant="h4"
-                      fontWeight={800}
-                      sx={{ color: "#6366f1", mb: 1 }}
-                    >
-                      {calculateProgress()}%
-                    </Typography>
-                    <LinearProgress
-                      variant="determinate"
-                      value={calculateProgress()}
-                      sx={{
-                        height: 8,
-                        borderRadius: 1,
-                        bgcolor: "rgba(99, 102, 241, 0.1)",
-                        "& .MuiLinearProgress-bar": {
-                          bgcolor: "#6366f1",
+
+                    {/* iOS toggle */}
+                    <Box sx={{ bgcolor: 'rgba(99,102,241,0.07)', borderRadius: '10px', p: '3px', mb: 1.5 }}>
+                      <ToggleButtonGroup
+                        value={progressMode}
+                        exclusive
+                        onChange={(_, v) => v && setProgressMode(v)}
+                        fullWidth
+                        size="small"
+                      >
+                        <ToggleButton
+                          value="tasks"
+                          sx={{
+                            border: '0 !important',
+                            borderRadius: '8px !important',
+                            py: 0.4,
+                            fontSize: '0.7rem',
+                            fontWeight: 600,
+                            color: progressMode === 'tasks' ? '#6366f1' : 'text.secondary',
+                            bgcolor: progressMode === 'tasks' ? 'white !important' : 'transparent',
+                            boxShadow: progressMode === 'tasks' ? '0 1px 4px rgba(0,0,0,0.12)' : 'none',
+                            gap: 0.5,
+                          }}
+                        >
+                          <CheckCircle sx={{ fontSize: 13 }} /> Tarefas
+                        </ToggleButton>
+                        <ToggleButton
+                          value="points"
+                          sx={{
+                            border: '0 !important',
+                            borderRadius: '8px !important',
+                            py: 0.4,
+                            fontSize: '0.7rem',
+                            fontWeight: 600,
+                            color: progressMode === 'points' ? '#d97706' : 'text.secondary',
+                            bgcolor: progressMode === 'points' ? 'white !important' : 'transparent',
+                            boxShadow: progressMode === 'points' ? '0 1px 4px rgba(0,0,0,0.12)' : 'none',
+                            gap: 0.5,
+                          }}
+                        >
+                          <Functions sx={{ fontSize: 13 }} /> Pontos
+                        </ToggleButton>
+                      </ToggleButtonGroup>
+                    </Box>
+
+                    {/* Glossy bar */}
+                    <Box sx={{ position: 'relative', height: 8, borderRadius: 4, bgcolor: 'rgba(0,0,0,0.07)', overflow: 'hidden', mb: 0.75 }}>
+                      <Box sx={{
+                        position: 'absolute', inset: 0, right: 'auto', width: `${activeProgress}%`, borderRadius: 4,
+                        background: progressBarGradient,
+                        transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                        '&::after': {
+                          content: '""', position: 'absolute', inset: 0, borderRadius: 'inherit',
+                          background: 'linear-gradient(to bottom, rgba(255,255,255,0.30) 0%, transparent 55%)',
+                          pointerEvents: 'none',
                         },
-                      }}
-                    />
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ mt: 0.5, display: "block" }}
-                    >
-                      {statistics.completedStoryPoints} /{" "}
-                      {statistics.totalStoryPoints} story points
+                      }} />
+                    </Box>
+
+                    {/* Insight chip */}
+                    {showInsight && (
+                      <Chip
+                        label={insightDelta > 0
+                          ? `Tarefas leves primeiro — pontos ${insightDelta > 0 ? '+' : ''}${insightDelta}% à frente`
+                          : `Tarefas pesadas primeiro — pts ${insightDelta}% vs tarefas`}
+                        size="small"
+                        sx={{
+                          mb: 0.75,
+                          height: 20,
+                          fontSize: '0.6rem',
+                          fontWeight: 600,
+                          bgcolor: insightDelta > 0 ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)',
+                          color: insightDelta > 0 ? '#10b981' : '#d97706',
+                          '& .MuiChip-label': { px: 1 },
+                        }}
+                      />
+                    )}
+
+                    <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
+                      {progressMode === 'tasks'
+                        ? `${statistics.done} / ${totalTasks} tarefas concluídas`
+                        : `${statistics.completedStoryPoints} / ${statistics.totalStoryPoints} pontos`}
                     </Typography>
                   </Box>
 
@@ -894,32 +968,103 @@ export default function ProjectDetailsModal({
         {/* Visão Geral Tab */}
         {activeTab === 0 && (
           <Box>
-            {/* Progress bar */}
-            <Box sx={{ mb: 3 }}>
-              <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-                <Typography variant="body2" color="text.secondary" fontWeight={500}>
-                  Progresso Geral
-                </Typography>
-                <Typography variant="body2" fontWeight={700} sx={{ color: "#6366f1" }}>
-                  {statistics.done}/{statistics.done + statistics.todo + statistics.in_progress + statistics.review + statistics.blocked}
-                </Typography>
+            {/* Dual-mode progress section */}
+            <Box sx={{ mb: 3, p: 2.5, borderRadius: 3, bgcolor: isDarkMode ? 'rgba(30,41,59,0.6)' : 'rgba(99,102,241,0.03)', border: '1px solid rgba(99,102,241,0.1)' }}>
+              {/* Label row */}
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {progressMode === 'tasks'
+                    ? <CheckCircle sx={{ fontSize: 18, color: '#6366f1' }} />
+                    : <Functions sx={{ fontSize: 18, color: '#d97706' }} />
+                  }
+                  <Typography variant="body2" fontWeight={700} sx={{ color: progressLabelColor }}>
+                    {activeProgress}%
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {progressMode === 'tasks'
+                      ? `${statistics.done} / ${totalTasks} tarefas`
+                      : `${statistics.completedStoryPoints} / ${statistics.totalStoryPoints} pts`}
+                  </Typography>
+                </Box>
+
+                {/* iOS toggle */}
+                <Box sx={{ bgcolor: 'rgba(99,102,241,0.07)', borderRadius: '10px', p: '3px' }}>
+                  <ToggleButtonGroup
+                    value={progressMode}
+                    exclusive
+                    onChange={(_, v) => v && setProgressMode(v)}
+                    size="small"
+                  >
+                    <ToggleButton
+                      value="tasks"
+                      sx={{
+                        border: '0 !important',
+                        borderRadius: '8px !important',
+                        px: 1.5,
+                        py: 0.4,
+                        fontSize: '0.72rem',
+                        fontWeight: 600,
+                        color: progressMode === 'tasks' ? '#6366f1' : 'text.secondary',
+                        bgcolor: progressMode === 'tasks' ? 'white !important' : 'transparent',
+                        boxShadow: progressMode === 'tasks' ? '0 1px 4px rgba(0,0,0,0.12)' : 'none',
+                        gap: 0.5,
+                      }}
+                    >
+                      <CheckCircle sx={{ fontSize: 14 }} /> Tarefas
+                    </ToggleButton>
+                    <ToggleButton
+                      value="points"
+                      sx={{
+                        border: '0 !important',
+                        borderRadius: '8px !important',
+                        px: 1.5,
+                        py: 0.4,
+                        fontSize: '0.72rem',
+                        fontWeight: 600,
+                        color: progressMode === 'points' ? '#d97706' : 'text.secondary',
+                        bgcolor: progressMode === 'points' ? 'white !important' : 'transparent',
+                        boxShadow: progressMode === 'points' ? '0 1px 4px rgba(0,0,0,0.12)' : 'none',
+                        gap: 0.5,
+                      }}
+                    >
+                      <Functions sx={{ fontSize: 14 }} /> Pontos
+                    </ToggleButton>
+                  </ToggleButtonGroup>
+                </Box>
               </Box>
-              <LinearProgress
-                variant="determinate"
-                value={calculateProgress()}
-                sx={{
-                  height: 10,
-                  borderRadius: 5,
-                  bgcolor: "rgba(99, 102, 241, 0.1)",
-                  "& .MuiLinearProgress-bar": {
-                    background: "linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%)",
-                    borderRadius: 5,
+
+              {/* Glossy bar */}
+              <Box sx={{ position: 'relative', height: 10, borderRadius: 5, bgcolor: 'rgba(0,0,0,0.07)', overflow: 'hidden' }}>
+                <Box sx={{
+                  position: 'absolute', inset: 0, right: 'auto', width: `${activeProgress}%`, borderRadius: 5,
+                  background: progressBarGradient,
+                  transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                  '&::after': {
+                    content: '""', position: 'absolute', inset: 0, borderRadius: 'inherit',
+                    background: 'linear-gradient(to bottom, rgba(255,255,255,0.30) 0%, transparent 55%)',
+                    pointerEvents: 'none',
                   },
-                }}
-              />
-              <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>
-                {statistics.completedStoryPoints} / {statistics.totalStoryPoints} story points concluídos
-              </Typography>
+                }} />
+              </Box>
+
+              {/* Insight chip */}
+              {showInsight && (
+                <Chip
+                  label={insightDelta > 0
+                    ? `Tarefas leves primeiro — pontos ${insightDelta > 0 ? '+' : ''}${insightDelta}% à frente das tarefas`
+                    : `Tarefas pesadas primeiro — pontos ${insightDelta}% atrás das tarefas`}
+                  size="small"
+                  sx={{
+                    mt: 1.5,
+                    height: 22,
+                    fontSize: '0.65rem',
+                    fontWeight: 600,
+                    bgcolor: insightDelta > 0 ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)',
+                    color: insightDelta > 0 ? '#10b981' : '#d97706',
+                    '& .MuiChip-label': { px: 1.5 },
+                  }}
+                />
+              )}
             </Box>
 
             {/* Status tiles grid */}

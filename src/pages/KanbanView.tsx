@@ -114,6 +114,7 @@ export default function KanbanView() {
   const [selectedStoryId, setSelectedStoryId] = useState<string>('')
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
   const [selectedAssignee, setSelectedAssignee] = useState<string>('all')
+  const [progressMode, setProgressMode] = useState<'tasks' | 'points'>('tasks')
 
   useEffect(() => {
     if (project?.id) {
@@ -304,6 +305,16 @@ export default function KanbanView() {
       .reduce((sum, story) => sum + (story.story_points || 0), 0)
   }
 
+  const doneCount = filteredStories.filter((s) => s.status === 'done').length
+  const totalCount = filteredStories.length
+  const tasksProgress = totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0
+  const pointsProgress = getTotalPoints() > 0 ? Math.round((getCompletedPoints() / getTotalPoints()) * 100) : 0
+  const activeProgress = progressMode === 'tasks' ? tasksProgress : pointsProgress
+  const progressBarGradient = progressMode === 'tasks'
+    ? 'linear-gradient(90deg, #818cf8 0%, #6366f1 100%)'
+    : 'linear-gradient(90deg, #fde68a 0%, #f59e0b 100%)'
+  const progressLabelColor = progressMode === 'tasks' ? '#6366f1' : '#d97706'
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
@@ -463,10 +474,111 @@ export default function KanbanView() {
             <Typography variant="caption" color="text.secondary" fontWeight={600}>
               Progresso
             </Typography>
-            <Typography variant="h5" fontWeight={800} sx={{ color: '#8b5cf6' }}>
-              {getTotalPoints() > 0 ? Math.round((getCompletedPoints() / getTotalPoints()) * 100) : 0}%
+            <Typography variant="h5" fontWeight={800} sx={{ color: progressLabelColor }}>
+              {activeProgress}%
             </Typography>
           </Box>
+        </Box>
+
+        {/* Progress bar + mode toggle */}
+        <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid rgba(99, 102, 241, 0.1)' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+            <Typography variant="caption" color="text.secondary">
+              <strong style={{ color: progressLabelColor }}>{activeProgress}%</strong>
+              {'  '}
+              {progressMode === 'tasks'
+                ? `${doneCount} de ${totalCount} tarefas concluídas`
+                : `${getCompletedPoints()} de ${getTotalPoints()} pontos concluídos`}
+            </Typography>
+            <ToggleButtonGroup
+              value={progressMode}
+              exclusive
+              onChange={(_, v) => v && setProgressMode(v)}
+              size="small"
+              sx={{
+                bgcolor: 'rgba(99, 102, 241, 0.07)',
+                borderRadius: 2,
+                p: 0.4,
+                '& .MuiToggleButtonGroup-grouped': {
+                  border: '0 !important',
+                  borderRadius: '10px !important',
+                  px: 1.5,
+                  py: 0.3,
+                  fontSize: '0.72rem',
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  color: 'text.secondary',
+                  minWidth: 64,
+                  '&.Mui-selected': {
+                    bgcolor: 'background.paper',
+                    color: '#6366f1',
+                    boxShadow: '0 1px 4px rgba(99, 102, 241, 0.2)',
+                  },
+                  '&:hover': { bgcolor: 'rgba(99, 102, 241, 0.05)' },
+                },
+              }}
+            >
+              <ToggleButton value="tasks">Tarefas</ToggleButton>
+              <ToggleButton value="points">Pontos</ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+          {/* Glossy progress bar */}
+          <Box
+            sx={{
+              position: 'relative',
+              height: 8,
+              borderRadius: 4,
+              bgcolor: 'rgba(0, 0, 0, 0.07)',
+              overflow: 'hidden',
+            }}
+          >
+            <Box
+              sx={{
+                position: 'absolute',
+                inset: 0,
+                right: 'auto',
+                width: `${activeProgress}%`,
+                borderRadius: 4,
+                background: progressBarGradient,
+                transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  inset: 0,
+                  borderRadius: 'inherit',
+                  background: 'linear-gradient(to bottom, rgba(255,255,255,0.28) 0%, transparent 55%)',
+                  pointerEvents: 'none',
+                },
+              }}
+            />
+          </Box>
+
+          {/* Insight chip — visible when the two metrics diverge meaningfully */}
+          {totalCount > 0 && getTotalPoints() > 0 &&
+            Math.abs(pointsProgress - tasksProgress) >= 10 && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1.5 }}>
+              <Chip
+                label={
+                  pointsProgress > tasksProgress
+                    ? `📈 Pontos (${pointsProgress}%) à frente das tarefas (${tasksProgress}%) — trabalho mais denso priorizado`
+                    : `⚠️ Tarefas (${tasksProgress}%) à frente dos pontos (${pointsProgress}%) — itens mais pesados ainda pendentes`
+                }
+                size="small"
+                sx={{
+                  fontSize: '0.68rem',
+                  fontWeight: 600,
+                  height: 'auto',
+                  py: 0.5,
+                  '& .MuiChip-label': { whiteSpace: 'normal', textAlign: 'center' },
+                  bgcolor: pointsProgress > tasksProgress
+                    ? 'rgba(16, 185, 129, 0.08)'
+                    : 'rgba(245, 158, 11, 0.08)',
+                  color: pointsProgress > tasksProgress ? '#059669' : '#d97706',
+                  border: `1px solid ${pointsProgress > tasksProgress ? 'rgba(16, 185, 129, 0.25)' : 'rgba(245, 158, 11, 0.25)'}`,
+                }}
+              />
+            </Box>
+          )}
         </Box>
       </Box>
 

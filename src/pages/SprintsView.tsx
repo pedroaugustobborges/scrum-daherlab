@@ -8,12 +8,15 @@ import {
   CardContent,
   Chip,
   Stack,
-  LinearProgress,
   Grid,
   IconButton,
+  ToggleButton,
+  ToggleButtonGroup,
 } from '@mui/material'
 import {
   Add,
+  CheckCircle,
+  Functions,
   SpaceDashboard,
   CalendarToday,
   TrendingUp,
@@ -65,6 +68,7 @@ export default function SprintsView() {
   const [sprintToEdit, setSprintToEdit] = useState<Sprint | null>(null)
   const [activeSprint, setActiveSprint] = useState<Sprint | null>(null)
   const [activeSprintStories, setActiveSprintStories] = useState<any[]>([])
+  const [progressMode, setProgressMode] = useState<'tasks' | 'points'>('tasks')
 
   useEffect(() => {
     if (project?.id) {
@@ -147,12 +151,6 @@ export default function SprintsView() {
   const handleCloseEditSprint = () => {
     setEditSprintOpen(false)
     setSprintToEdit(null)
-  }
-
-  const calculateProgress = (sprintId: string) => {
-    const stats = sprintStats[sprintId]
-    if (!stats || stats.totalPoints === 0) return 0
-    return Math.round((stats.completedPoints / stats.totalPoints) * 100)
   }
 
   const getTotalStats = () => {
@@ -319,11 +317,53 @@ export default function SprintsView() {
           </Button>
         </Box>
       ) : (
-        <Stack spacing={2}>
+        <Box>
+          {/* Progress mode toggle */}
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 1.5, mb: 2 }}>
+            <Typography variant="caption" color="text.secondary" fontWeight={600}>
+              Progresso por
+            </Typography>
+            <ToggleButtonGroup
+              value={progressMode}
+              exclusive
+              onChange={(_, v) => v && setProgressMode(v)}
+              size="small"
+              sx={{
+                bgcolor: 'rgba(99, 102, 241, 0.07)',
+                borderRadius: 2,
+                p: 0.4,
+                '& .MuiToggleButtonGroup-grouped': {
+                  border: '0 !important',
+                  borderRadius: '10px !important',
+                  px: 1.5,
+                  py: 0.3,
+                  fontSize: '0.72rem',
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  color: 'text.secondary',
+                  minWidth: 64,
+                  '&.Mui-selected': {
+                    bgcolor: 'background.paper',
+                    color: '#6366f1',
+                    boxShadow: '0 1px 4px rgba(99, 102, 241, 0.2)',
+                  },
+                  '&:hover': { bgcolor: 'rgba(99, 102, 241, 0.05)' },
+                },
+              }}
+            >
+              <ToggleButton value="tasks">Tarefas</ToggleButton>
+              <ToggleButton value="points">Pontos</ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+
+          <Stack spacing={2}>
           {sprints.map((sprint) => {
             const stats = sprintStats[sprint.id] || { totalStories: 0, completedStories: 0, totalPoints: 0, completedPoints: 0 }
-            const progress = calculateProgress(sprint.id)
+            const tasksProgress = stats.totalStories === 0 ? 0 : Math.round((stats.completedStories / stats.totalStories) * 100)
+            const pointsProgress = stats.totalPoints === 0 ? 0 : Math.round((stats.completedPoints / stats.totalPoints) * 100)
+            const progress = progressMode === 'tasks' ? tasksProgress : pointsProgress
             const statusInfo = sprintStatusConfig[sprint.status] || sprintStatusConfig.planning
+            const delta = pointsProgress - tasksProgress
 
             return (
               <Card
@@ -413,34 +453,116 @@ export default function SprintsView() {
                       </Box>
                     </Box>
 
-                    <Box sx={{ textAlign: 'right', minWidth: 100 }}>
-                      <Typography variant="h4" fontWeight={800} sx={{ color: statusInfo.color }}>
-                        {progress}%
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {stats.completedPoints}/{stats.totalPoints} pts
-                      </Typography>
+                    {/* Right: dual metric stats */}
+                    <Box sx={{ textAlign: 'right', minWidth: 130 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 0.75, mb: 0.5 }}>
+                        <CheckCircle sx={{ fontSize: 13, color: '#6366f1' }} />
+                        <Typography variant="caption" fontWeight={600} sx={{ color: '#6366f1' }}>Tarefas</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {stats.completedStories}/{stats.totalStories}
+                        </Typography>
+                        <Typography variant="body2" fontWeight={800} sx={{ color: '#6366f1', minWidth: 38, textAlign: 'right' }}>
+                          {tasksProgress}%
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 0.75 }}>
+                        <Functions sx={{ fontSize: 13, color: '#d97706' }} />
+                        <Typography variant="caption" fontWeight={600} sx={{ color: '#d97706' }}>Pontos</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {stats.completedPoints}/{stats.totalPoints}
+                        </Typography>
+                        <Typography variant="body2" fontWeight={800} sx={{ color: '#d97706', minWidth: 38, textAlign: 'right' }}>
+                          {pointsProgress}%
+                        </Typography>
+                      </Box>
+                      {/* Insight badge */}
+                      {stats.totalStories > 0 && stats.totalPoints > 0 && Math.abs(delta) >= 10 && (
+                        <Chip
+                          label={delta > 0 ? `+${delta}pts` : `${delta}pts`}
+                          size="small"
+                          sx={{
+                            mt: 0.75,
+                            fontSize: '0.62rem',
+                            fontWeight: 700,
+                            height: 18,
+                            bgcolor: delta > 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+                            color: delta > 0 ? '#059669' : '#d97706',
+                            border: `1px solid ${delta > 0 ? 'rgba(16,185,129,0.25)' : 'rgba(245,158,11,0.25)'}`,
+                          }}
+                        />
+                      )}
                     </Box>
                   </Box>
 
-                  <LinearProgress
-                    variant="determinate"
-                    value={progress}
-                    sx={{
-                      height: 8,
-                      borderRadius: 4,
-                      bgcolor: `${statusInfo.color}15`,
-                      '& .MuiLinearProgress-bar': {
-                        bgcolor: statusInfo.color,
+                  {/* Dual progress bars */}
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+                    {/* Tasks bar — indigo */}
+                    <Box
+                      sx={{
+                        position: 'relative',
+                        height: 7,
                         borderRadius: 4,
-                      },
-                    }}
-                  />
+                        bgcolor: 'rgba(0,0,0,0.07)',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          inset: 0,
+                          right: 'auto',
+                          width: `${tasksProgress}%`,
+                          borderRadius: 4,
+                          background: 'linear-gradient(90deg, #818cf8 0%, #6366f1 100%)',
+                          transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                          '&::after': {
+                            content: '""',
+                            position: 'absolute',
+                            inset: 0,
+                            borderRadius: 'inherit',
+                            background: 'linear-gradient(to bottom, rgba(255,255,255,0.28) 0%, transparent 55%)',
+                            pointerEvents: 'none',
+                          },
+                        }}
+                      />
+                    </Box>
+                    {/* Points bar — amber */}
+                    <Box
+                      sx={{
+                        position: 'relative',
+                        height: 7,
+                        borderRadius: 4,
+                        bgcolor: 'rgba(0,0,0,0.07)',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          inset: 0,
+                          right: 'auto',
+                          width: `${pointsProgress}%`,
+                          borderRadius: 4,
+                          background: 'linear-gradient(90deg, #fde68a 0%, #f59e0b 100%)',
+                          transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                          '&::after': {
+                            content: '""',
+                            position: 'absolute',
+                            inset: 0,
+                            borderRadius: 'inherit',
+                            background: 'linear-gradient(to bottom, rgba(255,255,255,0.28) 0%, transparent 55%)',
+                            pointerEvents: 'none',
+                          },
+                        }}
+                      />
+                    </Box>
+                  </Box>
                 </CardContent>
               </Card>
             )
           })}
-        </Stack>
+          </Stack>
+        </Box>
       )}
 
       {/* Sprint Details Modal */}

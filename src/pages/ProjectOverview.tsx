@@ -1,21 +1,26 @@
+import { useState, useEffect } from 'react'
 import {
   Box,
   Typography,
   Grid,
   Paper,
   Chip,
-  LinearProgress,
+  ToggleButton,
+  ToggleButtonGroup,
   alpha,
 } from '@mui/material'
 import {
   Assignment,
   CalendarToday,
+  CheckCircle,
+  Functions,
   Groups,
   TrendingUp,
   Speed,
   Timeline,
 } from '@mui/icons-material'
 import { useProjectContext } from './ProjectDetail'
+import { supabase } from '@/lib/supabase'
 
 export default function ProjectOverview() {
   const { project, config } = useProjectContext()
@@ -30,19 +35,45 @@ export default function ProjectOverview() {
     })
   }
 
-  const calculateProgress = () => {
-    if (!project.start_date || !project.end_date) return 0
-    const start = new Date(project.start_date).getTime()
-    const end = new Date(project.end_date).getTime()
-    const now = Date.now()
+  const [progressMode, setProgressMode] = useState<'tasks' | 'points'>('tasks')
+  const [taskStats, setTaskStats] = useState({
+    total: 0,
+    completed: 0,
+    totalPoints: 0,
+    completedPoints: 0,
+  })
 
-    if (now <= start) return 0
-    if (now >= end) return 100
+  useEffect(() => {
+    if (!project?.id) return
+    supabase
+      .from('tasks')
+      .select('status, story_points')
+      .eq('project_id', project.id)
+      .then(({ data }) => {
+        if (!data) return
+        setTaskStats({
+          total: data.length,
+          completed: data.filter((t) => t.status === 'done').length,
+          totalPoints: data.reduce((s, t) => s + (t.story_points || 0), 0),
+          completedPoints: data
+            .filter((t) => t.status === 'done')
+            .reduce((s, t) => s + (t.story_points || 0), 0),
+        })
+      })
+  }, [project?.id])
 
-    return Math.round(((now - start) / (end - start)) * 100)
-  }
-
-  const progress = calculateProgress()
+  const tasksProgress =
+    taskStats.total > 0 ? Math.round((taskStats.completed / taskStats.total) * 100) : 0
+  const pointsProgress =
+    taskStats.totalPoints > 0
+      ? Math.round((taskStats.completedPoints / taskStats.totalPoints) * 100)
+      : 0
+  const progress = progressMode === 'tasks' ? tasksProgress : pointsProgress
+  const progressColor = progressMode === 'tasks' ? '#6366f1' : '#f59e0b'
+  const progressBarGradient =
+    progressMode === 'tasks'
+      ? 'linear-gradient(90deg, #818cf8 0%, #6366f1 100%)'
+      : 'linear-gradient(90deg, #fde68a 0%, #f59e0b 100%)'
 
   const methodologyInfo = {
     agile: {
@@ -95,61 +126,142 @@ export default function ProjectOverview() {
                   width: 48,
                   height: 48,
                   borderRadius: 2,
-                  bgcolor: 'rgba(99, 102, 241, 0.1)',
+                  bgcolor: alpha(progressColor, 0.1),
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#6366f1',
+                  color: progressColor,
+                  transition: 'all 0.3s ease',
                 }}
               >
-                <Assignment />
+                {progressMode === 'tasks' ? <CheckCircle /> : <Functions />}
               </Box>
               <Box sx={{ flex: 1 }}>
                 <Typography variant="h6" fontWeight={700}>
                   Progresso do Projeto
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Baseado no cronograma planejado
+                  {progressMode === 'tasks'
+                    ? 'Baseado nas tarefas concluídas'
+                    : 'Baseado nos pontos concluídos'}
                 </Typography>
               </Box>
-              <Chip
-                label={`${progress}%`}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <ToggleButtonGroup
+                  value={progressMode}
+                  exclusive
+                  onChange={(_, v) => v && setProgressMode(v)}
+                  size="small"
+                  sx={{
+                    bgcolor: 'rgba(99, 102, 241, 0.07)',
+                    borderRadius: 2,
+                    p: 0.4,
+                    '& .MuiToggleButtonGroup-grouped': {
+                      border: '0 !important',
+                      borderRadius: '10px !important',
+                      px: 1.5,
+                      py: 0.3,
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      color: 'text.secondary',
+                      minWidth: 64,
+                      '&.Mui-selected': {
+                        bgcolor: 'background.paper',
+                        color: '#6366f1',
+                        boxShadow: '0 1px 4px rgba(99, 102, 241, 0.2)',
+                      },
+                      '&:hover': { bgcolor: 'rgba(99, 102, 241, 0.05)' },
+                    },
+                  }}
+                >
+                  <ToggleButton value="tasks">Tarefas</ToggleButton>
+                  <ToggleButton value="points">Pontos</ToggleButton>
+                </ToggleButtonGroup>
+                <Chip
+                  label={`${progress}%`}
+                  sx={{
+                    bgcolor: alpha(progressColor, 0.1),
+                    color: progressColor,
+                    fontWeight: 700,
+                    fontSize: '1rem',
+                    transition: 'all 0.3s ease',
+                  }}
+                />
+              </Box>
+            </Box>
+
+            {/* Glossy progress bar */}
+            <Box
+              sx={{
+                position: 'relative',
+                height: 12,
+                borderRadius: 6,
+                bgcolor: 'rgba(0, 0, 0, 0.07)',
+                overflow: 'hidden',
+              }}
+            >
+              <Box
                 sx={{
-                  bgcolor: alpha('#6366f1', 0.1),
-                  color: '#6366f1',
-                  fontWeight: 700,
-                  fontSize: '1rem',
+                  position: 'absolute',
+                  inset: 0,
+                  right: 'auto',
+                  width: `${progress}%`,
+                  borderRadius: 6,
+                  background: progressBarGradient,
+                  transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                  '&::after': {
+                    content: '""',
+                    position: 'absolute',
+                    inset: 0,
+                    borderRadius: 'inherit',
+                    background:
+                      'linear-gradient(to bottom, rgba(255,255,255,0.28) 0%, transparent 55%)',
+                    pointerEvents: 'none',
+                  },
                 }}
               />
             </Box>
 
-            <LinearProgress
-              variant="determinate"
-              value={progress}
-              sx={{
-                height: 12,
-                borderRadius: 6,
-                bgcolor: 'rgba(99, 102, 241, 0.1)',
-                '& .MuiLinearProgress-bar': {
-                  borderRadius: 6,
-                  bgcolor: '#6366f1',
-                },
-              }}
-            />
+            {/* Insight chip — visible whenever the two metrics diverge meaningfully */}
+            {taskStats.total > 0 && taskStats.totalPoints > 0 &&
+              Math.abs(pointsProgress - tasksProgress) >= 10 && (
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1.5 }}>
+                <Chip
+                  label={
+                    pointsProgress > tasksProgress
+                      ? `📈 Tarefas mais pesadas priorizadas — pontos (${pointsProgress}%) à frente das tarefas (${tasksProgress}%)`
+                      : `⚠️ Muitas tarefas leves concluídas — pontos (${pointsProgress}%) atrás das tarefas (${tasksProgress}%)`
+                  }
+                  size="small"
+                  sx={{
+                    fontSize: '0.68rem',
+                    fontWeight: 600,
+                    height: 'auto',
+                    py: 0.5,
+                    '& .MuiChip-label': { whiteSpace: 'normal', textAlign: 'center' },
+                    bgcolor: pointsProgress > tasksProgress
+                      ? 'rgba(16, 185, 129, 0.08)'
+                      : 'rgba(245, 158, 11, 0.08)',
+                    color: pointsProgress > tasksProgress ? '#059669' : '#d97706',
+                    border: `1px solid ${pointsProgress > tasksProgress ? 'rgba(16, 185, 129, 0.25)' : 'rgba(245, 158, 11, 0.25)'}`,
+                  }}
+                />
+              </Box>
+            )}
 
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                mt: 2,
-              }}
-            >
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <CalendarToday sx={{ fontSize: 18, color: 'text.secondary' }} />
                 <Typography variant="body2" color="text.secondary">
                   Início: <strong>{formatDate(project.start_date)}</strong>
                 </Typography>
               </Box>
+              <Typography variant="caption" fontWeight={600} sx={{ color: progressColor }}>
+                {progressMode === 'tasks'
+                  ? `${taskStats.completed} / ${taskStats.total} tarefas`
+                  : `${taskStats.completedPoints} / ${taskStats.totalPoints} pts`}
+              </Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <CalendarToday sx={{ fontSize: 18, color: 'text.secondary' }} />
                 <Typography variant="body2" color="text.secondary">

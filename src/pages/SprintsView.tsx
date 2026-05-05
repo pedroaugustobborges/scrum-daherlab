@@ -10,8 +10,6 @@ import {
   Stack,
   Grid,
   IconButton,
-  ToggleButton,
-  ToggleButtonGroup,
 } from '@mui/material'
 import {
   Add,
@@ -68,7 +66,6 @@ export default function SprintsView() {
   const [sprintToEdit, setSprintToEdit] = useState<Sprint | null>(null)
   const [activeSprint, setActiveSprint] = useState<Sprint | null>(null)
   const [activeSprintStories, setActiveSprintStories] = useState<any[]>([])
-  const [progressMode, setProgressMode] = useState<'tasks' | 'points'>('tasks')
 
   useEffect(() => {
     if (project?.id) {
@@ -317,51 +314,11 @@ export default function SprintsView() {
           </Button>
         </Box>
       ) : (
-        <Box>
-          {/* Progress mode toggle */}
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 1.5, mb: 2 }}>
-            <Typography variant="caption" color="text.secondary" fontWeight={600}>
-              Progresso por
-            </Typography>
-            <ToggleButtonGroup
-              value={progressMode}
-              exclusive
-              onChange={(_, v) => v && setProgressMode(v)}
-              size="small"
-              sx={{
-                bgcolor: 'rgba(99, 102, 241, 0.07)',
-                borderRadius: 2,
-                p: 0.4,
-                '& .MuiToggleButtonGroup-grouped': {
-                  border: '0 !important',
-                  borderRadius: '10px !important',
-                  px: 1.5,
-                  py: 0.3,
-                  fontSize: '0.72rem',
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  color: 'text.secondary',
-                  minWidth: 64,
-                  '&.Mui-selected': {
-                    bgcolor: 'background.paper',
-                    color: '#6366f1',
-                    boxShadow: '0 1px 4px rgba(99, 102, 241, 0.2)',
-                  },
-                  '&:hover': { bgcolor: 'rgba(99, 102, 241, 0.05)' },
-                },
-              }}
-            >
-              <ToggleButton value="tasks">Tarefas</ToggleButton>
-              <ToggleButton value="points">Pontos</ToggleButton>
-            </ToggleButtonGroup>
-          </Box>
-
-          <Stack spacing={2}>
+        <Stack spacing={2}>
           {sprints.map((sprint) => {
             const stats = sprintStats[sprint.id] || { totalStories: 0, completedStories: 0, totalPoints: 0, completedPoints: 0 }
             const tasksProgress = stats.totalStories === 0 ? 0 : Math.round((stats.completedStories / stats.totalStories) * 100)
             const pointsProgress = stats.totalPoints === 0 ? 0 : Math.round((stats.completedPoints / stats.totalPoints) * 100)
-            const progress = progressMode === 'tasks' ? tasksProgress : pointsProgress
             const statusInfo = sprintStatusConfig[sprint.status] || sprintStatusConfig.planning
             const delta = pointsProgress - tasksProgress
 
@@ -561,8 +518,7 @@ export default function SprintsView() {
               </Card>
             )
           })}
-          </Stack>
-        </Box>
+        </Stack>
       )}
 
       {/* Sprint Details Modal */}

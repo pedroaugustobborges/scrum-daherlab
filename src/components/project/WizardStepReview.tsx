@@ -13,6 +13,7 @@ import {
   CalendarMonth,
   LinearScale,
   Check,
+  Insights,
 } from '@mui/icons-material'
 import type { WizardData, Methodology } from '@/types/hybrid'
 
@@ -233,6 +234,42 @@ export default function WizardStepReview({ data }: WizardStepReviewProps) {
               </Typography>
               <Typography variant="body2" fontWeight={600}>
                 {formatDate(data.end_date)}
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Strategic Planning */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box
+              sx={{
+                width: 36,
+                height: 36,
+                borderRadius: 1.5,
+                bgcolor: data.strategic_planning
+                  ? 'rgba(16, 185, 129, 0.1)'
+                  : 'rgba(107, 114, 128, 0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: data.strategic_planning ? '#10b981' : '#6b7280',
+              }}
+            >
+              <Insights fontSize="small" />
+            </Box>
+            <Box>
+              <Typography variant="caption" color="text.secondary">
+                Plan. Estratégico
+              </Typography>
+              <Typography
+                variant="body2"
+                fontWeight={600}
+                sx={{ color: data.strategic_planning ? '#10b981' : '#6b7280' }}
+              >
+                {data.strategic_planning === null
+                  ? 'Não informado'
+                  : data.strategic_planning
+                  ? 'Sim'
+                  : 'Não'}
               </Typography>
             </Box>
           </Box>

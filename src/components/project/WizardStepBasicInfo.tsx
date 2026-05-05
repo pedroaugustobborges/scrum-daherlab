@@ -13,12 +13,14 @@ import {
   Checkbox,
   ListItemText,
   CircularProgress,
+  alpha,
 } from '@mui/material'
 import {
   Assignment,
   Description,
   CalendarToday,
   Groups,
+  Insights,
   TrendingUp,
 } from '@mui/icons-material'
 import toast from 'react-hot-toast'
@@ -128,25 +130,116 @@ export default function WizardStepBasicInfo({
       />
 
       {/* Description */}
-      <TextField
-        fullWidth
-        label="Descrição"
-        value={data.description}
-        onChange={(e) => onChange({ description: e.target.value })}
-        multiline
-        rows={3}
-        placeholder="Descreva os objetivos e escopo do projeto..."
-        InputProps={{
-          startAdornment: (
-            <InputAdornment
-              position="start"
-              sx={{ alignSelf: 'flex-start', mt: 2 }}
-            >
-              <Description sx={{ color: '#6366f1' }} />
-            </InputAdornment>
-          ),
-        }}
-      />
+      <Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+          <Description sx={{ color: '#6366f1', fontSize: 20 }} />
+          <Typography variant="body2" fontWeight={600} color="text.secondary">
+            Descrição
+          </Typography>
+          <Chip
+            label="Obrigatório"
+            size="small"
+            sx={{
+              height: 20,
+              fontSize: '0.65rem',
+              bgcolor: 'rgba(239, 68, 68, 0.1)',
+              color: '#ef4444',
+            }}
+          />
+        </Box>
+        <TextField
+          fullWidth
+          value={data.description}
+          onChange={(e) => onChange({ description: e.target.value })}
+          multiline
+          rows={3}
+          placeholder="Descreva os objetivos e escopo do projeto..."
+          error={!data.description.trim()}
+          helperText={
+            !data.description.trim()
+              ? 'Uma boa descrição ajuda o time a entender o propósito do projeto.'
+              : ''
+          }
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              '&.Mui-error fieldset': { borderColor: 'rgba(239,68,68,0.5)' },
+            },
+          }}
+        />
+      </Box>
+
+      {/* Strategic Planning */}
+      <Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+          <Insights sx={{ color: '#8b5cf6', fontSize: 20 }} />
+          <Typography variant="body2" fontWeight={600} color="text.secondary">
+            Planejamento Estratégico
+          </Typography>
+          <Chip
+            label="Obrigatório"
+            size="small"
+            sx={{
+              height: 20,
+              fontSize: '0.65rem',
+              bgcolor: 'rgba(239, 68, 68, 0.1)',
+              color: '#ef4444',
+            }}
+          />
+        </Box>
+        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+          {[
+            {
+              value: true,
+              label: 'Sim',
+              description: 'Faz parte do planejamento estratégico da organização',
+              color: '#10b981',
+            },
+            {
+              value: false,
+              label: 'Não',
+              description: 'Projeto operacional ou tático',
+              color: '#6b7280',
+            },
+          ].map(({ value, label, description, color }) => {
+            const selected = data.strategic_planning === value
+            return (
+              <Box
+                key={String(value)}
+                onClick={() => onChange({ strategic_planning: value })}
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  border: '2px solid',
+                  borderColor: selected ? color : 'rgba(0,0,0,0.12)',
+                  bgcolor: selected ? alpha(color, 0.06) : 'transparent',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    borderColor: color,
+                    bgcolor: alpha(color, 0.04),
+                  },
+                }}
+              >
+                <Typography
+                  variant="body1"
+                  fontWeight={700}
+                  sx={{ color: selected ? color : 'text.primary', mb: 0.5 }}
+                >
+                  {label}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {description}
+                </Typography>
+              </Box>
+            )
+          })}
+        </Box>
+        {data.strategic_planning === null && (
+          <Typography variant="caption" color="error" sx={{ display: 'block', mt: 1 }}>
+            Selecione uma opção para continuar.
+          </Typography>
+        )}
+      </Box>
 
       {/* Status */}
       <TextField

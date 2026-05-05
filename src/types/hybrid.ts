@@ -505,6 +505,7 @@ export interface WizardData {
   end_date: string;
   selectedTeams: string[];
   status: string;
+  strategic_planning: boolean | null;
 
   // Step 2: Methodology
   methodology: Methodology;

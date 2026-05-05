@@ -51,6 +51,7 @@ const initialWizardData: WizardData = {
   end_date: '',
   selectedTeams: [],
   status: 'active',
+  strategic_planning: null,
   // Step 2
   methodology: 'agile',
   // Step 3
@@ -134,7 +135,12 @@ export default function ProjectCreationWizard({
   const isStepValid = (step: number): boolean => {
     switch (step) {
       case 0:
-        return wizardData.name.trim().length > 0 && wizardData.selectedTeams.length > 0
+        return (
+          wizardData.name.trim().length > 0 &&
+          wizardData.description.trim().length > 0 &&
+          wizardData.strategic_planning !== null &&
+          wizardData.selectedTeams.length > 0
+        )
       case 1:
         return !!wizardData.methodology
       case 2:
@@ -173,6 +179,7 @@ export default function ProjectCreationWizard({
             name: wizardData.name,
             description: wizardData.description,
             status: wizardData.status,
+            strategic_planning: wizardData.strategic_planning,
             start_date: wizardData.start_date || null,
             end_date: wizardData.end_date || null,
             created_by: user.id,

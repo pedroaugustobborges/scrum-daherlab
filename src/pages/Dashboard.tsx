@@ -29,8 +29,8 @@ import {
   ResponsiveContainer,
   Tooltip,
   Legend,
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -1055,59 +1055,66 @@ export default function Dashboard() {
             ) : (
               <Box sx={{ height: 250 }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={productivityData}>
+                  <AreaChart data={productivityData}>
+                    <defs>
+                      {/* Stroke gradients — horizontal, light shade → rich shade */}
+                      <linearGradient id="prod-completed-stroke" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%"   stopColor="#6ee7b7" />
+                        <stop offset="100%" stopColor="#059669" />
+                      </linearGradient>
+                      <linearGradient id="prod-created-stroke" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%"   stopColor="#a5b4fc" />
+                        <stop offset="100%" stopColor="#4f46e5" />
+                      </linearGradient>
+                      {/* Fill gradients — vertical, semi-transparent area under each line */}
+                      <linearGradient id="prod-completed-fill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%"   stopColor="#10b981" stopOpacity={0.18} />
+                        <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="prod-created-fill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%"   stopColor="#6366f1" stopOpacity={0.15} />
+                        <stop offset="100%" stopColor="#6366f1" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+
                     <CartesianGrid
                       strokeDasharray="3 3"
-                      stroke={
-                        isDarkMode
-                          ? "rgba(255,255,255,0.08)"
-                          : "rgba(0,0,0,0.06)"
-                      }
+                      stroke={isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}
                     />
                     <XAxis
                       dataKey="label"
                       axisLine={false}
                       tickLine={false}
-                      tick={{
-                        fill: isDarkMode ? "#94a3b8" : "#6b7280",
-                        fontSize: 11,
-                      }}
+                      tick={{ fill: isDarkMode ? "#94a3b8" : "#6b7280", fontSize: 11 }}
                       interval={
                         productivityPeriod === "year" ||
                         productivityPeriod === "triennium" ||
                         productivityPeriod === "quinquennium"
-                          ? 1
-                          : 0
+                          ? 1 : 0
                       }
                       angle={
                         productivityPeriod === "quarter" ||
                         productivityPeriod === "triennium" ||
                         productivityPeriod === "quinquennium"
-                          ? -45
-                          : 0
+                          ? -45 : 0
                       }
                       textAnchor={
                         productivityPeriod === "quarter" ||
                         productivityPeriod === "triennium" ||
                         productivityPeriod === "quinquennium"
-                          ? "end"
-                          : "middle"
+                          ? "end" : "middle"
                       }
                       height={
                         productivityPeriod === "quarter" ||
                         productivityPeriod === "triennium" ||
                         productivityPeriod === "quinquennium"
-                          ? 50
-                          : 30
+                          ? 50 : 30
                       }
                     />
                     <YAxis
                       axisLine={false}
                       tickLine={false}
-                      tick={{
-                        fill: isDarkMode ? "#94a3b8" : "#6b7280",
-                        fontSize: 12,
-                      }}
+                      tick={{ fill: isDarkMode ? "#94a3b8" : "#6b7280", fontSize: 12 }}
                     />
                     <Tooltip
                       contentStyle={{
@@ -1117,8 +1124,8 @@ export default function Dashboard() {
                           : "1px solid rgba(0,0,0,0.08)",
                         borderRadius: 12,
                         boxShadow: isDarkMode
-                          ? "0 10px 25px rgba(0, 0, 0, 0.4)"
-                          : "0 10px 25px rgba(0, 0, 0, 0.1)",
+                          ? "0 10px 25px rgba(0,0,0,0.4)"
+                          : "0 10px 25px rgba(0,0,0,0.1)",
                         padding: "12px 16px",
                         color: isDarkMode ? "#f1f5f9" : "#1e293b",
                       }}
@@ -1127,54 +1134,56 @@ export default function Dashboard() {
                         name === "completed" ? "Concluídas" : "Criadas",
                       ]}
                     />
+                    {/* Custom legend with mini gradient bars — same glass style as donut legend */}
                     <Legend
-                      formatter={(value) => (
-                        <span
-                          style={{
-                            color: isDarkMode ? "#94a3b8" : "#4b5563",
-                            fontSize: 13,
-                            fontWeight: 500,
-                          }}
-                        >
-                          {value === "completed" ? "Concluídas" : "Criadas"}
-                        </span>
+                      content={() => (
+                        <Box sx={{ display: "flex", justifyContent: "center", gap: 3, mt: 1 }}>
+                          {[
+                            { label: "Concluídas", gradient: "linear-gradient(90deg, #6ee7b7 0%, #059669 100%)", fill: "rgba(16,185,129,0.15)" },
+                            { label: "Criadas",    gradient: "linear-gradient(90deg, #a5b4fc 0%, #4f46e5 100%)", fill: "rgba(99,102,241,0.12)" },
+                          ].map(({ label, gradient, fill }) => (
+                            <Box key={label} sx={{ display: "flex", alignItems: "center", gap: 0.75, px: 1.5, py: 0.4, borderRadius: 2, bgcolor: fill }}>
+                              <Box sx={{ width: 20, height: 3, borderRadius: 2, background: gradient, boxShadow: `0 1px 3px ${fill}` }} />
+                              <Typography variant="caption" sx={{ color: isDarkMode ? "#94a3b8" : "#4b5563", fontWeight: 600, fontSize: "0.72rem" }}>
+                                {label}
+                              </Typography>
+                            </Box>
+                          ))}
+                        </Box>
                       )}
                     />
-                    <Line
+
+                    <Area
                       type="monotone"
                       dataKey="completed"
-                      stroke="#10b981"
+                      stroke="url(#prod-completed-stroke)"
                       strokeWidth={2.5}
+                      fill="url(#prod-completed-fill)"
+                      fillOpacity={1}
                       dot={{
-                        fill: "#10b981",
-                        strokeWidth: 0,
-                        r:
-                          productivityPeriod === "triennium" ||
-                          productivityPeriod === "year" ||
-                          productivityPeriod === "quinquennium"
-                            ? 3
-                            : 4,
+                        fill: "#059669",
+                        stroke: "#fff",
+                        strokeWidth: 1.5,
+                        r: productivityPeriod === "triennium" || productivityPeriod === "year" || productivityPeriod === "quinquennium" ? 3 : 4,
                       }}
-                      activeDot={{ r: 6, stroke: "#fff", strokeWidth: 2 }}
+                      activeDot={{ r: 6, fill: "#059669", stroke: "#fff", strokeWidth: 2 }}
                     />
-                    <Line
+                    <Area
                       type="monotone"
                       dataKey="created"
-                      stroke="#6366f1"
+                      stroke="url(#prod-created-stroke)"
                       strokeWidth={2.5}
+                      fill="url(#prod-created-fill)"
+                      fillOpacity={1}
                       dot={{
-                        fill: "#6366f1",
-                        strokeWidth: 0,
-                        r:
-                          productivityPeriod === "triennium" ||
-                          productivityPeriod === "year" ||
-                          productivityPeriod === "quinquennium"
-                            ? 3
-                            : 4,
+                        fill: "#4f46e5",
+                        stroke: "#fff",
+                        strokeWidth: 1.5,
+                        r: productivityPeriod === "triennium" || productivityPeriod === "year" || productivityPeriod === "quinquennium" ? 3 : 4,
                       }}
-                      activeDot={{ r: 6, stroke: "#fff", strokeWidth: 2 }}
+                      activeDot={{ r: 6, fill: "#4f46e5", stroke: "#fff", strokeWidth: 2 }}
                     />
-                  </LineChart>
+                  </AreaChart>
                 </ResponsiveContainer>
               </Box>
             )}

@@ -10,6 +10,8 @@ import {
   alpha,
   Avatar,
   Skeleton,
+  Dialog,
+  Tooltip,
 } from "@mui/material";
 import {
   Assignment,
@@ -65,6 +67,10 @@ export default function ProjectOverview() {
 
   const [members, setMembers] = useState<ProjectMember[]>([]);
   const [membersLoading, setMembersLoading] = useState(false);
+  const [memberTaskCounts, setMemberTaskCounts] = useState<
+    Record<string, number>
+  >({});
+  const [medalModal, setMedalModal] = useState<ProjectMember | null>(null);
 
   useEffect(() => {
     if (!project?.id) return;
@@ -149,6 +155,24 @@ export default function ProjectOverview() {
     fetchMembers();
   }, [project?.id]);
 
+  useEffect(() => {
+    if (!project?.id) return;
+    supabase
+      .from("tasks")
+      .select("assigned_to")
+      .eq("project_id", project.id)
+      .eq("status", "done")
+      .not("assigned_to", "is", null)
+      .then(({ data }) => {
+        if (!data) return;
+        const counts: Record<string, number> = {};
+        (data as { assigned_to: string }[]).forEach((t) => {
+          counts[t.assigned_to] = (counts[t.assigned_to] || 0) + 1;
+        });
+        setMemberTaskCounts(counts);
+      });
+  }, [project?.id]);
+
   const tasksProgress =
     taskStats.total > 0
       ? Math.round((taskStats.completed / taskStats.total) * 100)
@@ -188,6 +212,33 @@ export default function ProjectOverview() {
   const methodology = config
     ? methodologyInfo[config.methodology]
     : methodologyInfo.agile;
+
+  const getMedal = (count: number) => {
+    if (count >= 30)
+      return {
+        emoji: "🥇",
+        label: "Ouro",
+        color: "#f59e0b",
+        tier: "gold" as const,
+      };
+    if (count >= 20)
+      return {
+        emoji: "🥈",
+        label: "Prata",
+        color: "#94a3b8",
+        tier: "silver" as const,
+      };
+    if (count >= 10)
+      return {
+        emoji: "🥉",
+        label: "Bronze",
+        color: "#cd7f32",
+        tier: "bronze" as const,
+      };
+    return null;
+  };
+
+  const getFirstName = (fullName: string) => fullName.split(" ")[0];
 
   return (
     <Box>
@@ -590,22 +641,56 @@ export default function ProjectOverview() {
                         },
                       }}
                     >
-                      <Avatar
-                        src={member.avatar_url ?? undefined}
-                        alt={member.full_name}
-                        sx={{
-                          width: 44,
-                          height: 44,
-                          bgcolor: role.color,
-                          fontWeight: 700,
-                          fontSize: "1rem",
-                          border: `2px solid ${alpha(role.color, 0.25)}`,
-                          boxShadow: `0 2px 8px ${alpha(role.color, 0.3)}`,
-                          flexShrink: 0,
-                        }}
-                      >
-                        {member.full_name?.charAt(0)?.toUpperCase() ?? "?"}
-                      </Avatar>
+                      <Box sx={{ position: "relative", flexShrink: 0 }}>
+                        <Avatar
+                          src={member.avatar_url ?? undefined}
+                          alt={member.full_name}
+                          sx={{
+                            width: 44,
+                            height: 44,
+                            bgcolor: role.color,
+                            fontWeight: 700,
+                            fontSize: "1rem",
+                            border: `2px solid ${alpha(role.color, 0.25)}`,
+                            boxShadow: `0 2px 8px ${alpha(role.color, 0.3)}`,
+                          }}
+                        >
+                          {member.full_name?.charAt(0)?.toUpperCase() ?? "?"}
+                        </Avatar>
+                        {(() => {
+                          const count = memberTaskCounts[member.id] ?? 0;
+                          const medal = getMedal(count);
+                          if (!medal) return null;
+                          return (
+                            <Tooltip
+                              title={`Medalha de ${medal.label} — ${count} tarefas concluídas`}
+                              placement="top"
+                            >
+                              <Box
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setMedalModal(member);
+                                }}
+                                sx={{
+                                  position: "absolute",
+                                  top: -7,
+                                  right: -7,
+                                  fontSize: "0.95rem",
+                                  lineHeight: 1,
+                                  cursor: "pointer",
+                                  filter:
+                                    "drop-shadow(0 1px 4px rgba(0,0,0,0.3))",
+                                  transition: "transform 0.2s ease",
+                                  "&:hover": { transform: "scale(1.4)" },
+                                  userSelect: "none",
+                                }}
+                              >
+                                {medal.emoji}
+                              </Box>
+                            </Tooltip>
+                          );
+                        })()}
+                      </Box>
                       <Box>
                         <Typography
                           variant="body2"
@@ -789,6 +874,180 @@ export default function ProjectOverview() {
           </Grid>
         </Grid>
       </Grid>
+
+      {/* Ada Medal Modal */}
+      {medalModal &&
+        (() => {
+          const count = memberTaskCounts[medalModal.id] ?? 0;
+          const medal = getMedal(count);
+          if (!medal) return null;
+          const firstName = getFirstName(medalModal.full_name);
+          const adaMessages = {
+            bronze: `Medalha de Bronze neste projeto para ${firstName}! 🥉 Com ${count} tarefa${count !== 1 ? "s" : ""} concluída${count !== 1 ? "s" : ""}, fica evidente o comprometimento com as entregas. Cada passo conta — e ${firstName} está claramente no caminho certo!`,
+            silver: `Que conquista incrível! 🥈 ${firstName} recebeu a Medalha de Prata de forma mais que merecida: ${count} tarefas concluídas neste projeto revelam dedicação e consistência. ${firstName} é um pilar deste projeto!`,
+            gold: `${firstName} atingiu o mais alto nível! 🥇 A Medalha de Ouro celebra ${count} tarefas concluídas neste projeto — um feito que inspira todo o time. ${firstName} é um verdadeiro exemplo de comprometimento com este projeto. Orgulho!`,
+          };
+          const glowColor = medal.color;
+          return (
+            <Dialog
+              open
+              onClose={() => setMedalModal(null)}
+              maxWidth="xs"
+              fullWidth
+              PaperProps={{
+                sx: {
+                  borderRadius: 4,
+                  overflow: "hidden",
+                  boxShadow:
+                    "0 24px 60px rgba(0,0,0,0.18), 0 0 0 1px rgba(99,102,241,0.1)",
+                },
+              }}
+            >
+              {/* Ada header */}
+              <Box
+                sx={{
+                  background:
+                    "linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%)",
+                  px: 3,
+                  py: 2.5,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 2,
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 46,
+                    height: 46,
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                    border: "2px solid rgba(255,255,255,0.4)",
+                    boxShadow: "0 2px 12px rgba(0,0,0,0.25)",
+                    flexShrink: 0,
+                  }}
+                >
+                  <video
+                    src="/ADA.mp4"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                </Box>
+                <Box sx={{ flex: 1 }}>
+                  <Typography
+                    variant="subtitle1"
+                    fontWeight={800}
+                    color="white"
+                    sx={{ lineHeight: 1.2 }}
+                  >
+                    Ada parabeniza:
+                  </Typography>
+                  {/* <Typography
+                    variant="caption"
+                    sx={{ color: "rgba(255,255,255,0.75)" }}
+                  >
+                    Concedi esta medalha!
+                  </Typography> */}
+                </Box>
+                <Box
+                  sx={{
+                    fontSize: "2.2rem",
+                    filter: `drop-shadow(0 2px 10px ${glowColor}99)`,
+                    lineHeight: 1,
+                  }}
+                >
+                  {medal.emoji}
+                </Box>
+              </Box>
+
+              {/* Content */}
+              <Box sx={{ p: 3 }}>
+                {/* Member row */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1.5,
+                    mb: 2.5,
+                  }}
+                >
+                  <Avatar
+                    src={medalModal.avatar_url ?? undefined}
+                    alt={medalModal.full_name}
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      bgcolor: ROLE_CONFIG[medalModal.role]?.color ?? "#6b7280",
+                      fontWeight: 700,
+                      fontSize: "0.9rem",
+                      border: `2px solid ${alpha(glowColor, 0.4)}`,
+                      boxShadow: `0 0 12px ${alpha(glowColor, 0.35)}`,
+                    }}
+                  >
+                    {medalModal.full_name?.charAt(0)?.toUpperCase() ?? "?"}
+                  </Avatar>
+                  <Box>
+                    <Typography variant="body2" fontWeight={700}>
+                      {medalModal.full_name}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {ROLE_CONFIG[medalModal.role]?.label ?? "Membro"}
+                    </Typography>
+                  </Box>
+                  <Chip
+                    label={`${count} tarefas`}
+                    size="small"
+                    sx={{
+                      ml: "auto",
+                      bgcolor: alpha(glowColor, 0.12),
+                      color: glowColor,
+                      fontWeight: 700,
+                      border: `1px solid ${alpha(glowColor, 0.3)}`,
+                      fontSize: "0.72rem",
+                    }}
+                  />
+                </Box>
+
+                {/* Speech bubble */}
+                <Box
+                  sx={{
+                    bgcolor: "rgba(99,102,241,0.05)",
+                    border: "1px solid rgba(99,102,241,0.14)",
+                    borderRadius: 3,
+                    p: 2.5,
+                    position: "relative",
+                    "&::before": {
+                      content: '""',
+                      position: "absolute",
+                      top: -8,
+                      left: 20,
+                      width: 14,
+                      height: 14,
+                      bgcolor: "rgba(99,102,241,0.05)",
+                      border: "1px solid rgba(99,102,241,0.14)",
+                      borderRight: "none",
+                      borderBottom: "none",
+                      transform: "rotate(45deg)",
+                    },
+                  }}
+                >
+                  <Typography
+                    variant="body2"
+                    sx={{ lineHeight: 1.8, color: "text.primary" }}
+                  >
+                    {adaMessages[medal.tier]}
+                  </Typography>
+                </Box>
+              </Box>
+            </Dialog>
+          );
+        })()}
     </Box>
   );
 }

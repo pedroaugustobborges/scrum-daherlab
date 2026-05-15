@@ -25,7 +25,6 @@ import {
 } from '@mui/icons-material'
 import toast from 'react-hot-toast'
 import { supabase } from '@/lib/supabase'
-import { useAuth } from '@/contexts/AuthContext'
 import type { WizardData } from '@/types/hybrid'
 
 interface WizardStepBasicInfoProps {
@@ -49,7 +48,6 @@ export default function WizardStepBasicInfo({
   data,
   onChange,
 }: WizardStepBasicInfoProps) {
-  const { user } = useAuth()
   const [teams, setTeams] = useState<Team[]>([])
   const [teamsLoading, setTeamsLoading] = useState(false)
 
@@ -60,33 +58,13 @@ export default function WizardStepBasicInfo({
   const fetchTeams = async () => {
     setTeamsLoading(true)
     try {
-      const { data: userTeamMembers, error: memberError } = await supabase
-        .from('team_members')
-        .select('team_id')
-        .eq('user_id', user?.id)
+      const { data: allTeams, error: teamsError } = await supabase
+        .from('teams')
+        .select('id, name')
+        .order('name')
 
-      if (memberError) throw memberError
-
-      const userTeamIds = userTeamMembers?.map((tm) => tm.team_id) || []
-
-      if (userTeamIds.length === 0) {
-        const { data: allTeams, error: teamsError } = await supabase
-          .from('teams')
-          .select('id, name')
-          .order('name')
-
-        if (teamsError) throw teamsError
-        setTeams(allTeams || [])
-      } else {
-        const { data: userTeams, error: teamsError } = await supabase
-          .from('teams')
-          .select('id, name')
-          .in('id', userTeamIds)
-          .order('name')
-
-        if (teamsError) throw teamsError
-        setTeams(userTeams || [])
-      }
+      if (teamsError) throw teamsError
+      setTeams(allTeams || [])
     } catch (error) {
       console.error('Error fetching teams:', error)
       toast.error('Erro ao carregar times')

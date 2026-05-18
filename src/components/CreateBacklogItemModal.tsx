@@ -279,7 +279,7 @@ export default function CreateBacklogItemModal({
     try {
       const { data: authData } = await supabase.auth.getUser();
 
-      if (item) {
+      if (item?.id) {
         // Update existing item
         const { error } = await supabase
           .from("tasks")

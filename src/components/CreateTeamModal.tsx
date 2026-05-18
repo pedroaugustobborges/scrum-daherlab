@@ -18,17 +18,20 @@ import {
   Divider,
   Collapse,
   Fade,
+  Paper,
+  ClickAwayListener,
   useTheme,
 } from "@mui/material";
 import {
   People,
   Description,
-  PersonAdd,
   Delete,
   Badge,
   Save,
   AutoAwesome,
   Check,
+  Search,
+  Clear,
 } from "@mui/icons-material";
 import toast from "react-hot-toast";
 import Modal from "./Modal";
@@ -44,11 +47,13 @@ interface CreateTeamModalProps {
 interface Profile {
   id: string;
   full_name: string;
+  avatar_url: string | null;
 }
 
 interface SelectedMember {
   userId: string;
   userName: string;
+  avatarUrl: string | null;
   role: string;
 }
 
@@ -71,7 +76,8 @@ export default function CreateTeamModal({
   const [loadingProfiles, setLoadingProfiles] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [selectedMembers, setSelectedMembers] = useState<SelectedMember[]>([]);
-  const [selectedUserId, setSelectedUserId] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
   const [selectedRole, setSelectedRole] = useState("developer");
   const [formData, setFormData] = useState({
     name: "",
@@ -177,7 +183,8 @@ export default function CreateTeamModal({
       // Reset form
       setFormData({ name: "", description: "" });
       setSelectedMembers([]);
-      setSelectedUserId("");
+      setSearchQuery("");
+      setShowDropdown(false);
       setSelectedRole("developer");
       setAiSuggestion("");
       setSuggestionSelected(false);
@@ -196,7 +203,7 @@ export default function CreateTeamModal({
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, full_name")
+        .select("id, full_name, avatar_url")
         .order("full_name");
 
       if (error) throw error;
@@ -213,32 +220,22 @@ export default function CreateTeamModal({
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleAddMember = () => {
-    if (!selectedUserId) {
-      toast.error("Por favor, selecione um usuário");
-      return;
-    }
-
-    // Check if already added
-    if (selectedMembers.some((m) => m.userId === selectedUserId)) {
+  const handleSelectUser = (profile: Profile) => {
+    if (selectedMembers.some((m) => m.userId === profile.id)) {
       toast.error("Este usuário já foi adicionado");
       return;
     }
-
-    const profile = profiles.find((p) => p.id === selectedUserId);
-    if (!profile) return;
-
     setSelectedMembers((prev) => [
       ...prev,
       {
-        userId: selectedUserId,
+        userId: profile.id,
         userName: profile.full_name || "Sem nome",
+        avatarUrl: profile.avatar_url,
         role: selectedRole,
       },
     ]);
-
-    setSelectedUserId("");
-    setSelectedRole("developer");
+    setSearchQuery("");
+    setShowDropdown(false);
   };
 
   const handleRemoveMember = (userId: string) => {
@@ -252,6 +249,17 @@ export default function CreateTeamModal({
   const availableProfiles = profiles.filter(
     (p) => !selectedMembers.some((m) => m.userId === p.id),
   );
+
+  const searchResults =
+    searchQuery.trim().length > 0
+      ? availableProfiles
+          .filter((p) =>
+            (p.full_name || "")
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase()),
+          )
+          .slice(0, 7)
+      : [];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -590,12 +598,16 @@ export default function CreateTeamModal({
                         }}
                       >
                         <Avatar
+                          src={member.avatarUrl ?? undefined}
+                          alt={member.userName}
                           sx={{
                             mr: 2,
                             bgcolor: roleConfig.color,
                             width: 36,
                             height: 36,
                             fontSize: "0.9rem",
+                            fontWeight: 700,
+                            border: `2px solid ${roleConfig.color}30`,
                           }}
                         >
                           {member.userName?.charAt(0) || "U"}
@@ -647,37 +659,159 @@ export default function CreateTeamModal({
 
             {/* Add Member Form */}
             <Box sx={{ display: "flex", gap: 1.5, alignItems: "flex-start" }}>
-              <TextField
-                select
-                label="Usuário"
-                value={selectedUserId}
-                onChange={(e) => setSelectedUserId(e.target.value)}
-                disabled={loadingProfiles || availableProfiles.length === 0}
-                size="small"
-                sx={{ flex: 1, minWidth: 150 }}
-              >
-                {loadingProfiles ? (
-                  <MenuItem disabled>Carregando...</MenuItem>
-                ) : availableProfiles.length === 0 ? (
-                  <MenuItem disabled>
-                    Todos os usuários já foram adicionados
-                  </MenuItem>
-                ) : (
-                  availableProfiles.map((profile) => (
-                    <MenuItem key={profile.id} value={profile.id}>
-                      {profile.full_name || "Sem nome"}
-                    </MenuItem>
-                  ))
-                )}
-              </TextField>
+              {/* Typeahead search */}
+              <ClickAwayListener onClickAway={() => setShowDropdown(false)}>
+                <Box sx={{ flex: 1, position: "relative" }}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Buscar membro"
+                    placeholder="Digite o nome..."
+                    value={searchQuery}
+                    disabled={loadingProfiles}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setShowDropdown(true);
+                    }}
+                    onFocus={() => {
+                      if (searchQuery.trim()) setShowDropdown(true);
+                    }}
+                    autoComplete="off"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          {loadingProfiles ? (
+                            <CircularProgress size={16} sx={{ color: "#6366f1" }} />
+                          ) : (
+                            <Search sx={{ color: "#6366f1", fontSize: 18 }} />
+                          )}
+                        </InputAdornment>
+                      ),
+                      endAdornment: searchQuery && (
+                        <InputAdornment position="end">
+                          <IconButton
+                            size="small"
+                            onClick={() => {
+                              setSearchQuery("");
+                              setShowDropdown(false);
+                            }}
+                          >
+                            <Clear sx={{ fontSize: 16 }} />
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
 
+                  {/* Dropdown results */}
+                  {showDropdown && searchQuery.trim().length > 0 && (
+                    <Paper
+                      elevation={8}
+                      sx={{
+                        position: "absolute",
+                        top: "calc(100% + 4px)",
+                        left: 0,
+                        right: 0,
+                        zIndex: 1400,
+                        borderRadius: 2.5,
+                        border: "1px solid rgba(99,102,241,0.18)",
+                        overflow: "hidden",
+                        boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+                      }}
+                    >
+                      {searchResults.length === 0 ? (
+                        <Box
+                          sx={{
+                            px: 2.5,
+                            py: 2,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1,
+                          }}
+                        >
+                          <Search sx={{ fontSize: 16, color: "text.disabled" }} />
+                          <Typography variant="body2" color="text.secondary">
+                            Nenhum usuário encontrado
+                          </Typography>
+                        </Box>
+                      ) : (
+                        searchResults.map((profile, idx) => {
+                          const roleConf = getRoleConfig(selectedRole);
+                          return (
+                            <Box
+                              key={profile.id}
+                              onClick={() => handleSelectUser(profile)}
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 1.5,
+                                px: 2,
+                                py: 1.25,
+                                cursor: "pointer",
+                                transition: "background 0.15s ease",
+                                borderBottom:
+                                  idx < searchResults.length - 1
+                                    ? "1px solid rgba(0,0,0,0.05)"
+                                    : "none",
+                                "&:hover": {
+                                  bgcolor: "rgba(99,102,241,0.07)",
+                                },
+                              }}
+                            >
+                              <Avatar
+                                src={profile.avatar_url ?? undefined}
+                                alt={profile.full_name}
+                                sx={{
+                                  width: 34,
+                                  height: 34,
+                                  bgcolor: "#6366f1",
+                                  fontSize: "0.85rem",
+                                  fontWeight: 700,
+                                  flexShrink: 0,
+                                  border: "2px solid rgba(99,102,241,0.15)",
+                                }}
+                              >
+                                {(profile.full_name || "U")
+                                  .charAt(0)
+                                  .toUpperCase()}
+                              </Avatar>
+                              <Typography
+                                variant="body2"
+                                fontWeight={600}
+                                sx={{ flex: 1 }}
+                              >
+                                {profile.full_name || "Sem nome"}
+                              </Typography>
+                              <Chip
+                                label={`+ ${roleConf.label}`}
+                                size="small"
+                                sx={{
+                                  height: 20,
+                                  fontSize: "0.62rem",
+                                  fontWeight: 700,
+                                  bgcolor: `${roleConf.color}18`,
+                                  color: roleConf.color,
+                                  border: `1px solid ${roleConf.color}30`,
+                                  "& .MuiChip-label": { px: 1 },
+                                }}
+                              />
+                            </Box>
+                          );
+                        })
+                      )}
+                    </Paper>
+                  )}
+                </Box>
+              </ClickAwayListener>
+
+              {/* Role selector */}
               <TextField
                 select
                 label="Função"
                 value={selectedRole}
                 onChange={(e) => setSelectedRole(e.target.value)}
                 size="small"
-                sx={{ minWidth: 150 }}
+                sx={{ minWidth: 148 }}
               >
                 {roleOptions.map((option) => (
                   <MenuItem key={option.value} value={option.value}>
@@ -688,6 +822,7 @@ export default function CreateTeamModal({
                           height: 10,
                           borderRadius: "50%",
                           backgroundColor: option.color,
+                          flexShrink: 0,
                         }}
                       />
                       {option.label}
@@ -695,26 +830,15 @@ export default function CreateTeamModal({
                   </MenuItem>
                 ))}
               </TextField>
-
-              <Button
-                variant="outlined"
-                onClick={handleAddMember}
-                disabled={!selectedUserId}
-                sx={{
-                  minWidth: 44,
-                  height: 40,
-                  p: 0,
-                  borderColor: "#6366f1",
-                  color: "#6366f1",
-                  "&:hover": {
-                    borderColor: "#6366f1",
-                    bgcolor: "rgba(99, 102, 241, 0.1)",
-                  },
-                }}
-              >
-                <PersonAdd />
-              </Button>
             </Box>
+
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ display: "block", mt: 0.75 }}
+            >
+              Selecione a função desejada e clique no membro para adicioná-lo
+            </Typography>
           </Box>
 
           <Box

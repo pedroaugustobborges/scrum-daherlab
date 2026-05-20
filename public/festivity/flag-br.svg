@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 21" shape-rendering="geometricPrecision">
+  <!-- Green background -->
+  <rect width="30" height="21" fill="#009C3B"/>
+  <!-- Yellow diamond -->
+  <polygon points="15,2.2 27.8,10.5 15,18.8 2.2,10.5" fill="#FFDF00"/>
+  <!-- Blue circle -->
+  <circle cx="15" cy="10.5" r="5.5" fill="#002776"/>
+  <!-- White equator arc (simplified) -->
+  <path d="M10.2,12.2 Q15,9.0 19.8,12.2" stroke="white" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+</svg>

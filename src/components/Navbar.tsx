@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   AppBar,
@@ -17,6 +17,7 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
+  Tooltip,
 } from "@mui/material";
 import {
   Dashboard,
@@ -33,11 +34,16 @@ import {
 } from "@mui/icons-material";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
+import { getActiveFestivity } from "@/config/festivities";
+import FestivityModal from "@/components/FestivityModal";
 
 export default function Navbar() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [festivityOpen, setFestivityOpen] = useState(false);
+  // Recomputed once per render; changes only when the date crosses a 30-day threshold
+  const activeFestivity = useMemo(() => getActiveFestivity(), []);
   const { user, signOut, isAdmin } = useAuth();
 
   // Fetch avatar from profiles table
@@ -283,26 +289,80 @@ export default function Navbar() {
             </Button>
           ))}
 
-          <IconButton
-            size="large"
-            onClick={handleMenu}
-            color="inherit"
-            sx={{ ml: 1 }}
-          >
-            <Avatar
-              src={avatarUrl || undefined}
-              alt={user?.user_metadata?.full_name || "User"}
-              sx={{
-                width: 32,
-                height: 32,
-                bgcolor: avatarUrl ? "transparent" : "#7c3aed",
-                fontSize: "0.875rem",
-                fontWeight: 600,
-              }}
+          {/* Avatar + optional festivity badge */}
+          <Box sx={{ position: "relative", display: "inline-flex", alignItems: "center", ml: 1 }}>
+            <IconButton
+              size="large"
+              onClick={handleMenu}
+              color="inherit"
+              sx={{ p: 0.5 }}
             >
-              {!avatarUrl && getInitials()}
-            </Avatar>
-          </IconButton>
+              <Avatar
+                src={avatarUrl || undefined}
+                alt={user?.user_metadata?.full_name || "User"}
+                sx={{
+                  width: 32,
+                  height: 32,
+                  bgcolor: avatarUrl ? "transparent" : "#7c3aed",
+                  fontSize: "0.875rem",
+                  fontWeight: 600,
+                }}
+              >
+                {!avatarUrl && getInitials()}
+              </Avatar>
+            </IconButton>
+
+            {/* Festivity badge — auto-switches via getActiveFestivity() in src/config/festivities.ts */}
+            {activeFestivity && (
+              <>
+                <style>{`
+                  @keyframes festivityPop {
+                    0%, 100% { transform: scale(1) rotate(0deg); }
+                    40%       { transform: scale(1.28) rotate(-6deg); }
+                    60%       { transform: scale(1.28) rotate(6deg); }
+                  }
+                `}</style>
+                <Tooltip title={activeFestivity.name} placement="bottom" arrow>
+                  <Box
+                    component="span"
+                    onClick={(e) => { e.stopPropagation(); setFestivityOpen(true); }}
+                    sx={{
+                      position: "absolute",
+                      bottom: -3,
+                      right: -5,
+                      cursor: "pointer",
+                      animation: "festivityPop 2.4s ease-in-out infinite",
+                      filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.4))",
+                      userSelect: "none",
+                      zIndex: 2,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {activeFestivity.badgeImage ? (
+                      <Box
+                        component="img"
+                        src={activeFestivity.badgeImage}
+                        alt={activeFestivity.name}
+                        sx={{
+                          width: 18,
+                          height: 13,
+                          borderRadius: "2px",
+                          display: "block",
+                          boxShadow: "0 1px 4px rgba(0,0,0,0.45)",
+                        }}
+                      />
+                    ) : (
+                      <Box component="span" sx={{ fontSize: 14, lineHeight: 1 }}>
+                        {activeFestivity.badgeEmoji}
+                      </Box>
+                    )}
+                  </Box>
+                </Tooltip>
+              </>
+            )}
+          </Box>
 
           <Menu
             anchorEl={anchorEl}
@@ -386,6 +446,13 @@ export default function Navbar() {
           </Menu>
         </Box>
       </Toolbar>
+
+      {/* Festivity modal — auto-selects via getActiveFestivity() */}
+      <FestivityModal
+        festivity={activeFestivity}
+        open={festivityOpen}
+        onClose={() => setFestivityOpen(false)}
+      />
 
       {/* Mobile Navigation Drawer */}
       <Drawer

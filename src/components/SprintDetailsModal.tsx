@@ -1346,7 +1346,7 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
                   }}
                   stories={stories}
                 />
-                <VelocityChart teamId={sprint.team_id} currentSprintId={sprint.id} />
+                <VelocityChart teamId={sprint.team_id} projectId={sprint.project_id} currentSprintId={sprint.id} />
               </Box>
             </Box>
           )}

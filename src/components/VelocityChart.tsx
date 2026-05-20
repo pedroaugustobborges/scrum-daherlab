@@ -18,6 +18,7 @@ import toast from 'react-hot-toast'
 
 interface VelocityChartProps {
   teamId: string
+  projectId?: string
   currentSprintId?: string
 }
 
@@ -29,7 +30,7 @@ interface SprintVelocity {
   status: string
 }
 
-export default function VelocityChart({ teamId, currentSprintId }: VelocityChartProps) {
+export default function VelocityChart({ teamId, projectId, currentSprintId }: VelocityChartProps) {
   const theme = useTheme()
   const isDarkMode = theme.palette.mode === 'dark'
   const [loading, setLoading] = useState(true)
@@ -37,19 +38,25 @@ export default function VelocityChart({ teamId, currentSprintId }: VelocityChart
 
   useEffect(() => {
     fetchVelocityData()
-  }, [teamId])
+  }, [teamId, projectId])
 
   const fetchVelocityData = async () => {
     setLoading(true)
     try {
-      // Fetch last 6 completed sprints + current sprint
-      const { data: sprints, error: sprintsError } = await supabase
+      // Fetch last 6 completed/active sprints scoped to this team (and project when available)
+      let sprintsQuery = supabase
         .from('sprints')
         .select('id, name, status, start_date, end_date')
         .eq('team_id', teamId)
         .in('status', ['completed', 'active'])
         .order('end_date', { ascending: false })
         .limit(6)
+
+      if (projectId) {
+        sprintsQuery = sprintsQuery.eq('project_id', projectId)
+      }
+
+      const { data: sprints, error: sprintsError } = await sprintsQuery
 
       if (sprintsError) throw sprintsError
 

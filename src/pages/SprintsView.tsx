@@ -266,7 +266,7 @@ export default function SprintsView() {
               />
             </Grid>
             <Grid item xs={12} lg={6}>
-              <VelocityChart teamId={activeSprint.team_id} currentSprintId={activeSprint.id} />
+              <VelocityChart teamId={activeSprint.team_id} projectId={project!.id} currentSprintId={activeSprint.id} />
             </Grid>
           </Grid>
         </Box>

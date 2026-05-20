@@ -17,13 +17,13 @@ interface ActiveSprint {
 }
 
 interface ActiveSprintsWidgetProps {
-  teamId?: string | null
+  teamIds?: string[]
   strategicFilter?: 'all' | 'yes' | 'no'
 }
 
 const ITEMS_PER_PAGE = 2
 
-export default function ActiveSprintsWidget({ teamId, strategicFilter = 'all' }: ActiveSprintsWidgetProps = {}) {
+export default function ActiveSprintsWidget({ teamIds = [], strategicFilter = 'all' }: ActiveSprintsWidgetProps = {}) {
   const theme = useTheme()
   const isDarkMode = theme.palette.mode === 'dark'
   const [loading, setLoading] = useState(true)
@@ -41,7 +41,7 @@ export default function ActiveSprintsWidget({ teamId, strategicFilter = 'all' }:
   useEffect(() => {
     setCurrentPage(1)
     fetchActiveSprints()
-  }, [teamId, strategicFilter])
+  }, [JSON.stringify(teamIds), strategicFilter])
 
   const fetchActiveSprints = async () => {
     try {
@@ -54,8 +54,8 @@ export default function ActiveSprintsWidget({ teamId, strategicFilter = 'all' }:
         .eq('status', 'active')
         .order('end_date', { ascending: true })
 
-      if (teamId) {
-        sprintsQuery = sprintsQuery.eq('team_id', teamId)
+      if (teamIds.length > 0) {
+        sprintsQuery = sprintsQuery.in('team_id', teamIds)
       }
 
       if (strategicFilter !== 'all') {
@@ -71,14 +71,14 @@ export default function ActiveSprintsWidget({ teamId, strategicFilter = 'all' }:
           if (projectIds.length > 0) {
             let q1 = supabase.from('sprints').select('id, name, start_date, end_date, project_id, team_id')
               .eq('status', 'active').in('project_id', projectIds).order('end_date', { ascending: true })
-            if (teamId) q1 = q1.eq('team_id', teamId)
+            if (teamIds.length > 0) q1 = q1.in('team_id', teamIds)
             const { data: d1 } = await q1
             ;(d1 ?? []).forEach((s: any) => collectedIds.push(s.id))
           }
 
           let q2 = supabase.from('sprints').select('id, name, start_date, end_date, project_id, team_id')
             .eq('status', 'active').is('project_id', null).order('end_date', { ascending: true })
-          if (teamId) q2 = q2.eq('team_id', teamId)
+          if (teamIds.length > 0) q2 = q2.in('team_id', teamIds)
           const { data: d2 } = await q2
           ;(d2 ?? []).forEach((s: any) => collectedIds.push(s.id))
 
@@ -129,7 +129,7 @@ export default function ActiveSprintsWidget({ teamId, strategicFilter = 'all' }:
           // "Sim": only explicitly strategic projects
           sprintsQuery = projectIds.length > 0
             ? sprintsQuery.in('project_id', projectIds)
-            : sprintsQuery.in('project_id', ['00000000-0000-0000-0000-000000000000'])
+            : sprintsQuery.in('project_id', ["00000000-0000-0000-0000-000000000000"])
         }
       }
 

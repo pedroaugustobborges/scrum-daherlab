@@ -29,7 +29,7 @@ interface ProjectLatency {
 }
 
 interface ActionLatencyWidgetProps {
-  teamId?: string | null;
+  teamIds?: string[];
   strategicFilter?: "all" | "yes" | "no";
 }
 
@@ -92,7 +92,7 @@ function latencyChip(days: number): {
 }
 
 export default function ActionLatencyWidget({
-  teamId,
+  teamIds = [],
   strategicFilter = "all",
 }: ActionLatencyWidgetProps = {}) {
   const theme = useTheme();
@@ -111,7 +111,7 @@ export default function ActionLatencyWidget({
   useEffect(() => {
     setCurrentPage(1);
     fetchLatency();
-  }, [teamId, strategicFilter]);
+  }, [JSON.stringify(teamIds), strategicFilter]);
 
   const fetchLatency = async () => {
     try {
@@ -135,20 +135,26 @@ export default function ActionLatencyWidget({
         activeProjectIds = (all ?? []).map((p: any) => p.id);
       }
 
-      // Apply team filter: keep only projects that have at least one sprint
-      // belonging to the selected team
-      if (teamId && activeProjectIds && activeProjectIds.length > 0) {
-        const { data: teamSprints } = await supabase
-          .from("sprints")
-          .select("project_id")
-          .eq("team_id", teamId)
-          .in("project_id", activeProjectIds);
-        const teamProjectIds = new Set(
-          (teamSprints ?? []).map((s: any) => s.project_id).filter(Boolean),
-        );
-        activeProjectIds = activeProjectIds.filter((id) =>
-          teamProjectIds.has(id),
-        );
+      // Apply team filter: keep only projects associated with the selected teams.
+      // Uses both sprints (team did work) AND project_teams (team is assigned to project).
+      if (teamIds.length > 0 && activeProjectIds && activeProjectIds.length > 0) {
+        const [{ data: sprintRows }, { data: ptRows }] = await Promise.all([
+          supabase
+            .from("sprints")
+            .select("project_id")
+            .in("team_id", teamIds)
+            .in("project_id", activeProjectIds),
+          supabase
+            .from("project_teams")
+            .select("project_id")
+            .in("team_id", teamIds)
+            .in("project_id", activeProjectIds),
+        ]);
+        const teamProjectIds = new Set([
+          ...(sprintRows ?? []).map((s: any) => s.project_id),
+          ...(ptRows ?? []).map((pt: any) => pt.project_id),
+        ].filter(Boolean));
+        activeProjectIds = activeProjectIds.filter((id) => teamProjectIds.has(id));
       }
 
       if (!activeProjectIds || activeProjectIds.length === 0) {

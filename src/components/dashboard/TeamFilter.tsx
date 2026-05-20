@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Box, Typography, Collapse } from "@mui/material";
-import { ExpandMore, Groups } from "@mui/icons-material";
+import { ExpandMore, Groups, Check } from "@mui/icons-material";
 import { useTheme as useMUITheme } from "@mui/material/styles";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
@@ -11,8 +11,9 @@ interface Team {
 }
 
 interface TeamFilterProps {
-  value: string | null;
-  onChange: (teamId: string | null) => void;
+  /** Array of selected team IDs. Empty array = all teams (no filter). */
+  value: string[];
+  onChange: (teamIds: string[]) => void;
 }
 
 export default function TeamFilter({ value, onChange }: TeamFilterProps) {
@@ -26,13 +27,11 @@ export default function TeamFilter({ value, onChange }: TeamFilterProps) {
 
   useEffect(() => {
     if (!user?.id) return;
-
     const fetchTeams = async () => {
       const { data } = await supabase
         .from("team_members")
         .select("teams(id, name)")
         .eq("user_id", user.id);
-
       if (data) {
         const parsed: Team[] = data
           .map((row: any) => row.teams)
@@ -41,7 +40,6 @@ export default function TeamFilter({ value, onChange }: TeamFilterProps) {
         setTeams(parsed);
       }
     };
-
     fetchTeams();
   }, [user?.id]);
 
@@ -56,11 +54,31 @@ export default function TeamFilter({ value, onChange }: TeamFilterProps) {
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
-  const selectedTeam = teams.find((t) => t.id === value) ?? null;
-  const label = selectedTeam?.name ?? "Todos os times";
-
   // Don't render if user belongs to 0 or 1 team
   if (teams.length < 2) return null;
+
+  const selectedCount = value.length;
+  const isActive = selectedCount > 0;
+
+  const label =
+    selectedCount === 0
+      ? "Todos os times"
+      : selectedCount === 1
+        ? (teams.find((t) => t.id === value[0])?.name ?? "1 time")
+        : `${selectedCount} times`;
+
+  const toggleTeam = (teamId: string) => {
+    if (value.includes(teamId)) {
+      onChange(value.filter((id) => id !== teamId));
+    } else {
+      onChange([...value, teamId]);
+    }
+  };
+
+  const clearAll = () => {
+    onChange([]);
+    setOpen(false);
+  };
 
   const pillBg = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)";
   const pillBgHover = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.07)";
@@ -88,7 +106,7 @@ export default function TeamFilter({ value, onChange }: TeamFilterProps) {
           border: "1px solid",
           borderColor: open
             ? isDark ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.12)"
-            : "transparent",
+            : isActive ? `${activeColor}50` : "transparent",
           transition: "all 0.18s ease",
           "&:hover": {
             bgcolor: pillBgHover,
@@ -96,21 +114,15 @@ export default function TeamFilter({ value, onChange }: TeamFilterProps) {
           },
         }}
       >
-        <Groups
-          sx={{
-            fontSize: 15,
-            color: value ? activeColor : "text.disabled",
-            flexShrink: 0,
-          }}
-        />
+        <Groups sx={{ fontSize: 15, color: isActive ? activeColor : "text.disabled", flexShrink: 0 }} />
         <Typography
           variant="caption"
           sx={{
-            fontWeight: value ? 600 : 500,
-            color: value ? activeColor : "text.secondary",
+            fontWeight: isActive ? 600 : 500,
+            color: isActive ? activeColor : "text.secondary",
             letterSpacing: "0.01em",
             lineHeight: 1,
-            maxWidth: 140,
+            maxWidth: 150,
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
@@ -118,6 +130,27 @@ export default function TeamFilter({ value, onChange }: TeamFilterProps) {
         >
           {label}
         </Typography>
+        {/* Compact count badge for multiple selections */}
+        {selectedCount > 1 && (
+          <Box
+            sx={{
+              minWidth: 18,
+              height: 18,
+              borderRadius: 99,
+              bgcolor: activeColor,
+              color: "white",
+              fontSize: "0.65rem",
+              fontWeight: 700,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              px: 0.5,
+              flexShrink: 0,
+            }}
+          >
+            {selectedCount}
+          </Box>
+        )}
         <ExpandMore
           sx={{
             fontSize: 14,
@@ -129,14 +162,14 @@ export default function TeamFilter({ value, onChange }: TeamFilterProps) {
         />
       </Box>
 
-      {/* Dropdown */}
+      {/* Dropdown — stays open while multi-selecting */}
       <Collapse in={open} timeout={160}>
         <Box
           sx={{
             position: "absolute",
             top: "calc(100% + 6px)",
             left: 0,
-            minWidth: 180,
+            minWidth: 200,
             bgcolor: dropdownBg,
             border: "1px solid",
             borderColor: dropdownBorder,
@@ -149,9 +182,9 @@ export default function TeamFilter({ value, onChange }: TeamFilterProps) {
             py: 0.5,
           }}
         >
-          {/* "All teams" option */}
+          {/* "All teams" option — clears selection and closes */}
           <Box
-            onClick={() => { onChange(null); setOpen(false); }}
+            onClick={clearAll}
             sx={{
               display: "flex",
               alignItems: "center",
@@ -160,27 +193,34 @@ export default function TeamFilter({ value, onChange }: TeamFilterProps) {
               py: 1,
               cursor: "pointer",
               transition: "background 0.15s ease",
-              bgcolor: value === null ? `${activeColor}12` : "transparent",
-              "&:hover": { bgcolor: value === null ? `${activeColor}18` : itemHoverBg },
+              bgcolor: !isActive ? `${activeColor}12` : "transparent",
+              "&:hover": { bgcolor: !isActive ? `${activeColor}18` : itemHoverBg },
             }}
           >
+            {/* Circle indicator */}
             <Box
               sx={{
-                width: 6,
-                height: 6,
+                width: 16,
+                height: 16,
                 borderRadius: "50%",
-                bgcolor: value === null ? activeColor : "transparent",
                 border: "1.5px solid",
-                borderColor: value === null ? activeColor : "text.disabled",
+                borderColor: !isActive ? activeColor : "text.disabled",
+                bgcolor: !isActive ? `${activeColor}20` : "transparent",
                 flexShrink: 0,
-                transition: "all 0.15s ease",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
-            />
+            >
+              {!isActive && (
+                <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: activeColor }} />
+              )}
+            </Box>
             <Typography
               variant="caption"
               sx={{
-                fontWeight: value === null ? 600 : 400,
-                color: value === null ? activeColor : "text.secondary",
+                fontWeight: !isActive ? 600 : 400,
+                color: !isActive ? activeColor : "text.secondary",
                 lineHeight: 1,
               }}
             >
@@ -191,47 +231,54 @@ export default function TeamFilter({ value, onChange }: TeamFilterProps) {
           {/* Divider */}
           <Box sx={{ height: "1px", bgcolor: dropdownBorder, mx: 1.5, my: 0.25 }} />
 
-          {/* Team options */}
+          {/* Multi-select team rows */}
           {teams.map((team) => {
-            const isActive = value === team.id;
+            const isChecked = value.includes(team.id);
             return (
               <Box
                 key={team.id}
-                onClick={() => { onChange(team.id); setOpen(false); }}
+                onClick={() => toggleTeam(team.id)}
                 sx={{
                   display: "flex",
                   alignItems: "center",
                   gap: 1,
                   px: 1.5,
-                  py: 1,
+                  py: 0.875,
                   cursor: "pointer",
                   transition: "background 0.15s ease",
-                  bgcolor: isActive ? `${activeColor}12` : "transparent",
-                  "&:hover": { bgcolor: isActive ? `${activeColor}18` : itemHoverBg },
+                  bgcolor: isChecked ? `${activeColor}10` : "transparent",
+                  "&:hover": { bgcolor: isChecked ? `${activeColor}18` : itemHoverBg },
                 }}
               >
+                {/* Square checkbox indicator */}
                 <Box
                   sx={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: "50%",
-                    bgcolor: isActive ? activeColor : "transparent",
+                    width: 16,
+                    height: 16,
+                    borderRadius: "4px",
                     border: "1.5px solid",
-                    borderColor: isActive ? activeColor : "text.disabled",
+                    borderColor: isChecked ? activeColor : isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
+                    bgcolor: isChecked ? activeColor : "transparent",
                     flexShrink: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                     transition: "all 0.15s ease",
                   }}
-                />
+                >
+                  {isChecked && <Check sx={{ fontSize: 11, color: "white" }} />}
+                </Box>
                 <Typography
                   variant="caption"
                   sx={{
-                    fontWeight: isActive ? 600 : 400,
-                    color: isActive ? activeColor : "text.secondary",
+                    fontWeight: isChecked ? 600 : 400,
+                    color: isChecked ? activeColor : "text.secondary",
                     lineHeight: 1,
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
                     maxWidth: 160,
+                    flex: 1,
                   }}
                 >
                   {team.name}
@@ -239,6 +286,21 @@ export default function TeamFilter({ value, onChange }: TeamFilterProps) {
               </Box>
             );
           })}
+
+          {/* Footer hint when something is selected */}
+          {isActive && (
+            <>
+              <Box sx={{ height: "1px", bgcolor: dropdownBorder, mx: 1.5, mt: 0.25 }} />
+              <Box sx={{ px: 1.5, py: 0.75 }}>
+                <Typography
+                  variant="caption"
+                  sx={{ color: "text.disabled", fontSize: "0.65rem" }}
+                >
+                  Clique em "Todos os times" para limpar
+                </Typography>
+              </Box>
+            </>
+          )}
         </Box>
       </Collapse>
     </Box>

@@ -256,7 +256,7 @@ export default function Dashboard() {
     color: string;
   } | null>(null);
   const [statusModalOpen, setStatusModalOpen] = useState(false);
-  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
+  const [selectedTeamIds, setSelectedTeamIds] = useState<string[]>([]);
   const [selectedStrategic, setSelectedStrategic] = useState<StrategicValue>("all");
 
   const totalActivitiesPages = Math.ceil(
@@ -305,8 +305,8 @@ export default function Dashboard() {
   }, [user]);
 
   useEffect(() => {
-    fetchDashboardData(selectedTeamId, selectedStrategic);
-  }, [selectedTeamId, selectedStrategic]);
+    fetchDashboardData(selectedTeamIds, selectedStrategic);
+  }, [JSON.stringify(selectedTeamIds), selectedStrategic]);
 
   const EMPTY_ID = "00000000-0000-0000-0000-000000000000";
 
@@ -332,16 +332,16 @@ export default function Dashboard() {
   };
 
   /**
-   * Resolve sprint IDs given team and strategic scope.
+   * Resolve sprint IDs given teams and strategic scope.
    * Returns null when no restriction applies (fetches everything).
    * For "Não": runs TWO separate queries (non-strategic projects + null project_id)
    * to avoid relying on PostgREST OR syntax with IS NULL.
    */
   const resolveSprintIds = async (
-    teamId: string | null,
+    teamIds: string[],
     scope: { ids: string[]; includeNull: boolean } | null,
   ): Promise<string[] | null> => {
-    if (!teamId && !scope) return null; // no restriction at all
+    if (teamIds.length === 0 && !scope) return null; // no restriction at all
 
     // "Não" case: collect sprint IDs from two sources
     if (scope?.includeNull) {
@@ -350,14 +350,14 @@ export default function Dashboard() {
       // Source 1: sprints whose project IS non-strategic
       if (scope.ids.length > 0) {
         let q = supabase.from("sprints").select("id").in("project_id", scope.ids);
-        if (teamId) q = q.eq("team_id", teamId);
+        if (teamIds.length > 0) q = q.in("team_id", teamIds);
         const { data } = await q;
         collected.push(...(data ?? []).map((s: any) => s.id));
       }
 
       // Source 2: sprints with NO project (project_id IS NULL)
       let q2 = supabase.from("sprints").select("id").is("project_id", null);
-      if (teamId) q2 = q2.eq("team_id", teamId);
+      if (teamIds.length > 0) q2 = q2.in("team_id", teamIds);
       const { data: nullData } = await q2;
       collected.push(...(nullData ?? []).map((s: any) => s.id));
 
@@ -366,7 +366,7 @@ export default function Dashboard() {
 
     // "Sim" or team-only: single query
     let q = supabase.from("sprints").select("id");
-    if (teamId) q = q.eq("team_id", teamId);
+    if (teamIds.length > 0) q = q.in("team_id", teamIds);
     if (scope) {
       q = scope.ids.length > 0
         ? q.in("project_id", scope.ids)
@@ -388,18 +388,18 @@ export default function Dashboard() {
   };
 
   const fetchDashboardData = async (
-    teamId: string | null = null,
+    teamIds: string[] = [],
     strategic: StrategicValue = "all",
   ) => {
     try {
       setLoading(true);
 
       const strategicScope = await resolveStrategicScope(strategic);
-      const sprintIds = await resolveSprintIds(teamId, strategicScope);
+      const sprintIds = await resolveSprintIds(teamIds, strategicScope);
 
       // "Não" without a team filter: also include tasks with no sprint at all
       // (tasks not in any sprint are not part of any strategic project)
-      const includeNullSprintTasks = strategicScope?.includeNull === true && !teamId;
+      const includeNullSprintTasks = strategicScope?.includeNull === true && teamIds.length === 0;
 
       // Fetch tasks
       let tasksQuery = supabase
@@ -434,17 +434,27 @@ export default function Dashboard() {
 
       setTaskStats(stats);
 
-      // Fetch project stats (scoped to strategic filter and/or team)
+      // Fetch project stats (scoped to strategic filter and/or teams)
       let projectsQuery = supabase.from("projects").select("id, status");
       projectsQuery = applyStrategicToProjects(projectsQuery, strategicScope);
-      if (teamId) {
-        const { data: teamProjects } = await supabase
-          .from("sprints")
-          .select("project_id")
-          .eq("team_id", teamId)
-          .not("project_id", "is", null);
+      if (teamIds.length > 0) {
+        // Union of: projects via sprints + projects explicitly linked via project_teams
+        const [{ data: sprintProjects }, { data: ptProjects }] = await Promise.all([
+          supabase
+            .from("sprints")
+            .select("project_id")
+            .in("team_id", teamIds)
+            .not("project_id", "is", null),
+          supabase
+            .from("project_teams")
+            .select("project_id")
+            .in("team_id", teamIds),
+        ]);
         const teamProjectIds = [
-          ...new Set((teamProjects ?? []).map((s: any) => s.project_id)),
+          ...new Set([
+            ...(sprintProjects ?? []).map((s: any) => s.project_id),
+            ...(ptProjects ?? []).map((pt: any) => pt.project_id),
+          ].filter(Boolean)),
         ];
         projectsQuery = teamProjectIds.length > 0
           ? projectsQuery.in("id", teamProjectIds)
@@ -464,16 +474,14 @@ export default function Dashboard() {
 
       setProjectStats(pStats);
 
-      // Fetch team workload - get all users who have tasks assigned
-      // Determine which user IDs to show in workload
-      // When a team is selected, use that team's member list; otherwise derive from tasks
+      // Fetch team workload: when teams are selected, union all members across those teams
       let profileIds: string[] = [];
-      if (teamId) {
+      if (teamIds.length > 0) {
         const { data: teamMembersData } = await supabase
           .from("team_members")
           .select("user_id")
-          .eq("team_id", teamId);
-        profileIds = (teamMembersData ?? []).map((m: any) => m.user_id);
+          .in("team_id", teamIds);
+        profileIds = [...new Set((teamMembersData ?? []).map((m: any) => m.user_id))];
       } else if (tasks && tasks.length > 0) {
         profileIds = [
           ...new Set(
@@ -627,7 +635,7 @@ export default function Dashboard() {
   // Fetch productivity data based on selected period
   const fetchProductivityData = async (
     period: ProductivityPeriod,
-    teamId: string | null = null,
+    teamIds: string[] = [],
     strategic: StrategicValue = "all",
   ) => {
     setProductivityLoading(true);
@@ -832,10 +840,10 @@ export default function Dashboard() {
           break;
       }
 
-      // Fetch tasks for the entire period (scoped to team and/or strategic filter)
+      // Fetch tasks for the entire period (scoped to teams and/or strategic filter)
       const prodScope = await resolveStrategicScope(strategic);
-      const prodSprintIds = await resolveSprintIds(teamId, prodScope);
-      const includeNullSprintTasks = prodScope?.includeNull === true && !teamId;
+      const prodSprintIds = await resolveSprintIds(teamIds, prodScope);
+      const includeNullSprintTasks = prodScope?.includeNull === true && teamIds.length === 0;
 
       let prodQuery = supabase
         .from("tasks")
@@ -883,10 +891,10 @@ export default function Dashboard() {
     }
   };
 
-  // Fetch productivity data when period, team, or strategic filter changes
+  // Fetch productivity data when period, teams, or strategic filter changes
   useEffect(() => {
-    fetchProductivityData(productivityPeriod, selectedTeamId, selectedStrategic);
-  }, [productivityPeriod, selectedTeamId, selectedStrategic]);
+    fetchProductivityData(productivityPeriod, selectedTeamIds, selectedStrategic);
+  }, [productivityPeriod, JSON.stringify(selectedTeamIds), selectedStrategic]);
 
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
@@ -951,11 +959,11 @@ export default function Dashboard() {
     // Component-based widgets — receive teamId so they react to the filter
     switch (type) {
       case "activeProjects":
-        return <ActiveProjectsWidget teamId={selectedTeamId} strategicFilter={selectedStrategic} />;
+        return <ActiveProjectsWidget teamIds={selectedTeamIds} strategicFilter={selectedStrategic} />;
       case "activeSprints":
-        return <ActiveSprintsWidget teamId={selectedTeamId} strategicFilter={selectedStrategic} />;
+        return <ActiveSprintsWidget teamIds={selectedTeamIds} strategicFilter={selectedStrategic} />;
       case "actionLatency":
-        return <ActionLatencyWidget teamId={selectedTeamId} strategicFilter={selectedStrategic} />;
+        return <ActionLatencyWidget teamIds={selectedTeamIds} strategicFilter={selectedStrategic} />;
       default:
         break;
     }
@@ -1971,9 +1979,9 @@ export default function Dashboard() {
             }}
           >
             <TeamFilter
-              value={selectedTeamId}
-              onChange={(id) => {
-                setSelectedTeamId(id);
+              value={selectedTeamIds}
+              onChange={(ids) => {
+                setSelectedTeamIds(ids);
                 setActivitiesPage(1);
                 setTeamWorkloadPage(1);
               }}

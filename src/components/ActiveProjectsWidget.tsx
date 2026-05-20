@@ -17,13 +17,13 @@ interface ActiveProject {
 }
 
 interface ActiveProjectsWidgetProps {
-  teamId?: string | null
+  teamIds?: string[]
   strategicFilter?: 'all' | 'yes' | 'no'
 }
 
 const ITEMS_PER_PAGE = 2
 
-export default function ActiveProjectsWidget({ teamId, strategicFilter = 'all' }: ActiveProjectsWidgetProps = {}) {
+export default function ActiveProjectsWidget({ teamIds = [], strategicFilter = 'all' }: ActiveProjectsWidgetProps = {}) {
   const theme = useTheme()
   const isDarkMode = theme.palette.mode === 'dark'
   const [loading, setLoading] = useState(true)
@@ -41,7 +41,7 @@ export default function ActiveProjectsWidget({ teamId, strategicFilter = 'all' }
   useEffect(() => {
     setCurrentPage(1)
     fetchActiveProjects()
-  }, [teamId, strategicFilter])
+  }, [JSON.stringify(teamIds), strategicFilter])
 
   const fetchActiveProjects = async () => {
     try {
@@ -59,13 +59,25 @@ export default function ActiveProjectsWidget({ teamId, strategicFilter = 'all' }
         // Note: projects always have strategic_planning set, so no NULL handling needed here
       }
 
-      if (teamId) {
-        const { data: teamSprints } = await supabase
+      if (teamIds.length > 0) {
+        // Collect project IDs from two sources so multi-team projects are never missed:
+        // 1. Sprints whose team_id is one of the selected teams
+        const { data: sprintRows } = await supabase
           .from('sprints')
           .select('project_id')
-          .eq('team_id', teamId)
+          .in('team_id', teamIds)
           .not('project_id', 'is', null)
-        const projectIds = [...new Set((teamSprints ?? []).map((s: any) => s.project_id))]
+        // 2. project_teams junction (projects explicitly linked to these teams)
+        const { data: ptRows } = await supabase
+          .from('project_teams')
+          .select('project_id')
+          .in('team_id', teamIds)
+        const projectIds = [
+          ...new Set([
+            ...(sprintRows ?? []).map((s: any) => s.project_id),
+            ...(ptRows ?? []).map((pt: any) => pt.project_id),
+          ].filter(Boolean)),
+        ]
         if (projectIds.length > 0) {
           projectQuery = projectQuery.in('id', projectIds)
         } else {

@@ -41,7 +41,7 @@ export interface Festivity {
 // ----------------------------------------------------------
 const WORLD_CUP_2026: Festivity = {
   id: "world-cup-2026",
-  name: "Copa do Mundo 2026",
+  name: "Copa do Mundo 2026 ⚽",
   badgeEmoji: "🏆",
   badgeImage: "/festivity/flag-br.svg",
   animationEmoji: "⚽",
@@ -49,11 +49,11 @@ const WORLD_CUP_2026: Festivity = {
   countdownSuffix: "para a Copa do Mundo",
   adaMessage: (d) =>
     d > 0
-      ? `Faltam ${d} dia${d !== 1 ? "s" : ""} para a Copa do Mundo. Este ano o hexa vem! 🏆⚽🇧🇷`
+      ? `Faltam ${d} dia${d !== 1 ? "s" : ""} para a Copa do Mundo. Estou confiante! Este ano o hexa vem! 🏆⚽🇧🇷`
       : "A Copa do Mundo começou! Bora torcer pelo Brasil! 🇧🇷⚽🏆",
   gradientStart: "#009C3B",
   gradientEnd: "#FFDF00",
-  adaExpression: "⚽",
+  adaExpression: "em clima de",
   animationType: "bounce",
 };
 

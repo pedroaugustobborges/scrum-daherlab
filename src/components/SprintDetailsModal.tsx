@@ -47,7 +47,25 @@ import {
   LightbulbOutlined,
   PictureAsPdf,
   People,
+  DragIndicator,
 } from '@mui/icons-material'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import toast from 'react-hot-toast'
@@ -86,6 +104,7 @@ interface UserStory {
   priority: string
   story_points: number
   assigned_to: string
+  order_index?: number
   profiles?: { full_name: string }
   assigned_to_profile?: { full_name: string }
   subtasks?: Subtask[]
@@ -122,6 +141,274 @@ const priorityConfig: Record<string, { label: string; color: string }> = {
   urgent: { label: 'Urgente', color: '#dc2626' },
 }
 
+interface SortableStoryItemProps {
+  story: UserStory
+  draggable: boolean
+  onDelete: (id: string, title: string) => void
+  onAddSubtask: (id: string) => void
+  onToggleSubtask: (subtask: Subtask) => void
+  onDeleteSubtask: (id: string) => void
+  calculateProgress: (story: UserStory) => number
+}
+
+function SortableStoryItem({
+  story,
+  draggable,
+  onDelete,
+  onAddSubtask,
+  onToggleSubtask,
+  onDeleteSubtask,
+  calculateProgress,
+}: SortableStoryItemProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: story.id,
+    disabled: !draggable,
+  })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+    position: 'relative' as const,
+    zIndex: isDragging ? 1 : 0,
+  }
+
+  return (
+    <Box ref={setNodeRef} style={style}>
+      <Accordion
+        elevation={0}
+        sx={{
+          border: isDragging ? '2px solid rgba(99, 102, 241, 0.5)' : '2px solid rgba(99, 102, 241, 0.1)',
+          borderRadius: '12px !important',
+          '&:before': { display: 'none' },
+          '&.Mui-expanded': { border: '2px solid rgba(99, 102, 241, 0.3)' },
+        }}
+      >
+        <AccordionSummary
+          expandIcon={<ExpandMore />}
+          sx={{ borderRadius: 3, '&.Mui-expanded': { borderBottom: '1px solid rgba(0,0,0,0.05)' } }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1, mr: 2 }}>
+            <Tooltip title={draggable ? 'Arrastar para reordenar' : 'Filtre por "Todos" para reordenar'}>
+              <span>
+                <IconButton
+                  size="small"
+                  {...(draggable ? { ...attributes, ...listeners } : {})}
+                  onClick={(e) => e.stopPropagation()}
+                  disabled={!draggable}
+                  sx={{
+                    cursor: draggable ? 'grab' : 'default',
+                    touchAction: 'none',
+                    color: draggable ? 'text.disabled' : 'action.disabled',
+                    '&:hover': { color: draggable ? '#6366f1' : 'action.disabled' },
+                    '&:active': { cursor: draggable ? 'grabbing' : 'default' },
+                  }}
+                >
+                  <DragIndicator />
+                </IconButton>
+              </span>
+            </Tooltip>
+
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: 2,
+                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <Assignment sx={{ color: 'white', fontSize: 20 }} />
+            </Box>
+
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="body1" fontWeight={700}>
+                {story.title}
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1, mt: 0.5, flexWrap: 'wrap' }}>
+                <Chip
+                  label={statusConfig[story.status]?.label || story.status}
+                  size="small"
+                  sx={{
+                    bgcolor: `${statusConfig[story.status]?.color}20`,
+                    color: statusConfig[story.status]?.color,
+                    fontWeight: 600,
+                    fontSize: '0.7rem',
+                  }}
+                />
+                <Chip
+                  label={priorityConfig[story.priority]?.label || story.priority}
+                  size="small"
+                  icon={<Flag sx={{ fontSize: 14 }} />}
+                  sx={{
+                    bgcolor: `${priorityConfig[story.priority]?.color}20`,
+                    color: priorityConfig[story.priority]?.color,
+                    fontWeight: 600,
+                    fontSize: '0.7rem',
+                  }}
+                />
+                {story.story_points > 0 && (
+                  <Chip
+                    label={`${story.story_points} pts`}
+                    size="small"
+                    icon={<Functions sx={{ fontSize: 14 }} />}
+                    sx={{ bgcolor: 'rgba(99, 102, 241, 0.1)', color: '#6366f1', fontWeight: 600, fontSize: '0.7rem' }}
+                  />
+                )}
+                {story.assigned_to_profile?.full_name && (
+                  <Chip
+                    label={story.assigned_to_profile.full_name}
+                    size="small"
+                    icon={<Person sx={{ fontSize: 14 }} />}
+                    sx={{ bgcolor: 'rgba(16, 185, 129, 0.1)', color: '#10b981', fontWeight: 600, fontSize: '0.7rem' }}
+                  />
+                )}
+              </Box>
+            </Box>
+
+            <Tooltip title="Excluir História">
+              <IconButton
+                onClick={(e) => { e.stopPropagation(); onDelete(story.id, story.title) }}
+                sx={{ bgcolor: 'rgba(239, 68, 68, 0.1)', '&:hover': { bgcolor: 'rgba(239, 68, 68, 0.2)' } }}
+              >
+                <Delete sx={{ color: '#ef4444' }} />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        </AccordionSummary>
+
+        <AccordionDetails>
+          {story.description && (
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3, whiteSpace: 'pre-line' }}>
+              {story.description}
+            </Typography>
+          )}
+
+          {story.subtasks && story.subtasks.length > 0 && (
+            <Box sx={{ mb: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Typography variant="caption" fontWeight={600} color="text.secondary">
+                  Progresso das Subtarefas
+                </Typography>
+                <Typography variant="caption" fontWeight={700} sx={{ color: '#6366f1' }}>
+                  {calculateProgress(story)}%
+                </Typography>
+              </Box>
+              <LinearProgress
+                variant="determinate"
+                value={calculateProgress(story)}
+                sx={{
+                  height: 6,
+                  borderRadius: 10,
+                  backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                  '& .MuiLinearProgress-bar': {
+                    background: 'linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%)',
+                    borderRadius: 10,
+                  },
+                }}
+              />
+            </Box>
+          )}
+
+          <Box sx={{ mb: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="subtitle2" fontWeight={700}>
+                Subtarefas ({story.subtasks?.length || 0})
+              </Typography>
+              <Button
+                size="small"
+                startIcon={<Add />}
+                onClick={() => onAddSubtask(story.id)}
+                sx={{ px: 2, py: 0.5, fontSize: '0.875rem' }}
+              >
+                Adicionar
+              </Button>
+            </Box>
+
+            {story.subtasks && story.subtasks.length > 0 ? (
+              <List sx={{ bgcolor: 'background.paper', borderRadius: 2, p: 0 }}>
+                {story.subtasks.map((subtask, index) => (
+                  <Box key={subtask.id}>
+                    <ListItem sx={{ py: 1.5, '&:hover': { bgcolor: 'rgba(99, 102, 241, 0.05)' } }}>
+                      <Tooltip title={subtask.status === 'done' ? 'Marcar como pendente' : 'Marcar como concluído'}>
+                        <IconButton size="small" onClick={() => onToggleSubtask(subtask)} sx={{ mr: 1 }}>
+                          <CheckCircle sx={{ color: subtask.status === 'done' ? '#10b981' : '#d1d5db' }} />
+                        </IconButton>
+                      </Tooltip>
+                      <ListItemText
+                        primary={
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              textDecoration: subtask.status === 'done' ? 'line-through' : 'none',
+                              color: subtask.status === 'done' ? 'text.secondary' : 'text.primary',
+                              fontWeight: 500,
+                            }}
+                          >
+                            {subtask.title}
+                          </Typography>
+                        }
+                        secondary={
+                          <Box sx={{ display: 'flex', gap: 1, mt: 0.5, flexWrap: 'wrap' }}>
+                            {subtask.estimated_hours && (
+                              <Chip
+                                label={`${subtask.estimated_hours}h`}
+                                size="small"
+                                icon={<Timer sx={{ fontSize: 12 }} />}
+                                sx={{ height: 20, fontSize: '0.65rem', bgcolor: 'rgba(99, 102, 241, 0.1)', color: '#6366f1' }}
+                              />
+                            )}
+                            {subtask.assigned_to_profile?.full_name && (
+                              <Chip
+                                label={subtask.assigned_to_profile.full_name}
+                                size="small"
+                                sx={{ height: 20, fontSize: '0.65rem', bgcolor: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}
+                              />
+                            )}
+                          </Box>
+                        }
+                      />
+                      <ListItemSecondaryAction>
+                        <IconButton
+                          edge="end"
+                          size="small"
+                          onClick={() => onDeleteSubtask(subtask.id)}
+                          sx={{ color: 'error.main', '&:hover': { bgcolor: 'error.lighter' } }}
+                        >
+                          <Delete fontSize="small" />
+                        </IconButton>
+                      </ListItemSecondaryAction>
+                    </ListItem>
+                    {index < story.subtasks!.length - 1 && <Divider />}
+                  </Box>
+                ))}
+              </List>
+            ) : (
+              <Box
+                sx={{
+                  textAlign: 'center',
+                  py: 3,
+                  px: 2,
+                  borderRadius: 2,
+                  bgcolor: 'rgba(99, 102, 241, 0.05)',
+                  border: '1px dashed rgba(99, 102, 241, 0.2)',
+                }}
+              >
+                <Typography variant="body2" color="text.secondary">
+                  Nenhuma subtarefa adicionada
+                </Typography>
+              </Box>
+            )}
+          </Box>
+        </AccordionDetails>
+      </Accordion>
+    </Box>
+  )
+}
+
 export default function SprintDetailsModal({ open, onClose, sprint }: SprintDetailsModalProps) {
   const theme = useTheme()
   const isDarkMode = theme.palette.mode === 'dark'
@@ -144,6 +431,32 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
     velocity?: number
   }>({ goal: sprint.goal, status: sprint.status, velocity: sprint.velocity })
   const [averageVelocity, setAverageVelocity] = useState<number>(0)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  )
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+
+    const activeIndex = stories.findIndex((s) => s.id === active.id)
+    const overIndex = stories.findIndex((s) => s.id === over.id)
+    const reordered = arrayMove(stories, activeIndex, overIndex)
+    setStories(reordered)
+
+    try {
+      await Promise.all(
+        reordered.map((story, index) =>
+          supabase.from('tasks').update({ order_index: index }).eq('id', story.id)
+        )
+      )
+    } catch (error) {
+      console.error('Error saving story order:', error)
+      toast.error('Erro ao salvar ordem')
+    }
+  }
 
   useEffect(() => {
     if (open) {
@@ -1012,6 +1325,7 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
         .from('tasks')
         .select('*, assigned_to_profile:profiles!assigned_to(full_name)')
         .eq('sprint_id', sprint.id)
+        .order('order_index', { ascending: true })
         .order('created_at', { ascending: true })
 
       if (storiesError) throw storiesError
@@ -1665,281 +1979,24 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
               )}
             </>
           ) : (
-            <Stack spacing={2}>
-              {filteredStories.map((story) => (
-                <Accordion
-                  key={story.id}
-                  elevation={0}
-                  sx={{
-                    border: '2px solid rgba(99, 102, 241, 0.1)',
-                    borderRadius: '12px !important',
-                    '&:before': { display: 'none' },
-                    '&.Mui-expanded': {
-                      border: '2px solid rgba(99, 102, 241, 0.3)',
-                    },
-                  }}
-                >
-                  <AccordionSummary
-                    expandIcon={<ExpandMore />}
-                    sx={{
-                      borderRadius: 3,
-                      '&.Mui-expanded': {
-                        borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
-                      },
-                    }}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1, mr: 2 }}>
-                      <Box
-                        sx={{
-                          width: 40,
-                          height: 40,
-                          borderRadius: 2,
-                          background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <Assignment sx={{ color: 'white', fontSize: 20 }} />
-                      </Box>
-
-                      <Box sx={{ flex: 1 }}>
-                        <Typography variant="body1" fontWeight={700}>
-                          {story.title}
-                        </Typography>
-                        <Box sx={{ display: 'flex', gap: 1, mt: 0.5, flexWrap: 'wrap' }}>
-                          <Chip
-                            label={statusConfig[story.status]?.label || story.status}
-                            size="small"
-                            sx={{
-                              bgcolor: `${statusConfig[story.status]?.color}20`,
-                              color: statusConfig[story.status]?.color,
-                              fontWeight: 600,
-                              fontSize: '0.7rem',
-                            }}
-                          />
-                          <Chip
-                            label={priorityConfig[story.priority]?.label || story.priority}
-                            size="small"
-                            icon={<Flag sx={{ fontSize: 14 }} />}
-                            sx={{
-                              bgcolor: `${priorityConfig[story.priority]?.color}20`,
-                              color: priorityConfig[story.priority]?.color,
-                              fontWeight: 600,
-                              fontSize: '0.7rem',
-                            }}
-                          />
-                          {story.story_points > 0 && (
-                            <Chip
-                              label={`${story.story_points} pts`}
-                              size="small"
-                              icon={<Functions sx={{ fontSize: 14 }} />}
-                              sx={{
-                                bgcolor: 'rgba(99, 102, 241, 0.1)',
-                                color: '#6366f1',
-                                fontWeight: 600,
-                                fontSize: '0.7rem',
-                              }}
-                            />
-                          )}
-                          {story.assigned_to_profile?.full_name && (
-                            <Chip
-                              label={story.assigned_to_profile.full_name}
-                              size="small"
-                              icon={<Person sx={{ fontSize: 14 }} />}
-                              sx={{
-                                bgcolor: 'rgba(16, 185, 129, 0.1)',
-                                color: '#10b981',
-                                fontWeight: 600,
-                                fontSize: '0.7rem',
-                              }}
-                            />
-                          )}
-                        </Box>
-                      </Box>
-
-                      <Tooltip title="Excluir História">
-                        <IconButton
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleDeleteStory(story.id, story.title)
-                          }}
-                          sx={{
-                            bgcolor: 'rgba(239, 68, 68, 0.1)',
-                            '&:hover': {
-                              bgcolor: 'rgba(239, 68, 68, 0.2)',
-                            },
-                          }}
-                        >
-                          <Delete sx={{ color: '#ef4444' }} />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
-                  </AccordionSummary>
-
-                  <AccordionDetails>
-                    {story.description && (
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 3, whiteSpace: 'pre-line' }}>
-                        {story.description}
-                      </Typography>
-                    )}
-
-                    {/* Subtasks Progress */}
-                    {story.subtasks && story.subtasks.length > 0 && (
-                      <Box sx={{ mb: 2 }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                          <Typography variant="caption" fontWeight={600} color="text.secondary">
-                            Progresso das Subtarefas
-                          </Typography>
-                          <Typography variant="caption" fontWeight={700} sx={{ color: '#6366f1' }}>
-                            {calculateStoryProgress(story)}%
-                          </Typography>
-                        </Box>
-                        <LinearProgress
-                          variant="determinate"
-                          value={calculateStoryProgress(story)}
-                          sx={{
-                            height: 6,
-                            borderRadius: 10,
-                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                            '& .MuiLinearProgress-bar': {
-                              background: 'linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%)',
-                              borderRadius: 10,
-                            },
-                          }}
-                        />
-                      </Box>
-                    )}
-
-                    {/* Subtasks List */}
-                    <Box sx={{ mb: 2 }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                        <Typography variant="subtitle2" fontWeight={700}>
-                          Subtarefas ({story.subtasks?.length || 0})
-                        </Typography>
-                        <Button
-                          size="small"
-                          startIcon={<Add />}
-                          onClick={() => handleOpenSubtaskModal(story.id)}
-                          sx={{
-                            px: 2,
-                            py: 0.5,
-                            fontSize: '0.875rem',
-                          }}
-                        >
-                          Adicionar
-                        </Button>
-                      </Box>
-
-                      {story.subtasks && story.subtasks.length > 0 ? (
-                        <List sx={{ bgcolor: 'background.paper', borderRadius: 2, p: 0 }}>
-                          {story.subtasks.map((subtask, index) => (
-                            <Box key={subtask.id}>
-                              <ListItem
-                                sx={{
-                                  py: 1.5,
-                                  '&:hover': {
-                                    bgcolor: 'rgba(99, 102, 241, 0.05)',
-                                  },
-                                }}
-                              >
-                                <Tooltip title={subtask.status === 'done' ? 'Marcar como pendente' : 'Marcar como concluído'}>
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => handleToggleSubtaskStatus(subtask)}
-                                    sx={{ mr: 1 }}
-                                  >
-                                    <CheckCircle
-                                      sx={{
-                                        color: subtask.status === 'done' ? '#10b981' : '#d1d5db',
-                                      }}
-                                    />
-                                  </IconButton>
-                                </Tooltip>
-                                <ListItemText
-                                  primary={
-                                    <Typography
-                                      variant="body2"
-                                      sx={{
-                                        textDecoration: subtask.status === 'done' ? 'line-through' : 'none',
-                                        color: subtask.status === 'done' ? 'text.secondary' : 'text.primary',
-                                        fontWeight: 500,
-                                      }}
-                                    >
-                                      {subtask.title}
-                                    </Typography>
-                                  }
-                                  secondary={
-                                    <Box sx={{ display: 'flex', gap: 1, mt: 0.5, flexWrap: 'wrap' }}>
-                                      {subtask.estimated_hours && (
-                                        <Chip
-                                          label={`${subtask.estimated_hours}h`}
-                                          size="small"
-                                          icon={<Timer sx={{ fontSize: 12 }} />}
-                                          sx={{
-                                            height: 20,
-                                            fontSize: '0.65rem',
-                                            bgcolor: 'rgba(99, 102, 241, 0.1)',
-                                            color: '#6366f1',
-                                          }}
-                                        />
-                                      )}
-                                      {subtask.assigned_to_profile?.full_name && (
-                                        <Chip
-                                          label={subtask.assigned_to_profile.full_name}
-                                          size="small"
-                                          sx={{
-                                            height: 20,
-                                            fontSize: '0.65rem',
-                                            bgcolor: 'rgba(16, 185, 129, 0.1)',
-                                            color: '#10b981',
-                                          }}
-                                        />
-                                      )}
-                                    </Box>
-                                  }
-                                />
-                                <ListItemSecondaryAction>
-                                  <IconButton
-                                    edge="end"
-                                    size="small"
-                                    onClick={() => handleDeleteSubtask(subtask.id)}
-                                    sx={{
-                                      color: 'error.main',
-                                      '&:hover': {
-                                        bgcolor: 'error.lighter',
-                                      },
-                                    }}
-                                  >
-                                    <Delete fontSize="small" />
-                                  </IconButton>
-                                </ListItemSecondaryAction>
-                              </ListItem>
-                              {index < story.subtasks!.length - 1 && <Divider />}
-                            </Box>
-                          ))}
-                        </List>
-                      ) : (
-                        <Box
-                          sx={{
-                            textAlign: 'center',
-                            py: 3,
-                            px: 2,
-                            borderRadius: 2,
-                            bgcolor: 'rgba(99, 102, 241, 0.05)',
-                            border: '1px dashed rgba(99, 102, 241, 0.2)',
-                          }}
-                        >
-                          <Typography variant="body2" color="text.secondary">
-                            Nenhuma subtarefa adicionada
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                  </AccordionDetails>
-                </Accordion>
-              ))}
-            </Stack>
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={filteredStories.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+                <Stack spacing={2}>
+                  {filteredStories.map((story) => (
+                    <SortableStoryItem
+                      key={story.id}
+                      story={story}
+                      draggable={selectedAssignee === 'all'}
+                      onDelete={handleDeleteStory}
+                      onAddSubtask={handleOpenSubtaskModal}
+                      onToggleSubtask={handleToggleSubtaskStatus}
+                      onDeleteSubtask={handleDeleteSubtask}
+                      calculateProgress={calculateStoryProgress}
+                    />
+                  ))}
+                </Stack>
+              </SortableContext>
+            </DndContext>
           )}
             </>
           )}

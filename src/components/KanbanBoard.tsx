@@ -12,7 +12,7 @@ import {
   rectIntersection,
   useDroppable,
 } from '@dnd-kit/core'
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import KanbanCard from './KanbanCard'
 import StoryDetailsModal from './StoryDetailsModal'
 import BlockReasonModal from './BlockReasonModal'
@@ -367,20 +367,23 @@ export default function KanbanBoard({ stories, onRefresh, onDeleteStory, current
       }
     }
 
-    // Only update if actually moving to a different column
-    if (currentStatus !== targetColumn && columns.some((col) => col.id === targetColumn)) {
+    if (currentStatus === targetColumn && !isOverColumn) {
+      // Same column: reorder in place
+      const activeIndex = storiesByStatus[currentStatus].findIndex((s) => s.id === activeId)
+      const overIndex = storiesByStatus[currentStatus].findIndex((s) => s.id === overId)
+      if (activeIndex !== -1 && overIndex !== -1 && activeIndex !== overIndex) {
+        setStoriesByStatus((prev) => ({
+          ...prev,
+          [currentStatus]: arrayMove(prev[currentStatus], activeIndex, overIndex),
+        }))
+      }
+    } else if (currentStatus !== targetColumn && columns.some((col) => col.id === targetColumn)) {
+      // Cross-column move
       setStoriesByStatus((prev) => {
         const newState = { ...prev }
-
-        // Remove from current column
         newState[currentStatus] = newState[currentStatus].filter((s) => s.id !== activeId)
-
-        // Add to target column
-        if (!newState[targetColumn]) {
-          newState[targetColumn] = []
-        }
+        if (!newState[targetColumn]) newState[targetColumn] = []
         newState[targetColumn] = [...newState[targetColumn], { ...activeStory!, status: targetColumn }]
-
         return newState
       })
     }
@@ -448,8 +451,19 @@ export default function KanbanBoard({ stories, onRefresh, onDeleteStory, current
       return
     }
 
-    // Don't update if status hasn't changed
+    // Same column: persist the reordered order_index
     if (story.status === newStatus) {
+      const columnStories = storiesByStatus[newStatus] || []
+      try {
+        await Promise.all(
+          columnStories.map((s, index) =>
+            supabase.from('tasks').update({ order_index: index }).eq('id', s.id)
+          )
+        )
+      } catch (error) {
+        console.error('Error saving card order:', error)
+        toast.error('Erro ao salvar ordem')
+      }
       return
     }
 

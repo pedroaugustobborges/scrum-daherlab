@@ -16,9 +16,11 @@ import {
   Flag,
   Speed,
   Save,
+  DeleteForever,
 } from '@mui/icons-material'
 import toast from 'react-hot-toast'
 import Modal from './Modal'
+import DeleteSprintModal from './DeleteSprintModal'
 import { supabase } from '@/lib/supabase'
 
 interface EditSprintModalProps {
@@ -36,6 +38,7 @@ interface EditSprintModalProps {
     project_id: string
     velocity: number
   }
+  onDeleted?: () => void
 }
 
 interface Team {
@@ -60,8 +63,10 @@ export default function EditSprintModal({
   onClose,
   onSuccess,
   sprint,
+  onDeleted,
 }: EditSprintModalProps) {
   const [loading, setLoading] = useState(false)
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [teams, setTeams] = useState<Team[]>([])
   const [projects, setProjects] = useState<Project[]>([])
   const [loadingData, setLoadingData] = useState(true)
@@ -175,7 +180,15 @@ export default function EditSprintModal({
     }
   }
 
+  const handleSprintDeleted = () => {
+    setDeleteModalOpen(false)
+    onClose()
+    if (onDeleted) onDeleted()
+    else onSuccess()
+  }
+
   return (
+    <>
     <Modal open={open} onClose={onClose} title="Editar Sprint" maxWidth="md">
       <form onSubmit={handleSubmit}>
         <Stack spacing={3}>
@@ -405,52 +418,94 @@ export default function EditSprintModal({
                 sx={{
                   display: 'flex',
                   gap: 2,
-                  justifyContent: 'flex-end',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
                   pt: 2,
                   borderTop: '2px solid',
                   borderColor: 'rgba(99, 102, 241, 0.1)',
                 }}
               >
+                {/* Delete button — left side */}
                 <Button
                   variant="outlined"
-                  onClick={onClose}
+                  onClick={() => setDeleteModalOpen(true)}
                   disabled={loading}
+                  startIcon={<DeleteForever />}
                   sx={{
-                    px: 4,
+                    px: 3,
                     py: 1.5,
                     borderRadius: 3,
                     borderWidth: 2,
-                    borderColor: 'rgba(99, 102, 241, 0.3)',
-                    color: '#6366f1',
+                    borderColor: 'rgba(239, 68, 68, 0.3)',
+                    color: '#ef4444',
                     fontWeight: 600,
                     '&:hover': {
                       borderWidth: 2,
-                      borderColor: '#6366f1',
-                      backgroundColor: 'rgba(99, 102, 241, 0.05)',
+                      borderColor: '#ef4444',
+                      backgroundColor: 'rgba(239, 68, 68, 0.05)',
                     },
                   }}
                 >
-                  Cancelar
+                  Excluir Sprint
                 </Button>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  disabled={loading}
-                  startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Save />}
-                  sx={{
-                    px: 4,
-                    py: 1.5,
-                    borderRadius: 3,
-                    fontSize: '1rem',
-                  }}
-                >
-                  {loading ? 'Salvando...' : 'Salvar Alterações'}
-                </Button>
+
+                {/* Cancel + Save — right side */}
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                  <Button
+                    variant="outlined"
+                    onClick={onClose}
+                    disabled={loading}
+                    sx={{
+                      px: 4,
+                      py: 1.5,
+                      borderRadius: 3,
+                      borderWidth: 2,
+                      borderColor: 'rgba(99, 102, 241, 0.3)',
+                      color: '#6366f1',
+                      fontWeight: 600,
+                      '&:hover': {
+                        borderWidth: 2,
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.05)',
+                      },
+                    }}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={loading}
+                    startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Save />}
+                    sx={{
+                      px: 4,
+                      py: 1.5,
+                      borderRadius: 3,
+                      fontSize: '1rem',
+                    }}
+                  >
+                    {loading ? 'Salvando...' : 'Salvar Alterações'}
+                  </Button>
+                </Box>
               </Box>
             </>
           )}
         </Stack>
       </form>
     </Modal>
+
+    {sprint && (
+      <DeleteSprintModal
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onDeleted={handleSprintDeleted}
+        sprint={{
+          id: sprint.id,
+          name: sprint.name,
+          project_id: sprint.project_id,
+        }}
+      />
+    )}
+    </>
   )
 }

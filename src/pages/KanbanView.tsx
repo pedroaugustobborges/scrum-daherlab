@@ -625,6 +625,7 @@ export default function KanbanView() {
           onDeleteStory={handleDeleteStory}
           currentSprintId={selectedSprintId !== 'all' && selectedSprintId !== 'backlog' ? selectedSprintId : undefined}
           isStakeholder={isStakeholder}
+          projectId={project.id}
         />
       ) : (
         <Stack spacing={2}>

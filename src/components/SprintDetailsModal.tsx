@@ -1708,6 +1708,7 @@ export default function SprintDetailsModal({ open, onClose, sprint }: SprintDeta
                 onRefresh={fetchUserStories}
                 onDeleteStory={handleDeleteStory}
                 currentSprintId={sprint.id}
+                projectId={sprint.project_id}
               />
 
               {/* AI Tips Section */}

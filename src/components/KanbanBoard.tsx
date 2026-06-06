@@ -54,6 +54,7 @@ interface KanbanBoardProps {
   onDeleteStory: (storyId: string, title: string) => void
   currentSprintId?: string
   isStakeholder?: boolean
+  projectId?: string
 }
 
 const columns = [
@@ -88,7 +89,7 @@ function DroppableColumn({ id, children }: { id: string; children: React.ReactNo
   )
 }
 
-export default function KanbanBoard({ stories, onRefresh, onDeleteStory, currentSprintId, isStakeholder = false }: KanbanBoardProps) {
+export default function KanbanBoard({ stories, onRefresh, onDeleteStory, currentSprintId, isStakeholder = false, projectId }: KanbanBoardProps) {
   const theme = useTheme()
   const { user } = useAuth()
   const { checkAndNotifyMilestone } = useTaskMilestone()
@@ -236,11 +237,16 @@ export default function KanbanBoard({ stories, onRefresh, onDeleteStory, current
 
   const fetchAvailableSprints = async () => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('sprints')
         .select('id, name, status')
-        .in('status', ['planning', 'active'])
         .order('start_date', { ascending: false })
+
+      if (projectId) {
+        query = query.eq('project_id', projectId)
+      }
+
+      const { data, error } = await query
 
       if (error) throw error
       // Filter out the current sprint

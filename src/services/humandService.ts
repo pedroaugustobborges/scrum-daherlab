@@ -15,6 +15,10 @@ const HUMAND_API_URL: string | null = import.meta.env.DEV
   ? (import.meta.env.VITE_HUMAND_PROXY_URL ?? null)
   : "/api/humand-message";
 
+const HUMAND_ACK_API_URL: string | null = import.meta.env.DEV
+  ? (import.meta.env.VITE_HUMAND_ACK_PROXY_URL ?? null)
+  : "/api/humand-acknowledgement";
+
 // ---------------------------------------------------------------------------
 // Message builders
 // ---------------------------------------------------------------------------
@@ -390,5 +394,142 @@ export async function notifyProjectReactivated({
     }
   } catch (err) {
     console.error("notifyProjectReactivated error:", err);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Centennial milestone: acknowledgement + broadcast (multiples of 100 tasks)
+// ---------------------------------------------------------------------------
+
+/**
+ * Sends a Humand acknowledgement (recognition post on the Humand platform) for
+ * a user who reached a multiple-of-100 task milestone.
+ *
+ * The `acknowledgedUsername` is the user's employee_internal_id (CPF), which
+ * is the identifier used across the Humand integration.
+ */
+export async function sendHumandAcknowledgement({
+  acknowledgedUsername,
+  body,
+}: {
+  acknowledgedUsername: string;
+  body: string;
+}): Promise<boolean> {
+  if (!HUMAND_ACK_API_URL) {
+    console.info(
+      "[dev] Humand acknowledgement skipped (no proxy URL configured):",
+      body.slice(0, 80),
+    );
+    return true;
+  }
+
+  const response = await fetch(HUMAND_ACK_API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ acknowledgedUsername, body }),
+  });
+
+  if (!response.ok) {
+    console.error(
+      "humandService: acknowledgement proxy returned",
+      response.status,
+    );
+    return false;
+  }
+
+  const data = await response.json();
+  return data.success === true;
+}
+
+/**
+ * Text that appears as the acknowledgement body on the Humand platform.
+ * Gender-neutral — avoids gendered suffixes in Brazilian Portuguese.
+ */
+export function buildCentennialAcknowledgementBody(
+  userName: string,
+  milestone: number,
+): string {
+  return (
+    `Parabéns para ${userName}! 🏆\n\n` +
+    `Pessoa de muito talento e dedicação que acabou de completar ${milestone} atividades ` +
+    `no DaherPlan, nosso sistema de gestão de projetos.\n\n` +
+    `Uma conquista que inspira toda a equipe e demonstra um comprometimento ` +
+    `exemplar com a entrega de projetos de saúde com qualidade e eficiência. 🚀❤️‍🩹`
+  );
+}
+
+/**
+ * Message sent via Humand chat to every user in the platform, announcing the
+ * recognition and directing them to celebrate on the Humand acknowledgements page.
+ * Gender-neutral — avoids gendered suffixes in Brazilian Portuguese.
+ */
+export function buildCentennialBroadcastMessage(
+  userName: string,
+  milestone: number,
+): string {
+  return (
+    `🏆 *Reconhecimento no DaherPlan!*\n\n` +
+    `${userName} acabou de completar *${milestone} atividades* no nosso sistema de ` +
+    `gestão de projetos e recebeu um Reconhecimento na Humand! 🎉\n\n` +
+    `Que tal celebrar esse momento e deixar uma mensagem de parabéns?\n\n` +
+    `Acesse: https://app.humand.co/acknowledgements`
+  );
+}
+
+/**
+ * Orchestrates the full centennial milestone flow:
+ *  1. Posts a Humand acknowledgement for the person who reached the milestone.
+ *  2. Sends a Humand chat message to ALL users in the profiles table, encouraging
+ *     them to visit https://app.humand.co/acknowledgements and celebrate.
+ *
+ * Fire-and-forget — never throws so it never blocks the task status update.
+ */
+export async function notifyAllUsersOfCentennialMilestone({
+  userId,
+  userName,
+  employeeInternalId,
+  milestone,
+}: {
+  userId: string;
+  userName: string;
+  employeeInternalId: string | null;
+  milestone: number;
+}): Promise<void> {
+  try {
+    // 1. Post the acknowledgement on the Humand platform for the honoured person
+    if (employeeInternalId) {
+      await sendHumandAcknowledgement({
+        acknowledgedUsername: employeeInternalId,
+        body: buildCentennialAcknowledgementBody(userName, milestone),
+      });
+    }
+
+    // 2. Broadcast to every registered user in the SaaS
+    const { data: allProfiles, error } = await supabase
+      .from("profiles")
+      .select("id, full_name, employee_internal_id");
+
+    if (error) {
+      console.error(
+        "[humandService] centennial broadcast: profiles query failed",
+        error,
+      );
+      return;
+    }
+
+    const broadcastText = buildCentennialBroadcastMessage(userName, milestone);
+
+    for (const profile of allProfiles ?? []) {
+      // Skip the honoured person themselves (they get the direct Humand message
+      // from the existing milestone flow, not a "go check the page" nudge)
+      if (profile.id === userId) continue;
+
+      const externalId = profile.employee_internal_id as string | null;
+      if (!externalId) continue;
+
+      await sendHumandMessage(externalId, broadcastText);
+    }
+  } catch (err) {
+    console.error("notifyAllUsersOfCentennialMilestone error:", err);
   }
 }

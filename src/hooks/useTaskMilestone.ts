@@ -23,6 +23,7 @@ import { supabase } from '@/lib/supabase';
 import {
   buildMilestoneMessage,
   sendHumandMessage,
+  notifyAllUsersOfCentennialMilestone,
 } from '@/services/humandService';
 
 const MILESTONE_INTERVAL = 10;
@@ -157,6 +158,18 @@ export function useTaskMilestone() {
       const externalId = profile?.employee_internal_id ?? null;
       if (externalId) {
         await sendHumandMessage(externalId, text);
+      }
+
+      // ── 8b. Centennial milestone: acknowledgement + broadcast ─────────────
+      // At every multiple of 100, also post a Humand acknowledgement for the
+      // honoured person and notify ALL platform users via Humand chat.
+      if (highest % 100 === 0) {
+        void notifyAllUsersOfCentennialMilestone({
+          userId,
+          userName:           profile?.full_name ?? 'Colaborador',
+          employeeInternalId: externalId,
+          milestone:          highest,
+        });
       }
 
       // ── 9. Persist the highest milestone (idempotency guard) ─────────────

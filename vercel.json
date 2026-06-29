@@ -5,5 +5,11 @@
       "source": "/((?!api|assets|[^/]+\\.[^/]+$).*)",
       "destination": "/index.html"
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/ada-latency-alert",
+      "schedule": "0 13 * * 1-5"
+    }
   ]
 }

@@ -9,7 +9,7 @@
   "crons": [
     {
       "path": "/api/ada-latency-alert",
-      "schedule": "0 13 * * 1-5"
+      "schedule": "30 13 * * 1-5"
     }
   ]
 }

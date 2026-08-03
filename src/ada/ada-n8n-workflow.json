@@ -93,7 +93,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const response = $input.first().json.message?.content || '';\nconst originalData = $('Parse Input').first().json;\n\nlet result;\n\nconst regexMarkdown = /```json\\s*([\\s\\S]*?)\\s*```/;\nconst regexRawJson = /\\{[\\s\\S]*\"type\"\\s*:\\s*\"email\"[\\s\\S]*\\}/;\n\nconst jsonMatch = response.match(regexMarkdown) || response.match(regexRawJson);\n\nif (jsonMatch) {\n  try {\n    const jsonStr = jsonMatch[1] || jsonMatch[0];\n    const parsed = JSON.parse(jsonStr);\n    \n    if (parsed.type === 'email') {\n      result = {\n        ...originalData,\n        type: 'email',\n        recipients: parsed.recipients || [],\n        recipientNames: parsed.recipientNames || parsed.recipients || [],\n        subject: parsed.subject || 'Mensagem do Daher Plan',\n        body: parsed.body || '',\n        needsClarification: parsed.needsClarification || false,\n        clarificationQuestion: parsed.clarificationQuestion || '',\n        also_sent_humand: parsed.also_sent_humand || false\n      };\n    } else {\n      result = {\n        ...originalData,\n        type: 'answer',\n        message: response.replace(/```json[\\s\\S]*?```/g, '').trim()\n      };\n    }\n  } catch (e) {\n    result = {\n      ...originalData,\n      type: 'answer',\n      message: response\n    };\n  }\n} else {\n  result = {\n    ...originalData,\n    type: 'answer',\n    message: response\n  };\n}\n\nreturn result;"
+        "jsCode": "// Handle both agent output format ({ output: '...' }) and chat completion format ({ message: { content: '...' } })\nconst input = $input.first().json;\nconst response = input.output || input.message?.content || input.text || '';\nconst originalData = $('Parse Input').first().json;\n\nlet result;\n\nconst regexMarkdown = /```json\\s*([\\s\\S]*?)\\s*```/;\nconst regexRawJson = /\\{[\\s\\S]*\"type\"\\s*:\\s*\"email\"[\\s\\S]*\\}/;\n\nconst jsonMatch = response.match(regexMarkdown) || response.match(regexRawJson);\n\nif (jsonMatch) {\n  try {\n    const jsonStr = jsonMatch[1] || jsonMatch[0];\n    const parsed = JSON.parse(jsonStr);\n    \n    if (parsed.type === 'email') {\n      result = {\n        ...originalData,\n        type: 'email',\n        recipients: parsed.recipients || [],\n        recipientNames: parsed.recipientNames || parsed.recipients || [],\n        subject: parsed.subject || 'Mensagem do Daher Plan',\n        body: parsed.body || '',\n        needsClarification: parsed.needsClarification || false,\n        clarificationQuestion: parsed.clarificationQuestion || '',\n        also_sent_humand: parsed.also_sent_humand || false\n      };\n    } else {\n      result = {\n        ...originalData,\n        type: 'answer',\n        message: response.replace(/```json[\\s\\S]*?```/g, '').trim()\n      };\n    }\n  } catch (e) {\n    result = {\n      ...originalData,\n      type: 'answer',\n      message: response\n    };\n  }\n} else {\n  result = {\n    ...originalData,\n    type: 'answer',\n    message: response\n  };\n}\n\nreturn result;"
       },
       "id": "0bc16b15-7040-441d-b39c-bd5a7ee935ce",
       "name": "Parse Response",
@@ -235,7 +235,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ JSON.stringify($json) }}",
+        "responseBody": "={{ $json }}",
         "options": {
           "responseHeaders": {
             "entries": [
